@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Test</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <h1>Testing Analytics System</h1>
+    <div id="test-results"></div>
+    <button onclick="testAnalyticsManually()">Test Analytics Manually</button>
+    
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZw6AnBlQUJuF74pcP-VoliQtG6jLRIaI",
+            authDomain: "nazakat-ae992.firebaseapp.com",
+            projectId: "nazakat-ae992",
+            storageBucket: "nazakat-ae992.firebasestorage.app",
+            messagingSenderId: "313125797080",
+            appId: "1:313125797080:web:c84bc281bbbabae0816bad",
+            measurementId: "G-Y4QK5DGNK6"
+        };
+
+        // Initialize Firebase
+        console.log('🔥 Initializing Firebase for analytics test...');
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        function log(message) {
+            console.log(message);
+            document.getElementById('test-results').innerHTML += '<p>' + message + '</p>';
+        }
+        
+        // Test Firebase connection
+        async function testFirebaseConnection() {
+            try {
+                log('🔍 Testing Firebase connection...');
+                
+                // Try to read from a collection
+                const testRef = await db.collection('analytics_visits').limit(1).get();
+                log('✅ Firebase connection successful!');
+                log('📊 Existing analytics visits: ' + testRef.size);
+                
+                return true;
+            } catch (error) {
+                log('❌ Firebase connection failed: ' + error.message);
+                return false;
+            }
+        }
+        
+        // Test analytics data write
+        async function testAnalyticsWrite() {
+            try {
+                log('📝 Testing analytics data write...');
+                
+                const testData = {
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    visitorId: 'test_visitor_' + Date.now(),
+                    sessionId: 'test_session_' + Date.now(),
+                    page: '/test-page',
+                    pageTitle: 'Analytics Test Page',
+                    referrer: 'direct',
+                    url: window.location.href,
+                    userAgent: navigator.userAgent,
+                    screenResolution: screen.width + 'x' + screen.height,
+                    viewport: window.innerWidth + 'x' + window.innerHeight,
+                    language: navigator.language,
+                    trafficSource: 'Direct',
+                    deviceType: 'Desktop',
+                    browser: 'Test Browser',
+                    operatingSystem: 'Test OS',
+                    isNewVisitor: true,
+                    pageLoadTime: 1000
+                };
+                
+                const docRef = await db.collection('analytics_visits').add(testData);
+                log('✅ Successfully wrote test analytics data! Document ID: ' + docRef.id);
+                
+                return true;
+            } catch (error) {
+                log('❌ Failed to write analytics data: ' + error.message);
+                return false;
+            }
+        }
+        
+        // Manual test function
+        async function testAnalyticsManually() {
+            log('🚀 Starting manual analytics test...');
+            
+            const firebaseOk = await testFirebaseConnection();
+            if (firebaseOk) {
+                await testAnalyticsWrite();
+            }
+            
+            log('🏁 Test completed!');
+        }
+        
+        // Auto-run tests when page loads
+        window.addEventListener('load', async () => {
+            log('📊 Analytics Test Page Loaded');
+            await testAnalyticsManually();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+Order confirmed: Savan Naik - ₹35,002
+16/8/2025, 3:59:50 pm
+Order: AURIC-189046-8679
+Customer: Savan Naik (savannaik090@gmail.com)
+Phone: 9901954610
+Address: 43, Karwar , Karwar, Karnataka - 581400, Karwar, Karnataka - 581400
+Payment: Cash on Delivery
+Items: 1 items
+Notes: Please deliver in the evening after 6 PM.
+Order confirmed: Savan Naik - ₹85,858
+15/8/2025, 9:22:14 pm
+Order: AURIC-107447-2824
+Customer: Savan Naik (savannaik090@gmail.com)
+Phone: 9901954610
+Address: 83, Karwar , Karwar, Karnataka - 581400, Karwar, Karnataka - 581400
+Payment: razorpay
+Items: 4 items
+Notes: Please deliver in the evening after 6 PM.
+Order confirmed: John Smith - ₹37,502
+15/8/2025, 1:39:10 pm
+Order: AURIC-348257-3492
+Customer: John Smith (savannaik090@gmail.com)
+Phone: 9876543210
+Address: 42A, Marine Drive, Churchgate, Mumbai, Maharashtra - 400001, Mumbai, Maharashtra - 400001
+Payment: Cash on Delivery
+Items: 2 items
+Notes: Please deliver in the evening after 6 PM.
+Order confirmed: John Smith - ₹1,500
+13/8/2025, 8:45:19 pm
+Order: AURIC-117700-5910
+Customer: John Smith (savannaik090@gmail.com)
+Phone: 9876543210
+Address: 42A, Marine Drive, Churchgate, Mumbai, Maharashtra - 400001, Mumbai, Maharashtra - 400001
+Payment: Cash on Delivery
+Items: 1 items
+Notes: Please deliver in the evening after 6 PM.
+Order cancelled: John Smith - ₹35,002
+13/8/2025, 8:29:07 pm
+Order: AURIC-144730-5246
+Customer: John Smith (savannaik090@gmail.com)
+Phone: 9876543210
+Address: 42A, Marine Drive, Churchgate, Mumbai, Maharashtra - 400001, Mumbai, Maharashtra - 400001
+Payment: Cash on Delivery
+Items: 1 items
+Notes: Please deliver in the evening after 6 PM.
+Order confirmed: John Smith - ₹2,588
+13/8/2025, 8:13:05 pm
+Order: AURIC-183545-6543
+Customer: John Smith (savannaik090@gmail.com)
+Phone: 9876543210
+Address: 42A, Marine Drive, Churchgate, Mumbai, Maharashtra - 400001, Mumbai, Maharashtra - 400001
+Payment: Cash on Delivery
+Items: 1 items
+Notes: Please deliver in the evening after 6 PM.
+Order cancelled: John Smith - ₹2,588
+13/8/2025, 7:58:13 pm
+Order: AURIC-292171-5013
+Customer: John Smith (savannaik090@gmail.com)
+Phone: 9876543210
+Address: 42A, Marine Drive, Churchgate, Mumbai, Maharashtra - 400001, Mumbai, Maharashtra - 400001
+Payment: Cash on Delivery
+Items: 1 items
+Notes: Please deliver in the evening after 6 PM.
+Order confirmed: John Smith - ₹2,000
+13/8/2025, 7:21:36 pm
+Order: AURIC-094967-1935
+Customer: John Smith (savannaik090@gmail.com)
+Phone: 9876543210
+Address: 42A, Marine Drive, Churchgate, Mumbai, Maharashtra - 400001, Mumbai, Maharashtra - 400001
+Payment: Cash on Delivery
+Items: 1 items
+Notes: Please deliver in the evening after 6 PM.
+Order confirmed: John Smith - ₹35,002
+13/8/2025, 6:20:12 pm
+Order: AURIC-410480-7891
+Customer: John Smith (savannaik090@gmail.com)
+Phone: 9876543210
+Address: 42A, Marine Drive, Churchgate, Mumbai, Maharashtra - 400001, Mumbai, Maharashtra - 400001
+Payment: Cash on Delivery
+Items: 1 items
+Notes: Please deliver in the evening after 6 PM.
+Order confirmed: John Smith - ₹70,004
+13/8/2025, 2:27:25 pm
+Order: AURIC-443330-9311
+Customer: John Smith (savannaik090@gmail.com)
+Phone: 9876543210
+Address: 42A, Marine Drive, Churchgate, Mumbai, Maharashtra - 400001, Mumbai, Maharashtra - 400001
+Payment: Cash on Delivery
+Items: 1 items
+Notes: Please deliver in the evening after 6 PM.

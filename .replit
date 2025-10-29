@@ -1,0 +1,95 @@
+modules = ["nodejs-20", "web", "postgresql-16", "python-3.11"]
+run = "npm run dev"
+hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
+
+[nix]
+channel = "stable-24_05"
+packages = ["nodejs"]
+
+[deployment]
+deploymentTarget = "autoscale"
+build = ["npm", "run", "build"]
+run = ["npm", "run", "start"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 34133
+externalPort = 3003
+
+[[ports]]
+localPort = 35537
+externalPort = 3002
+
+[[ports]]
+localPort = 37665
+externalPort = 5000
+
+[[ports]]
+localPort = 39307
+externalPort = 6800
+
+[[ports]]
+localPort = 43873
+externalPort = 4200
+
+[[ports]]
+localPort = 43885
+externalPort = 3000
+
+[[ports]]
+localPort = 44003
+externalPort = 8000
+
+[[ports]]
+localPort = 44303
+externalPort = 5173
+
+[[ports]]
+localPort = 44365
+externalPort = 3001
+
+[[ports]]
+localPort = 46663
+externalPort = 6000
+
+[env]
+PORT = "5000"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Server"
+
+[[workflows.workflow]]
+name = "Start Website"
+author = 47556237
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node run-server.js"
+
+[[workflows.workflow]]
+name = "Server"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node run-server.js"
+waitForPort = 5000
+
+[agent]
+expertMode = true
