@@ -372,7 +372,7 @@ background-color: #000 !important;
 
     <!-- Overlay for menu background -->
     <div class="menu-overlay" id="menuOverlay"></div>
-      
+
     <!-- Circular Category Section -->
       <section class="category-circles-section">
           <div class="category-circles-container">
@@ -1197,7 +1197,7 @@ background-color: #000 !important;
                         </div>
                         <div class="review-content">
                             <div class="review-text">
-                                <p data-translate-dynamic>"Received parcel today. Both the dresses are so beautiful... fabric is also very good... thnq 👌"</p>
+                                <p data-translate-dynamic>"Received the suits. Both are beautiful. Keep bringing more in similar price range :)"</p>
                             </div>
                             <div class="review-rating">
                                 <div class="stars">
@@ -2208,6 +2208,74 @@ background-color: #000 !important;
                     console.log('Manual search icon handler attached');
                 }
             }, 500);
+
+            // Initialize Watch and Buy video section
+            const buyWatchScroll = document.getElementById('buyWatchScroll');
+            const buyWatchPrev = document.querySelector('.buy-watch-prev');
+            const buyWatchNext = document.querySelector('.buy-watch-next');
+
+            if (buyWatchScroll && buyWatchPrev && buyWatchNext) {
+                // Handle navigation buttons
+                buyWatchPrev.addEventListener('click', () => {
+                    buyWatchScroll.scrollBy({ left: -320, behavior: 'smooth' });
+                });
+
+                buyWatchNext.addEventListener('click', () => {
+                    buyWatchScroll.scrollBy({ left: 320, behavior: 'smooth' });
+                });
+
+                // Update button visibility on scroll
+                buyWatchScroll.addEventListener('scroll', () => {
+                    buyWatchPrev.style.display = buyWatchScroll.scrollLeft > 0 ? 'flex' : 'none';
+                    buyWatchNext.style.display = 
+                        buyWatchScroll.scrollLeft < buyWatchScroll.scrollWidth - buyWatchScroll.clientWidth - 10 
+                        ? 'flex' : 'none';
+                });
+
+                // Handle video play buttons
+                document.querySelectorAll('.buy-watch-section .video-play-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const video = this.parentElement.querySelector('video');
+
+                        // Pause all other videos
+                        document.querySelectorAll('.buy-watch-section video').forEach(v => {
+                            if (v !== video) {
+                                v.pause();
+                                const otherBtn = v.parentElement.querySelector('.video-play-btn');
+                                if (otherBtn) {
+                                    otherBtn.style.display = 'flex';
+                                    otherBtn.querySelector('i').classList.remove('fa-pause');
+                                    otherBtn.querySelector('i').classList.add('fa-play');
+                                }
+                            }
+                        });
+
+                        // Toggle this video
+                        if (video.paused) {
+                            video.play();
+                            this.querySelector('i').classList.remove('fa-play');
+                            this.querySelector('i').classList.add('fa-pause');
+                        } else {
+                            video.pause();
+                            this.querySelector('i').classList.remove('fa-pause');
+                            this.querySelector('i').classList.add('fa-play');
+                        }
+                    });
+                });
+
+                // Hide play button when video is playing, show when paused
+                document.querySelectorAll('.buy-watch-section video').forEach(video => {
+                    video.addEventListener('play', function() {
+                        const btn = this.parentElement.querySelector('.video-play-btn');
+                        if (btn) btn.style.display = 'none';
+                    });
+
+                    video.addEventListener('pause', function() {
+                        const btn = this.parentElement.querySelector('.video-play-btn');
+                        if (btn) btn.style.display = 'flex';
+                    });
+                });
+            }
         });
     </script>
     <!-- Interactive Product Showcase -->
