@@ -29,9 +29,9 @@ const InteractiveShowcase = (function() {
 
         // Product IDs to display in the showcase
         const showcaseProductIds = [
-            'SAR-1757234997861-2at1j85k-73749', // Product 1
-            'NEW-1757002427991-clq4ptks-71266',              // Product 2
-            'NEW-1757005742892-55l4bbbe-11790420000004768'  // Product 3
+            'SAR-002', // Product 1
+            'NEW-003',              // Product 2
+            'SAR-005'  // Product 3
         ];
 
         // Dot classes for positioning on the image
