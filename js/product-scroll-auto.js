@@ -27,8 +27,18 @@ setTimeout(function() {
 }, 3000);
 
 // Listen for new arrivals products being loaded
+document.addEventListener('productsLoaded', function(event) {
+    if (event.detail && event.detail.section === 'new-arrivals') {
+        console.log('New arrivals products loaded event received, attempting auto-scroll...');
+        setTimeout(() => {
+            autoScrollNewArrivalsSection();
+        }, 500);
+    }
+});
+
+// Also listen for the old event name for backward compatibility
 document.addEventListener('newArrivalsProductsLoaded', function() {
-    console.log('New arrivals products loaded event received, attempting auto-scroll...');
+    console.log('New arrivals products loaded event received (legacy), attempting auto-scroll...');
     setTimeout(() => {
         autoScrollNewArrivalsSection();
     }, 500);
@@ -132,12 +142,12 @@ function autoScrollNewArrivalsSection() {
 
     const productItems = newArrivalsScrollContainer.querySelectorAll('.product-item, .arrival-item');
     
-    if (productItems.length < 1) {
-        console.log('No new arrivals products found');
+    if (productItems.length < 2) {
+        console.log('Not enough new arrivals products for auto-scroll - found:', productItems.length);
         // Retry after a delay in case products are still loading
         setTimeout(() => {
             const retryItems = newArrivalsScrollContainer.querySelectorAll('.product-item, .arrival-item');
-            if (retryItems.length >= 1) {
+            if (retryItems.length >= 2) {
                 console.log('Products loaded on retry, attempting scroll...');
                 autoScrollNewArrivalsSection();
             }
@@ -145,18 +155,59 @@ function autoScrollNewArrivalsSection() {
         return;
     }
 
-    console.log('New arrivals section - showing left padding only, no auto-scroll needed');
+    console.log('Starting auto-scroll for new arrivals section with', productItems.length, 'products');
 
-    // Simply scroll to show the left padding (50px) - don't scroll past first product
-    // This ensures the left spacing is visible without hiding any products
-    setTimeout(() => {
-        newArrivalsScrollContainer.scrollTo({
-            left: 0,
-            behavior: 'smooth'
-        });
-        
-        console.log('New arrivals section reset to show left padding');
-    }, 200);
+    // Calculate scroll position to show products scrolled smoothly
+    const firstProduct = productItems[0];
+    const secondProduct = productItems[1];
+    
+    if (firstProduct && secondProduct) {
+        // Ensure elements are rendered before calculating dimensions
+        setTimeout(() => {
+            const firstProductWidth = firstProduct.offsetWidth;
+            const secondProductWidth = secondProduct.offsetWidth;
+            
+            console.log('New arrivals - First product width:', firstProductWidth);
+            console.log('New arrivals - Second product width:', secondProductWidth);
+            
+            if (firstProductWidth === 0 || secondProductWidth === 0) {
+                console.log('Product dimensions not ready, retrying...');
+                setTimeout(autoScrollNewArrivalsSection, 500);
+                return;
+            }
+            
+            // Calculate gap between products
+            const containerStyles = window.getComputedStyle(newArrivalsScrollContainer);
+            const gap = parseInt(containerStyles.gap) || 15; // Default gap
+            
+            // Calculate scroll position
+            const containerWidth = newArrivalsScrollContainer.clientWidth;
+            
+            // Responsive calculation based on screen size
+            let scrollAmount;
+            if (containerWidth <= 480) {
+                // Small mobile - show partial second product
+                scrollAmount = firstProductWidth + gap + (secondProductWidth * 0.5);
+            } else if (containerWidth <= 768) {
+                // Medium mobile/tablet - show more of second product
+                scrollAmount = firstProductWidth + gap + (secondProductWidth * 0.6);
+            } else {
+                // Desktop - scroll to show 1.5 products
+                scrollAmount = firstProductWidth + gap;
+            }
+            
+            console.log('New arrivals - Container width:', containerWidth);
+            console.log('New arrivals - Calculated scroll amount:', scrollAmount);
+            
+            // Smooth scroll to the calculated position
+            newArrivalsScrollContainer.scrollTo({
+                left: Math.max(0, scrollAmount),
+                behavior: 'smooth'
+            });
+            
+            console.log('New arrivals section auto-scrolled successfully');
+        }, 200);
+    }
 }
 
 // Make functions globally available
