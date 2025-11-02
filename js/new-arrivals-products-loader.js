@@ -624,7 +624,7 @@ const NewArrivalsProductsLoader = (function() {
                 }
             }, 1200);
 
-            // Refresh out-of-stock handler for newly loaded products
+            // Refresh out-of-stock handler for newly loaded products 
             if (window.OutOfStockHandler) {
                 setTimeout(() => {
                     console.log('Refreshing OutOfStockHandler for new arrivals...');
