@@ -113,20 +113,23 @@ function autoScrollProductCategory() {
 
     console.log('Starting auto-scroll for product category section');
 
-    // Calculate scroll position to show 2 products scrolled past
+    // Calculate scroll position to center the third product (index 2)
     const firstProduct = productItems[0];
     const secondProduct = productItems[1];
+    const thirdProduct = productItems[2];
     
-    if (firstProduct && secondProduct) {
+    if (firstProduct && secondProduct && thirdProduct) {
         // Ensure elements are rendered before calculating dimensions
         setTimeout(() => {
             const firstProductWidth = firstProduct.offsetWidth;
             const secondProductWidth = secondProduct.offsetWidth;
+            const thirdProductWidth = thirdProduct.offsetWidth;
             
             console.log('First product width:', firstProductWidth);
             console.log('Second product width:', secondProductWidth);
+            console.log('Third product width:', thirdProductWidth);
             
-            if (firstProductWidth === 0 || secondProductWidth === 0) {
+            if (firstProductWidth === 0 || secondProductWidth === 0 || thirdProductWidth === 0) {
                 console.log('Product dimensions not ready, retrying...');
                 setTimeout(autoScrollProductCategory, 500);
                 return;
@@ -136,20 +139,20 @@ function autoScrollProductCategory() {
             const containerStyles = window.getComputedStyle(productScrollContainer);
             const gap = parseInt(containerStyles.gap) || 5; // Default gap from CSS
             
-            // Calculate scroll position to center the second product card
+            // Calculate scroll position to center the third product card
             const containerWidth = productScrollContainer.clientWidth;
             
-            // Responsive calculation based on screen size
+            // Calculate scroll to center third product on all devices
             let scrollAmount;
             if (containerWidth <= 480) {
-                // Small mobile devices - show more of the second product
-                scrollAmount = firstProductWidth + gap + (secondProductWidth * 0.67);
+                // Small mobile - center third product
+                scrollAmount = firstProductWidth + gap + secondProductWidth + gap + (thirdProductWidth * 0.5) - (containerWidth / 2);
             } else if (containerWidth <= 768) {
-                // Medium mobile devices and tablets
-                scrollAmount = firstProductWidth + gap + (secondProductWidth * 0.67);
+                // Medium mobile/tablet - center third product
+                scrollAmount = firstProductWidth + gap + secondProductWidth + gap + (thirdProductWidth * 0.5) - (containerWidth / 2);
             } else {
-                // Desktop - your original calculation works fine
-                scrollAmount = firstProductWidth + gap + (secondProductWidth / 0);
+                // Desktop - center third product
+                scrollAmount = firstProductWidth + gap + secondProductWidth + gap + (thirdProductWidth * 0.5) - (containerWidth / 2);
             }
             
             console.log('Container width:', containerWidth);
@@ -162,7 +165,7 @@ function autoScrollProductCategory() {
                 behavior: 'smooth'
             });
             
-            console.log('Auto-scrolled product category section to center second product');
+            console.log('Auto-scrolled product category section to center third product');
         }, 100);
     }
 }
@@ -194,12 +197,12 @@ function autoScrollNewArrivalsSection() {
 
     const productItems = newArrivalsScrollContainer.querySelectorAll('.product-item, .arrival-item');
     
-    if (productItems.length < 2) {
+    if (productItems.length < 3) {
         console.log('Not enough new arrivals products for auto-scroll - found:', productItems.length);
         // Retry after a delay in case products are still loading
         setTimeout(() => {
             const retryItems = newArrivalsScrollContainer.querySelectorAll('.product-item, .arrival-item');
-            if (retryItems.length >= 2) {
+            if (retryItems.length >= 3) {
                 console.log('Products loaded on retry, attempting scroll...');
                 autoScrollNewArrivalsSection();
             }
@@ -209,20 +212,23 @@ function autoScrollNewArrivalsSection() {
 
     console.log('Starting auto-scroll for new arrivals section with', productItems.length, 'products');
 
-    // Calculate scroll position to show products scrolled smoothly
+    // Calculate scroll position to center the third product (index 2)
     const firstProduct = productItems[0];
     const secondProduct = productItems[1];
+    const thirdProduct = productItems[2];
     
-    if (firstProduct && secondProduct) {
+    if (firstProduct && secondProduct && thirdProduct) {
         // Ensure elements are rendered before calculating dimensions
         setTimeout(() => {
             const firstProductWidth = firstProduct.offsetWidth;
             const secondProductWidth = secondProduct.offsetWidth;
+            const thirdProductWidth = thirdProduct.offsetWidth;
             
             console.log('New arrivals - First product width:', firstProductWidth);
             console.log('New arrivals - Second product width:', secondProductWidth);
+            console.log('New arrivals - Third product width:', thirdProductWidth);
             
-            if (firstProductWidth === 0 || secondProductWidth === 0) {
+            if (firstProductWidth === 0 || secondProductWidth === 0 || thirdProductWidth === 0) {
                 console.log('Product dimensions not ready, retrying...');
                 setTimeout(autoScrollNewArrivalsSection, 500);
                 return;
@@ -232,20 +238,20 @@ function autoScrollNewArrivalsSection() {
             const containerStyles = window.getComputedStyle(newArrivalsScrollContainer);
             const gap = parseInt(containerStyles.gap) || 15; // Default gap
             
-            // Calculate scroll position
+            // Calculate scroll position to center third product
             const containerWidth = newArrivalsScrollContainer.clientWidth;
             
-            // Responsive calculation based on screen size
+            // Center third product on all devices
             let scrollAmount;
             if (containerWidth <= 480) {
-                // Small mobile - show partial second product
-                scrollAmount = firstProductWidth + gap + (secondProductWidth * 0.5);
+                // Small mobile - center third product
+                scrollAmount = firstProductWidth + gap + secondProductWidth + gap + (thirdProductWidth * 0.5) - (containerWidth / 2);
             } else if (containerWidth <= 768) {
-                // Medium mobile/tablet - show more of second product
-                scrollAmount = firstProductWidth + gap + (secondProductWidth * 0.6);
+                // Medium mobile/tablet - center third product
+                scrollAmount = firstProductWidth + gap + secondProductWidth + gap + (thirdProductWidth * 0.5) - (containerWidth / 2);
             } else {
-                // Desktop - scroll to show 1.5 products
-                scrollAmount = firstProductWidth + gap;
+                // Desktop - center third product
+                scrollAmount = firstProductWidth + gap + secondProductWidth + gap + (thirdProductWidth * 0.5) - (containerWidth / 2);
             }
             
             console.log('New arrivals - Container width:', containerWidth);
@@ -257,7 +263,7 @@ function autoScrollNewArrivalsSection() {
                 behavior: 'smooth'
             });
             
-            console.log('New arrivals section auto-scrolled successfully');
+            console.log('New arrivals section auto-scrolled to center third product');
         }, 200);
     }
 }
