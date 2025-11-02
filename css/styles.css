@@ -944,11 +944,31 @@ a {
 .arrivals-grid {
     display: flex;
     gap: 15px;
-    overflow-x: auto;
+    overflow-x: scroll;
     overflow-y: hidden;
     scroll-behavior: smooth;
     padding: 2px 20px 2px 20px !important;
     width: 100%;
+    -webkit-overflow-scrolling: touch;
+}
+
+.arrivals-grid::-webkit-scrollbar {
+    height: 8px;
+    display: block;
+}
+
+.arrivals-grid::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.arrivals-grid::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+.arrivals-grid::-webkit-scrollbar-thumb:hover {
+    background: #999;
 }
 
 /* Horizontal scrolling layout for polki-edit section - matching category section */
@@ -1514,22 +1534,35 @@ a {
 .new-arrivals-edit .arrivals-grid {
     display: flex;
     gap: 12px;
-    overflow-x: auto;
+    overflow-x: scroll;
     overflow-y: hidden;
     scroll-behavior: smooth;
     padding: 2px 20px 2px 20px !important;
     width: 100%;
+    -webkit-overflow-scrolling: touch;
 }
 
-/* Hide scrollbar for cleaner look */
+/* Show scrollbar for better UX */
 .new-arrivals-edit .product-scroll-container::-webkit-scrollbar,
 .new-arrivals-edit .arrivals-grid::-webkit-scrollbar {
     height: 8px;
+    display: block;
 }
 
 .new-arrivals-edit .product-scroll-container::-webkit-scrollbar-track {
     background: #f1f1f1;
     border-radius: 4px;
+}
+
+.new-arrivals-edit .product-scroll-container::-webkit-scrollbar-thumb,
+.new-arrivals-edit .arrivals-grid::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+.new-arrivals-edit .product-scroll-container::-webkit-scrollbar-thumb:hover,
+.new-arrivals-edit .arrivals-grid::-webkit-scrollbar-thumb:hover {
+    background: #999;
 }
 
 .new-arrivals-edit .product-scroll-container::-webkit-scrollbar-thumb {
@@ -2193,16 +2226,18 @@ a {
 .new-arrivals-products .product-scroll-container {
     display: flex;
     gap: 12px;
-    overflow-x: auto;
+    overflow-x: scroll;
     overflow-y: hidden;
     scroll-behavior: smooth;
     padding: 0 10px 20px 20px; /* Reduced right padding to 10px for minimal space */
     width: 100%;
+    -webkit-overflow-scrolling: touch;
 }
 
-/* Hide scrollbar for cleaner look */
+/* Show scrollbar for better UX */
 .new-arrivals-products .product-scroll-container::-webkit-scrollbar {
     height: 8px;
+    display: block;
 }
 
 .new-arrivals-products .product-scroll-container::-webkit-scrollbar-track {
