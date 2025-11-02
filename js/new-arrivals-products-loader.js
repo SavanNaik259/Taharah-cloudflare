@@ -616,6 +616,14 @@ const NewArrivalsProductsLoader = (function() {
                 }
             }));
 
+            // Trigger auto-scroll after a delay to ensure DOM is updated
+            setTimeout(() => {
+                if (window.autoScrollNewArrivalsSection) {
+                    console.log('Triggering auto-scroll from products loader...');
+                    window.autoScrollNewArrivalsSection();
+                }
+            }, 1200);
+
             // Refresh out-of-stock handler for newly loaded products
             if (window.OutOfStockHandler) {
                 setTimeout(() => {

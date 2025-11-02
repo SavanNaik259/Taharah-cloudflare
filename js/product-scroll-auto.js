@@ -32,7 +32,7 @@ document.addEventListener('productsLoaded', function(event) {
         console.log('New arrivals products loaded event received, attempting auto-scroll...');
         setTimeout(() => {
             autoScrollNewArrivalsSection();
-        }, 500);
+        }, 800);
     }
 });
 
@@ -41,8 +41,60 @@ document.addEventListener('newArrivalsProductsLoaded', function() {
     console.log('New arrivals products loaded event received (legacy), attempting auto-scroll...');
     setTimeout(() => {
         autoScrollNewArrivalsSection();
-    }, 500);
+    }, 800);
 });
+
+// Additional listener for DOM mutations to catch dynamically loaded products
+let newArrivalsObserver = null;
+
+function setupNewArrivalsObserver() {
+    const newArrivalsSection = document.querySelector('.new-arrivals-edit');
+    if (!newArrivalsSection) {
+        console.log('New arrivals section not found for observer');
+        return;
+    }
+
+    // Disconnect existing observer if any
+    if (newArrivalsObserver) {
+        newArrivalsObserver.disconnect();
+    }
+
+    // Create new observer
+    newArrivalsObserver = new MutationObserver((mutations) => {
+        for (let mutation of mutations) {
+            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                // Check if product items were added
+                const hasProductItems = Array.from(mutation.addedNodes).some(node => {
+                    return node.nodeType === 1 && (
+                        node.classList?.contains('product-item') ||
+                        node.classList?.contains('arrival-item') ||
+                        node.querySelector?.('.product-item, .arrival-item')
+                    );
+                });
+
+                if (hasProductItems) {
+                    console.log('New arrivals products detected via mutation observer, triggering auto-scroll...');
+                    setTimeout(() => {
+                        autoScrollNewArrivalsSection();
+                        // Disconnect after successful scroll
+                        if (newArrivalsObserver) {
+                            newArrivalsObserver.disconnect();
+                            newArrivalsObserver = null;
+                        }
+                    }, 1000);
+                }
+            }
+        }
+    });
+
+    // Start observing
+    newArrivalsObserver.observe(newArrivalsSection, {
+        childList: true,
+        subtree: true
+    });
+
+    console.log('New arrivals mutation observer set up');
+}
 
 function autoScrollProductCategory() {
     const productScrollContainer = document.querySelector('.you-may-also-like .product-scroll-container');
@@ -213,3 +265,8 @@ function autoScrollNewArrivalsSection() {
 // Make functions globally available
 window.autoScrollProductCategory = autoScrollProductCategory;
 window.autoScrollNewArrivalsSection = autoScrollNewArrivalsSection;
+
+// Set up observer when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    setupNewArrivalsObserver();
+});
