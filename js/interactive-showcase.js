@@ -29,9 +29,8 @@ const InteractiveShowcase = (function() {
 
         // Product IDs to display in the showcase
         const showcaseProductIds = [
-            'SAR-002', // Product 1
-            'NEW-003',              // Product 2
-            'SAR-005'  // Product 3
+            'SAR-002',
+            'NEW-003',                                     'SAR-005' 
         ];
 
         // Dot classes for positioning on the image
