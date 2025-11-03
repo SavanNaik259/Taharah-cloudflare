@@ -94,25 +94,25 @@
 
 /* Product dot positions */
 .dot-maang-tikka {
-    top: 10%;
+    top: 90%;
     left: 50%;
     transform: translateX(-50%);
 }
 
 .dot-earrings {
-    top: 25%;
-    left: 15%;
+    top: 27%;
+    left: 34%;
 }
 
 .dot-necklace {
-    top: 50%;
+    top: 40%;
     left: 50%;
     transform: translateX(-50%);
 }
 
 .dot-bangle {
-    bottom: 20%;
-    right: 10%;
+    bottom: 37%;
+    right: 82%;
 }
 
 .showcase-product-list {
