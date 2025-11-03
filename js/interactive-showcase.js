@@ -27,7 +27,6 @@ const InteractiveShowcase = (function() {
     async function setupSampleProducts() {
         console.log('Loading showcase products from Firebase...');
 
-        // Product IDs to display in the showcase
         const showcaseProductIds = [
             'SAR-002',
             'NEW-003',                                     'SAR-005' 
