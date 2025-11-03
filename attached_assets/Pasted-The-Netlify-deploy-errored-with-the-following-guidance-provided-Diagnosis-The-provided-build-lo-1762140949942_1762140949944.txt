@@ -1,0 +1,45 @@
+The Netlify deploy errored, with the following guidance provided:
+
+Diagnosis
+- The provided build logs are empty/truncated (you only supplied a single brace "}") so I cannot isolate the error lines or identify the concrete error. Because there are no error lines to inspect, I cannot determine the error type or root cause from the data you gave.
+
+Solution
+1. Re-run the build and capture the full error output
+   - In Netlify: open the Deploy details page for the failed deploy, then copy the full logs (expand "Show all" if needed).
+   - Locally: from the repository root run the same build command Netlify uses (check your Netlify site settings → Build & deploy → Build command). Common commands:
+```bash
+# if using npm
+npm ci
+npm run build
+
+# if using yarn
+yarn install --frozen-lockfile
+yarn build
+```
+   - If a CLI build fails, re-run with verbose output (example for many frameworks):
+```bash
+# Node/npm example
+NODE_OPTIONS=--trace-warnings npm run build
+```
+   - Paste the full failing section (at least 20–30 lines before and after the first error). That will let me isolate relevant error lines.
+
+2. What to include when you paste logs
+   - The exact failing lines (stack trace) and the build command used (Netlify settings).
+   - package.json (scripts and dependencies) and any configuration files involved in the build (vite.config.js, rollup config, next.config.js, etc.).
+   - If the error references a missing file or package, ensure that file is committed and that package appears in package.json before suggesting adding it to any external config.
+
+3. Quick checks you can do now (these often resolve common Netlify build failures)
+   - Verify package.json exists and contains the build script Netlify is invoking.
+   - Ensure node_modules is not committed (use CI install) and that package-lock.json / yarn.lock is present and committed.
+   - Confirm all source files imported by the build are committed to the repo (especially any files referenced by relative imports).
+   - If errors mention an unresolved external during bundling (rollup/vite), first verify the package is listed in package.json or that the file exists in the repo. Only after verifying that, consider adding it to build.rollupOptions.external (I'll give exact config changes once you share the error).
+   - If you suspect a Node version mismatch, follow Netlify's docs on changing Node versions: https://docs.netlify.com/configure-builds/manage-dependencies/#node-js-and-javascript
+
+4. If you post the logs back, I will:
+   - Isolate the exact error lines and link to them (using the line reference format you requested).
+   - Identify error type and cause.
+   - Provide a specific fix (code/config changes or package install) with exact commands and file edits.
+
+Paste the full failing log excerpt (including the build command and package.json) and I’ll diagnose the failure and provide a precise fix.
+
+The relevant error logs are:
