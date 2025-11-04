@@ -15,9 +15,9 @@ if (typeof firebase === 'undefined') {
  * @returns {Object} Auth requirement status
  */
 function checkOrderAuthRequirement() {
-    // Default requirement: not authenticated and auth required
+    // Guest checkout is now allowed - authentication is optional
     const result = {
-        requiresAuth: true,
+        requiresAuth: false, // Changed to false to allow guest orders
         isAuthenticated: false
     };
     

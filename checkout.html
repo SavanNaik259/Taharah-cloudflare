@@ -817,7 +817,7 @@
                                 <h5 class="mb-0">Shipping Address</h5>
                             </div>
                             <div class="card-body">
-                                <!-- Saved Addresses Section (shown when user is logged in) -->
+                                <!-- Saved Addresses Section (shown for both logged in and guest users) -->
                                 <div id="saved-addresses-section" style="display: none;">
                                     <div class="mb-4">
                                         <label class="form-label">Select a Saved Address</label>
@@ -827,6 +827,13 @@
                                         <button type="button" class="btn btn-outline-secondary btn-sm mt-2" id="use-new-address-btn">
                                             <i class="fas fa-plus"></i> Use New Address
                                         </button>
+                                    </div>
+                                </div>
+
+                                <!-- Guest Address Save Notice -->
+                                <div id="guest-address-notice" style="display: none; margin-bottom: 20px;">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i> Your address will be saved locally on this device for faster checkout next time.
                                     </div>
                                 </div>
 
@@ -932,12 +939,12 @@
                                         <textarea id="notes" name="notes" rows="2" placeholder="Please deliver in the evening after 6 PM."></textarea>
                                     </div>
 
-                                    <!-- Save Address Option for logged in users -->
+                                    <!-- Save Address Option for all users -->
                                     <div id="save-address-option" style="display: none;">
                                         <div class="form-check mb-3">
-                                            <input class="form-check-input" type="checkbox" id="saveAddress" name="saveAddress">
+                                            <input class="form-check-input" type="checkbox" id="saveAddress" name="saveAddress" checked>
                                             <label class="form-check-label" for="saveAddress">
-                                                Save this address for future orders
+                                                Save this address for future orders on this device
                                             </label>
                                         </div>
                                     </div>
@@ -1128,7 +1135,8 @@
     <script src="js/firebase/firebase-wishlist-manager.js?v=1.0.0"></script>
     <script src="js/wishlist-manager.js?v=1.0.0"></script>
 
-    <!-- Firebase Address Manager -->
+    <!-- Address Management for Both Authenticated and Guest Users -->
+    <script src="js/local-address-manager.js?v=1.0.0"></script>
     <script src="js/firebase/firebase-address-manager.js?v=1.0.0"></script>
 
     <!-- JavaScripts -->
