@@ -1,309 +1,518 @@
-// A simplified Firebase integration function that focuses on reliability
-    function initializeFirebaseIntegration() {
-        console.log('Initializing Firebase integration (simplified version)');
 
-        try {
-            // First try to access LocalStorageCart for reliable cart access
-            if (typeof LocalStorageCart !== 'undefined' && LocalStorageCart.getItems) {
-                console.log('Using LocalStorageCart module for checkout');
-            } else {
-                console.log('LocalStorageCart module not available');
-            }
+/**
+ * Simplified Checkout Script
+ * Handles cart loading and checkout process for both logged-in and guest users
+ */
 
-            // Initialize LocalAddressManager for guest users
-            if (typeof LocalAddressManager !== 'undefined') {
-                console.log('LocalAddressManager available for guest checkout');
-            } else {
-                console.log('LocalAddressManager not available');
-            }
+// Storage key for cart data (matching cart-manager.js)
+const STORAGE_KEY = 'auric_cart_items';
 
-            // Try to use Firebase if available
-            if (typeof firebase !== 'undefined' && firebase.auth) {
-                // Just check if auth module exists - avoid deep integration to prevent errors
-                console.log('Firebase auth detected, will try to use Firebase cart if user is logged in');
+// Track selected saved address
+let selectedSavedAddressId = null;
+
+// Current step in checkout process
+let currentStep = 1;
+
+/**
+ * Initialize checkout page
+ */
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('Initializing checkout page...');
+    
+    // Load and display cart items
+    await loadAndDisplayCart();
+    
+    // Set up event listeners
+    setupEventListeners();
+    
+    // Set up form validation
+    setupCheckoutFormValidation();
+    
+    // Load saved addresses
+    setTimeout(() => {
+        loadSavedAddresses();
+    }, 500);
+});
+
+/**
+ * Load cart items and display them
+ */
+async function loadAndDisplayCart() {
+    console.log('Loading cart items for checkout...');
+    
+    let cartItems = [];
+    
+    // Check if user is logged in
+    const isUserLoggedIn = typeof firebase !== 'undefined' && 
+                          firebase.auth && 
+                          firebase.auth().currentUser;
+    
+    if (isUserLoggedIn) {
+        console.log('User logged in, trying Firebase cart');
+        // Try Firebase first
+        if (typeof FirebaseCartManager !== 'undefined' && FirebaseCartManager.getItems) {
+            try {
+                const result = await FirebaseCartManager.getItems();
+                if (result.success && result.items) {
+                    cartItems = result.items;
+                    console.log('Loaded from Firebase:', cartItems.length, 'items');
+                }
+            } catch (error) {
+                console.error('Firebase cart error:', error);
             }
-        } catch (error) {
-            console.error('Error during Firebase integration initialization:', error);
         }
     }
-
-// Function to load saved addresses for both logged in and guest users
-    async function loadSavedAddresses() {
-        console.log('Loading saved addresses...');
-
-        let addresses = [];
-        let isGuestUser = false;
-
-        // Check if user is logged in
-        const user = firebase.auth().currentUser;
-
-        if (user) {
-            // Load from Firebase for logged in users
-            console.log('User logged in, loading from Firebase');
-            if (typeof FirebaseAddressManager !== 'undefined' && FirebaseAddressManager.getAddresses) {
-                try {
-                    addresses = await FirebaseAddressManager.getAddresses();
-                    console.log('Loaded Firebase addresses:', addresses);
-                } catch (error) {
-                    console.error('Error loading Firebase addresses:', error);
-                }
-            }
+    
+    // Fallback to local storage if Firebase failed or user not logged in
+    if (cartItems.length === 0) {
+        console.log('Loading from local storage');
+        if (typeof LocalStorageCart !== 'undefined') {
+            cartItems = LocalStorageCart.getItems();
         } else {
-            // Load from localStorage for guest users
-            console.log('Guest user, loading from localStorage');
-            isGuestUser = true;
-            if (typeof LocalAddressManager !== 'undefined' && LocalAddressManager.getAddresses) {
-                addresses = LocalAddressManager.getAddresses();
-                console.log('Loaded local addresses:', addresses);
+            const savedCart = localStorage.getItem(STORAGE_KEY);
+            if (savedCart) {
+                cartItems = JSON.parse(savedCart);
             }
         }
+        console.log('Loaded from local storage:', cartItems.length, 'items');
+    }
+    
+    // Display cart items
+    displayCartItems(cartItems);
+    
+    // If cart is empty, redirect to shop
+    if (cartItems.length === 0) {
+        console.log('Cart is empty, showing message');
+        showEmptyCartMessage();
+    }
+}
 
-        // Display addresses if available
-        if (addresses && addresses.length > 0) {
-            const container = document.getElementById('saved-addresses-container');
+/**
+ * Display cart items in all checkout steps
+ */
+function displayCartItems(items) {
+    const orderSummary = document.getElementById('orderSummary');
+    const orderSummaryStep2 = document.getElementById('orderSummaryStep2');
+    const orderSummaryStep3 = document.getElementById('orderSummaryStep3');
+    
+    if (!items || items.length === 0) {
+        const emptyMessage = '<p class="text-muted">Your cart is empty</p>';
+        if (orderSummary) orderSummary.innerHTML = emptyMessage;
+        if (orderSummaryStep2) orderSummaryStep2.innerHTML = emptyMessage;
+        if (orderSummaryStep3) orderSummaryStep3.innerHTML = emptyMessage;
+        return;
+    }
+    
+    // Generate HTML for cart items
+    let html = '';
+    let total = 0;
+    
+    items.forEach(item => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+        
+        html += `
+            <div class="cart-item mb-3 pb-3 border-bottom">
+                <div class="row align-items-center">
+                    <div class="col-3">
+                        <img src="${item.image || 'images/product-placeholder.jpg'}" 
+                             alt="${item.name}" 
+                             class="img-fluid rounded"
+                             style="max-height: 80px; object-fit: cover;">
+                    </div>
+                    <div class="col-9">
+                        <h6 class="mb-1">${item.name}</h6>
+                        <p class="mb-1 text-muted small">Quantity: ${item.quantity}</p>
+                        <p class="mb-0"><strong>₹${itemTotal.toFixed(2)}</strong></p>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    // Update all order summary sections
+    if (orderSummary) orderSummary.innerHTML = html;
+    if (orderSummaryStep2) orderSummaryStep2.innerHTML = html;
+    if (orderSummaryStep3) orderSummaryStep3.innerHTML = html;
+    
+    // Update total amounts
+    const totalFormatted = `₹${total.toFixed(2)}`;
+    const totalElements = [
+        document.getElementById('orderTotal'),
+        document.getElementById('orderTotalStep2'),
+        document.getElementById('orderTotalStep3')
+    ];
+    
+    totalElements.forEach(el => {
+        if (el) el.textContent = totalFormatted;
+    });
+}
+
+/**
+ * Show empty cart message
+ */
+function showEmptyCartMessage() {
+    const steps = document.querySelectorAll('.checkout-step');
+    steps.forEach(step => step.style.display = 'none');
+    
+    const container = document.querySelector('.container.py-5');
+    if (container) {
+        container.innerHTML = `
+            <div class="text-center py-5">
+                <i class="fas fa-shopping-cart fa-4x text-muted mb-4"></i>
+                <h2>Your cart is empty</h2>
+                <p class="lead mb-4">Add some products to your cart to continue</p>
+                <a href="index.html" class="btn btn-primary">Continue Shopping</a>
+            </div>
+        `;
+    }
+}
+
+/**
+ * Set up event listeners for checkout navigation
+ */
+function setupEventListeners() {
+    // Continue to address button
+    const continueToAddress = document.getElementById('continue-to-address');
+    if (continueToAddress) {
+        continueToAddress.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = 'index.html';
+        });
+    }
+    
+    // Continue to payment button
+    const continueToPayment = document.getElementById('continue-to-payment');
+    if (continueToPayment) {
+        continueToPayment.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (validateAddressForm()) {
+                showStep(3);
+                displayAddressConfirmation();
+            }
+        });
+    }
+    
+    // Back buttons
+    const backToSummary = document.getElementById('back-to-summary');
+    if (backToSummary) {
+        backToSummary.addEventListener('click', () => showStep(1));
+    }
+    
+    const backToAddress = document.getElementById('back-to-address');
+    if (backToAddress) {
+        backToAddress.addEventListener('click', () => showStep(2));
+    }
+    
+    // Use new address button
+    const useNewAddressBtn = document.getElementById('use-new-address-btn');
+    if (useNewAddressBtn) {
+        useNewAddressBtn.addEventListener('click', function() {
+            document.getElementById('saved-addresses-section').style.display = 'none';
+            document.getElementById('manual-address-form').style.display = 'block';
+            document.getElementById('save-address-option').style.display = 'block';
+        });
+    }
+    
+    // Form submission
+    const checkoutForm = document.getElementById('checkoutForm');
+    if (checkoutForm) {
+        checkoutForm.addEventListener('submit', handleCheckoutSubmit);
+    }
+}
+
+/**
+ * Show specific checkout step
+ */
+function showStep(step) {
+    // Hide all steps
+    document.querySelectorAll('.checkout-step').forEach(s => {
+        s.classList.remove('active');
+    });
+    
+    // Show selected step
+    const targetStep = document.getElementById(`checkout-step-${step}`);
+    if (targetStep) {
+        targetStep.classList.add('active');
+    }
+    
+    // Update progress
+    updateProgress(step);
+    currentStep = step;
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/**
+ * Update checkout progress indicator
+ */
+function updateProgress(step) {
+    // Update step icons
+    for (let i = 1; i <= 3; i++) {
+        const icon = document.getElementById(`step-icon-${i}`);
+        if (icon) {
+            if (i <= step) {
+                icon.classList.add('active');
+            } else {
+                icon.classList.remove('active');
+            }
+        }
+    }
+    
+    // Update progress bar
+    const progressBar = document.getElementById('checkout-progress-bar');
+    if (progressBar) {
+        const width = (step / 3) * 100;
+        progressBar.style.width = `${width}%`;
+    }
+}
+
+/**
+ * Validate address form
+ */
+function validateAddressForm() {
+    const fields = [
+        'firstName', 'lastName', 'email', 'phone',
+        'houseNumber', 'roadName', 'city', 'state', 'pinCode'
+    ];
+    
+    let isValid = true;
+    
+    fields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field && !field.value.trim()) {
+            field.classList.add('error');
+            isValid = false;
+        } else if (field) {
+            field.classList.remove('error');
+        }
+    });
+    
+    if (!isValid) {
+        showNotification('Please fill in all required fields', 'error');
+    }
+    
+    return isValid;
+}
+
+/**
+ * Display address confirmation in step 3
+ */
+function displayAddressConfirmation() {
+    const addressConfirmation = document.getElementById('address-confirmation');
+    if (!addressConfirmation) return;
+    
+    const firstName = document.getElementById('firstName')?.value || '';
+    const lastName = document.getElementById('lastName')?.value || '';
+    const email = document.getElementById('email')?.value || '';
+    const phone = document.getElementById('phone')?.value || '';
+    const houseNumber = document.getElementById('houseNumber')?.value || '';
+    const roadName = document.getElementById('roadName')?.value || '';
+    const city = document.getElementById('city')?.value || '';
+    const state = document.getElementById('state')?.value || '';
+    const pinCode = document.getElementById('pinCode')?.value || '';
+    
+    addressConfirmation.innerHTML = `
+        <p class="mb-2"><strong>${firstName} ${lastName}</strong></p>
+        <p class="mb-1">${houseNumber}, ${roadName}</p>
+        <p class="mb-1">${city}, ${state} - ${pinCode}</p>
+        <p class="mb-1">Phone: ${phone}</p>
+        <p class="mb-0">Email: ${email}</p>
+    `;
+}
+
+/**
+ * Handle checkout form submission
+ */
+async function handleCheckoutSubmit(e) {
+    e.preventDefault();
+    console.log('Processing order...');
+    
+    const submitButton = e.target.querySelector('button[type="submit"]');
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    }
+    
+    try {
+        // Save address if checkbox is checked
+        await saveAddressForFutureOrders();
+        
+        // Get payment method
+        const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'Cash on Delivery';
+        
+        // Show success message
+        showNotification('Order placed successfully!', 'success');
+        
+        // Redirect to order confirmation or home page after 2 seconds
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Order error:', error);
+        showNotification('Failed to place order. Please try again.', 'error');
+        
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.innerHTML = 'Complete Order';
+        }
+    }
+}
+
+/**
+ * Load saved addresses for both logged in and guest users
+ */
+async function loadSavedAddresses() {
+    console.log('Loading saved addresses...');
+    
+    let addresses = [];
+    let isGuestUser = false;
+    
+    // Check if user is logged in
+    const user = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth().currentUser : null;
+    
+    if (user) {
+        // Load from Firebase for logged in users
+        if (typeof FirebaseAddressManager !== 'undefined' && FirebaseAddressManager.getAddresses) {
+            try {
+                addresses = await FirebaseAddressManager.getAddresses();
+            } catch (error) {
+                console.error('Error loading Firebase addresses:', error);
+            }
+        }
+    } else {
+        // Load from localStorage for guest users
+        isGuestUser = true;
+        if (typeof LocalAddressManager !== 'undefined' && LocalAddressManager.getAddresses) {
+            addresses = LocalAddressManager.getAddresses();
+        }
+    }
+    
+    // Display addresses if available
+    if (addresses && addresses.length > 0) {
+        const container = document.getElementById('saved-addresses-container');
+        if (container) {
             container.innerHTML = '';
-
             addresses.forEach(address => {
                 const addressCard = createAddressCard(address);
                 container.appendChild(addressCard);
             });
-
-            document.getElementById('saved-addresses-section').style.display = 'block';
-            document.getElementById('manual-address-form').style.display = 'none';
-            document.getElementById('save-address-option').style.display = 'none';
-
-            // Show guest notice if guest user
-            if (isGuestUser) {
-                document.getElementById('guest-address-notice').style.display = 'block';
-            } else {
-                document.getElementById('guest-address-notice').style.display = 'none';
-            }
-        } else {
-            // No saved addresses, show manual form
-            document.getElementById('saved-addresses-section').style.display = 'none';
-            document.getElementById('manual-address-form').style.display = 'block';
-            document.getElementById('save-address-option').style.display = 'block';
-
-            // Show guest notice if guest user
-            if (isGuestUser) {
-                document.getElementById('guest-address-notice').style.display = 'block';
-            } else {
-                document.getElementById('guest-address-notice').style.display = 'none';
-            }
+        }
+        
+        document.getElementById('saved-addresses-section').style.display = 'block';
+        document.getElementById('manual-address-form').style.display = 'none';
+        
+        if (isGuestUser) {
+            document.getElementById('guest-address-notice').style.display = 'block';
+        }
+    } else {
+        document.getElementById('manual-address-form').style.display = 'block';
+        document.getElementById('save-address-option').style.display = 'block';
+        
+        if (isGuestUser) {
+            document.getElementById('guest-address-notice').style.display = 'block';
         }
     }
-
-// Function to save address for future orders (for both logged in and guest users)
-    async function saveAddressForFutureOrders() {
-        const saveAddressCheckbox = document.getElementById('saveAddress');
-        if (!saveAddressCheckbox || !saveAddressCheckbox.checked) {
-            console.log('Save address not checked or checkbox not found, skipping address save');
-            return;
-        }
-
-        // Check if an address was already selected
-        if (selectedSavedAddressId) {
-            console.log('Using existing saved address, not saving new one');
-            return;
-        }
-
-        const addressData = {
-            firstName: document.getElementById('firstName').value,
-            lastName: document.getElementById('lastName').value,
-            email: document.getElementById('email').value,
-            phone: document.getElementById('phone').value,
-            houseNumber: document.getElementById('houseNumber').value,
-            roadName: document.getElementById('roadName').value,
-            city: document.getElementById('city').value,
-            state: document.getElementById('state').value,
-            pinCode: document.getElementById('pinCode').value,
-            addressType: 'home', // default type
-            isDefault: false // don't set as default automatically
-        };
-
-        // Check if user is logged in
-        const user = firebase.auth().currentUser;
-
-        if (user) {
-            // Save to Firebase for logged in users
-            if (typeof FirebaseAddressManager !== 'undefined' && FirebaseAddressManager.saveAddress) {
-                try {
-                    const result = await FirebaseAddressManager.saveAddress(addressData);
-                    if (result.success) {
-                        console.log('Address saved to Firebase for future orders');
-                    } else {
-                        console.warn('Failed to save address to Firebase:', result.error);
-                    }
-                } catch (error) {
-                    console.error('Error saving address to Firebase:', error);
-                }
-            }
-        } else {
-            // Save to localStorage for guest users
-            if (typeof LocalAddressManager !== 'undefined' && LocalAddressManager.saveAddress) {
-                try {
-                    const result = LocalAddressManager.saveAddress(addressData);
-                    if (result.success) {
-                        console.log('Address saved to localStorage for future orders');
-                    } else {
-                        console.warn('Failed to save address to localStorage:', result.errors);
-                    }
-                } catch (error) {
-                    console.error('Error saving address to localStorage:', error);
-                }
-            }
-        }
-    }
-
-// Function to create an address card (assumed to be defined elsewhere)
-    function createAddressCard(address) {
-        // This is a placeholder, implement the actual creation of address cards
-        const div = document.createElement('div');
-        div.className = 'address-card';
-        div.innerHTML = `
-            <h3>${address.firstName} ${address.lastName}</h3>
-            <p>${address.houseNumber} ${address.roadName}</p>
-            <p>${address.city}, ${address.state} - ${address.pinCode}</p>
-            <p>Phone: ${address.phone}</p>
-            <p>Email: ${address.email}</p>
-            <button onclick="selectSavedAddress('${address.id || address.uuid}')">Select</button>
-        `; // Added id/uuid for selection
-        return div;
-    }
-
-// Dummy function for selecting a saved address
-    function selectSavedAddress(addressId) {
-        console.log('Selected address with ID:', addressId);
-        // Implement logic to populate the form with selected address and store its ID
-        // For now, just setting a placeholder global variable
-        selectedSavedAddressId = addressId;
-        alert('Address selected. You can now proceed to checkout.');
-        // Potentially hide manual form and show selected address summary
-    }
-
-    let selectedSavedAddressId = null; // To keep track of the selected address
-
-    // Event listener for the checkout form submission
-    const checkoutForm = document.getElementById('checkout-form');
-    if (checkoutForm) {
-        checkoutForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            console.log('Checkout form submitted');
-
-            // Guest checkout is now allowed - no authentication required
-            const user = firebase.auth().currentUser;
-            console.log('User authentication status:', user ? 'Logged in' : 'Guest checkout');
-
-            // Assuming address data is collected from the form or selected saved address
-            const addressData = {};
-            if (selectedSavedAddressId) {
-                // Logic to retrieve full address data from saved addresses based on ID
-                // For now, using placeholder
-                console.log('Using saved address with ID:', selectedSavedAddressId);
-                // In a real scenario, you'd fetch the full address object here
-                // and populate addressData.
-            } else {
-                // Collect data from the manual form
-                addressData.firstName = document.getElementById('firstName').value;
-                addressData.lastName = document.getElementById('lastName').value;
-                addressData.email = document.getElementById('email').value;
-                addressData.phone = document.getElementById('phone').value;
-                addressData.houseNumber = document.getElementById('houseNumber').value;
-                addressData.roadName = document.getElementById('roadName').value;
-                addressData.city = document.getElementById('city').value;
-                addressData.state = document.getElementById('state').value;
-                addressData.pinCode = document.getElementById('pinCode').value;
-            }
-
-            // Save address if checkbox is checked
-            await saveAddressForFutureOrders();
-
-            // Proceed with order placement logic (e.g., creating order in DB, payment gateway)
-            console.log('Proceeding to place order with address:', addressData);
-            alert('Order placement logic would go here.');
-
-            // Reset button state
-            const submitButton = checkoutForm.querySelector('button[type="submit"]');
-            submitButton.disabled = false;
-            submitButton.innerHTML = 'Place Order';
-        });
-    }
-
-    // Initial setup when the page loads
-    document.addEventListener('DOMContentLoaded', () => {
-        initializeFirebaseIntegration();
-        loadSavedAddresses();
-
-        // Add event listener for the save address checkbox to toggle its visibility/state
-        const saveAddressCheckbox = document.getElementById('saveAddress');
-        if (saveAddressCheckbox) {
-            saveAddressCheckbox.addEventListener('change', () => {
-                // Logic to enable/disable save address functionality or show it
-                console.log('Save address checkbox changed:', saveAddressCheckbox.checked);
-            });
-        }
-
-        // Show/hide manual address form based on saved addresses availability
-        // This is handled within loadSavedAddresses, but can be reinforced here if needed
-        const savedAddressesSection = document.getElementById('saved-addresses-section');
-        const manualAddressForm = document.getElementById('manual-address-form');
-        const saveAddressOption = document.getElementById('save-address-option');
-
-        if (savedAddressesSection && manualAddressForm && saveAddressOption) {
-            // Initial visibility is managed by loadSavedAddresses
-        }
-    });
-
-// Placeholder for LocalAddressManager if it's not globally available
-// In a real application, this would be imported or defined elsewhere.
-if (typeof LocalAddressManager === 'undefined') {
-    console.warn('LocalAddressManager is not defined. Mocking for demonstration.');
-    const LocalAddressManager = {
-        addresses: [],
-        load: function() {
-            const storedAddresses = localStorage.getItem('guestAddresses');
-            this.addresses = storedAddresses ? JSON.parse(storedAddresses) : [];
-            return this.addresses;
-        },
-        save: function() {
-            localStorage.setItem('guestAddresses', JSON.stringify(this.addresses));
-        },
-        getAddresses: function() {
-            return this.load();
-        },
-        saveAddress: function(addressData) {
-            // Assign a simple unique ID for demonstration
-            const newAddress = { ...addressData, id: Date.now().toString(), uuid: crypto.randomUUID() };
-            this.addresses.push(newAddress);
-            this.save();
-            return { success: true, address: newAddress };
-        }
-    };
-    window.LocalAddressManager = LocalAddressManager; // Make it globally accessible for the example
 }
 
-// Placeholder for FirebaseAddressManager if it's not globally available
-// In a real application, this would be imported or defined elsewhere.
-if (typeof FirebaseAddressManager === 'undefined') {
-    console.warn('FirebaseAddressManager is not defined. Mocking for demonstration.');
-    const FirebaseAddressManager = {
-        getAddresses: async function() {
-            console.log('Mock: Fetching addresses from Firebase...');
-            // Simulate network delay
-            await new Promise(resolve => setTimeout(resolve, 500));
-            // Return dummy data
-            return [
-                { id: 'fb-addr-1', firstName: 'Firebase', lastName: 'User', street: '123 Firebase St', city: 'Firetown', zip: '12345' },
-                { id: 'fb-addr-2', firstName: 'Another', lastName: 'Firebase', street: '456 Cloud Ave', city: 'Cloudsville', zip: '67890' }
-            ];
-        },
-        saveAddress: async function(addressData) {
-            console.log('Mock: Saving address to Firebase:', addressData);
-            // Simulate network delay
-            await new Promise(resolve => setTimeout(resolve, 500));
-            // Simulate success response
-            return { success: true, error: null, id: 'fb-addr-' + Date.now() };
-        }
+/**
+ * Create address card element
+ */
+function createAddressCard(address) {
+    const div = document.createElement('div');
+    div.className = 'address-option';
+    div.innerHTML = `
+        <div class="address-type">
+            ${address.addressType || 'Home'}
+            ${address.isDefault ? '<span class="default-badge">Default</span>' : ''}
+        </div>
+        <div class="address-details">
+            <strong>${address.firstName} ${address.lastName}</strong><br>
+            ${address.houseNumber}, ${address.roadName}<br>
+            ${address.city}, ${address.state} - ${address.pinCode}<br>
+            Phone: ${address.phone}
+        </div>
+        <input type="radio" name="savedAddress" class="address-radio" value="${address.id || address.uuid}">
+    `;
+    
+    div.addEventListener('click', function() {
+        selectSavedAddress(address.id || address.uuid, address);
+    });
+    
+    return div;
+}
+
+/**
+ * Select a saved address
+ */
+function selectSavedAddress(addressId, addressData) {
+    selectedSavedAddressId = addressId;
+    
+    // Update UI
+    document.querySelectorAll('.address-option').forEach(opt => {
+        opt.classList.remove('selected');
+    });
+    event.currentTarget.classList.add('selected');
+    
+    // Populate form fields if needed
+    if (addressData) {
+        document.getElementById('firstName').value = addressData.firstName || '';
+        document.getElementById('lastName').value = addressData.lastName || '';
+        document.getElementById('email').value = addressData.email || '';
+        document.getElementById('phone').value = addressData.phone || '';
+        document.getElementById('houseNumber').value = addressData.houseNumber || '';
+        document.getElementById('roadName').value = addressData.roadName || '';
+        document.getElementById('city').value = addressData.city || '';
+        document.getElementById('state').value = addressData.state || '';
+        document.getElementById('pinCode').value = addressData.pinCode || '';
+    }
+}
+
+/**
+ * Save address for future orders
+ */
+async function saveAddressForFutureOrders() {
+    const saveAddressCheckbox = document.getElementById('saveAddress');
+    if (!saveAddressCheckbox || !saveAddressCheckbox.checked) {
+        return;
+    }
+    
+    if (selectedSavedAddressId) {
+        console.log('Using existing saved address');
+        return;
+    }
+    
+    const addressData = {
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        houseNumber: document.getElementById('houseNumber').value,
+        roadName: document.getElementById('roadName').value,
+        city: document.getElementById('city').value,
+        state: document.getElementById('state').value,
+        pinCode: document.getElementById('pinCode').value,
+        addressType: 'home',
+        isDefault: false
     };
-    window.FirebaseAddressManager = FirebaseAddressManager; // Make it globally accessible for the example
+    
+    const user = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth().currentUser : null;
+    
+    if (user && typeof FirebaseAddressManager !== 'undefined') {
+        try {
+            await FirebaseAddressManager.saveAddress(addressData);
+            console.log('Address saved to Firebase');
+        } catch (error) {
+            console.error('Error saving to Firebase:', error);
+        }
+    } else if (typeof LocalAddressManager !== 'undefined') {
+        try {
+            LocalAddressManager.saveAddress(addressData);
+            console.log('Address saved to localStorage');
+        } catch (error) {
+            console.error('Error saving to localStorage:', error);
+        }
+    }
 }
