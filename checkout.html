@@ -59,12 +59,13 @@
                     console.log('Auth state changed:', user ? 'Logged in' : 'Not logged in');
                     // Update UI based on auth state
                     updateAuthUI(user);
-                    // Load addresses if user is logged in
-                    if (user) {
-                        setTimeout(() => {
+                    // Load addresses for both logged-in and guest users
+                    // The loadSavedAddresses function handles both cases internally
+                    setTimeout(() => {
+                        if (typeof loadSavedAddresses === 'function') {
                             loadSavedAddresses();
-                        }, 1000);
-                    }
+                        }
+                    }, 1000);
                 });
             } catch (error) {
                 console.error('Error initializing Firebase:', error);
