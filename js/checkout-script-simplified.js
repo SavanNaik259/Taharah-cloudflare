@@ -1803,6 +1803,21 @@ document.addEventListener('DOMContentLoaded', function() {
             // Load saved addresses for both logged-in and guest users
             await loadSavedAddresses();
 
+            // Show save address option for all users (including guests)
+            const saveAddressOption = document.getElementById('save-address-option');
+            if (saveAddressOption) {
+                saveAddressOption.style.display = 'block';
+                console.log('Save address option shown for all users');
+            }
+
+            // Show guest notice for non-authenticated users
+            const isLoggedIn = firebase.auth && firebase.auth().currentUser;
+            const guestNotice = document.getElementById('guest-address-notice');
+            if (!isLoggedIn && guestNotice) {
+                guestNotice.style.display = 'block';
+                console.log('Guest address notice shown');
+            }
+
             // Start at step 1
             goToStep(1);
 
@@ -2679,7 +2694,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load saved addresses for both logged-in and guest users
     async function loadSavedAddresses() {
         const user = firebase.auth().currentUser;
-        
+
         if (user) {
             console.log('Loading saved addresses for logged-in user:', user.uid);
             await loadFirebaseAddresses();
