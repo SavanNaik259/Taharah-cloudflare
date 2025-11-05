@@ -10,6 +10,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (January 2025)
 
+- **COMPLETED**: Guest checkout with address persistence - implemented complete localStorage-based address management system allowing guest users to save and reuse shipping addresses across sessions. Features unified address loading (LocalAddressManager for guests, FirebaseAddressManager for logged-in users), address selection UI for both user types, automatic address saving during checkout with opt-in checkbox, and seamless switching between storage backends based on authentication status.
 - **COMPLETED**: Organized all media files into categorized folders - moved 12 images and 1 video from root to images/ directory with proper subfolders (logos/, hero-slides/, icons/, videos/) and updated all HTML file references
 - **COMPLETED**: Moved CSS and JS files to proper folders - relocated checkout-styles.css to css/ and checkout-script-simplified.js to js/ with updated path references  
 - **RESOLVED**: Razorpay payment confirmation flow aligned with COD - removed popup alerts, now uses proper confirmation modal with automatic cart clearing and homepage redirect
