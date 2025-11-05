@@ -311,8 +311,11 @@ window.FirebaseAuth = (function() {
           const firebaseAuthVerified = user.emailVerified;
           const firestoreFullyVerified = isEmailVerifiedTrue && !hasVerificationToken && !hasTokenExpiry;
 
-          // FIXED LOGIC: Prioritize Firestore as authoritative source, Firebase Auth as backup
-          isActuallyVerified = firestoreFullyVerified || firebaseAuthVerified;
+          // FIXED LOGIC: User is verified if EITHER:
+          // - Firestore is fully verified (emailVerified=true and no tokens), OR
+          // - Firebase Auth shows verified, OR
+          // - Firestore emailVerified=true (even if tokens exist from previous state)
+          isActuallyVerified = firestoreFullyVerified || firebaseAuthVerified || isEmailVerifiedTrue;
 
           console.log('🔍 VERIFICATION DECISION LOGIC:', {
             firestoreEmailVerified: isEmailVerifiedTrue,
@@ -320,11 +323,13 @@ window.FirebaseAuth = (function() {
             firestoreHasExpiry: hasTokenExpiry,
             firestoreFullyVerified: firestoreFullyVerified,
             firebaseAuthVerified: firebaseAuthVerified,
-            finalDecision: isActuallyVerified ? 'ALLOW_LOGIN' : 'REQUIRE_VERIFICATION'
+            finalDecision: isActuallyVerified ? 'ALLOW_LOGIN' : 'REQUIRE_VERIFICATION',
+            reasoning: isActuallyVerified ? 
+              (firestoreFullyVerified ? 'Firestore fully verified' : 
+               firebaseAuthVerified ? 'Firebase Auth verified' : 
+               isEmailVerifiedTrue ? 'Firestore emailVerified=true' : 'Unknown') 
+              : 'Not verified'
           });
-
-          // User NEEDS verification if NOT completely verified in EITHER system
-          const needsVerification = (!isEmailVerifiedTrue || hasVerificationToken || hasTokenExpiry) && !firebaseAuthVerified;
 
           console.log('LOGIN verification status check:', {
             emailVerifiedValue: emailVerifiedValue,
