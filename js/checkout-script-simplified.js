@@ -183,6 +183,100 @@
 
     let selectedSavedAddressId = null; // To keep track of the selected address
 
+    // Display cart items in all order summary sections
+    function displayCartItems() {
+        console.log('Displaying cart items:', cartItems?.length || 0);
+
+        if (!cartItems || cartItems.length === 0) {
+            showEmptyCartMessage();
+            return;
+        }
+
+        // Update all three order summary sections (step 1, 2, and 3)
+        const summaryContainers = [
+            document.getElementById('orderSummary'),
+            document.getElementById('orderSummaryStep2'),
+            document.getElementById('orderSummaryStep3')
+        ];
+
+        const totalContainers = [
+            document.getElementById('orderTotal'),
+            document.getElementById('orderTotalStep2'),
+            document.getElementById('orderTotalStep3')
+        ];
+
+        // Calculate total
+        const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+        // Update each summary container
+        summaryContainers.forEach(container => {
+            if (!container) return;
+
+            let html = '';
+            cartItems.forEach(item => {
+                const itemTotal = (item.price * item.quantity).toFixed(2);
+                html += `
+                    <div class="cart-item-summary" style="display: flex; gap: 10px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
+                        <img src="${item.image}" alt="${item.name}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; margin-bottom: 5px;">${item.name}</div>
+                            <div style="color: #666; font-size: 14px;">Qty: ${item.quantity}</div>
+                            <div style="color: #603000; font-weight: 600;">₹${itemTotal}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        });
+
+        // Update all total displays
+        totalContainers.forEach(totalEl => {
+            if (totalEl) {
+                totalEl.textContent = `₹${total.toFixed(2)}`;
+            }
+        });
+
+        console.log('Cart items displayed successfully');
+    }
+
+    // Function to show an empty cart message
+    function showEmptyCartMessage() {
+        const emptyMessage = '<p>Your cart is empty.</p>';
+        const summaryContainers = [
+            document.getElementById('orderSummary'),
+            document.getElementById('orderSummaryStep2'),
+            document.getElementById('orderSummaryStep3')
+        ];
+        summaryContainers.forEach(container => {
+            if (container) {
+                container.innerHTML = emptyMessage;
+            }
+        });
+
+        const totalContainers = [
+            document.getElementById('orderTotal'),
+            document.getElementById('orderTotalStep2'),
+            document.getElementById('orderTotalStep3')
+        ];
+        totalContainers.forEach(totalEl => {
+            if (totalEl) {
+                totalEl.textContent = '₹0.00';
+            }
+        });
+        console.log('Empty cart message displayed');
+    }
+
+    // Placeholder for cartItems - in a real app, this would be managed by a cart module
+    let cartItems = [];
+    if (typeof LocalStorageCart !== 'undefined' && LocalStorageCart.getItems) {
+        cartItems = LocalStorageCart.getItems();
+    } else {
+        // Fallback for demonstration if LocalStorageCart is not available
+        console.warn('LocalStorageCart not found, using dummy cart data for checkout page.');
+        cartItems = JSON.parse(localStorage.getItem('cartItems')) || []; // Example: load from localStorage if not defined
+    }
+
+
     // Event listener for the checkout form submission
     const checkoutForm = document.getElementById('checkout-form');
     if (checkoutForm) {
@@ -233,6 +327,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         initializeFirebaseIntegration();
         loadSavedAddresses();
+        displayCartItems(); // Call displayCartItems on page load
 
         // Add event listener for the save address checkbox to toggle its visibility/state
         const saveAddressCheckbox = document.getElementById('saveAddress');
@@ -306,4 +401,51 @@ if (typeof FirebaseAddressManager === 'undefined') {
         }
     };
     window.FirebaseAddressManager = FirebaseAddressManager; // Make it globally accessible for the example
+}
+
+// Placeholder for LocalStorageCart if it's not globally available
+// In a real application, this would be imported or defined elsewhere.
+if (typeof LocalStorageCart === 'undefined') {
+    console.warn('LocalStorageCart is not defined. Mocking for demonstration.');
+    const LocalStorageCart = {
+        getItems: function() {
+            const storedCart = localStorage.getItem('cartItems');
+            console.log('Mock: Getting items from localStorage:', storedCart ? JSON.parse(storedCart) : []);
+            return storedCart ? JSON.parse(storedCart) : [];
+        },
+        addItem: function(item) {
+            const cart = this.getItems();
+            const existingItemIndex = cart.findIndex(cartItem => cartItem.id === item.id);
+            if (existingItemIndex > -1) {
+                cart[existingItemIndex].quantity += item.quantity;
+            } else {
+                cart.push(item);
+            }
+            localStorage.setItem('cartItems', JSON.stringify(cart));
+            console.log('Mock: Added item to cart:', item);
+        },
+        removeItem: function(itemId) {
+            let cart = this.getItems();
+            cart = cart.filter(item => item.id !== itemId);
+            localStorage.setItem('cartItems', JSON.stringify(cart));
+            console.log('Mock: Removed item from cart with ID:', itemId);
+        },
+        updateQuantity: function(itemId, quantity) {
+            let cart = this.getItems();
+            const itemIndex = cart.findIndex(item => item.id === itemId);
+            if (itemIndex > -1) {
+                cart[itemIndex].quantity = quantity;
+                if (quantity <= 0) {
+                    cart.splice(itemIndex, 1); // Remove if quantity is zero or less
+                }
+                localStorage.setItem('cartItems', JSON.stringify(cart));
+                console.log('Mock: Updated quantity for item ID:', itemId, 'to', quantity);
+            }
+        },
+        clearCart: function() {
+            localStorage.removeItem('cartItems');
+            console.log('Mock: Cleared cart');
+        }
+    };
+    window.LocalStorageCart = LocalStorageCart;
 }
