@@ -323,11 +323,84 @@
         });
     }
 
+    // Function to navigate between checkout steps
+    function goToStep(stepNumber) {
+        console.log('Navigating to step:', stepNumber);
+        
+        // Hide all steps
+        const steps = document.querySelectorAll('.checkout-step');
+        steps.forEach(step => {
+            step.classList.remove('active');
+            step.style.display = 'none';
+        });
+        
+        // Show the requested step
+        const targetStep = document.getElementById(`checkout-step-${stepNumber}`);
+        if (targetStep) {
+            targetStep.classList.add('active');
+            targetStep.style.display = 'block';
+        }
+        
+        // Update progress bar and step icons
+        const progressBar = document.getElementById('checkout-progress-bar');
+        const stepIcons = document.querySelectorAll('.step-icon');
+        
+        if (progressBar) {
+            progressBar.style.width = `${(stepNumber / 3) * 100}%`;
+        }
+        
+        stepIcons.forEach((icon, index) => {
+            if (index < stepNumber) {
+                icon.classList.add('active');
+            } else {
+                icon.classList.remove('active');
+            }
+        });
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     // Initial setup when the page loads
     document.addEventListener('DOMContentLoaded', () => {
         initializeFirebaseIntegration();
         loadSavedAddresses();
         displayCartItems(); // Call displayCartItems on page load
+
+        // Set up step navigation
+        const continueToAddressBtn = document.getElementById('continue-to-address');
+        const backToSummaryBtn = document.getElementById('back-to-summary');
+        const continueToPaymentBtn = document.getElementById('continue-to-payment');
+        const backToAddressBtn = document.getElementById('back-to-address');
+
+        if (continueToAddressBtn) {
+            continueToAddressBtn.addEventListener('click', () => {
+                console.log('Continue to address clicked');
+                if (cartItems && cartItems.length > 0) {
+                    goToStep(2);
+                } else {
+                    alert('Your cart is empty. Please add items before proceeding.');
+                }
+            });
+        }
+
+        if (backToSummaryBtn) {
+            backToSummaryBtn.addEventListener('click', () => {
+                goToStep(1);
+            });
+        }
+
+        if (continueToPaymentBtn) {
+            continueToPaymentBtn.addEventListener('click', () => {
+                goToStep(3);
+            });
+        }
+
+        if (backToAddressBtn) {
+            backToAddressBtn.addEventListener('click', () => {
+                goToStep(2);
+            });
+        }
 
         // Add event listener for the save address checkbox to toggle its visibility/state
         const saveAddressCheckbox = document.getElementById('saveAddress');
