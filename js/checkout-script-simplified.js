@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     /**
      * Update checkout button state based on authentication
-     * If authentication is required, disable the button for non-authenticated users
+     * Guest checkout is now enabled - button is always enabled for all users
      */
     function updateCheckoutButtonState() {
         console.log('Updating checkout button state');
@@ -186,39 +186,23 @@ document.addEventListener('DOMContentLoaded', function() {
         const isLoggedIn = firebase.auth && firebase.auth().currentUser;
         console.log('User authentication status:', isLoggedIn ? 'Logged in' : 'Not logged in');
 
-        if (isLoggedIn) {
-            // User is authenticated - ensure button is enabled
-            submitButton.innerHTML = 'Place Order';
-            submitButton.classList.remove('auth-required');
-            submitButton.removeEventListener('click', showAuthRequirementModal);
-            submitButton.disabled = false;
-            submitButton.classList.remove('disabled');
+        // GUEST CHECKOUT ENABLED - Always show "Place Order" button for all users
+        submitButton.innerHTML = 'Place Order';
+        submitButton.classList.remove('auth-required');
+        submitButton.removeEventListener('click', showAuthRequirementModal);
+        submitButton.disabled = false;
+        submitButton.classList.remove('disabled');
 
-            // Make sure the form uses the standard submit handler
-            if (checkoutForm) {
-                checkoutForm.removeEventListener('submit', showAuthRequirementModal);
-                if (!checkoutForm._hasSubmitHandler) {
-                    checkoutForm.addEventListener('submit', handleSubmit);
-                    checkoutForm._hasSubmitHandler = true;
-                }
+        // Make sure the form uses the standard submit handler
+        if (checkoutForm) {
+            checkoutForm.removeEventListener('submit', showAuthRequirementModal);
+            if (!checkoutForm._hasSubmitHandler) {
+                checkoutForm.addEventListener('submit', handleSubmit);
+                checkoutForm._hasSubmitHandler = true;
             }
-
-            console.log('Button state updated for logged in user - enabled');
-        } else {
-            // User is not authenticated - use auth modal
-            submitButton.innerHTML = 'Sign In to Place Order';
-            submitButton.classList.add('auth-required');
-
-            // Add special click handler for unauthenticated users
-            submitButton.removeEventListener('click', showAuthRequirementModal);
-            submitButton.addEventListener('click', showAuthRequirementModal);
-
-            // Make sure button appears enabled
-            submitButton.disabled = false;
-            submitButton.classList.remove('disabled');
-
-            console.log('Button state updated for guest user');
         }
+
+        console.log('Button state updated - guest checkout enabled for all users');
     }
 
     // Show modal requiring authentication before order placement
@@ -723,26 +707,8 @@ document.addEventListener('DOMContentLoaded', function() {
     async function handleSubmit(e) {
         e.preventDefault();
 
-        // Check if the Firebase Orders module is loaded
-        if (firebaseOrdersModule) {
-            // Check if authentication is required for placing orders (only if function exists)
-            if (typeof firebaseOrdersModule.checkOrderAuthRequirement === 'function') {
-                try {
-                    const authRequirement = firebaseOrdersModule.checkOrderAuthRequirement();
-
-                    if (authRequirement && authRequirement.requiresAuth && !authRequirement.isAuthenticated) {
-                        console.log('User authentication required for order placement');
-                        showCreateAccountModal();
-                        return;
-                    }
-                } catch (authCheckError) {
-                    console.warn('Error checking auth requirement:', authCheckError);
-                    // Continue with order processing as this is not critical
-                }
-            } else {
-                console.log('checkOrderAuthRequirement function not available, proceeding with order');
-            }
-        }
+        // GUEST CHECKOUT ENABLED - No authentication check required
+        console.log('Processing order - guest checkout enabled');
 
         // Save address if user requested it (before processing order)
         await saveAddressIfRequested();
