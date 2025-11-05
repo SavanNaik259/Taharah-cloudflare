@@ -803,6 +803,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (window.firebaseOrdersModule && typeof window.firebaseOrdersModule.saveOrderToFirebase === 'function') {
                 console.log('Saving order to Firebase...');
                 try {
+                    // Initialize deliveryStatus for the order
+                    orderData.deliveryStatus = 'pending'; // Default status for new orders
+
                     const firebaseResult = await window.firebaseOrdersModule.saveOrderToFirebase(orderData);
 
                     if (firebaseResult.success) {
@@ -817,10 +820,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 if (stockResult.success) {
                                     console.log('Stock updated successfully after COD order:', stockResult.updates);
 
-                                    // Show notifications for out of stock products
-                                    if (stockResult.outOfStockProducts.length > 0) {
-                                        console.log('Products now out of stock:', stockResult.outOfStockProducts);
-                                    }
+                                    // Notifications for out of stock products can be added here if needed
                                 } else {
                                     console.error('Stock update failed for COD order:', stockResult.error);
                                 }
@@ -2083,6 +2083,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     orderData.paymentStatus = 'pending';
                     orderData.razorpayOrderId = result.order.id;
                     orderData.paymentMethod = 'razorpay';
+                    orderData.deliveryStatus = 'pending'; // Initialize delivery status
 
                     const saveResult = await firebaseOrdersModule.saveOrderToFirebase(orderData);
 
@@ -2332,7 +2333,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             paymentId: response.razorpay_payment_id,
                             razorpayOrderId: response.razorpay_order_id,
                             signature: response.razorpay_signature,
-                            paymentCompletedAt: updatedOrderData.paymentCompletedAt
+                            paymentCompletedAt: updatedOrderData.paymentCompletedAt,
+                            deliveryStatus: 'pending' // Ensure delivery status is set
                         });
                         firebaseSaveResult = updateResult;
                         if (updateResult.success) {
@@ -2345,6 +2347,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     } else {
                         // Save new order with completed payment status
                         console.log('Saving completed order to Firebase...');
+                        updatedOrderData.deliveryStatus = 'pending'; // Set initial delivery status
                         firebaseSaveResult = await window.firebaseOrdersModule.saveOrderToFirebase(updatedOrderData);
                         if (firebaseSaveResult.success) {
                             console.log('Order saved to Firebase with ID:', firebaseSaveResult.orderId);
@@ -2367,6 +2370,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // If user is not logged in, still try to save the order with payment details
                 // This might be for guest checkouts or if Firebase auth state is delayed
                 try {
+                    updatedOrderData.deliveryStatus = 'pending'; // Set initial delivery status for guest orders
                     firebaseSaveResult = await window.firebaseOrdersModule.saveOrderToFirebase(updatedOrderData);
                     if (firebaseSaveResult.success) {
                         console.log('Order saved to Firebase without user context:', firebaseSaveResult.orderId);
@@ -2545,6 +2549,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     paymentMethod: orderData.paymentMethod,
                     orderDate: orderData.orderDate,
                     status: 'pending',
+                    deliveryStatus: orderData.deliveryStatus || 'pending', // Include delivery status
                     products: orderData.products,
                     notes: orderData.notes,
                     orderDetails: {
@@ -2946,7 +2951,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Clear all form fields
         const formFields = [
-            'firstName', 'lastName', 'email', 'phone', 
+            'firstName', 'lastName', 'email', 'phone',
             'houseNumber', 'pinCode', 'roadName', 'city', 'state', 'notes'
         ];
 

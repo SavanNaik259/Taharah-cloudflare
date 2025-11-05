@@ -868,6 +868,60 @@
       const profileEmail = document.getElementById('profileEmail');
       const profileAvatar = document.getElementById('profileAvatar');
 
+      // Helper function to get delivery status info
+      function getDeliveryStatusInfo(status) {
+        switch (status) {
+          case 'delivered':
+            return {
+              label: 'Delivered',
+              description: 'Your order has been successfully delivered.',
+              icon: 'fas fa-check-circle',
+              bgColor: '#d4edda', // Light green
+              textColor: '#155724' // Dark green
+            };
+          case 'in_transit':
+            return {
+              label: 'In Transit',
+              description: 'Your order is on its way.',
+              icon: 'fas fa-shipping-fast',
+              bgColor: '#d1ecf1', // Light blue
+              textColor: '#0c5460' // Dark blue
+            };
+          case 'shipped':
+            return {
+              label: 'Shipped',
+              description: 'Your order has been shipped.',
+              icon: 'fas fa-box',
+              bgColor: '#fff3cd', // Light yellow
+              textColor: '#856404' // Dark yellow
+            };
+          case 'processing':
+            return {
+              label: 'Processing',
+              description: 'Your order is being processed.',
+              icon: 'fas fa-cogs',
+              bgColor: '#e2e3e5', // Light gray
+              textColor: '#383d41' // Dark gray
+            };
+          case 'cancelled':
+            return {
+              label: 'Cancelled',
+              description: 'Your order has been cancelled.',
+              icon: 'fas fa-times-circle',
+              bgColor: '#f8d7da', // Light red
+              textColor: '#721c24' // Dark red
+            };
+          default: // pending
+            return {
+              label: 'Pending',
+              description: 'Your order is awaiting confirmation.',
+              icon: 'fas fa-clock',
+              bgColor: '#e2e3e5', // Light gray
+              textColor: '#383d41' // Dark gray
+            };
+        }
+      }
+
       // Main initialization
       document.addEventListener('DOMContentLoaded', () => {
         // Initialize Firebase first
@@ -1162,11 +1216,22 @@
               year: 'numeric', month: 'long', day: 'numeric'
             });
 
+            // Determine delivery status
+            const deliveryStatus = order.deliveryStatus || 'pending';
+            const statusInfo = getDeliveryStatusInfo(deliveryStatus);
+
             let orderHTML = `
               <div class="order-card">
                 <div class="order-header">
                   <span class="order-id">Order #${order.orderId || order.orderReference || order.id}</span>
                   <span class="order-date">${formattedDate}</span>
+                </div>
+                <div class="order-status-banner" style="background: ${statusInfo.bgColor}; color: ${statusInfo.textColor}; padding: 10px; border-radius: 6px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                  <i class="${statusInfo.icon}" style="font-size: 20px;"></i>
+                  <div>
+                    <strong>${statusInfo.label}</strong>
+                    <div style="font-size: 12px; opacity: 0.9;">${statusInfo.description}</div>
+                  </div>
                 </div>
             `;
 
@@ -1906,7 +1971,7 @@
                 <option value="Sikkim">Sikkim</option>
                 <option value="Tamil Nadu">Tamil Nadu</option>
                 <option value="Telangana">Telangana</option>
-                <option value="Tripura">Tripura</option>
+                <option value="Tripura"> Tripura</option>
                 <option value="Uttar Pradesh">Uttar Pradesh</option>
                 <option value="Uttarakhand">Uttarakhand</option>
                 <option value="West Bengal">West Bengal</option>

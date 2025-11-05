@@ -253,11 +253,11 @@
             opacity: 1;
             visibility: visible;
         }
-        
+
         .info-tooltip:hover::after {
             transform: translateX(-50%) translateY(0);
         }
-        
+
         .info-tooltip:hover::before {
             transform: translateX(-50%);
         }
@@ -282,7 +282,7 @@
                 border-radius: 8px !important;
                 box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
             }
-            
+
             .info-tooltip::before {
                 display: none !important;
             }
@@ -308,7 +308,7 @@
                 max-height: 200px;
                 margin-left: 0;
             }
-            
+
             .info-tooltip::before {
                 top: 50%;
                 left: 50%;
@@ -394,7 +394,7 @@
                 overflow-y: auto;
                 overflow-x: hidden;
             }
-            
+
             /* Special positioning for bounce rate card on mobile */
             .analytics-section .stat-card:nth-child(2) .info-tooltip::after {
                 left: auto;
@@ -402,13 +402,13 @@
                 transform: translateY(0);
                 width: 250px;
             }
-            
+
             .analytics-section .stat-card:nth-child(2) .info-tooltip::before {
                 left: auto;
                 right: -48px;
                 transform: none;
             }
-            
+
             .info-tooltip::before {
                 top: 100%;
                 left: 50%;
@@ -429,7 +429,7 @@
                 font-size: 11px;
                 padding: 8px 12px;
             }
-            
+
             /* Bounce rate specific positioning for tablets - fix selector to match the actual DOM structure */
             .analytics-section .stats-grid .stat-card:nth-child(2) .info-tooltip::after {
                 left: auto;
@@ -473,13 +473,6 @@
             .analytics-section .stats-grid .stat-card:nth-child(4) .info-tooltip:hover::before {
                 transform: translateY(calc(-100% - 9px));
             }
-        }</old_str> solid #1f2937;
-                margin-top: -6px;
-            }
-
-            .info-tooltip:hover::after {
-                transform: translateY(0);
-            }
         }
 
         @media (max-width: 480px) {
@@ -505,7 +498,7 @@
                 background: #1f2937 !important;
                 backdrop-filter: blur(10px) !important;
             }
-            
+
             .info-tooltip::before {
                 display: none !important;
             }
@@ -1867,7 +1860,7 @@
                 height: 250px !important;
                 margin-bottom: 16px;
             }
-            
+
             /* Ensure traffic sources chart has adequate height on mobile */
             .analytics-section #traffic-sources-chart {
                 min-height: 180px !important;
@@ -2001,7 +1994,7 @@
             .analytics-section .chart-container {
                 height: 200px !important;
             }
-            
+
             /* Ensure traffic sources chart container has adequate height on very small screens */
             .analytics-section #traffic-sources-chart {
                 min-height: 180px !important;
@@ -3242,7 +3235,9 @@
                             customerAddress: extractCustomerAddress(orderData),
                             paymentMethod: orderData.paymentMethod || 'Not specified',
                             products: orderData.products || orderData.items || [],
-                            notes: orderData.notes || orderData.specialInstructions || ''
+                            notes: orderData.notes || orderData.specialInstructions || '',
+                            status: orderData.status || 'pending', // Default status
+                            deliveryStatus: orderData.deliveryStatus || 'pending' // Add delivery status
                         };
 
                         allOrders.push(processedOrder);
@@ -4260,7 +4255,8 @@
                     .update({
                         adminConfirmed: true,
                         confirmedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        status: 'confirmed'
+                        status: 'confirmed',
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
 
                 // Get order data for email
@@ -4291,7 +4287,8 @@
                     paymentMethod: orderData.paymentMethod,
                     orderDate: (orderData.timestamp?.toDate() || new Date()).toISOString(),
                     products: orderData.products || orderData.items || [],
-                    notes: orderData.notes || orderData.specialInstructions || ''
+                    notes: orderData.notes || orderData.specialInstructions || '',
+                    status: 'confirmed' // Ensure status is passed
                 };
                 await addOrderStatusNotification(orderId, 'confirmed', orderDetailsForNotification);
 
@@ -4337,7 +4334,10 @@
                     .update({
                         status: 'cancelled',
                         cancelledAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        cancelledBy: 'admin'
+                        cancelledBy: 'admin',
+                        cancellationReason: cancellationData.reason, // Store cancellation reason
+                        cancellationNote: cancellationData.note, // Store cancellation note
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
 
                 // Send cancellation email
@@ -4421,6 +4421,74 @@
             }
         }
 
+        // Mark order as delivered
+        async function markAsDelivered(orderId, userId) {
+            try {
+                const confirmed = confirm('Are you sure you want to mark this order as delivered?');
+                if (!confirmed) return;
+
+                showGlobalLoader('Updating delivery status...');
+
+                // Update order in Firebase
+                await db.collection('users')
+                    .doc(userId)
+                    .collection('orders')
+                    .doc(orderId)
+                    .update({
+                        deliveryStatus: 'delivered',
+                        deliveredAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        deliveredBy: 'admin',
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                hideGlobalLoader();
+
+                showSuccessModal({
+                    icon: '<i class="fas fa-check-circle"></i>',
+                    title: 'Order Marked as Delivered',
+                    message: 'The order has been successfully marked as delivered. Customer will be notified.'
+                });
+
+                // Reload orders to reflect changes
+                setTimeout(() => {
+                    loadOrders();
+                }, 2000);
+
+            } catch (error) {
+                hideGlobalLoader();
+                console.error('Error marking order as delivered:', error);
+                alert('Failed to update delivery status: ' + error.message);
+            }
+        }
+
+        // Make function global
+        window.markAsDelivered = markAsDelivered;
+
+        // Logout is now handled by the logout-confirmation.js modal system
+
+        // Show error message
+        function showError(message) {
+            // Try to show error in the UI first
+            const errorElement = document.getElementById('error-message');
+            if (errorElement) {
+                errorElement.innerHTML = message;
+                errorElement.style.display = 'block';
+
+                // Scroll to the top of the page to make sure error is visible
+                window.scrollTo(0, 0);
+
+                // Hide error after some time (unless it contains a button)
+                if (!message.includes('button')) {
+                    setTimeout(() => {
+                        errorElement.style.display = 'none';
+                    }, 8000);
+                }
+            } else {
+                // Fallback to alert if no error element is available
+                alert(message);
+            }
+        }
+
         // Navigation functions
         function showSection(sectionName) {
             console.log(`Switching to section: ${sectionName}`);
@@ -4466,7 +4534,7 @@
                 loadAnalyticsData(currentAnalyticsPeriod); // Ensure analytics data is loaded
                 loadLocationAnalytics(currentAnalyticsPeriod); // Ensure location analytics are loaded
                 loadNotifications(); // Load notifications when the section is shown
-                
+
                 // Fix chart rendering issues when section becomes visible
                 setTimeout(() => {
                     window.dispatchEvent(new Event('resize'));
@@ -4750,7 +4818,7 @@
                 document.getElementById('out-of-stock-count').textContent = outOfStockCount;
                 document.getElementById('low-stock-count').textContent = lowStockCount;
                 document.getElementById('in-stock-count').textContent = inStockCount;
-                document.getElementById('total-products-count').textContent = totalProductsCount;
+                document.getElementById('total-products-count').textContent =totalProductsCount;
 
                 // Update tab badges
                 document.getElementById('out-of-stock-tab-count').textContent = outOfStockCount;
@@ -5181,9 +5249,14 @@
                                     <button class="btn btn-danger btn-sm" onclick="cancelOrder('${order.orderId}', '${order.userId}')">
                                         <i class="fas fa-times"></i> Cancel
                                     </button>
-                                ` : order.status === 'confirmed' ?
-                                    '<span class="btn btn-sm" style="background: #d1fae5; color: #065f46; cursor: default;">Processed</span>' :
-                                    '<span class="btn btn-sm" style="background: #fee2e2; color: #991b1b; cursor: default;">Cancelled</span>'
+                                ` : order.status === 'confirmed' ? `
+                                        ${order.deliveryStatus === 'delivered' 
+                                            ? '<span class="btn btn-sm" style="background: #d1fae5; color: #065f46; cursor: default;"><i class="fas fa-check-circle"></i> Delivered</span>'
+                                            : `<button class="btn btn-success btn-sm" onclick="markAsDelivered('${order.orderId}', '${order.userId}')">
+                                                <i class="fas fa-truck"></i> Mark Delivered
+                                              </button>`
+                                        }
+                                    ` : '<span class="btn btn-sm" style="background: #fee2e2; color: #991b1b; cursor: default;">Cancelled</span>'
                                 }
                             </td>
                         </tr>
@@ -6289,7 +6362,8 @@
                                 paymentMethod: orderData.paymentMethod || 'Not specified',
                                 products: orderData.products || orderData.items || [],
                                 notes: orderData.notes || orderData.specialInstructions || '',
-                                status: orderData.status || 'pending'
+                                status: orderData.status || 'pending', // Default status
+                                deliveryStatus: orderData.deliveryStatus || 'pending' // Ensure delivery status is included
                             };
                         }
                     }
@@ -7043,7 +7117,7 @@
                     // Show user-friendly error modal
                     const errorModal = `
                         <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center;">
-                            <div style="background: white; padding: 30px; border-radius: 12px; max-width: 500px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
+                            <div style="background: white; padding: 30px; border-radius: 12px; max-width: 500px; text-align: center;">
                                 <h3 style="color: #dc2626; margin-bottom: 20px;">🚫 Failed to create shipment</h3>
                                 <p style="color: #374151; margin-bottom: 20px; line-height: 1.5;">${errorMessage}</p>
                                 <div style="margin-bottom: 20px; background: #fef3c7; padding: 15px; border-radius: 8px; color: #92400e; font-size: 14px; text-align: left;">
@@ -7262,7 +7336,7 @@
             // Only initialize once
             if (chartsInitialized) {
                 console.log('🔍 [ANALYTICS DEBUG] Charts already initialized, skipping');
-                return;
+                return true;
             }
 
             try {
@@ -7682,7 +7756,6 @@
             try {
                 console.log('🎯 [CHARTS DEBUG] Attempting to initialize charts...');
                 console.log('🎯 [CHARTS DEBUG] Chart.js available:', typeof Chart !== 'undefined');
-                console.log('🎯 [CHARTS DEBUG] Window Chart:', window.Chart);
                 console.log('🎯 [CHARTS DEBUG] Current page:', window.location.pathname);
 
                 // Check if already initialized
@@ -7960,7 +8033,7 @@
 
                     const labels = Object.keys(trafficSources);
                     const data = Object.values(trafficSources);
-                    
+
                     // Debug logging for traffic sources
                     console.log('🔍 [TRAFFIC SOURCES DEBUG] Found traffic sources:', trafficSources);
                     console.log('🔍 [TRAFFIC SOURCES DEBUG] Labels:', labels);
@@ -7994,7 +8067,7 @@
             }).join('');
 
             document.getElementById('traffic-sources-legend').innerHTML = legendHtml;
-            
+
             // Ensure chart is properly sized after legend update
             setTimeout(() => {
                 if (trafficSourcesChart) {
@@ -8230,9 +8303,8 @@
                     document.getElementById('device-browser-loading').style.display = 'none';
                     document.getElementById('device-browser-content').style.display = 'block';
                 })
-                .catch(error => {
-                    console.error('Error loading device/browser data:', error);
-                });
+                .catch(error                console.error('Error loading device/browser data:', error);
+            });
         }
 
         // Update Browser Stats
@@ -8365,7 +8437,7 @@
         // Load Location Analytics Data
         async function loadLocationAnalytics(period) {
             console.log('🌍 [LOCATION ANALYTICS] Loading location analytics for period:', period);
-            
+
             if (!db) {
                 console.error('❌ [LOCATION ANALYTICS] Firebase database not initialized');
                 displayLocationError('Database not initialized');
@@ -8382,7 +8454,7 @@
                 // Calculate date range based on period with proper Firestore timestamp handling
                 const now = new Date();
                 let startDate;
-                
+
                 switch (period) {
                     case 'day':
                         startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -8400,11 +8472,11 @@
 
                 // Query analytics visits with proper timestamp handling
                 let query = db.collection('analytics_visits');
-                
+
                 // Convert startDate to Firestore Timestamp for comparison
                 const firestoreStartDate = firebase.firestore.Timestamp.fromDate(startDate);
                 query = query.where('timestamp', '>=', firestoreStartDate);
-                
+
                 const visitsSnapshot = await query.get();
 
                 console.log(`📊 [LOCATION ANALYTICS] Found ${visitsSnapshot.size} total visits in period`);
@@ -8424,7 +8496,7 @@
                 visitsSnapshot.forEach(doc => {
                     const data = doc.data();
                     totalRecords++;
-                    
+
                     // Handle timestamp validation
                     const timestamp = data.timestamp;
                     if (timestamp && timestamp.toDate) {
@@ -8437,11 +8509,11 @@
                     } else if (timestamp === null || timestamp === undefined) {
                         console.warn('⚠️ Found visit with null timestamp, including in analysis');
                     }
-                    
+
                     const visitorId = data.visitorId;
                     const country = data.country || 'Unknown';
                     const city = data.city || 'Unknown';
-                    
+
                     // Skip records without visitor ID
                     if (!visitorId) {
                         recordsWithoutVisitorId++;
@@ -8452,7 +8524,7 @@
                     // Track visitor's country (use the most recent country if visitor has multiple)
                     visitorCountries[visitorId] = country;
                     visitorCities[visitorId] = city;
-                    
+
                     // Process country data
                     if (country === 'Unknown' || !country) {
                         recordsUnknownCountry++;
@@ -8464,7 +8536,7 @@
                         }
                         countryVisitors[country].add(visitorId);
                     }
-                    
+
                     // Process city data
                     if (city === 'Unknown' || !city) {
                         recordsUnknownCity++;
@@ -8481,7 +8553,7 @@
                 // Convert to visitor counts per country
                 const countryStats = {};
                 let totalUniqueVisitors = 0;
-                
+
                 Object.entries(countryVisitors).forEach(([country, visitorSet]) => {
                     const uniqueVisitorCount = visitorSet.size;
                     countryStats[country] = uniqueVisitorCount;
@@ -8491,7 +8563,7 @@
                 // Convert to visitor counts per city
                 const cityStats = {};
                 let totalUniqueVisitorsWithCity = 0;
-                
+
                 Object.entries(cityVisitors).forEach(([city, visitorSet]) => {
                     const uniqueVisitorCount = visitorSet.size;
                     cityStats[city] = uniqueVisitorCount;
@@ -8560,17 +8632,17 @@
 
                 // Update the location analytics display
                 displayLocationData(locationData, countryStatsElement);
-                
+
                 // Update charts with real data
                 updateLocationCharts(locationData);
-                
+
                 console.log('✅ [LOCATION ANALYTICS] Location analytics loaded successfully:', {
                     uniqueVisitors: totalUniqueVisitors,
                     unknownVisitors: unknownUniqueVisitors,
                     countriesWithData: topCountries.length,
                     period: period
                 });
-                
+
             } catch (error) {
                 console.error('❌ [LOCATION ANALYTICS] Error loading location analytics:', error);
                 console.error('❌ [LOCATION ANALYTICS] Error details:', {
@@ -8578,7 +8650,7 @@
                     code: error.code,
                     stack: error.stack
                 });
-                
+
                 displayLocationError('Failed to load location data: ' + error.message);
             }
         }
@@ -8588,42 +8660,42 @@
             // Show the content container and hide loading state for COUNTRIES
             const geoCountryContent = document.getElementById('geo-country-content');
             const geoCountryLoading = document.getElementById('geo-country-loading');
-            
+
             if (geoCountryContent && geoCountryLoading) {
                 geoCountryLoading.style.display = 'none';
                 geoCountryContent.style.display = 'block';
             }
-            
+
             // Handle CITIES section - display real city data
             const geoCityContent = document.getElementById('geo-city-content');
             const geoCityLoading = document.getElementById('geo-city-loading');
-            
+
             if (geoCityContent && geoCityLoading) {
                 geoCityLoading.style.display = 'none';
                 geoCityContent.style.display = 'block';
-                
+
                 // Update city chart with real data
                 updateCityChart(locationData);
                 console.log('✅ [CITIES] Updated city chart with real data');
             }
-            
+
             // Handle LOCATION BREAKDOWN section - display real data
             const geoTableContent = document.getElementById('geo-table-content');
             const geoTableLoading = document.getElementById('geo-table-loading');
-            
+
             if (geoTableContent && geoTableLoading) {
                 geoTableLoading.style.display = 'none';
                 geoTableContent.style.display = 'block';
-                
+
                 // Display real location data in table
                 populateLocationTable(locationData);
             }
-            
-            const { top_countries, total_visitors, unknown_visitors, total_records, period } = locationData;
+
+            const { top_countries, total_visitors, unknown_visitors, total_records } = locationData;
 
             // UPDATE GEOGRAPHIC ANALYTICS STAT CARDS
             updateGeographicStatCards(locationData);
-            
+
             if (!countryStatsElement) {
                 console.warn('⚠️ [LOCATION DISPLAY] Country stats element not found');
                 return;
@@ -8645,7 +8717,7 @@
                     `<p style="margin: 8px 0 0 0; font-size: 14px; color: #6b7280;">
                         ${unknown_visitors} visitor${unknown_visitors !== 1 ? 's' : ''} with unknown location${unknown_visitors !== 1 ? 's' : ''}
                     </p>` : '';
-                
+
                 countryStatsElement.innerHTML = `
                     <div style="text-align: center; padding: 30px; color: #64748b;">
                         <i class="fas fa-globe-americas" style="font-size: 48px; color: #cbd5e1; margin-bottom: 16px;"></i>
@@ -8702,9 +8774,9 @@
         // Update the Geographic Analytics Stat Cards
         function updateGeographicStatCards(locationData) {
             console.log('📊 [GEO STAT CARDS] Updating geographic stat cards with data:', locationData);
-            
+
             const { top_countries, total_visitors, unknown_visitors, total_records } = locationData;
-            
+
             // Update Countries Count - INDEPENDENT UPDATES
             const countriesCountEl = document.getElementById('geo-countries-count');
             if (countriesCountEl) {
@@ -8712,25 +8784,25 @@
                 countriesCountEl.textContent = countryCount;
                 console.log('✅ Updated countries count:', countryCount);
             }
-            
+
             const countriesChangeEl = document.getElementById('geo-countries-change');
             if (countriesChangeEl) {
                 const countryCount = top_countries.length;
                 countriesChangeEl.textContent = countryCount > 0 ? `${countryCount} unique countries` : 'No countries';
             }
-            
+
             // Update Cities Count - Mark as not available (need real city data from analytics)
             const citiesCountEl = document.getElementById('geo-cities-count');
             if (citiesCountEl) {
                 citiesCountEl.textContent = 'N/A';
                 console.log('✅ Updated cities count: N/A (need real city data)');
             }
-            
+
             const citiesChangeEl = document.getElementById('geo-cities-change');
             if (citiesChangeEl) {
                 citiesChangeEl.textContent = 'City data not available';
             }
-            
+
             // Update Top Country - SAFE PERCENTAGE HANDLING
             const topCountryEl = document.getElementById('geo-top-country');
             if (topCountryEl) {
@@ -8742,7 +8814,7 @@
                     topCountryEl.textContent = 'Unknown';
                 }
             }
-            
+
             const topCountryChangeEl = document.getElementById('geo-top-country-change');
             if (topCountryChangeEl) {
                 if (top_countries.length > 0) {
@@ -8754,8 +8826,8 @@
                     topCountryChangeEl.textContent = 'No data available';
                 }
             }
-            
-            
+
+
             console.log('✅ [GEO STAT CARDS] All geographic stat cards updated successfully');
         }
 
@@ -8766,17 +8838,17 @@
         function populateLocationTable(locationData) {
             currentLocationData = locationData; // Store for filtering
             const geoTableTbody = document.getElementById('geo-table-tbody');
-            
+
             if (!geoTableTbody) {
                 console.warn('⚠️ [LOCATION TABLE] Table body element not found');
                 return;
             }
 
             const { top_countries, total_visitors, unknown_visitors, total_records } = locationData;
-            
+
             // Clear existing content
             geoTableTbody.innerHTML = '';
-            
+
             if (total_records === 0) {
                 geoTableTbody.innerHTML = `
                     <tr>
@@ -8842,7 +8914,7 @@
                             `;
                         });
                     }
-                    
+
                     // Add unknown visitors row if any
                     if (unknown_visitors > 0) {
                         const unknownPercentage = total_visitors > 0 ? Math.round((unknown_visitors / (total_visitors + unknown_visitors)) * 100) : 0;
@@ -8873,7 +8945,7 @@
                 case 'city':
                     // Display city data
                     const { top_cities, total_city_visitors, unknown_city_visitors } = currentLocationData;
-                    
+
                     if (top_cities && top_cities.length > 0) {
                         top_cities.forEach((city, index) => {
                             tableRows += `
@@ -8898,7 +8970,7 @@
                                 </tr>
                             `;
                         });
-                        
+
                         // Add unknown city visitors if any
                         if (unknown_city_visitors > 0) {
                             const unknownCityPercentage = total_city_visitors > 0 ? Math.round((unknown_city_visitors / (total_city_visitors + unknown_city_visitors)) * 100) : 0;
@@ -8989,7 +9061,7 @@
                                 </tr>
                             `;
                         });
-                        
+
                         // Add unknown visitors if any
                         if (unknown_visitors > 0) {
                             const unknownPercentage = total_visitors > 0 ? Math.round((unknown_visitors / (total_visitors + unknown_visitors)) * 100) : 0;
@@ -9027,10 +9099,10 @@
         window.filterLocationData = function() {
             const filterSelect = document.getElementById('geo-filter');
             if (!filterSelect) return;
-            
+
             const selectedFilter = filterSelect.value;
             console.log(`🔍 [LOCATION FILTER] Applying filter: ${selectedFilter}`);
-            
+
             // Apply the filter to current data
             displayFilteredLocationData(selectedFilter);
         };
@@ -9038,7 +9110,7 @@
         // Update City Chart with Real Data
         function updateCityChart(locationData) {
             console.log('🏙️ [CITY CHART] Updating city chart with location data:', locationData);
-            
+
             try {
                 // Validate input data
                 if (!locationData || typeof locationData !== 'object') {
@@ -9047,7 +9119,7 @@
                 }
 
                 const { top_cities = [], total_city_visitors = 0 } = locationData;
-                
+
                 // Update city chart if it exists and is properly initialized
                 if (window.cityChart) {
                     // Validate chart structure
@@ -9061,7 +9133,7 @@
                         const cities = top_cities.slice(0, 5);
                         const labels = cities.map(c => c.city || 'Unknown');
                         const data = cities.map(c => c.visitors || 0);
-                        
+
                         // Generate colors for city chart (different from country chart)
                         const cityColors = [
                             '#10b981', // Green
@@ -9075,40 +9147,38 @@
                             '#ec4899', // Pink
                             '#6b7280'  // Gray
                         ];
-                        
+
                         // Update chart data
                         window.cityChart.data.labels = labels;
                         window.cityChart.data.datasets[0].data = data;
                         window.cityChart.data.datasets[0].backgroundColor = cityColors.slice(0, labels.length);
                         window.cityChart.data.datasets[0].borderColor = cityColors.slice(0, labels.length);
                         window.cityChart.data.datasets[0].label = 'Visitors by City';
-                        
+
                         // Update chart with animation
                         window.cityChart.update('active');
-                        
+
                         console.log('✅ [CITY CHART] City chart updated with real data:', {
                             cities: labels,
                             visitors: data,
                             totalCities: top_cities.length
                         });
-                        
+
                     } else {
                         // No city data - show empty state
                         window.cityChart.data.labels = ['No City Data'];
                         window.cityChart.data.datasets[0].data = [1];
                         window.cityChart.data.datasets[0].backgroundColor = ['#e5e7eb'];
-                        window.cityChart.data.datasets[0].borderColor = ['#d1d5db'];
-                        window.cityChart.data.datasets[0].label = 'No city data available';
                         window.cityChart.update('none'); // No animation for empty state
-                        
+
                         console.log('📊 [CITY CHART] City chart updated to show empty state');
                     }
                 } else {
                     console.log('⚠️ [CITY CHART] City chart not initialized');
                 }
-                
+
                 console.log('✅ [CITY CHART] City chart update completed');
-                
+
             } catch (error) {
                 console.error('❌ [CITY CHART] Error updating city chart:', error);
                 // Don't throw error to avoid breaking the analytics display
@@ -9164,7 +9234,7 @@
         // Update Location Charts with Real Data
         function updateLocationCharts(locationData) {
             console.log('📊 [LOCATION CHARTS] Updating charts with location data:', locationData);
-            
+
             try {
                 // Validate input data
                 if (!locationData || typeof locationData !== 'object') {
@@ -9173,7 +9243,7 @@
                 }
 
                 const { top_countries = [], total_visitors = 0 } = locationData;
-                
+
                 // Update country chart if it exists and is properly initialized
                 if (window.countryChart) {
                     // Validate chart structure
@@ -9187,7 +9257,7 @@
                         const countries = top_countries.slice(0, 5);
                         const labels = countries.map(c => c.country || 'Unknown');
                         const data = countries.map(c => c.visitors || 0);
-                        
+
                         // Generate colors dynamically based on data length
                         const colors = [
                             '#3b82f6', // Blue
@@ -9201,35 +9271,35 @@
                             '#ec4899', // Pink
                             '#6b7280'  // Gray
                         ];
-                        
+
                         // Update chart data
                         window.countryChart.data.labels = labels;
                         window.countryChart.data.datasets[0].data = data;
                         window.countryChart.data.datasets[0].backgroundColor = colors.slice(0, labels.length);
-                        
+
                         // Update chart with animation
                         window.countryChart.update('active');
-                        
+
                         console.log('✅ [LOCATION CHARTS] Country chart updated with real data:', {
                             countries: labels,
                             visitors: data,
                             totalCountries: top_countries.length
                         });
-                        
+
                     } else {
                         // No data - show empty state
                         window.countryChart.data.labels = ['No Data'];
                         window.countryChart.data.datasets[0].data = [1];
                         window.countryChart.data.datasets[0].backgroundColor = ['#e5e7eb'];
                         window.countryChart.update('none'); // No animation for empty state
-                        
+
                         console.log('📊 [LOCATION CHARTS] Country chart updated with empty state');
                     }
                 } else {
                     console.log('⚠️ [LOCATION CHARTS] Country chart not initialized, attempting to initialize...');
                     // Try to initialize the chart if it doesn't exist
                     initializeLocationCharts();
-                    
+
                     // Retry updating after initialization
                     setTimeout(() => {
                         if (window.countryChart && top_countries.length > 0) {
@@ -9241,7 +9311,7 @@
                 // Update city chart with real data if available
                 if (window.cityChart) {
                     const { top_cities = [] } = locationData;
-                    
+
                     if (top_cities.length > 0) {
                         // Use the existing updateCityChart function to display real data
                         updateCityChart(locationData);
@@ -9251,18 +9321,16 @@
                         window.cityChart.data.labels = ['City Data Not Available'];
                         window.cityChart.data.datasets[0].data = [1];
                         window.cityChart.data.datasets[0].backgroundColor = ['#e5e7eb'];
-                        window.cityChart.data.datasets[0].borderColor = ['#d1d5db'];
-                        window.cityChart.data.datasets[0].label = 'City data not collected';
                         window.cityChart.update('none');
-                        
+
                         console.log('📊 [LOCATION CHARTS] City chart updated to show not available state (no city data found)');
                     }
                 } else {
                     console.log('⚠️ [LOCATION CHARTS] City chart not initialized');
                 }
-                
+
                 console.log('✅ [LOCATION CHARTS] Charts update completed');
-                
+
             } catch (error) {
                 console.error('❌ [LOCATION CHARTS] Error updating charts:', error);
                 console.error('❌ [LOCATION CHARTS] Error details:', {
@@ -9270,7 +9338,7 @@
                     stack: error.stack,
                     locationData: locationData
                 });
-                
+
                 // Try to reinitialize charts on error
                 try {
                     console.log('🔄 [LOCATION CHARTS] Attempting to reinitialize charts after error...');
@@ -9284,7 +9352,7 @@
         // Initialize Location Charts
         function initializeLocationCharts() {
             console.log('🌍 [LOCATION CHARTS] Initializing location charts...');
-            
+
             try {
                 // Initialize country visitors chart (if canvas element exists)
                 const countryChartCanvas = document.getElementById('country-chart');
@@ -9334,7 +9402,7 @@
                             }
                         }
                     });
-                    
+
                     console.log('✅ [LOCATION CHARTS] Country chart initialized successfully');
                 } else {
                     console.log('⚠️ [LOCATION CHARTS] Country chart canvas not found or Chart.js not available');
@@ -9375,14 +9443,14 @@
                             }
                         }
                     });
-                    
+
                     console.log('✅ [LOCATION CHARTS] City chart initialized successfully');
                 } else {
                     console.log('⚠️ [LOCATION CHARTS] City chart canvas not found or Chart.js not available');
                 }
 
                 console.log('✅ [LOCATION CHARTS] Location charts initialization completed');
-                
+
             } catch (error) {
                 console.error('❌ [LOCATION CHARTS] Error initializing location charts:', error);
                 // Don't throw error to avoid breaking the analytics initialization
