@@ -1800,10 +1800,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Set up address management
             setupAddressManagement();
 
-            // Load saved addresses if user is logged in
-            if (firebase.auth && firebase.auth().currentUser) {
-                await loadSavedAddresses();
-            }
+            // Load saved addresses for both logged-in and guest users
+            await loadSavedAddresses();
 
             // Start at step 1
             goToStep(1);
@@ -2678,23 +2676,42 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Load saved addresses for logged in users
+    // Load saved addresses for both logged-in and guest users
     async function loadSavedAddresses() {
         const user = firebase.auth().currentUser;
+        
+        if (user) {
+            console.log('Loading saved addresses for logged-in user:', user.uid);
+            await loadFirebaseAddresses();
+        } else {
+            console.log('Loading saved addresses for guest user from localStorage');
+            await loadLocalAddresses();
+        }
+    }
+
+    // Load addresses from Firebase for logged-in users
+    async function loadFirebaseAddresses() {
+        const user = firebase.auth().currentUser;
         if (!user) {
-            console.log('User not logged in, skipping address loading');
+            console.log('User not logged in, cannot load Firebase addresses');
             return;
         }
 
-        console.log('Loading saved addresses for user:', user.uid);
+        console.log('Loading Firebase addresses for user:', user.uid);
 
         const savedAddressesSection = document.getElementById('saved-addresses-section');
         const saveAddressOption = document.getElementById('save-address-option');
         const addressContainer = document.getElementById('saved-addresses-container');
+        const guestNotice = document.getElementById('guest-address-notice');
 
         if (!savedAddressesSection || !addressContainer) {
             console.warn('Address UI elements not found');
             return;
+        }
+
+        // Hide guest notice for logged-in users
+        if (guestNotice) {
+            guestNotice.style.display = 'none';
         }
 
         // Show the save address option for logged in users
@@ -2766,8 +2783,103 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Select a saved address
-    function selectSavedAddress(addressId) {
+    // Load addresses from localStorage for guest users
+    async function loadLocalAddresses() {
+        const savedAddressesSection = document.getElementById('saved-addresses-section');
+        const saveAddressOption = document.getElementById('save-address-option');
+        const addressContainer = document.getElementById('saved-addresses-container');
+        const guestNotice = document.getElementById('guest-address-notice');
+
+        if (!savedAddressesSection || !addressContainer) {
+            console.warn('Address UI elements not found');
+            return;
+        }
+
+        // Show guest notice
+        if (guestNotice) {
+            guestNotice.style.display = 'block';
+        }
+
+        // Always show save address option for guest users
+        if (saveAddressOption) {
+            saveAddressOption.style.display = 'block';
+            const label = saveAddressOption.querySelector('label');
+            if (label) {
+                label.textContent = 'Save this address for faster checkout next time';
+            }
+        }
+
+        try {
+            // Check if LocalAddressManager is available
+            if (typeof LocalAddressManager === 'undefined') {
+                console.warn('LocalAddressManager not available');
+                showManualAddressForm();
+                return;
+            }
+
+            const addresses = LocalAddressManager.getAddresses();
+
+            if (addresses && addresses.length > 0) {
+                console.log('Loaded', addresses.length, 'guest addresses from localStorage');
+
+                // Show saved addresses section
+                savedAddressesSection.style.display = 'block';
+
+                // Display addresses
+                addressContainer.innerHTML = '';
+                addresses.forEach((address, index) => {
+                    const addressHTML = `
+                        <div class="address-option" data-address-id="${address.id}" data-address-type="local" onclick="selectSavedAddress('${address.id}', 'local')">
+                            <input type="radio" name="savedAddress" value="${address.id}" class="address-radio" ${address.isDefault ? 'checked' : ''}>
+                            <div class="address-type">
+                                ${address.addressType ? address.addressType.charAt(0).toUpperCase() + address.addressType.slice(1) : 'Address'}
+                                ${address.isDefault ? '<span class="default-badge">Default</span>' : ''}
+                            </div>
+                            <div class="address-details">
+                                <strong>${address.firstName} ${address.lastName}</strong><br>
+                                ${address.houseNumber}, ${address.street || address.roadName}<br>
+                                ${address.city}, ${address.state} ${address.pinCode}<br>
+                                Phone: ${address.phone}
+                            </div>
+                        </div>
+                    `;
+                    addressContainer.insertAdjacentHTML('beforeend', addressHTML);
+                });
+
+                // If there's a default address, select it and hide manual form
+                const defaultAddress = addresses.find(addr => addr.isDefault);
+                if (defaultAddress) {
+                    selectSavedAddress(defaultAddress.id, 'local');
+                    hideManualAddressForm();
+                } else {
+                    // Select first address if no default
+                    if (addresses.length > 0) {
+                        selectSavedAddress(addresses[0].id, 'local');
+                        hideManualAddressForm();
+                    }
+                }
+
+            } else {
+                console.log('No saved guest addresses found');
+                addressContainer.innerHTML = '';
+                savedAddressesSection.style.display = 'none';
+                // Keep manual form visible
+                showManualAddressForm();
+            }
+
+        } catch (error) {
+            console.error('Error loading local addresses:', error);
+            showManualAddressForm();
+        }
+    }
+
+    // Select a saved address (works for both Firebase and localStorage)
+    function selectSavedAddress(addressId, storageType) {
+        // Default to Firebase if not specified
+        if (!storageType) {
+            const user = firebase.auth && firebase.auth().currentUser;
+            storageType = user ? 'firebase' : 'local';
+        }
         // Update radio button selection
         const radios = document.querySelectorAll('input[name="savedAddress"]');
         radios.forEach(radio => {
@@ -2785,31 +2897,42 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Load address data into the form (for order confirmation)
-        loadAddressIntoForm(addressId);
+        loadAddressIntoForm(addressId, storageType);
 
-        console.log('Selected saved address:', addressId);
+        console.log('Selected saved address:', addressId, 'from', storageType);
     }
 
-    // Load address data into form
-    async function loadAddressIntoForm(addressId) {
+    // Load address data into form (supports both Firebase and localStorage)
+    async function loadAddressIntoForm(addressId, storageType) {
         try {
-            const result = await FirebaseAddressManager.loadUserAddresses();
-            if (result.success) {
-                const address = result.addresses.find(addr => addr.id === addressId);
-                if (address) {
-                    // Fill form fields
-                    document.getElementById('firstName').value = address.firstName || '';
-                    document.getElementById('lastName').value = address.lastName || '';
-                    document.getElementById('email').value = address.email || '';
-                    document.getElementById('phone').value = address.phone || '';
-                    document.getElementById('pinCode').value = address.pinCode || '';
-                    document.getElementById('state').value = address.state || '';
-                    document.getElementById('city').value = address.city || '';
-                    document.getElementById('houseNumber').value = address.houseNumber || '';
-                    document.getElementById('roadName').value = address.roadName || '';
+            let address = null;
 
-                    console.log('Address data loaded into form');
+            if (storageType === 'local') {
+                // Load from localStorage
+                if (typeof LocalAddressManager !== 'undefined') {
+                    address = LocalAddressManager.getAddressById(addressId);
                 }
+            } else {
+                // Load from Firebase
+                const result = await FirebaseAddressManager.loadUserAddresses();
+                if (result.success) {
+                    address = result.addresses.find(addr => addr.id === addressId);
+                }
+            }
+
+            if (address) {
+                // Fill form fields
+                document.getElementById('firstName').value = address.firstName || '';
+                document.getElementById('lastName').value = address.lastName || '';
+                document.getElementById('email').value = address.email || '';
+                document.getElementById('phone').value = address.phone || '';
+                document.getElementById('pinCode').value = address.pinCode || '';
+                document.getElementById('state').value = address.state || '';
+                document.getElementById('city').value = address.city || '';
+                document.getElementById('houseNumber').value = address.houseNumber || '';
+                document.getElementById('roadName').value = address.street || address.roadName || '';
+
+                console.log('Address data loaded into form from', storageType);
             }
         } catch (error) {
             console.error('Error loading address into form:', error);
@@ -2824,14 +2947,20 @@ document.addEventListener('DOMContentLoaded', function() {
             manualForm.style.display = 'block';
         }
 
-        // Show save address option for logged-in users
-        const user = firebase.auth && firebase.auth().currentUser;
-        if (user) {
-            const saveAddressOption = document.getElementById('save-address-option');
-            if (saveAddressOption) {
-                saveAddressOption.style.display = 'block';
-                console.log('Save address option shown for logged-in user');
+        // Show save address option for both logged-in and guest users
+        const saveAddressOption = document.getElementById('save-address-option');
+        if (saveAddressOption) {
+            saveAddressOption.style.display = 'block';
+            const user = firebase.auth && firebase.auth().currentUser;
+            const label = saveAddressOption.querySelector('label');
+            if (label) {
+                if (user) {
+                    label.textContent = 'Save this address to your account';
+                } else {
+                    label.textContent = 'Save this address for faster checkout next time';
+                }
             }
+            console.log('Save address option shown for', user ? 'logged-in user' : 'guest user');
         }
 
         // Clear all form fields
@@ -2873,13 +3002,13 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Manual address form hidden');
     }
 
-    // Save address during checkout if requested
+    // Save address during checkout if requested (supports both Firebase and localStorage)
     async function saveAddressIfRequested() {
-        const user = firebase.auth().currentUser;
-        if (!user) return;
-
         const saveAddressCheckbox = document.getElementById('saveAddress');
-        if (!saveAddressCheckbox || !saveAddressCheckbox.checked) return;
+        if (!saveAddressCheckbox || !saveAddressCheckbox.checked) {
+            console.log('Save address checkbox not checked, skipping save');
+            return;
+        }
 
         // Check if a saved address is selected instead of manual form
         const selectedSavedAddress = document.querySelector('input[name="savedAddress"]:checked');
@@ -2888,6 +3017,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        const user = firebase.auth && firebase.auth().currentUser;
+
         try {
             const addressData = {
                 firstName: document.getElementById('firstName').value,
@@ -2895,6 +3026,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 email: document.getElementById('email').value,
                 phone: document.getElementById('phone').value,
                 houseNumber: document.getElementById('houseNumber').value,
+                street: document.getElementById('roadName').value,
                 roadName: document.getElementById('roadName').value,
                 city: document.getElementById('city').value,
                 state: document.getElementById('state').value,
@@ -2903,11 +3035,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 isDefault: false // don't set as default automatically
             };
 
-            const result = await FirebaseAddressManager.saveAddress(addressData);
-            if (result.success) {
-                console.log('Address saved successfully for future orders');
+            if (user) {
+                // Save to Firebase for logged-in users
+                const result = await FirebaseAddressManager.saveAddress(addressData);
+                if (result.success) {
+                    console.log('✅ Address saved to Firebase successfully for future orders');
+                } else {
+                    console.warn('Failed to save address to Firebase:', result.error);
+                }
             } else {
-                console.warn('Failed to save address:', result.error);
+                // Save to localStorage for guest users
+                if (typeof LocalAddressManager !== 'undefined') {
+                    const result = LocalAddressManager.saveAddress(addressData);
+                    if (result.success) {
+                        console.log('✅ Address saved to localStorage successfully for future orders');
+                    } else {
+                        console.warn('Failed to save address to localStorage:', result.errors);
+                    }
+                } else {
+                    console.warn('LocalAddressManager not available, cannot save guest address');
+                }
             }
         } catch (error) {
             console.error('Error saving address:', error);
