@@ -177,7 +177,13 @@ function setupEventListeners() {
     if (continueToAddress) {
         continueToAddress.addEventListener('click', function(e) {
             e.preventDefault();
-            window.location.href = 'index.html';
+            // Validate that cart has items before proceeding
+            const cartItems = JSON.parse(localStorage.getItem('auric_cart_items') || '[]');
+            if (cartItems.length > 0) {
+                showStep(2);
+            } else {
+                showNotification('Your cart is empty. Please add products before continuing.', 'error');
+            }
         });
     }
     
