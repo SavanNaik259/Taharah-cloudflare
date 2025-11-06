@@ -1285,17 +1285,16 @@
             const orderTotal = parseFloat(order.orderTotal || order.total || 0).toFixed(2);
             orderHTML += `
                 <div class="order-total">Total: ₹${orderTotal}</div>
-              `;
+              </div>
+            `; // Close order-card
+
+            ordersContainer.insertAdjacentHTML('beforeend', orderHTML);
 
             // Check if order has been reviewed and display reviews or review button
             if (deliveryStatus === 'delivered') {
-              // Load reviews for this order
+              // Load reviews for this order after the order card is in the DOM
               loadOrderReviews(order.id, order.products || []);
             }
-
-            orderHTML += `</div>`; // Close order-card
-
-            ordersContainer.insertAdjacentHTML('beforeend', orderHTML);
           });
 
         } catch (error) {
@@ -1889,27 +1888,44 @@
       // Load reviews for an order
       async function loadOrderReviews(orderId, products) {
         const orderCard = document.querySelector(`[data-order-id="${orderId}"]`);
-        if (!orderCard) return;
+        if (!orderCard) {
+          console.log('Order card not found for:', orderId);
+          return;
+        }
 
-        const reviewsContainer = document.createElement('div');
-        reviewsContainer.className = 'order-reviews-section';
-        reviewsContainer.style.cssText = 'margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;';
+        // Check if reviews section already exists
+        let reviewsContainer = orderCard.querySelector('.order-reviews-section');
+        if (!reviewsContainer) {
+          reviewsContainer = document.createElement('div');
+          reviewsContainer.className = 'order-reviews-section';
+          reviewsContainer.style.cssText = 'margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;';
+        }
 
         try {
+          console.log('Loading reviews for order:', orderId, 'with', products.length, 'products');
           const allReviews = [];
+          const user = firebase.auth().currentUser;
           
-          // Check each product for reviews
+          // Check each product for reviews by this user for this order
           for (const product of products) {
             const productId = product.productId || product.id;
             if (!productId) continue;
 
             const result = await FirebaseReviewsManager.loadProductReviews(productId);
             if (result.success && result.reviews.length > 0) {
-              // Filter reviews for this order
-              const orderReviews = result.reviews.filter(r => r.orderId === orderId);
-              allReviews.push(...orderReviews.map(r => ({ ...r, productName: product.name, productId })));
+              // Filter reviews for this order and this user
+              const orderReviews = result.reviews.filter(r => 
+                r.orderId === orderId && r.userId === user.uid
+              );
+              allReviews.push(...orderReviews.map(r => ({ 
+                ...r, 
+                productName: product.name, 
+                productId 
+              })));
             }
           }
+
+          console.log('Found', allReviews.length, 'reviews for order:', orderId);
 
           if (allReviews.length > 0) {
             // Display submitted reviews
@@ -1938,7 +1954,8 @@
 
             reviewsContainer.innerHTML = reviewsHTML;
           } else {
-            // Show write review button
+            // Show write review button for delivered orders with no reviews
+            console.log('No reviews found, showing write review button');
             reviewsContainer.innerHTML = `
               <div class="order-actions" style="margin-top: 15px;">
                 <button class="review-order-btn shop-now-button" data-order-id="${orderId}" data-order-ref="${orderId}">Write a Review</button>
@@ -1946,9 +1963,21 @@
             `;
           }
 
-          orderCard.appendChild(reviewsContainer);
+          // Append to order card if not already there
+          if (!orderCard.querySelector('.order-reviews-section')) {
+            orderCard.appendChild(reviewsContainer);
+          }
         } catch (error) {
           console.error('Error loading order reviews:', error);
+          // Still show the write review button if there's an error
+          reviewsContainer.innerHTML = `
+            <div class="order-actions" style="margin-top: 15px;">
+              <button class="review-order-btn shop-now-button" data-order-id="${orderId}" data-order-ref="${orderId}">Write a Review</button>
+            </div>
+          `;
+          if (!orderCard.querySelector('.order-reviews-section')) {
+            orderCard.appendChild(reviewsContainer);
+          }
         }
       }
 
