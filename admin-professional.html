@@ -1315,6 +1315,14 @@
                 return;
             }
 
+            // Debug info
+            console.log('📋 Displaying orders:', orders.map(o => ({
+                id: o.id,
+                userId: o.userId,
+                status: o.deliveryStatus || 'pending',
+                hasUserId: !!o.userId
+            })));
+
             const tableHTML = `
                 <div class="table-container">
                     <table class="table">
