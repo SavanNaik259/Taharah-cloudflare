@@ -2626,7 +2626,7 @@
           const rating = document.getElementById('review-rating').value;
           const comment = document.getElementById('review-comment').value;
           const orderId = document.getElementById('review-order-id').value;
-          const reviewId = document.getElementById('review-id').value;
+          const existingReviewId = document.getElementById('review-id').value;
           const imageInput = document.getElementById('review-images');
 
           // Validate product ID first
@@ -2718,6 +2718,12 @@
             comment: comment ? comment.trim() : '',
             images: imageUrls
           };
+
+          // Include review ID if editing existing review
+          if (existingReviewId && existingReviewId.trim() !== '') {
+            reviewData.id = existingReviewId.trim();
+            console.log('Updating existing review:', existingReviewId);
+          }
 
           console.log('Submitting review with data:', reviewData);
           console.log('Product ID length:', reviewData.productId.length);

@@ -68,9 +68,10 @@ window.FirebaseReviewsManager = (function() {
         }
 
         try {
-            // Generate a unique ID for the review
-            const reviewId = db.collection('temp').doc().id;
-            console.log('Generated review ID:', reviewId);
+            // Use existing review ID if editing, otherwise generate a new one
+            const reviewId = reviewData.id || db.collection('temp').doc().id;
+            const isEditing = !!reviewData.id;
+            console.log(isEditing ? 'Updating existing review ID:' : 'Creating new review ID:', reviewId);
             
             const reviewToSave = {
                 id: reviewId,
@@ -84,14 +85,16 @@ window.FirebaseReviewsManager = (function() {
                 comment: reviewData.comment ? reviewData.comment.trim() : '',
                 images: reviewData.images || [],
                 verified: true, // Mark as verified purchase
-                createdAt: firebase.firestore.Timestamp.now(),
                 updatedAt: firebase.firestore.Timestamp.now()
             };
 
+            // Only set createdAt for new reviews
+            if (!isEditing) {
+                reviewToSave.createdAt = firebase.firestore.Timestamp.now();
+            }
+
             console.log('Review object to save:', reviewToSave);
             console.log('Target product ID:', reviewData.productId);
-            console.log('Product ID type:', typeof reviewData.productId);
-            console.log('Product ID trimmed length:', reviewData.productId.trim().length);
 
             // First, ensure the product document exists or create a placeholder
             const productRef = db.collection('products').doc(reviewData.productId.trim());
@@ -116,11 +119,19 @@ window.FirebaseReviewsManager = (function() {
                 // Continue anyway - the review collection might work without parent document
             }
 
-            // Save to Firestore at products/{productId}/reviews/{reviewId}
-            console.log('Attempting to save review to path:', `products/${reviewData.productId}/reviews/${reviewId}`);
-            await productRef.collection('reviews').doc(reviewId).set(reviewToSave);
+            // Save or update review in Firestore
+            if (isEditing) {
+                // Update existing review, merging with existing data
+                console.log('Updating review at path:', `products/${reviewData.productId}/reviews/${reviewId}`);
+                await productRef.collection('reviews').doc(reviewId).update(reviewToSave);
+                console.log('Review updated successfully:', reviewId);
+            } else {
+                // Create new review
+                console.log('Creating review at path:', `products/${reviewData.productId}/reviews/${reviewId}`);
+                await productRef.collection('reviews').doc(reviewId).set(reviewToSave);
+                console.log('Review created successfully:', reviewId);
+            }
             
-            console.log('Review saved successfully:', reviewId);
             return { success: true, reviewId: reviewId, review: reviewToSave };
         } catch (error) {
             console.error('Error saving review:', error);
