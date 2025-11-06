@@ -2490,7 +2490,7 @@
             </div>
 
             <div class="form-group">
-              <label for="review-rating">Rating *</label>
+              <label for="review-rating">Rating (Optional)</label>
               <div class="star-rating" id="star-rating">
                 <i class="far fa-star" data-rating="1"></i>
                 <i class="far fa-star" data-rating="2"></i>
@@ -2499,7 +2499,7 @@
                 <i class="far fa-star" data-rating="5"></i>
               </div>
               <input type="hidden" id="review-rating" name="rating" value="${existingReview ? existingReview.rating : ''}">
-              <small style="color: #666; display: block; margin-top: 5px;">Click on a star to submit rating</small>
+              <small style="color: #666; display: block; margin-top: 5px;">Click on a star to rate</small>
             </div>
 
             <div class="form-group">
@@ -2511,6 +2511,12 @@
               <label for="review-images">Upload Images (Optional)</label>
               <input type="file" id="review-images" accept="image/*" multiple style="padding: 8px;">
               <small style="color: #777; display: block; margin-top: 5px;">You can upload up to 3 images</small>
+            </div>
+            
+            <div style="background: #f0f7ff; padding: 12px; border-radius: 6px; margin-top: 15px; border-left: 4px solid #c8a97e;">
+              <small style="color: #555; display: block;">
+                <strong>Note:</strong> You can submit a review with just stars, text, or images - any combination works!
+              </small>
             </div>
 
             <div class="modal-buttons">
@@ -2545,7 +2551,7 @@
         }
 
         stars.forEach(star => {
-          star.addEventListener('click', async function() {
+          star.addEventListener('click', function() {
             const rating = this.dataset.rating;
             ratingInput.value = rating;
 
@@ -2558,9 +2564,6 @@
                 s.classList.add('far');
               }
             });
-
-            // Auto-submit rating
-            await submitRatingOnly(rating);
           });
         });
 
@@ -2624,6 +2627,7 @@
           const comment = document.getElementById('review-comment').value;
           const orderId = document.getElementById('review-order-id').value;
           const reviewId = document.getElementById('review-id').value;
+          const imageInput = document.getElementById('review-images');
 
           // Validate product ID first
           if (!productId || productId.trim() === '') {
@@ -2643,8 +2647,13 @@
             return;
           }
 
-          if (!rating) {
-            showNotification('Please select a rating', 'error');
+          // Check if at least one field is filled (rating, comment, or images)
+          const hasRating = rating && parseInt(rating) > 0;
+          const hasComment = comment && comment.trim().length > 0;
+          const hasImages = imageInput && imageInput.files && imageInput.files.length > 0;
+
+          if (!hasRating && !hasComment && !hasImages) {
+            showNotification('Please provide at least a rating, review text, or upload images', 'error');
             submitBtn.disabled = false;
             submitText.textContent = reviewId ? 'Update' : 'Submit Review';
             return;
@@ -2705,8 +2714,8 @@
             productId: productId.trim(),
             productName: productName.trim(),
             orderId: orderId.trim(),
-            rating: parseInt(rating),
-            comment: comment.trim(),
+            rating: rating ? parseInt(rating) : 0,
+            comment: comment ? comment.trim() : '',
             images: imageUrls
           };
 
@@ -2714,6 +2723,9 @@
           console.log('Product ID length:', reviewData.productId.length);
           console.log('Product ID value:', JSON.stringify(reviewData.productId));
           console.log('Images count:', imageUrls.length);
+          console.log('Has rating:', !!reviewData.rating);
+          console.log('Has comment:', !!reviewData.comment);
+          console.log('Has images:', imageUrls.length > 0);
 
           const result = await FirebaseReviewsManager.submitReview(reviewData);
 

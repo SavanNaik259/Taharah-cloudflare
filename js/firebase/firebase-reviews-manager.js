@@ -51,17 +51,18 @@ window.FirebaseReviewsManager = (function() {
             return { success: false, error: 'Product ID is required' };
         }
 
-        if (!reviewData.rating) {
-            console.error('Rating is missing:', reviewData.rating);
-            return { success: false, error: 'Rating is required' };
+        // Check if at least one field is provided (rating, comment, or images)
+        const hasRating = reviewData.rating && reviewData.rating > 0;
+        const hasComment = reviewData.comment && reviewData.comment.trim().length > 0;
+        const hasImages = reviewData.images && reviewData.images.length > 0;
+
+        if (!hasRating && !hasComment && !hasImages) {
+            console.error('No review content provided');
+            return { success: false, error: 'Please provide at least a rating, comment, or images' };
         }
 
-        if (!reviewData.comment || reviewData.comment.trim() === '') {
-            console.error('Comment is missing or empty:', reviewData.comment);
-            return { success: false, error: 'Review comment is required' };
-        }
-
-        if (reviewData.rating < 1 || reviewData.rating > 5) {
+        // Validate rating if provided
+        if (reviewData.rating && (reviewData.rating < 0 || reviewData.rating > 5)) {
             console.error('Invalid rating value:', reviewData.rating);
             return { success: false, error: 'Rating must be between 1 and 5' };
         }
@@ -79,8 +80,8 @@ window.FirebaseReviewsManager = (function() {
                 userId: user.uid,
                 userEmail: user.email,
                 userName: reviewData.userName || user.displayName || user.email.split('@')[0],
-                rating: parseInt(reviewData.rating),
-                comment: reviewData.comment.trim(),
+                rating: reviewData.rating ? parseInt(reviewData.rating) : 0,
+                comment: reviewData.comment ? reviewData.comment.trim() : '',
                 images: reviewData.images || [],
                 verified: true, // Mark as verified purchase
                 createdAt: firebase.firestore.Timestamp.now(),
