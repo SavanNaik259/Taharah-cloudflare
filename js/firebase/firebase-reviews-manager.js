@@ -38,24 +38,42 @@ window.FirebaseReviewsManager = (function() {
         if (!init()) return { success: false, error: 'Firebase not initialized' };
         
         const user = auth.currentUser;
-        if (!user) return { success: false, error: 'User not authenticated' };
+        if (!user) {
+            console.error('No authenticated user found');
+            return { success: false, error: 'User not authenticated' };
+        }
 
-        // Validate review data
-        if (!reviewData.productId || !reviewData.rating || !reviewData.comment) {
-            return { success: false, error: 'Missing required review data' };
+        console.log('submitReview called with data:', reviewData);
+
+        // Comprehensive validation with detailed error messages
+        if (!reviewData.productId || reviewData.productId.trim() === '') {
+            console.error('Product ID is missing or empty:', reviewData.productId);
+            return { success: false, error: 'Product ID is required' };
+        }
+
+        if (!reviewData.rating) {
+            console.error('Rating is missing:', reviewData.rating);
+            return { success: false, error: 'Rating is required' };
+        }
+
+        if (!reviewData.comment || reviewData.comment.trim() === '') {
+            console.error('Comment is missing or empty:', reviewData.comment);
+            return { success: false, error: 'Review comment is required' };
         }
 
         if (reviewData.rating < 1 || reviewData.rating > 5) {
+            console.error('Invalid rating value:', reviewData.rating);
             return { success: false, error: 'Rating must be between 1 and 5' };
         }
 
         try {
             // Generate a unique ID for the review
             const reviewId = db.collection('temp').doc().id;
+            console.log('Generated review ID:', reviewId);
             
             const reviewToSave = {
                 id: reviewId,
-                productId: reviewData.productId,
+                productId: reviewData.productId.trim(),
                 productName: reviewData.productName || '',
                 orderId: reviewData.orderId || '',
                 userId: user.uid,
@@ -69,8 +87,14 @@ window.FirebaseReviewsManager = (function() {
                 updatedAt: firebase.firestore.Timestamp.now()
             };
 
+            console.log('Review object to save:', reviewToSave);
+            console.log('Target product ID:', reviewData.productId);
+            console.log('Product ID type:', typeof reviewData.productId);
+            console.log('Product ID trimmed length:', reviewData.productId.trim().length);
+
             // First, ensure the product document exists or create a placeholder
-            const productRef = db.collection('products').doc(reviewData.productId);
+            const productRef = db.collection('products').doc(reviewData.productId.trim());
+            console.log('Product reference path:', productRef.path);
             
             try {
                 const productDoc = await productRef.get();
@@ -99,7 +123,18 @@ window.FirebaseReviewsManager = (function() {
             return { success: true, reviewId: reviewId, review: reviewToSave };
         } catch (error) {
             console.error('Error saving review:', error);
-            return { success: false, error: error.message };
+            console.error('Error name:', error.name);
+            console.error('Error code:', error.code);
+            console.error('Error message:', error.message);
+            console.error('Error stack:', error.stack);
+            console.error('Review data that failed:', reviewData);
+            
+            return { 
+                success: false, 
+                error: error.message,
+                errorCode: error.code,
+                errorName: error.name
+            };
         }
     }
 

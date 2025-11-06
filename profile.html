@@ -2239,38 +2239,67 @@
       function openReviewModal(orderId, orderRef) {
         currentReviewOrderId = orderId;
 
-        // Find the order to get products
+        // Find the order to get products - MUST get actual order data
         const orderCard = document.querySelector(`[data-order-id="${orderId}"]`);
         if (!orderCard) {
           console.error("Order card not found for ID:", orderId);
+          showNotification('Could not find order details. Please refresh the page.', 'error');
           return;
         }
-        const productElements = orderCard.querySelectorAll('.order-item');
 
-        currentReviewProducts = Array.from(productElements).map(el => {
-          const nameEl = el.querySelector('.order-item-details h4');
-          const imgEl = el.querySelector('.order-item-image');
-          // Ensure product ID is correctly extracted
-          const productId = imgEl ? imgEl.dataset.productId : '';
-          return {
-            name: nameEl ? nameEl.textContent : 'Product',
-            image: imgEl ? imgEl.src : '',
-            id: productId // Use the extracted product ID
-          };
-        });
+        // Get the actual order data from Firebase to ensure we have product IDs
+        firebase.firestore()
+          .collection('users')
+          .doc(firebase.auth().currentUser.uid)
+          .collection('orders')
+          .doc(orderId)
+          .get()
+          .then(orderDoc => {
+            if (!orderDoc.exists) {
+              console.error("Order document not found in Firestore:", orderId);
+              showNotification('Could not load order details. Please try again.', 'error');
+              return;
+            }
 
-        // Filter out products that might have already been reviewed for this order
-        // This requires knowing which products have been reviewed. For now, we assume
-        // the backend/Firestore will handle preventing duplicate reviews or we show all.
+            const orderData = orderDoc.data();
+            const items = orderData.products || orderData.items || [];
 
-        if (currentReviewProducts.length === 1) {
-          // Single product - show review form directly
-          showReviewForm(currentReviewProducts[0]);
-        } else {
-          // Multiple products - show product selector
-          showProductSelector();
+            if (items.length === 0) {
+              console.error("No products found in order:", orderId);
+              showNotification('No products found in this order.', 'error');
+              return;
+            }
+
+            // Map products with their actual IDs from Firestore
+            currentReviewProducts = items.map(item => ({
+              name: item.name || 'Product',
+              image: item.image || '/images/product-placeholder.jpg',
+              id: item.productId || item.id || '' // Get ID from order data
+            }));
+
+            console.log('Products loaded for review:', currentReviewProducts);
+
+            // Validate that all products have IDs
+            const missingIds = currentReviewProducts.filter(p => !p.id);
+            if (missingIds.length > 0) {
+              console.error('Some products missing IDs:', missingIds);
+              showNotification('Some products are missing required data. Please contact support.', 'error');
+              return;
+            }
+
+            // Continue with modal display
+            if (currentReviewProducts.length === 1) {
+              showReviewForm(currentReviewProducts[0]);
+            } else {
+              showProductSelector();
+            }
+          })
+          .catch(error => {
+            console.error('Error loading order for review:', error);
+            showNotification('Failed to load order details: ' + error.message, 'error');
+          });
+
         }
-      }
 
       function showProductSelector() {
         const modal = document.getElementById('review-modal');
@@ -2399,6 +2428,24 @@
           const comment = document.getElementById('review-comment').value;
           const orderId = document.getElementById('review-order-id').value;
 
+          // Validate product ID first
+          if (!productId || productId.trim() === '') {
+            console.error('Product ID is missing:', { productId, productName, orderId });
+            showNotification('Product information is missing. Please close and try again.', 'error');
+            submitBtn.disabled = false;
+            submitText.textContent = 'Submit Review';
+            return;
+          }
+
+          // Validate order ID
+          if (!orderId || orderId.trim() === '') {
+            console.error('Order ID is missing');
+            showNotification('Order information is missing. Please refresh the page.', 'error');
+            submitBtn.disabled = false;
+            submitText.textContent = 'Submit Review';
+            return;
+          }
+
           if (!rating) {
             showNotification('Please select a rating', 'error');
             submitBtn.disabled = false;
@@ -2415,13 +2462,17 @@
           }
 
           const reviewData = {
-            productId: productId,
-            productName: productName,
-            orderId: orderId,
-            rating: rating,
-            comment: comment,
+            productId: productId.trim(),
+            productName: productName.trim(),
+            orderId: orderId.trim(),
+            rating: parseInt(rating),
+            comment: comment.trim(),
             images: [] // Image upload can be added later if needed
           };
+
+          console.log('Submitting review with data:', reviewData);
+          console.log('Product ID length:', reviewData.productId.length);
+          console.log('Product ID value:', JSON.stringify(reviewData.productId));
 
           const result = await FirebaseReviewsManager.submitReview(reviewData);
 
