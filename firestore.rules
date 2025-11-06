@@ -1,8 +1,4 @@
 
-
-
-
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -20,6 +16,16 @@ service cloud.firestore {
       match /addresses/{addressId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
+      
+      // User's cart subcollection
+      match /carts/{cartId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // User's wishlist subcollection
+      match /wishlist/{wishlistId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
     
     // Products collection - everyone can read, authenticated users can write for reviews
@@ -35,7 +41,13 @@ service cloud.firestore {
       }
     }
     
-    // Admin collections - allow all for debugging (restrict in production)
+    // Categories collection - public read, admin write
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if true; // For admin panel
+    }
+    
+    // Admin collections - allow all for admin dashboard
     match /admin/{document=**} {
       allow read, write: if true;
     }
