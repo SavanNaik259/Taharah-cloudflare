@@ -1199,6 +1199,7 @@
                 
                 for (const userDoc of usersSnapshot.docs) {
                     const ordersSnapshot = await userDoc.ref.collection('orders').get();
+                    const userData = userDoc.data();
                     
                     ordersSnapshot.forEach(orderDoc => {
                         const orderData = orderDoc.data();
@@ -1206,7 +1207,9 @@
                             id: orderDoc.id,
                             userId: userDoc.id,
                             ...orderData,
-                            customerName: userDoc.data().displayName || userDoc.data().email || 'Guest'
+                            customerName: orderData.customer?.name || userData.displayName || userData.email || 'Guest',
+                            email: orderData.customer?.email || userData.email || 'N/A',
+                            phone: orderData.customer?.phone || userData.phone || 'N/A'
                         });
                     });
                 }
@@ -1328,31 +1331,51 @@
                             </tr>
                         </thead>
                         <tbody>
-                            ${orders.map(order => `
-                                <tr>
-                                    <td>#${order.id}</td>
-                                    <td>${order.customerName || 'Guest'}</td>
-                                    <td>${order.phone || order.email || 'N/A'}</td>
-                                    <td>${formatDate(order.createdAt)}</td>
-                                    <td>${order.items?.length || 0} items</td>
-                                    <td>₹${order.totalAmount?.toLocaleString() || '0'}</td>
-                                    <td>
-                                        <span class="status-badge ${getStatusClass(order.status)}">
-                                            ${order.status || 'pending'}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-secondary btn-sm" onclick="viewOrderDetails('${order.id}')">
-                                            <i class="fas fa-eye"></i>
-                                            View
-                                        </button>
-                                        <button class="btn btn-success btn-sm" onclick="updateOrderStatus('${order.id}', 'confirmed')">
-                                            <i class="fas fa-check"></i>
-                                            Confirm
-                                        </button>
-                                    </td>
-                                </tr>
-                            `).join('')}
+                            ${orders.map(order => {
+                                const currentStatus = order.deliveryStatus || 'pending';
+                                const isPending = currentStatus === 'pending';
+                                const isConfirmed = currentStatus === 'confirmed';
+                                const isDelivered = currentStatus === 'delivered';
+                                
+                                return `
+                                    <tr>
+                                        <td>#${order.id}</td>
+                                        <td>${order.customerName || 'Guest'}</td>
+                                        <td>${order.phone || order.email || 'N/A'}</td>
+                                        <td>${formatDate(order.createdAt)}</td>
+                                        <td>${order.items?.length || order.products?.length || 0} items</td>
+                                        <td>₹${order.totalAmount?.toLocaleString() || order.orderTotal?.toLocaleString() || '0'}</td>
+                                        <td>
+                                            <span class="status-badge ${getStatusClass(currentStatus)}">
+                                                ${currentStatus}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-secondary btn-sm" onclick="viewOrderDetails('${order.id}')">
+                                                <i class="fas fa-eye"></i>
+                                                View
+                                            </button>
+                                            ${isPending ? `
+                                                <button class="btn btn-success btn-sm" onclick="updateOrderStatus('${order.id}', '${order.userId}', 'confirmed')">
+                                                    <i class="fas fa-check"></i>
+                                                    Confirm
+                                                </button>
+                                            ` : ''}
+                                            ${isConfirmed ? `
+                                                <button class="btn btn-primary btn-sm" onclick="updateOrderStatus('${order.id}', '${order.userId}', 'delivered')">
+                                                    <i class="fas fa-truck"></i>
+                                                    Mark Delivered
+                                                </button>
+                                            ` : ''}
+                                            ${isDelivered ? `
+                                                <span class="status-badge status-success" style="padding: 6px 12px;">
+                                                    <i class="fas fa-check-circle"></i> Delivered
+                                                </span>
+                                            ` : ''}
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
                         </tbody>
                     </table>
                 </div>
@@ -1382,18 +1405,34 @@
             });
         }
 
-        async function updateOrderStatus(orderId, newStatus) {
+        async function updateOrderStatus(orderId, userId, newStatus) {
             try {
-                // Here you would update the order status in Firestore
-                console.log(`Updating order ${orderId} status to ${newStatus}`);
+                console.log(`Updating order ${orderId} status to ${newStatus} for user ${userId}`);
                 
-                // For now, just reload the orders
+                if (!userId) {
+                    alert('Error: User ID is missing. Cannot update order status.');
+                    return;
+                }
+                
+                // Update the order's deliveryStatus in Firestore
+                await db.collection('users')
+                    .doc(userId)
+                    .collection('orders')
+                    .doc(orderId)
+                    .update({
+                        deliveryStatus: newStatus,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                
+                console.log(`✅ Order ${orderId} status updated to ${newStatus}`);
+                
+                // Reload the orders to reflect changes
                 await loadOrdersData();
                 
                 alert(`Order ${orderId} status updated to ${newStatus}`);
             } catch (error) {
                 console.error('Error updating order status:', error);
-                alert('Error updating order status');
+                alert('Error updating order status: ' + error.message);
             }
         }
 
