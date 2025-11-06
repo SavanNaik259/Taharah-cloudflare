@@ -1866,7 +1866,7 @@
                 min-height: 180px !important;
             }
 
-            /* Table responsive */
+            /* Responsive table */
             .analytics-section .table-container {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
@@ -2025,7 +2025,7 @@
                 font-size: 9px !important;
             }
 
-            /* Geographic breakdown table */
+            /* Geographic section */
             .analytics-section select {
                 width: 100% !important;
                 margin-bottom: 8px !important;
@@ -5251,8 +5251,8 @@
                                 ` : order.status === 'confirmed' ? `
                                         ${order.deliveryStatus === 'delivered'
                                             ? '<span class="btn btn-sm" style="background: #d1fae5; color: #065f46; cursor: default;"><i class="fas fa-check-circle"></i> Delivered</span>'
-                                            : `<button class="btn btn-success btn-sm" onclick="markAsDelivered('${order.orderId}', '${order.userId}')">
-                                                <i class="fas fa-truck"></i> Mark Delivered
+                                            : `<button class="btn btn-primary btn-sm" onclick="markAsDelivered('${order.orderId}', '${order.userId}')">
+                                                <i class="fas fa-truck"></i> Mark as Delivered
                                               </button>`
                                         }
                                     ` : '<span class="btn btn-sm" style="background: #fee2e2; color: #991b1b; cursor: default;">Cancelled</span>'
@@ -7880,10 +7880,22 @@
                         datasets: [{
                             data: sampleTrafficData,
                             backgroundColor: [
-                                '#3b82f6', '#10b981', '#f59e0b', '#ef4444',
-                                '#8b5cf6', '#06b6d4', '#84cc16', '#f97316',
-                                '#ec4899', '#06b6d4', '#84cc16', '#f59e0b',
-                                '#3b82f6', '#ef4444', '#8b5cf6', '#f97316'
+                                '#3b82f6',
+                                '#10b981',
+                                '#f59e0b',
+                                '#ef4444',
+                                '#8b5cf6',
+                                '#06b6d4',
+                                '#84cc16',
+                                '#f97316',
+                                '#ec4899',
+                                '#06b6d4',
+                                '#84cc16',
+                                '#f59e0b',
+                                '#3b82f6',
+                                '#ef4444',
+                                '#8b5cf6',
+                                '#f97316'
                             ]
                         }]
                     },
@@ -8287,8 +8299,7 @@
                         const browser = visit.browser || 'Other';
 
                         deviceData[device] = (deviceData[device] || 0) + 1;
-                        browserData[browser] = (browserData[browser] || 0) + 1;
-                    });
+                        browserData[browser] = (browserData[browser] || 0) + 1;                    });
 
                     // Update device chart
                     deviceChart.data.datasets[0].data = [
