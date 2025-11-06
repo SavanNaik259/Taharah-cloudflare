@@ -3031,15 +3031,15 @@
     </div>
 
     <script>
-        // Initialize Firebase - using new app1-c89d6 config
+        // Firebase configuration - Auric project
         const firebaseConfig = {
-            apiKey: "AIzaSyAZw6AnBlQUJuF74pcP-VoliQtG6jLRIaI",
-            authDomain: "nazakat-ae992.firebaseapp.com",
-            projectId: "nazakat-ae992",
-            storageBucket: "nazakat-ae992.firebasestorage.app",
-            messagingSenderId: "313125797080",
-            appId: "1:313125797080:web:c84bc281bbbabae0816bad",
-            measurementId: "G-Y4QK5DGNK6"
+            apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
+            authDomain: "auric-a0c92.firebaseapp.com",
+            projectId: "auric-a0c92",
+            storageBucket: "auric-a0c92.firebasestorage.app",
+            messagingSenderId: "878979958342",
+            appId: "1:878979958342:web:e6092f7522488d21eaec47",
+            measurementId: "G-ZYZ750JHMB"
         };
 
         firebase.initializeApp(firebaseConfig);
@@ -4287,8 +4287,7 @@
                     paymentMethod: orderData.paymentMethod,
                     orderDate: (orderData.timestamp?.toDate() || new Date()).toISOString(),
                     products: orderData.products || orderData.items || [],
-                    notes: orderData.notes || orderData.specialInstructions || '',
-                    status: 'confirmed' // Ensure status is passed
+                    notes: orderData.notes || orderData.specialInstructions || ''
                 };
                 await addOrderStatusNotification(orderId, 'confirmed', orderDetailsForNotification);
 
@@ -5250,7 +5249,7 @@
                                         <i class="fas fa-times"></i> Cancel
                                     </button>
                                 ` : order.status === 'confirmed' ? `
-                                        ${order.deliveryStatus === 'delivered' 
+                                        ${order.deliveryStatus === 'delivered'
                                             ? '<span class="btn btn-sm" style="background: #d1fae5; color: #065f46; cursor: default;"><i class="fas fa-check-circle"></i> Delivered</span>'
                                             : `<button class="btn btn-success btn-sm" onclick="markAsDelivered('${order.orderId}', '${order.userId}')">
                                                 <i class="fas fa-truck"></i> Mark Delivered
@@ -6022,7 +6021,7 @@
 
                 // Force immediate update of display and badges
                 updateNotificationDisplay();
-                updateNotificationBadges();
+                updateNotificationBadges(); // Ensure badges are updated
                 console.log(`✅ Notification ${notificationId} marked as read, badge should update`);
             } else if (notification && notification.read) {
                 console.log(`Notification ${notificationId} is already marked as read`);
@@ -6556,7 +6555,7 @@
                         customerPhone: orderDetails.customerPhone,
                         customerAddress: orderDetails.customerAddress,
                         amount: orderDetails.amount,
-                        paymentMethod: orderData.paymentMethod,
+                        paymentMethod: orderDetails.paymentMethod,
                         orderDate: typeof orderDetails.orderDate === 'string' ? orderDetails.orderDate : new Date().toISOString(),
                         status: newStatus,
                         products: orderDetails.products,
@@ -8303,8 +8302,9 @@
                     document.getElementById('device-browser-loading').style.display = 'none';
                     document.getElementById('device-browser-content').style.display = 'block';
                 })
-                .catch(error                console.error('Error loading device/browser data:', error);
-            });
+                .catch(error => {
+                    console.error('Error loading device/browser data:', error);
+                });
         }
 
         // Update Browser Stats
@@ -8713,7 +8713,7 @@
             }
 
             if (total_visitors === 0) {
-                const unknownText = unknown_visitors > 0 ? 
+                const unknownText = unknown_visitors > 0 ?
                     `<p style="margin: 8px 0 0 0; font-size: 14px; color: #6b7280;">
                         ${unknown_visitors} visitor${unknown_visitors !== 1 ? 's' : ''} with unknown location${unknown_visitors !== 1 ? 's' : ''}
                     </p>` : '';
@@ -9061,32 +9061,32 @@
                                 </tr>
                             `;
                         });
+                    }
 
-                        // Add unknown visitors if any
-                        if (unknown_visitors > 0) {
-                            const unknownPercentage = total_visitors > 0 ? Math.round((unknown_visitors / (total_visitors + unknown_visitors)) * 100) : 0;
-                            tableRows += `
-                                <tr style="border-bottom: 1px solid #f1f5f9; opacity: 0.7;">
-                                    <td style="padding: 12px 16px;">
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                            <span style="font-size: 18px;">🌐</span>
-                                            <span style="font-weight: 600; color: #6b7280;">Unknown Location</span>
+                    // Add unknown visitors if any
+                    if (unknown_visitors > 0) {
+                        const unknownPercentage = total_visitors > 0 ? Math.round((unknown_visitors / (total_visitors + unknown_visitors)) * 100) : 0;
+                        tableRows += `
+                            <tr style="border-bottom: 1px solid #f1f5f9; opacity: 0.7;">
+                                <td style="padding: 12px 16px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-size: 18px;">🌐</span>
+                                        <span style="font-weight: 600; color: #6b7280;">Unknown Location</span>
+                                    </div>
+                                </td>
+                                <td style="padding: 12px 16px; color: #6b7280;">${unknown_visitors}</td>
+                                <td style="padding: 12px 16px; color: #6b7280;">~${unknown_visitors * 2}</td>
+                                <td style="padding: 12px 16px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="width: 100px; height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden;">
+                                            <div style="width: ${unknownPercentage}%; height: 100%; background: linear-gradient(90deg, #6b7280, #4b5563); border-radius: 4px;"></div>
                                         </div>
-                                    </td>
-                                    <td style="padding: 12px 16px; color: #6b7280;">${unknown_visitors}</td>
-                                    <td style="padding: 12px 16px; color: #6b7280;">~${unknown_visitors * 2}</td>
-                                    <td style="padding: 12px 16px;">
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                            <div style="width: 100px; height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden;">
-                                                <div style="width: ${unknownPercentage}%; height: 100%; background: linear-gradient(90deg, #6b7280, #4b5563); border-radius: 4px;"></div>
-                                            </div>
-                                            <span style="font-weight: 600; color: #6b7280;">${unknownPercentage}%</span>
-                                        </div>
-                                    </td>
-                                    <td style="padding: 12px 16px; color: #6b7280;">Geographic</td>
-                                </tr>
-                            `;
-                        }
+                                        <span style="font-weight: 600; color: #6b7280;">${unknownPercentage}%</span>
+                                    </div>
+                                </td>
+                                <td style="padding: 12px 16px; color: #6b7280;">Geographic</td>
+                            </tr>
+                        `;
                     }
                     break;
             }

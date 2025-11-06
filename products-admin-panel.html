@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nazakat Admin Panel - Product Management</title>
+    <title>Auric Professional Admin Panel</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * {
@@ -502,22 +502,22 @@
             .compression-settings {
                 padding: 15px;
             }
-            
+
             .compression-settings h3 {
                 padding-right: 0;
                 margin-bottom: 15px;
             }
-            
+
             .compression-toggle {
                 position: static;
                 margin-bottom: 15px;
                 justify-content: flex-start;
             }
-            
+
             .compression-options {
                 gap: 12px;
             }
-            
+
             .compression-option {
                 padding: 8px;
             }
@@ -691,7 +691,7 @@
 <body>
     <div class="admin-container">
         <div class="admin-header">
-            <h1>Nazakat Admin Panel</h1>
+            <h1>Auric Admin Panel</h1>
             <p>Product Management System</p>
         </div>
 
@@ -734,19 +734,19 @@
                             <i class="fas fa-compress-alt"></i>
                             Image Compression Settings
                         </h3>
-                        
+
                         <div class="compression-toggle">
                             <input type="checkbox" id="enableCompression" checked>
                             <label for="enableCompression">Enable Compression</label>
                         </div>
-                        
+
                         <div class="compression-options" id="compressionOptions">
                             <div class="compression-option">
                                 <label for="compressionQuality">Quality: <span id="qualityValue">0.15</span> (<span id="qualityPercent">15%</span>)</label>
                                 <input type="range" id="compressionQuality" min="0.1" max="0.95" step="0.05" value="0.15">
                                 <small>0.1 = Smallest files, 0.95 = Best quality</small>
                             </div>
-                            
+
                             <div class="compression-option">
                                 <label for="outputFormat">Output Format</label>
                                 <select id="outputFormat">
@@ -757,7 +757,7 @@
                                 <small>Choose based on your needs</small>
                             </div>
                         </div>
-                        
+
                         <div class="compression-info">
                             <i class="fas fa-info-circle"></i>
                             Compression reduces file sizes for faster uploads and better website performance. Original images are processed in your browser - no data leaves your device during compression.
@@ -772,7 +772,7 @@
                         <h3>Drag and Drop Images Here</h3>
                         <p>or <strong>click to browse</strong> • Upload multiple images • Compression settings applied automatically</p>
                         <input type="file" id="multiImageInput" multiple accept="image/*" style="display: none;" required>
-                        
+
                         <div class="compression-progress" id="compressionProgress">
                             <div class="compression-progress-bar" id="compressionProgressBar"></div>
                         </div>
@@ -819,21 +819,21 @@
                 <h2 style="margin: 0 0 10px 0; color: #1e293b; font-size: 24px;">Product Admin Access</h2>
                 <p style="margin: 0; color: #64748b;">Enter the 4-digit verification code to access product management</p>
             </div>
-            
+
             <div style="margin-bottom: 25px;">
-                <input type="password" id="verificationCode" placeholder="Enter 4-digit code" maxlength="4" 
-                       style="width: 200px; padding: 15px; border: 2px solid #e2e8f0; border-radius: 8px; text-align: center; font-size: 18px; font-weight: bold; letter-spacing: 3px;" 
+                <input type="password" id="verificationCode" placeholder="Enter 4-digit code" maxlength="4"
+                       style="width: 200px; padding: 15px; border: 2px solid #e2e8f0; border-radius: 8px; text-align: center; font-size: 18px; font-weight: bold; letter-spacing: 3px;"
                        oninput="handleCodeInput(this)" onkeydown="handleCodeKeydown(event)">
             </div>
-            
+
             <div id="verificationError" style="color: #dc2626; margin-bottom: 20px; font-size: 14px; display: none;">
                 <i class="fas fa-exclamation-triangle"></i> Incorrect verification code. Please try again.
             </div>
-            
+
             <button onclick="verifyCode()" style="background: #2563eb; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
                 <i class="fas fa-unlock"></i> Verify Access
             </button>
-            
+
             <div style="margin-top: 20px; font-size: 12px; color: #94a3b8;">
                 Authorized personnel only
             </div>
@@ -851,30 +851,30 @@
             const fromAdminPanel = sessionStorage.getItem('fromAdminPanel');
             const adminVerified = sessionStorage.getItem('adminVerified');
             const adminVerifyTime = sessionStorage.getItem('adminVerifyTime');
-            
+
             if (fromAdminPanel === 'true' && adminVerified === 'true' && adminVerifyTime) {
                 const verifyTime = parseInt(adminVerifyTime);
                 const now = Date.now();
-                
+
                 // Check if verification is still valid (within 1 hour)
                 if (now - verifyTime < 60 * 60 * 1000) {
                     console.log('✅ Bypassing verification - user came from verified admin panel');
-                    
+
                     // Clear session flags
                     sessionStorage.removeItem('fromAdminPanel');
                     sessionStorage.removeItem('adminVerified');
                     sessionStorage.removeItem('adminVerifyTime');
-                    
+
                     // Save to localStorage for this panel
                     localStorage.setItem(SESSION_KEY, JSON.stringify({
                         timestamp: Date.now(),
                         verified: true
                     }));
-                    
+
                     return true;
                 }
             }
-            
+
             return false;
         }
 
@@ -885,7 +885,7 @@
                 document.getElementById('verificationModal').style.display = 'none';
                 return true;
             }
-            
+
             // Check localStorage session
             const session = localStorage.getItem(SESSION_KEY);
             if (session) {
@@ -907,17 +907,17 @@
         function verifyCode() {
             const enteredCode = document.getElementById('verificationCode').value;
             const errorDiv = document.getElementById('verificationError');
-            
+
             if (enteredCode === ADMIN_CODE) {
                 // Save session
                 localStorage.setItem(SESSION_KEY, JSON.stringify({
                     timestamp: Date.now(),
                     verified: true
                 }));
-                
+
                 // Hide modal
                 document.getElementById('verificationModal').style.display = 'none';
-                
+
                 // Show success message briefly
                 showSuccessMessage();
             } else {
@@ -926,7 +926,7 @@
                 document.getElementById('verificationCode').value = '';
                 document.getElementById('verificationCode').style.borderColor = '#dc2626';
                 document.getElementById('verificationCode').focus();
-                
+
                 // Reset border color after 2 seconds
                 setTimeout(() => {
                     document.getElementById('verificationCode').style.borderColor = '#e2e8f0';
@@ -938,7 +938,7 @@
         // Handle code input (auto-format and limit to 4 digits)
         function handleCodeInput(input) {
             input.value = input.value.replace(/[^0-9]/g, '').substring(0, 4);
-            
+
             // Auto-verify when 4 digits are entered
             if (input.value.length === 4) {
                 setTimeout(() => verifyCode(), 200);
@@ -963,7 +963,7 @@
             `;
             successDiv.innerHTML = '<i class="fas fa-check-circle"></i> Product admin access granted!';
             document.body.appendChild(successDiv);
-            
+
             setTimeout(() => {
                 successDiv.remove();
             }, 3000);
@@ -1074,7 +1074,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             const category = urlParams.get('category');
             const editProductId = urlParams.get('edit');
-            
+
             if (category) {
                 console.log('Pre-selecting category from URL:', category);
                 const categorySelect = document.getElementById('productCategory');
@@ -1083,7 +1083,7 @@
                     console.log('Category pre-selected:', category);
                 }
             }
-            
+
             if (editProductId) {
                 console.log('Edit mode detected for product:', editProductId);
                 // Handle edit mode if needed
@@ -1093,14 +1093,14 @@
         // Show compression summary after processing multiple images
         function showCompressionSummary(images) {
             const compressedImages = images.filter(img => img.isCompressed);
-            
+
             if (compressedImages.length === 0) return;
-            
+
             const totalOriginalSize = compressedImages.reduce((sum, img) => sum + img.originalSize, 0);
             const totalCompressedSize = compressedImages.reduce((sum, img) => sum + img.compressedSize, 0);
             const totalSavings = totalOriginalSize - totalCompressedSize;
             const averageSavings = (totalSavings / totalOriginalSize * 100).toFixed(1);
-            
+
             // Create summary notification
             const summaryDiv = document.createElement('div');
             summaryDiv.style.cssText = `
@@ -1111,7 +1111,7 @@
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                 max-width: 320px; animation: slideIn 0.3s ease-out;
             `;
-            
+
             summaryDiv.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
                     <i class="fas fa-compress-alt" style="font-size: 20px;"></i>
@@ -1125,14 +1125,14 @@
                         ${formatFileSize(totalOriginalSize)} → ${formatFileSize(totalCompressedSize)}
                     </div>
                 </div>
-                <button onclick="this.parentElement.remove()" 
-                        style="position: absolute; top: 8px; right: 8px; background: none; 
-                               border: none; color: white; font-size: 18px; cursor: pointer; 
-                               width: 24px; height: 24px; border-radius: 50%; 
+                <button onclick="this.parentElement.remove()"
+                        style="position: absolute; top: 8px; right: 8px; background: none;
+                               border: none; color: white; font-size: 18px; cursor: pointer;
+                               width: 24px; height: 24px; border-radius: 50%;
                                display: flex; align-items: center; justify-content: center;"
                         title="Close">×</button>
             `;
-            
+
             // Add slide-in animation
             const style = document.createElement('style');
             style.textContent = `
@@ -1142,9 +1142,9 @@
                 }
             `;
             document.head.appendChild(style);
-            
+
             document.body.appendChild(summaryDiv);
-            
+
             // Auto-remove after 8 seconds
             setTimeout(() => {
                 if (summaryDiv.parentElement) {
@@ -1160,10 +1160,10 @@
         document.addEventListener('DOMContentLoaded', async function() {
             // Handle URL parameters first
             handleURLParameters();
-            
+
             // Initialize compression settings
             initializeCompressionSettings();
-            
+
             // Check network connectivity first
             if (!navigator.onLine) {
                 showError('No internet connection. Please check your network and try again.');
@@ -1198,15 +1198,15 @@
         // Initialize compression settings on page load
         function initializeCompressionSettings() {
             console.log('⚙️ Initializing image compression system...');
-            
+
             // Set default values and initialize UI state
             const enableCompression = document.getElementById('enableCompression');
             const compressionOptions = document.getElementById('compressionOptions');
-            
+
             if (enableCompression.checked) {
                 compressionOptions.classList.remove('compression-disabled');
             }
-            
+
             console.log('✅ Image compression system ready');
             console.log('Compression settings:', {
                 enabled: enableCompression.checked,
@@ -1288,12 +1288,12 @@
                             }));
                             mainImageIndex = product.images.findIndex(img => img.isMain);
                             if (mainImageIndex === -1) mainImageIndex = 0;
-                            
+
                             // Cache the image URLs for display
                             selectedImages.forEach(img => {
                                 imageCache.set(img, img.url);
                             });
-                            
+
                             updateContainerState();
                             displayImageGrid();
                         } else if (product.mainImage) {
@@ -1308,7 +1308,7 @@
                             };
                             selectedImages = [imageObj];
                             mainImageIndex = 0;
-                            
+
                             // Cache the image URL
                             imageCache.set(imageObj, product.mainImage);
                             updateContainerState();
@@ -1336,9 +1336,9 @@
                 editProductId = null;
                 editCategory = null;
                 originalProductData = null;
-                
+
                 // Reset UI
-                document.querySelector('.admin-header h1').innerHTML = 'Nazakat Admin Panel';
+                document.querySelector('.admin-header h1').innerHTML = 'Auric Admin Panel';
                 document.querySelector('.admin-header p').textContent = 'Product Management System';
                 document.getElementById('submitBtn').innerHTML = '<i class="fas fa-plus"></i> Add Product';
             }
@@ -1444,7 +1444,7 @@
                         // Create canvas
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
-                        
+
                         // Set canvas dimensions to original size
                         canvas.width = width;
                         canvas.height = height;
@@ -1457,9 +1457,9 @@
                         ctx.drawImage(img, 0, 0, width, height);
 
                         // Convert to blob with compression
-                        const mimeType = format === 'png' ? 'image/png' : 
+                        const mimeType = format === 'png' ? 'image/png' :
                                        format === 'webp' ? 'image/webp' : 'image/jpeg';
-                        
+
                         canvas.toBlob((blob) => {
                             if (!blob) {
                                 reject(new Error('Canvas compression failed'));
@@ -1519,7 +1519,7 @@
             const progress = (current / total) * 100;
             compressionProgress.style.display = 'block';
             compressionProgressBar.style.width = progress + '%';
-            
+
             // Update container message
             const container = document.querySelector('#multiImageContainer h3');
             if (container) {
@@ -1551,7 +1551,7 @@
         function hideCompressionProgress() {
             compressionProgress.style.display = 'none';
             compressionProgressBar.style.width = '0%';
-            
+
             // Update container state
             updateContainerState();
         }
@@ -1567,10 +1567,10 @@
             console.log(`Processing ${imageFiles.length} new images...`);
 
             let processedImages = [];
-            
+
             // Check if compression is enabled
             const compressionEnabled = document.getElementById('enableCompression').checked;
-            
+
             if (compressionEnabled) {
                 try {
                     // Get compression settings
@@ -1580,7 +1580,7 @@
                     };
 
                     console.log('Compression enabled with settings:', compressionSettings);
-                    
+
                     // Show progress
                     showCompressionProgress(0, imageFiles.length);
 
@@ -1588,11 +1588,11 @@
                     for (let i = 0; i < imageFiles.length; i++) {
                         const file = imageFiles[i];
                         console.log(`Compressing image ${i + 1}/${imageFiles.length}: ${file.name}`);
-                        
+
                         try {
                             const compressedFile = await compressImage(file, compressionSettings);
                             processedImages.push(compressedFile);
-                            
+
                             // Log compression results
                             console.log(`✅ Compressed ${file.name}:`, {
                                 original: formatFileSize(compressedFile.originalSize),
@@ -1600,7 +1600,7 @@
                                 savings: compressedFile.compressionRatio + '%',
                                 dimensions: `${compressedFile.originalDimensions.width}x${compressedFile.originalDimensions.height} → ${compressedFile.newDimensions.width}x${compressedFile.newDimensions.height}`
                             });
-                            
+
                             showCompressionProgress(i + 1, imageFiles.length);
                         } catch (error) {
                             console.warn(`Compression failed for ${file.name}, using original:`, error);
@@ -1612,7 +1612,7 @@
 
                     hideCompressionProgress();
                     console.log(`✅ Image compression completed. ${processedImages.length} images processed.`);
-                    
+
                 } catch (error) {
                     console.error('Compression process failed:', error);
                     hideCompressionProgress();
@@ -1649,7 +1649,7 @@
             // Display grid after all images are cached
             Promise.all(loadPromises).then(() => {
                 displayImageGrid();
-                
+
                 // Show compression summary if any images were compressed
                 if (compressionEnabled) {
                     showCompressionSummary(processedImages);
@@ -1688,14 +1688,14 @@
                     // Handle existing image URLs (edit mode) - no FileReader needed
                     const imageUrl = file.existingUrl || file.url;
                     const fileName = file.name || file.alt || 'Existing Image';
-                    
+
                     // Cache the URL for consistency
                     imageCache.set(file, imageUrl);
-                    
+
                     const imageItem = createImageItem(imageUrl, index, fileName);
                     imageItem.style.order = index;
                     imageGrid.appendChild(imageItem);
-                    
+
                     console.log(`Position ${index + 1}: ${fileName} (existing URL) ${index === mainImageIndex ? '(MAIN)' : ''}`);
                 } else {
                     // Handle new file uploads that need FileReader
@@ -1753,24 +1753,24 @@
             // Check if this is a compressed image
             const imageFile = selectedImages[index];
             const isCompressed = imageFile && imageFile.isCompressed;
-            
+
             // Add compressed class if applicable
             if (isCompressed) {
                 div.classList.add('compressed');
             }
-            
+
             // Create compression info for display
             let compressionInfo = '';
             let compressionBadge = '';
-            
+
             if (isCompressed && imageFile.compressionRatio) {
                 compressionBadge = `<div class="compression-badge">-${imageFile.compressionRatio}%</div>`;
-                
+
                 const originalSize = formatFileSize(imageFile.originalSize);
                 const compressedSize = formatFileSize(imageFile.compressedSize);
                 const originalDim = imageFile.originalDimensions;
                 const newDim = imageFile.newDimensions;
-                
+
                 compressionInfo = `\n                    <div style="font-size: 10px; color: #059669; margin-top: 2px;">
                         ✅ ${originalSize} → ${compressedSize}<br>
                         ${originalDim.width}×${originalDim.height} (no resize)
@@ -2303,7 +2303,7 @@
                 // Handle edit mode vs create mode
                 if (isEditMode && editProductId && originalProductData) {
                     console.log('Updating existing product:', editProductId);
-                    
+
                     // For edit mode, only validate fields that are actually being changed
                     // Build updated product data with only changed values
                     const updatedProductData = {
@@ -2333,13 +2333,24 @@
                     if (selectedImages.length > 0) {
                         updatedProductData.images = await processSelectedImages();
                         updatedProductData.mainImage = updatedProductData.images.find(img => img.isMain)?.url || updatedProductData.images[0]?.url;
+                    } else {
+                        // If no images are selected in edit mode, retain existing images
+                        if (originalProductData.images) {
+                            updatedProductData.images = originalProductData.images;
+                            updatedProductData.mainImage = originalProductData.mainImage;
+                        } else {
+                            // Handle case where there were no images initially
+                            updatedProductData.images = [];
+                            updatedProductData.mainImage = null;
+                        }
                     }
+
 
                     await updateProductData(updatedProductData, editCategory);
                     showSuccess('Product updated successfully!');
                 } else {
                     console.log('Creating new product');
-                    
+
                     // For new product creation, validate all required fields
                     if (!productData.name || !productData.price || !productData.category) {
                         throw new Error('Please fill in all required fields');
@@ -2348,13 +2359,13 @@
                     if (selectedImages.length === 0) {
                         throw new Error('Please select at least one product image');
                     }
-                    
+
                     // Process images and create new product
                     productData.images = await processSelectedImages();
                     productData.mainImage = productData.images.find(img => img.isMain)?.url || productData.images[0]?.url;
                     productData.id = generateProductId(productData.category, productData.name, productData.price);
                     productData.createdAt = new Date().toISOString();
-                    
+
                     await saveProductData(productData, productData.category);
                     showSuccess('Product created successfully!');
                 }
@@ -2417,7 +2428,7 @@
             originalProductData = null;
 
             // Reset UI text
-            document.querySelector('.admin-header h1').innerHTML = 'Nazakat Admin Panel';
+            document.querySelector('.admin-header h1').innerHTML = 'Auric Admin Panel';
             document.querySelector('.admin-header p').textContent = 'Product Management System';
             document.getElementById('submitBtn').innerHTML = '<i class="fas fa-plus"></i> Add Product';
 
@@ -2439,11 +2450,11 @@
         async function processSelectedImages() {
             const imageUrls = [];
             let newImageCount = 0;
-            
+
             for (let i = 0; i < selectedImages.length; i++) {
                 const file = selectedImages[i];
                 let url;
-                
+
                 if (file.existingUrl || file.isExisting) {
                     // If it's an existing image during edit, use its URL directly
                     url = file.existingUrl || file.url;
@@ -2455,18 +2466,18 @@
                     const randomId = Math.random().toString(36).substring(2, 8);
                     const productId = editProductId || generateProductId(editCategory || document.getElementById('productCategory').value || 'temp', document.getElementById('productName').value || 'product', 0);
                     const fileName = `${productId}_${timestamp}_${i}_${randomId}.jpg`;
-                    
+
                     console.log(`Uploading new image ${newImageCount}: ${file.name || 'Unknown'}`);
                     url = await uploadSingleImage(file, fileName, newImageCount - 1, selectedImages.filter(img => !img.isExisting).length);
                 }
-                
+
                 imageUrls.push({
                     url: url,
                     isMain: i === mainImageIndex,
                     alt: `${document.getElementById('productName').value} - Image ${i + 1}`
                 });
             }
-            
+
             console.log(`Processed ${imageUrls.length} total images (${newImageCount} new uploads, ${imageUrls.length - newImageCount} existing)`);
             return imageUrls;
         }
