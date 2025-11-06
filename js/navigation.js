@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', function() {
      * Update account icon based on login status
      */
     function updateAccountIcon() {
-        const accountIconLink = document.getElementById('account-icon-link');
+        const accountIconLink = document.querySelector('#user-icon');
         if (!accountIconLink) return;
 
         // Check if user is logged in using the proper FirebaseAuth method
@@ -211,37 +211,44 @@ document.addEventListener('DOMContentLoaded', function() {
         if (window.FirebaseAuth && typeof window.FirebaseAuth.isLoggedIn === 'function') {
             // Use the proper authentication check that includes email verification
             isLoggedIn = window.FirebaseAuth.isLoggedIn();
-        } else if (window.Firebase && window.Firebase.auth && window.Firebase.auth().currentUser) {
+        } else if (window.firebase && window.firebase.auth && window.firebase.auth().currentUser) {
             // Fallback to basic Firebase auth check (but this doesn't check email verification)
-            const user = window.Firebase.auth().currentUser;
+            const user = window.firebase.auth().currentUser;
             // For now, assume logged in if user exists (the login function handles verification)
             isLoggedIn = !!user;
         }
 
         if (isLoggedIn) {
             // User is logged in and verified, show profile link
-            accountIconLink.href = '/profile';
-            accountIconLink.innerHTML = '<i class="fas fa-user-circle"></i>';
+            accountIconLink.href = 'profile.html';
+            accountIconLink.classList.add('logged-in');
         } else {
-            // User is not logged in or not verified, show sign-up link
-            accountIconLink.href = '/signup';
-            accountIconLink.innerHTML = '<i class="fas fa-sign-in-alt"></i>';
+            // User is not logged in or not verified, show login link
+            accountIconLink.href = 'login.html';
+            accountIconLink.classList.remove('logged-in');
         }
     }
 
 
-    // Check if user is logged in when page loads
-    // Wait for Firebase Auth to initialize
-    setTimeout(() => {
-        updateAccountIcon();
-    }, 500);
-
-    // Also listen for auth state changes
-    if (window.FirebaseAuth && FirebaseAuth.observeAuthState) {
-        FirebaseAuth.observeAuthState((user) => {
+    // Wait for Firebase to initialize before checking auth state
+    function initializeAuthStateCheck() {
+        if (window.firebase && window.firebase.auth) {
+            // Initial check
             updateAccountIcon();
-        });
+            
+            // Set up auth state observer
+            firebase.auth().onAuthStateChanged((user) => {
+                console.log('Auth state changed in navigation:', user ? 'logged in' : 'logged out');
+                updateAccountIcon();
+            });
+        } else {
+            // Retry after a short delay if Firebase isn't ready
+            setTimeout(initializeAuthStateCheck, 200);
+        }
     }
+    
+    // Start initialization check
+    initializeAuthStateCheck();
 
     /**
      * Setup search functionality
