@@ -1887,36 +1887,72 @@
 
       // Load reviews for an order
       async function loadOrderReviews(orderId, products) {
+        console.log('🔍 loadOrderReviews called for order:', orderId);
+        console.log('🔍 Products in order:', products);
+        
         const orderCard = document.querySelector(`[data-order-id="${orderId}"]`);
         if (!orderCard) {
-          console.log('Order card not found for:', orderId);
+          console.error('❌ Order card not found for:', orderId);
           return;
         }
 
+        console.log('✅ Order card found');
+
         // Check if reviews section already exists
         let reviewsContainer = orderCard.querySelector('.order-reviews-section');
-        if (!reviewsContainer) {
-          reviewsContainer = document.createElement('div');
-          reviewsContainer.className = 'order-reviews-section';
-          reviewsContainer.style.cssText = 'margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;';
+        if (reviewsContainer) {
+          console.log('⚠️ Reviews container already exists, removing it');
+          reviewsContainer.remove();
         }
+        
+        // Always create a fresh container
+        reviewsContainer = document.createElement('div');
+        reviewsContainer.className = 'order-reviews-section';
+        reviewsContainer.style.cssText = 'margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;';
 
         try {
-          console.log('Loading reviews for order:', orderId, 'with', products.length, 'products');
-          const allReviews = [];
           const user = firebase.auth().currentUser;
+          if (!user) {
+            console.error('❌ No user logged in');
+            return;
+          }
+
+          console.log('👤 Current user:', user.uid);
           
-          // Check each product for reviews by this user for this order
+          // Always show the Write Review button by default
+          reviewsContainer.innerHTML = `
+            <div class="order-actions" style="margin-top: 15px;">
+              <button class="review-order-btn shop-now-button" data-order-id="${orderId}" data-order-ref="${orderId}" style="background-color: #c8a97e; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background-color 0.3s;">Write a Review</button>
+            </div>
+          `;
+          
+          // Append to order card
+          orderCard.appendChild(reviewsContainer);
+          console.log('✅ Write Review button added to order card');
+
+          // Try to load existing reviews in the background
+          const allReviews = [];
+          
           for (const product of products) {
             const productId = product.productId || product.id;
-            if (!productId) continue;
+            if (!productId) {
+              console.warn('⚠️ Product missing ID:', product);
+              continue;
+            }
 
+            console.log('🔍 Checking reviews for product:', productId);
+            
             const result = await FirebaseReviewsManager.loadProductReviews(productId);
             if (result.success && result.reviews.length > 0) {
+              console.log('📝 Found', result.reviews.length, 'reviews for product:', productId);
+              
               // Filter reviews for this order and this user
               const orderReviews = result.reviews.filter(r => 
                 r.orderId === orderId && r.userId === user.uid
               );
+              
+              console.log('📝 Filtered to', orderReviews.length, 'reviews for this order and user');
+              
               allReviews.push(...orderReviews.map(r => ({ 
                 ...r, 
                 productName: product.name, 
@@ -1925,10 +1961,10 @@
             }
           }
 
-          console.log('Found', allReviews.length, 'reviews for order:', orderId);
+          console.log('📊 Total reviews found:', allReviews.length);
 
           if (allReviews.length > 0) {
-            // Display submitted reviews
+            // Replace the button with submitted reviews
             let reviewsHTML = '<div style="margin-bottom: 15px; font-weight: 600; color: #333;">Your Reviews:</div>';
             
             allReviews.forEach(review => {
@@ -1953,31 +1989,14 @@
             });
 
             reviewsContainer.innerHTML = reviewsHTML;
+            console.log('✅ Reviews displayed');
           } else {
-            // Show write review button for delivered orders with no reviews
-            console.log('No reviews found, showing write review button');
-            reviewsContainer.innerHTML = `
-              <div class="order-actions" style="margin-top: 15px;">
-                <button class="review-order-btn shop-now-button" data-order-id="${orderId}" data-order-ref="${orderId}">Write a Review</button>
-              </div>
-            `;
+            console.log('ℹ️ No existing reviews, Write Review button remains visible');
           }
 
-          // Append to order card if not already there
-          if (!orderCard.querySelector('.order-reviews-section')) {
-            orderCard.appendChild(reviewsContainer);
-          }
         } catch (error) {
-          console.error('Error loading order reviews:', error);
-          // Still show the write review button if there's an error
-          reviewsContainer.innerHTML = `
-            <div class="order-actions" style="margin-top: 15px;">
-              <button class="review-order-btn shop-now-button" data-order-id="${orderId}" data-order-ref="${orderId}">Write a Review</button>
-            </div>
-          `;
-          if (!orderCard.querySelector('.order-reviews-section')) {
-            orderCard.appendChild(reviewsContainer);
-          }
+          console.error('❌ Error in loadOrderReviews:', error);
+          // Button is already shown, so just log the error
         }
       }
 
