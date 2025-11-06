@@ -23,6 +23,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
 
     <!-- Unified Firebase Configuration -->
     <script src="js/firebase-config.js"></script>
@@ -1032,6 +1033,14 @@ background-color: #000 !important;
                         
                         const verifiedBadge = review.verified ? '<span class="verified-purchase">✓ Verified Purchase</span>' : '';
 
+                        const imagesHTML = review.images && review.images.length > 0 
+                            ? `<div class="review-images">
+                                ${review.images.map(imageUrl => `
+                                    <img src="${imageUrl}" alt="Review image" class="review-image" onclick="window.open('${imageUrl}', '_blank')">
+                                `).join('')}
+                               </div>`
+                            : '';
+
                         return `
                             <div class="review-item">
                                 <div class="review-header">
@@ -1043,6 +1052,7 @@ background-color: #000 !important;
                                 </div>
                                 <div class="review-rating">${stars}</div>
                                 <div class="review-comment">${review.comment}</div>
+                                ${imagesHTML}
                             </div>
                         `;
                     }).join('');
@@ -1157,6 +1167,29 @@ background-color: #000 !important;
             font-size: 15px;
             line-height: 1.6;
             color: #555;
+            margin-bottom: 15px;
+        }
+
+        .review-images {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .review-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #ddd;
+        }
+
+        .review-image:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .no-reviews-message,
