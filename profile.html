@@ -1224,8 +1224,14 @@
               year: 'numeric', month: 'long', day: 'numeric'
             });
 
-            // Determine delivery status
-            const deliveryStatus = order.deliveryStatus || 'pending';
+            // Determine delivery status - check both deliveryStatus and adminConfirmed
+            let deliveryStatus = order.deliveryStatus || 'pending';
+
+            // If order is adminConfirmed but deliveryStatus is still pending, show as confirmed
+            if (order.adminConfirmed && deliveryStatus === 'pending') {
+              deliveryStatus = 'confirmed';
+            }
+
             const statusInfo = getDeliveryStatusInfo(deliveryStatus);
 
             let orderHTML = `
