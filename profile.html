@@ -1240,7 +1240,7 @@
             const statusInfo = getDeliveryStatusInfo(deliveryStatus);
 
             let orderHTML = `
-              <div class="order-card">
+              <div class="order-card" data-order-id="${order.id}">
                 <div class="order-header">
                   <span class="order-id">Order #${order.orderId || order.orderReference || order.id}</span>
                   <span class="order-date">${formattedDate}</span>
@@ -1263,6 +1263,7 @@
                     <img src="${item.image || '/images/newarrivals/IMG_20250504_150241.jpg'}"
                         alt="${item.name || 'Product'}"
                         class="order-item-image"
+                        data-product-id="${item.productId || item.id}"
                         onerror="this.src='/images/newarrivals/IMG_20250504_150241.jpg';">
                     <div class="order-item-details">
                       <h4>${item.name || 'Product'}</h4>
@@ -1280,8 +1281,25 @@
             const orderTotal = parseFloat(order.orderTotal || order.total || 0).toFixed(2);
             orderHTML += `
                 <div class="order-total">Total: ₹${orderTotal}</div>
-              </div>
-            `;
+              `;
+
+            // Add review button if order is delivered and not yet reviewed (simplified check)
+            const hasReviewed = order.reviews && order.reviews.some(r => r.orderId === order.id); // Assuming 'reviews' field exists if reviewed
+            const orderCanBeReviewed = deliveryStatus === 'delivered' && !hasReviewed; // Add more robust check for existing reviews
+
+            if (orderCanBeReviewed) {
+              // Check if any product in the order has been reviewed
+              const orderHasReview = order.products && order.products.some(p => p.reviewed === true);
+              if (!orderHasReview) {
+                orderHTML += `
+                <div class="order-actions" style="margin-top: 15px; justify-content: flex-end;">
+                  <button class="review-order-btn shop-now-button" data-order-id="${order.id}" data-order-ref="${order.orderReference || order.id}">Write a Review</button>
+                </div>
+              `;
+              }
+            }
+
+            orderHTML += `</div>`; // Close order-card
 
             ordersContainer.insertAdjacentHTML('beforeend', orderHTML);
           });
@@ -1862,7 +1880,7 @@
           notification.classList.add('show');
         }, 100);
 
-        // Hide notification after 6 seconds (longer for error messages)
+        // Hide notification after some time (longer for error messages)
         const hideDelay = type === 'error' ? 6000 : 4000;
         setTimeout(() => {
           notification.classList.remove('show');
@@ -2031,6 +2049,54 @@
       </div>
     </div>
 
+    <!-- Review Modal -->
+    <div id="review-modal" class="modal-overlay">
+      <div class="address-modal" style="max-width: 600px;">
+        <div class="modal-header">
+          <h3>Write a Review</h3>
+          <button class="close-modal" onclick="closeReviewModal()">&times;</button>
+        </div>
+        <form id="review-form">
+          <input type="hidden" id="review-product-id">
+          <input type="hidden" id="review-order-id">
+
+          <div class="form-group">
+            <label>Product: <span id="review-product-name" style="font-weight: normal;"></span></label>
+          </div>
+
+          <div class="form-group">
+            <label for="review-rating">Rating *</label>
+            <div class="star-rating" id="star-rating">
+              <i class="far fa-star" data-rating="1"></i>
+              <i class="far fa-star" data-rating="2"></i>
+              <i class="far fa-star" data-rating="3"></i>
+              <i class="far fa-star" data-rating="4"></i>
+              <i class="far fa-star" data-rating="5"></i>
+            </div>
+            <input type="hidden" id="review-rating" name="rating" required>
+          </div>
+
+          <div class="form-group">
+            <label for="review-comment">Your Review *</label>
+            <textarea id="review-comment" name="comment" rows="4" required placeholder="Share your experience with this product..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="review-images">Upload Images (Optional)</label>
+            <input type="file" id="review-images" accept="image/*" multiple style="padding: 8px;">
+            <small style="color: #777; display: block; margin-top: 5px;">You can upload up to 3 images</small>
+          </div>
+
+          <div class="modal-buttons">
+            <button type="button" class="btn-secondary" onclick="closeReviewModal()">Cancel</button>
+            <button type="submit" class="btn-primary" id="submit-review-btn">
+              <span id="submit-review-text">Submit Review</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- Add spinner and notification styles -->
     <style>
       .spinner {
@@ -2135,8 +2201,280 @@
         border-color: #27ae60 !important;
         box-shadow: 0 0 0 2px rgba(39, 174, 96, 0.1) !important;
       }
+
+      /* Review Specific Styles */
+      .star-rating {
+        font-size: 32px;
+        margin: 10px 0;
+      }
+
+      .star-rating i {
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.2s;
+        margin-right: 5px;
+      }
+
+      .star-rating i:hover,
+      .star-rating i.active {
+        color: #ffc107;
+      }
+
+      .review-order-btn:hover {
+        background-color: #b39063;
+      }
+
+      .order-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
     </style>
 
+    <script>
+      // Review Modal Functions
+      let currentReviewOrderId = null;
+      let currentReviewProducts = [];
+
+      function openReviewModal(orderId, orderRef) {
+        currentReviewOrderId = orderId;
+
+        // Find the order to get products
+        const orderCard = document.querySelector(`[data-order-id="${orderId}"]`);
+        if (!orderCard) {
+          console.error("Order card not found for ID:", orderId);
+          return;
+        }
+        const productElements = orderCard.querySelectorAll('.order-item');
+
+        currentReviewProducts = Array.from(productElements).map(el => {
+          const nameEl = el.querySelector('.order-item-details h4');
+          const imgEl = el.querySelector('.order-item-image');
+          // Ensure product ID is correctly extracted
+          const productId = imgEl ? imgEl.dataset.productId : '';
+          return {
+            name: nameEl ? nameEl.textContent : 'Product',
+            image: imgEl ? imgEl.src : '',
+            id: productId // Use the extracted product ID
+          };
+        });
+
+        // Filter out products that might have already been reviewed for this order
+        // This requires knowing which products have been reviewed. For now, we assume
+        // the backend/Firestore will handle preventing duplicate reviews or we show all.
+
+        if (currentReviewProducts.length === 1) {
+          // Single product - show review form directly
+          showReviewForm(currentReviewProducts[0]);
+        } else {
+          // Multiple products - show product selector
+          showProductSelector();
+        }
+      }
+
+      function showProductSelector() {
+        const modal = document.getElementById('review-modal');
+        const modalContent = modal.querySelector('.address-modal');
+
+        modalContent.innerHTML = `
+          <div class="modal-header">
+            <h3>Select Product to Review</h3>
+            <button class="close-modal" onclick="closeReviewModal()">&times;</button>
+          </div>
+          <div style="padding: 20px;">
+            ${currentReviewProducts.map((product, index) => `
+              <div class="product-select-item" onclick="selectProductForReview(${index})" style="display: flex; align-items: center; padding: 15px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: background-color 0.2s;">
+                <img src="${product.image}" alt="${product.name}" style="width: 60px; height: 60px; object-fit: cover; margin-right: 15px; border-radius: 4px;">
+                <div style="flex: 1;">
+                  <h4 style="margin: 0; font-size: 16px;">${product.name}</h4>
+                </div>
+                <i class="fas fa-chevron-right" style="color: #c8a97e;"></i>
+              </div>
+            `).join('')}
+          </div>
+        `;
+
+        modal.classList.add('show');
+      }
+
+      function selectProductForReview(index) {
+        showReviewForm(currentReviewProducts[index]);
+      }
+
+      function showReviewForm(product) {
+        const modal = document.getElementById('review-modal');
+        const modalContent = modal.querySelector('.address-modal');
+
+        modalContent.innerHTML = `
+          <div class="modal-header">
+            <h3>Write a Review</h3>
+            <button class="close-modal" onclick="closeReviewModal()">&times;</button>
+          </div>
+          <form id="review-form">
+            <input type="hidden" id="review-product-id" value="${product.id}">
+            <input type="hidden" id="review-order-id" value="${currentReviewOrderId}">
+
+            <div class="form-group">
+              <label>Product: <span id="review-product-name" style="font-weight: normal;">${product.name}</span></label>
+            </div>
+
+            <div class="form-group">
+              <label for="review-rating">Rating *</label>
+              <div class="star-rating" id="star-rating">
+                <i class="far fa-star" data-rating="1"></i>
+                <i class="far fa-star" data-rating="2"></i>
+                <i class="far fa-star" data-rating="3"></i>
+                <i class="far fa-star" data-rating="4"></i>
+                <i class="far fa-star" data-rating="5"></i>
+              </div>
+              <input type="hidden" id="review-rating" name="rating" required>
+            </div>
+
+            <div class="form-group">
+              <label for="review-comment">Your Review *</label>
+              <textarea id="review-comment" name="comment" rows="4" required placeholder="Share your experience with this product..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="review-images">Upload Images (Optional)</label>
+              <input type="file" id="review-images" accept="image/*" multiple style="padding: 8px;">
+              <small style="color: #777; display: block; margin-top: 5px;">You can upload up to 3 images</small>
+            </div>
+
+            <div class="modal-buttons">
+              <button type="button" class="btn-secondary" onclick="closeReviewModal()">Cancel</button>
+              <button type="submit" class="btn-primary" id="submit-review-btn">
+                <span id="submit-review-text">Submit Review</span>
+              </button>
+            </div>
+          </form>
+        `;
+
+        // Re-attach event listeners
+        setupReviewForm();
+
+        modal.classList.add('show');
+      }
+
+      function setupReviewForm() {
+        // Star rating functionality
+        const stars = document.querySelectorAll('.star-rating i');
+        const ratingInput = document.getElementById('review-rating');
+
+        stars.forEach(star => {
+          star.addEventListener('click', function() {
+            const rating = this.dataset.rating;
+            ratingInput.value = rating;
+
+            stars.forEach((s, index) => {
+              if (index < rating) {
+                s.classList.remove('far');
+                s.classList.add('fas', 'active');
+              } else {
+                s.classList.remove('fas', 'active');
+                s.classList.add('far');
+              }
+            });
+          });
+        });
+
+        // Form submission
+        const form = document.getElementById('review-form');
+        form.addEventListener('submit', handleReviewSubmit);
+      }
+
+      async function handleReviewSubmit(e) {
+        e.preventDefault();
+
+        const submitBtn = document.getElementById('submit-review-btn');
+        const submitText = document.getElementById('submit-review-text');
+
+        submitBtn.disabled = true;
+        submitText.innerHTML = '<div class="loading-spinner"></div>Submitting...';
+
+        try {
+          const productId = document.getElementById('review-product-id').value;
+          const productName = document.getElementById('review-product-name').textContent;
+          const rating = document.getElementById('review-rating').value;
+          const comment = document.getElementById('review-comment').value;
+          const orderId = document.getElementById('review-order-id').value;
+
+          if (!rating) {
+            showNotification('Please select a rating', 'error');
+            submitBtn.disabled = false;
+            submitText.textContent = 'Submit Review';
+            return;
+          }
+
+          // Basic validation for comment length
+          if (comment.trim().length < 10) {
+            showNotification('Your review should be at least 10 characters long.', 'error');
+            submitBtn.disabled = false;
+            submitText.textContent = 'Submit Review';
+            return;
+          }
+
+          const reviewData = {
+            productId: productId,
+            productName: productName,
+            orderId: orderId,
+            rating: rating,
+            comment: comment,
+            images: [] // Image upload can be added later if needed
+          };
+
+          const result = await FirebaseReviewsManager.submitReview(reviewData);
+
+          if (result.success) {
+            showNotification('Review submitted successfully! Thank you for your feedback.', 'success');
+            closeReviewModal();
+            // Reload orders to update review status
+            const user = firebase.auth().currentUser;
+            if (user) {
+              await loadUserOrders(user.uid);
+            }
+          } else {
+            showNotification('Failed to submit review: ' + result.error, 'error');
+          }
+        } catch (error) {
+          console.error('Error submitting review:', error);
+          // Provide a more user-friendly error message
+          if (error.code === 'permission-denied') {
+            showNotification('Permission denied. Please ensure you are logged in.', 'error');
+          } else {
+            showNotification('Failed to submit review. Please try again.', 'error');
+          }
+        } finally {
+          submitBtn.disabled = false;
+          submitText.textContent = 'Submit Review';
+        }
+      }
+
+      function closeReviewModal() {
+        const modal = document.getElementById('review-modal');
+        if (modal) {
+          modal.classList.remove('show');
+        }
+        currentReviewOrderId = null;
+        currentReviewProducts = [];
+      }
+
+      // Make functions global
+      window.openReviewModal = openReviewModal;
+      window.closeReviewModal = closeReviewModal;
+      window.selectProductForReview = selectProductForReview; // Needed for the product selector
+
+      // Add event listener for review buttons after orders are loaded
+      // This delegation is more efficient than adding listeners to each button
+      document.addEventListener('click', function(e) {
+        if (e.target.closest('.review-order-btn')) {
+          const btn = e.target.closest('.review-order-btn');
+          const orderId = btn.dataset.orderId;
+          const orderRef = btn.dataset.orderRef; // Not currently used, but might be useful
+          openReviewModal(orderId, orderRef);
+        }
+      });
+    </script>
     <!-- Cart Panel -->
     <div id="auricCartPanel" class="cart-panel" style="position:fixed !important; top:0 !important; right:-400px !important; width:400px !important; max-width:90% !important; height:100% !important; background:#ffffff !important; box-shadow:-2px 0 10px rgba(0,0,0,0.3) !important; z-index:999999 !important; transition:right 0.3s ease-in-out !important; display:flex !important; flex-direction:column !important; overflow:hidden !important; visibility:visible !important; pointer-events:auto !important;">
       <div class="cart-panel-header">
