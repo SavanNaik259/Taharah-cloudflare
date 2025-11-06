@@ -399,8 +399,16 @@ background-color: #000 !important;
                 <h3>Product Description</h3>
                 <p></p>
             </div>
+        </div>
 
-
+        <!-- Product Reviews Section -->
+        <div class="product-reviews-section">
+            <div class="container">
+                <h2 class="section-title">Customer Reviews</h2>
+                <div id="reviews-container">
+                    <div class="loading-message">Loading reviews...</div>
+                </div>
+            </div>
         </div>
 
         <!-- You May Also Like Section -->
@@ -576,6 +584,9 @@ background-color: #000 !important;
     <script src="js/cart-local-storage.js?v=1.0.0"></script>
     <script src="js/firebase/firebase-cart-manager.js?v=1.0.0"></script>
     <script src="js/cart-manager.js?v=1.0.1"></script>
+
+    <!-- Firebase Reviews Manager -->
+    <script src="js/firebase/firebase-reviews-manager.js"></script>
 
     <!-- Wishlist Scripts -->
     <script src="js/wishlist-local-storage.js?v=1.0.0"></script>
@@ -985,5 +996,193 @@ background-color: #000 !important;
     
     <!-- Currency Converter -->
     <script src="js/currency-converter.js?v=1.0.1"></script>
+
+    <!-- Product Reviews Loader -->
+    <script>
+        async function loadProductReviews() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+
+            if (!productId) {
+                console.warn('No product ID found in URL');
+                return;
+            }
+
+            const reviewsContainer = document.getElementById('reviews-container');
+            
+            try {
+                // Wait for FirebaseReviewsManager to be available
+                if (typeof FirebaseReviewsManager === 'undefined') {
+                    console.error('FirebaseReviewsManager not loaded');
+                    reviewsContainer.innerHTML = '<div class="no-reviews-message">Unable to load reviews at this time.</div>';
+                    return;
+                }
+
+                console.log('Loading reviews for product:', productId);
+                const result = await FirebaseReviewsManager.loadProductReviews(productId);
+
+                if (result.success && result.reviews.length > 0) {
+                    const reviewsHTML = result.reviews.map(review => {
+                        const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+                        const reviewDate = review.createdAt ? new Date(review.createdAt.toDate()).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        }) : 'Recently';
+                        
+                        const verifiedBadge = review.verified ? '<span class="verified-purchase">✓ Verified Purchase</span>' : '';
+
+                        return `
+                            <div class="review-item">
+                                <div class="review-header">
+                                    <div class="review-author">
+                                        <strong>${review.userName || 'Anonymous'}</strong>
+                                        ${verifiedBadge}
+                                    </div>
+                                    <div class="review-date">${reviewDate}</div>
+                                </div>
+                                <div class="review-rating">${stars}</div>
+                                <div class="review-comment">${review.comment}</div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    const summaryHTML = `
+                        <div class="reviews-summary">
+                            <div class="reviews-count">${result.reviews.length} Review${result.reviews.length !== 1 ? 's' : ''}</div>
+                        </div>
+                        <div class="reviews-list">
+                            ${reviewsHTML}
+                        </div>
+                    `;
+
+                    reviewsContainer.innerHTML = summaryHTML;
+                } else {
+                    reviewsContainer.innerHTML = '<div class="no-reviews-message">No reviews yet. Be the first to review this product!</div>';
+                }
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+                reviewsContainer.innerHTML = '<div class="no-reviews-message">Unable to load reviews at this time.</div>';
+            }
+        }
+
+        // Load reviews when page loads and after product is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(loadProductReviews, 1500);
+        });
+
+        window.addEventListener('productLoaded', function() {
+            setTimeout(loadProductReviews, 500);
+        });
+    </script>
+
+    <!-- Reviews Section Styles -->
+    <style>
+        .product-reviews-section {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 30px 20px;
+            background-color: #fff;
+        }
+
+        .product-reviews-section .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #333;
+        }
+
+        .reviews-summary {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .reviews-count {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .reviews-list {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .review-item {
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .review-author {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .verified-purchase {
+            font-size: 12px;
+            color: #28a745;
+            font-weight: 600;
+            background-color: #d4edda;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .review-date {
+            font-size: 14px;
+            color: #777;
+        }
+
+        .review-rating {
+            font-size: 20px;
+            color: #ffc107;
+            margin-bottom: 10px;
+        }
+
+        .review-comment {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .no-reviews-message,
+        .loading-message {
+            text-align: center;
+            color: #777;
+            font-size: 16px;
+            padding: 40px 20px;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .product-reviews-section {
+                padding: 20px 15px;
+            }
+
+            .product-reviews-section .section-title {
+                font-size: 24px;
+            }
+
+            .review-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+        }
+    </style>
 </body>
 </html>
