@@ -2438,9 +2438,19 @@
           }
         } catch (error) {
           console.error('Error submitting review:', error);
+          console.error('Error details:', {
+            code: error.code,
+            message: error.message,
+            stack: error.stack
+          });
+          
           // Provide a more user-friendly error message
           if (error.code === 'permission-denied') {
             showNotification('Permission denied. Please ensure you are logged in.', 'error');
+          } else if (error.code === 'unauthenticated') {
+            showNotification('You must be logged in to submit a review.', 'error');
+          } else if (error.message) {
+            showNotification(`Failed to submit review: ${error.message}`, 'error');
           } else {
             showNotification('Failed to submit review. Please try again.', 'error');
           }

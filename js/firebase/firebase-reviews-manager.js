@@ -71,19 +71,28 @@ window.FirebaseReviewsManager = (function() {
 
             // First, ensure the product document exists or create a placeholder
             const productRef = db.collection('products').doc(reviewData.productId);
-            const productDoc = await productRef.get();
             
-            if (!productDoc.exists) {
-                // Create a minimal product document if it doesn't exist
-                await productRef.set({
-                    id: reviewData.productId,
-                    name: reviewData.productName || 'Product',
-                    createdAt: firebase.firestore.Timestamp.now()
-                }, { merge: true });
-                console.log('Created product document for reviews:', reviewData.productId);
+            try {
+                const productDoc = await productRef.get();
+                
+                if (!productDoc.exists) {
+                    // Create a minimal product document if it doesn't exist
+                    console.log('Creating product document for reviews:', reviewData.productId);
+                    await productRef.set({
+                        id: reviewData.productId,
+                        name: reviewData.productName || 'Product',
+                        createdAt: firebase.firestore.Timestamp.now(),
+                        hasReviews: true
+                    });
+                    console.log('Product document created successfully');
+                }
+            } catch (productError) {
+                console.warn('Could not create product document (non-critical):', productError);
+                // Continue anyway - the review collection might work without parent document
             }
 
             // Save to Firestore at products/{productId}/reviews/{reviewId}
+            console.log('Attempting to save review to path:', `products/${reviewData.productId}/reviews/${reviewId}`);
             await productRef.collection('reviews').doc(reviewId).set(reviewToSave);
             
             console.log('Review saved successfully:', reviewId);
