@@ -69,9 +69,22 @@ window.FirebaseReviewsManager = (function() {
                 updatedAt: firebase.firestore.Timestamp.now()
             };
 
+            // First, ensure the product document exists or create a placeholder
+            const productRef = db.collection('products').doc(reviewData.productId);
+            const productDoc = await productRef.get();
+            
+            if (!productDoc.exists) {
+                // Create a minimal product document if it doesn't exist
+                await productRef.set({
+                    id: reviewData.productId,
+                    name: reviewData.productName || 'Product',
+                    createdAt: firebase.firestore.Timestamp.now()
+                }, { merge: true });
+                console.log('Created product document for reviews:', reviewData.productId);
+            }
+
             // Save to Firestore at products/{productId}/reviews/{reviewId}
-            await db.collection('products').doc(reviewData.productId)
-                .collection('reviews').doc(reviewId).set(reviewToSave);
+            await productRef.collection('reviews').doc(reviewId).set(reviewToSave);
             
             console.log('Review saved successfully:', reviewId);
             return { success: true, reviewId: reviewId, review: reviewToSave };
