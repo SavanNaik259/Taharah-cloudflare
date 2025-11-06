@@ -1009,13 +1009,14 @@ background-color: #000 !important;
                 return;
             }
 
+            const reviewsSection = document.querySelector('.product-reviews-section');
             const reviewsContainer = document.getElementById('reviews-container');
             
             try {
                 // Wait for FirebaseReviewsManager to be available
                 if (typeof FirebaseReviewsManager === 'undefined') {
                     console.error('FirebaseReviewsManager not loaded');
-                    reviewsContainer.innerHTML = '<div class="no-reviews-message">Unable to load reviews at this time.</div>';
+                    reviewsSection.style.display = 'none';
                     return;
                 }
 
@@ -1026,6 +1027,8 @@ background-color: #000 !important;
                 console.log('Number of reviews:', result.reviews ? result.reviews.length : 0);
 
                 if (result.success && result.reviews.length > 0) {
+                    reviewsSection.style.display = 'block';
+                    
                     const reviewsHTML = result.reviews.map(review => {
                         console.log('Processing review:', review);
                         console.log('Review images:', review.images);
@@ -1041,7 +1044,7 @@ background-color: #000 !important;
                         const imagesHTML = review.images && review.images.length > 0 
                             ? `<div class="review-images">
                                 ${review.images.map(imageUrl => `
-                                    <img src="${imageUrl}" alt="Review image" class="review-image" onclick="window.open('${imageUrl}', '_blank')">
+                                    <img src="${imageUrl}" alt="Review image" class="review-image" onclick="openReviewImageModal('${imageUrl}')">
                                 `).join('')}
                                </div>`
                             : '';
@@ -1056,7 +1059,7 @@ background-color: #000 !important;
                                     <div class="review-date">${reviewDate}</div>
                                 </div>
                                 <div class="review-rating">${stars}</div>
-                                <div class="review-comment">${review.comment}</div>
+                                ${review.comment ? `<div class="review-comment">${review.comment}</div>` : ''}
                                 ${imagesHTML}
                             </div>
                         `;
@@ -1074,20 +1077,35 @@ background-color: #000 !important;
                     reviewsContainer.innerHTML = summaryHTML;
                 } else {
                     console.log('No reviews found for this product');
-                    reviewsContainer.innerHTML = `
-                        <div class="no-reviews-message">
-                            <p>No reviews yet. Be the first to review this product!</p>
-                            <p style="font-size: 14px; color: #999; margin-top: 10px;">
-                                Purchase this product and leave a review with photos from your profile page.
-                            </p>
-                        </div>
-                    `;
+                    reviewsSection.style.display = 'none';
                 }
             } catch (error) {
                 console.error('Error loading reviews:', error);
-                reviewsContainer.innerHTML = '<div class="no-reviews-message">Unable to load reviews at this time.</div>';
+                reviewsSection.style.display = 'none';
             }
         }
+
+        // Review image modal
+        function openReviewImageModal(imageUrl) {
+            const modal = document.createElement('div');
+            modal.className = 'review-image-modal';
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 99999; display: flex; align-items: center; justify-content: center; cursor: pointer;';
+            
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.style.cssText = 'max-width: 90%; max-height: 90%; border-radius: 8px;';
+            
+            modal.appendChild(img);
+            document.body.appendChild(modal);
+            document.body.style.overflow = 'hidden';
+            
+            modal.addEventListener('click', function() {
+                document.body.removeChild(modal);
+                document.body.style.overflow = 'auto';
+            });
+        }
+
+        window.openReviewImageModal = openReviewImageModal;
 
         // Load reviews when page loads and after product is loaded
         document.addEventListener('DOMContentLoaded', function() {
