@@ -1407,31 +1407,50 @@
 
         async function updateOrderStatus(orderId, userId, newStatus) {
             try {
-                console.log(`Updating order ${orderId} status to ${newStatus} for user ${userId}`);
+                console.log(`🔄 STARTING ORDER STATUS UPDATE`);
+                console.log(`   Order ID: ${orderId}`);
+                console.log(`   User ID: ${userId}`);
+                console.log(`   New Status: ${newStatus}`);
                 
                 if (!userId) {
+                    console.error('❌ ERROR: User ID is missing!');
                     alert('Error: User ID is missing. Cannot update order status.');
                     return;
                 }
                 
+                if (!db) {
+                    console.error('❌ ERROR: Firebase database not initialized!');
+                    alert('Error: Database connection not available.');
+                    return;
+                }
+                
                 // Update the order's deliveryStatus in Firestore
-                await db.collection('users')
+                const docRef = db.collection('users')
                     .doc(userId)
                     .collection('orders')
-                    .doc(orderId)
-                    .update({
-                        deliveryStatus: newStatus,
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
+                    .doc(orderId);
                 
-                console.log(`✅ Order ${orderId} status updated to ${newStatus}`);
+                console.log(`📝 Firestore path: users/${userId}/orders/${orderId}`);
+                
+                await docRef.update({
+                    deliveryStatus: newStatus,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                console.log(`✅ Successfully updated order ${orderId} status to ${newStatus}`);
                 
                 // Reload the orders to reflect changes
+                console.log('🔄 Reloading orders...');
                 await loadOrdersData();
                 
-                alert(`Order ${orderId} status updated to ${newStatus}`);
+                alert(`Order ${orderId} status updated to ${newStatus}!`);
             } catch (error) {
-                console.error('Error updating order status:', error);
+                console.error('❌ ERROR updating order status:', error);
+                console.error('Error details:', {
+                    code: error.code,
+                    message: error.message,
+                    stack: error.stack
+                });
                 alert('Error updating order status: ' + error.message);
             }
         }
