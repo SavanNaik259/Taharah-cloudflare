@@ -555,7 +555,7 @@
       }
 
       .btn-primary:disabled {
-        background-color: #ccc;
+        opacity: 0.6;
         cursor: not-allowed;
       }
 
@@ -573,6 +573,68 @@
       @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
+      }
+
+      /* Review Modal Styles */
+      .star-rating {
+        display: flex;
+        gap: 8px;
+        font-size: 32px;
+        margin: 10px 0;
+      }
+
+      .star-rating i {
+        cursor: pointer;
+        color: #cbd5e1;
+        transition: color 0.2s ease;
+      }
+
+      .star-rating i:hover,
+      .star-rating i.active {
+        color: #fbbf24;
+      }
+
+      .image-preview-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .image-preview-item {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .image-preview-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .image-preview-remove {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        background: rgba(220, 38, 38, 0.9);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+      }
+
+      .image-preview-remove:hover {
+        background: rgba(185, 28, 28, 1);
       }
     </style>
   </head>
@@ -1284,6 +1346,22 @@
             `;
 
             ordersContainer.insertAdjacentHTML('beforeend', orderHTML);
+
+            // If order is delivered, add a "Give Review" button
+            if (deliveryStatus === 'delivered') {
+              const orderCard = ordersContainer.lastElementChild;
+              const reviewButton = document.createElement('button');
+              reviewButton.classList.add('btn-primary', 'review-button');
+              reviewButton.textContent = 'Give Review';
+              reviewButton.dataset.orderId = order.id;
+              reviewButton.dataset.productId = order.products ? order.products[0].id : 'unknown'; // Assuming one product per order for simplicity, might need adjustment
+              reviewButton.dataset.productName = order.products ? order.products[0].name : 'Product';
+              reviewButton.style.marginTop = '15px';
+              reviewButton.style.marginLeft = 'auto'; // Push to the right
+              reviewButton.style.display = 'block'; // Make it block to push right
+
+              orderCard.appendChild(reviewButton);
+            }
           });
 
         } catch (error) {
@@ -1454,6 +1532,16 @@
         if (addressesSection && addressesSection.classList.contains('active')) {
           loadAndDisplayAddresses();
         }
+
+        // Add event listeners for review buttons
+        document.addEventListener('click', function(e) {
+          if (e.target.classList.contains('review-button')) {
+            const orderId = e.target.dataset.orderId;
+            const productId = e.target.dataset.productId;
+            const productName = e.target.dataset.productName;
+            openReviewModal(orderId, productId, productName);
+          }
+        });
       }
 
       // Global variable to track if we're editing an address
@@ -1862,7 +1950,7 @@
           notification.classList.add('show');
         }, 100);
 
-        // Hide notification after 6 seconds (longer for error messages)
+        // Hide notification after some time (longer for error messages)
         const hideDelay = type === 'error' ? 6000 : 4000;
         setTimeout(() => {
           notification.classList.remove('show');
@@ -1902,6 +1990,179 @@
           alert(message);
         }
       }
+
+      // Function to open the review modal
+      function openReviewModal(orderId, productId, productName) {
+        const modal = document.getElementById('review-modal');
+        if (!modal) {
+          console.error('Review modal element not found');
+          return;
+        }
+
+        // Set product name and ID
+        modal.querySelector('#review-product-name').textContent = productName;
+        modal.dataset.orderId = orderId;
+        modal.dataset.productId = productId;
+
+        // Reset stars and image preview
+        const stars = modal.querySelectorAll('.star-rating i');
+        stars.forEach(star => star.classList.remove('active'));
+        modal.querySelector('.image-preview-container').innerHTML = '';
+        modal.querySelector('#review-image-upload').value = ''; // Clear file input
+        modal.querySelector('#review-text').value = ''; // Clear textarea
+
+        modal.classList.add('show');
+      }
+
+      // Function to close the review modal
+      function closeReviewModal() {
+        const modal = document.getElementById('review-modal');
+        if (modal) {
+          modal.classList.remove('show');
+        }
+      }
+
+      // Handle star rating clicks
+      function handleStarClick(event) {
+        const starsContainer = event.target.closest('.star-rating');
+        const stars = starsContainer.querySelectorAll('i');
+        const clickedStarIndex = Array.from(stars).indexOf(event.target);
+        let rating = 0;
+
+        stars.forEach((star, index) => {
+          if (index <= clickedStarIndex) {
+            star.classList.add('active');
+            rating = index + 1;
+          } else {
+            star.classList.remove('active');
+          }
+        });
+        starsContainer.dataset.rating = rating;
+      }
+
+      // Handle image upload
+      function handleImageUpload(event) {
+        const previewContainer = document.querySelector('#review-modal .image-preview-container');
+        const files = event.target.files;
+
+        if (!files || files.length === 0) return;
+
+        // Limit to 3 images
+        for (let i = 0; i < Math.min(files.length, 3); i++) {
+          const file = files[i];
+          const reader = new FileReader();
+
+          reader.onload = function(e) {
+            const previewItem = document.createElement('div');
+            previewItem.classList.add('image-preview-item');
+            previewItem.innerHTML = `
+              <img src="${e.target.result}" alt="Product Image Preview">
+              <button type="button" class="image-preview-remove">&times;</button>
+            `;
+            previewContainer.appendChild(previewItem);
+
+            // Add remove button listener
+            previewItem.querySelector('.image-preview-remove').addEventListener('click', function() {
+              previewContainer.removeChild(previewItem);
+              // Optionally, you might need to update the file input if you're managing a list of files
+            });
+          }
+          reader.readAsDataURL(file);
+        }
+      }
+
+      // Handle review submission
+      async function submitReview() {
+        const modal = document.getElementById('review-modal');
+        const orderId = modal.dataset.orderId;
+        const productId = modal.dataset.productId;
+        const productName = modal.querySelector('#review-product-name').textContent;
+        const rating = parseInt(modal.querySelector('.star-rating').dataset.rating || '0');
+        const reviewText = modal.querySelector('#review-text').value.trim();
+        const imageFiles = modal.querySelector('#review-image-upload').files;
+
+        if (!rating || rating === 0) {
+          showNotification('Please select a star rating.', 'error');
+          return;
+        }
+
+        if (!reviewText && imageFiles.length === 0) {
+          showNotification('Please provide a review text or upload an image.', 'error');
+          return;
+        }
+
+        const submitButton = modal.querySelector('#submit-review-btn');
+        const originalButtonText = submitButton.innerHTML;
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<div class="loading-spinner"></div>Submitting...';
+
+        try {
+          let imageUrls = [];
+          if (imageFiles.length > 0) {
+            // Upload images to Firebase Storage and get URLs
+            for (const file of imageFiles) {
+              const storageRef = firebase.storage().ref(`reviews/${productId}/${Date.now()}_${file.name}`);
+              await storageRef.put(file);
+              const url = await storageRef.getDownloadURL();
+              imageUrls.push(url);
+            }
+          }
+
+          // Save review to Firestore
+          const userId = firebase.auth().currentUser.uid;
+          await firebase.firestore().collection('reviews').add({
+            productId: productId,
+            orderId: orderId, // Link to the order
+            userId: userId,
+            productName: productName,
+            rating: rating,
+            reviewText: reviewText,
+            imageUrls: imageUrls,
+            timestamp: firebase.firestore.Timestamp.now()
+          });
+
+          showNotification('Review submitted successfully!', 'success');
+          closeReviewModal();
+
+          // Optionally: Update order status to indicate review submitted (if needed)
+          // await firebase.firestore().collection('users').doc(userId).collection('orders').doc(orderId).update({
+          //   reviewSubmitted: true
+          // });
+
+        } catch (error) {
+          console.error('Error submitting review:', error);
+          showNotification('Failed to submit review. Please try again.', 'error');
+        } finally {
+          submitButton.disabled = false;
+          submitButton.innerHTML = originalButtonText;
+        }
+      }
+
+      // Initialize review modal event listeners
+      document.addEventListener('DOMContentLoaded', () => {
+        // Star rating clicks
+        document.querySelectorAll('.star-rating i').forEach(star => {
+          star.addEventListener('click', handleStarClick);
+        });
+
+        // Image upload change
+        const imageUploadInput = document.getElementById('review-image-upload');
+        if (imageUploadInput) {
+          imageUploadInput.addEventListener('change', handleImageUpload);
+        }
+
+        // Submit review button
+        const submitReviewBtn = document.getElementById('submit-review-btn');
+        if (submitReviewBtn) {
+          submitReviewBtn.addEventListener('click', submitReview);
+        }
+
+        // Close modal buttons
+        document.querySelectorAll('.close-review-modal').forEach(btn => {
+          btn.addEventListener('click', closeReviewModal);
+        });
+      });
+
     </script>
 
     <!-- Address Management Modal -->
@@ -2031,6 +2292,45 @@
       </div>
     </div>
 
+    <!-- Review Modal -->
+    <div id="review-modal" class="modal-overlay">
+      <div class="address-modal" style="max-width: 600px;">
+        <div class="modal-header">
+          <h3>Leave a Review for <span id="review-product-name">Product</span></h3>
+          <button class="close-modal close-review-modal">&times;</button>
+        </div>
+        <form id="review-form">
+          <div class="form-group">
+            <label>Rating *</label>
+            <div class="star-rating" data-rating="0">
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+            </div>
+            <div class="error-text" id="rating-error" style="display: block;">Please select a rating</div>
+          </div>
+
+          <div class="form-group">
+            <label for="review-text">Your Review</label>
+            <textarea id="review-text" name="reviewText" rows="4" maxlength="500"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="review-image-upload">Upload Product Images (Up to 3)</label>
+            <input type="file" id="review-image-upload" name="reviewImages" accept="image/*" multiple>
+            <div class="image-preview-container"></div>
+          </div>
+
+          <div class="modal-buttons">
+            <button type="button" class="btn-secondary close-review-modal">Cancel</button>
+            <button type="button" class="btn-primary" id="submit-review-btn">Submit Review</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- Add spinner and notification styles -->
     <style>
       .spinner {
@@ -2134,6 +2434,68 @@
       .form-group select.valid {
         border-color: #27ae60 !important;
         box-shadow: 0 0 0 2px rgba(39, 174, 96, 0.1) !important;
+      }
+
+      /* Review Modal Styles */
+      .star-rating {
+        display: flex;
+        gap: 8px;
+        font-size: 32px;
+        margin: 10px 0;
+      }
+
+      .star-rating i {
+        cursor: pointer;
+        color: #cbd5e1;
+        transition: color 0.2s ease;
+      }
+
+      .star-rating i:hover,
+      .star-rating i.active {
+        color: #fbbf24;
+      }
+
+      .image-preview-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .image-preview-item {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .image-preview-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .image-preview-remove {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        background: rgba(220, 38, 38, 0.9);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+      }
+
+      .image-preview-remove:hover {
+        background: rgba(185, 28, 28, 1);
       }
     </style>
 
