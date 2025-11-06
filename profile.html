@@ -881,8 +881,8 @@
             };
           case 'confirmed':
             return {
-              label: 'Confirmed',
-              description: 'Your order is yet to be delivered.',
+              label: 'Order Confirmed',
+              description: 'Your order has been confirmed and will be shipped soon.',
               icon: 'fas fa-check-circle',
               bgColor: '#d1ecf1', // Light blue
               textColor: '#0c5460' // Dark blue
@@ -1229,6 +1229,11 @@
 
             // If order is adminConfirmed but deliveryStatus is still pending, show as confirmed
             if (order.adminConfirmed && deliveryStatus === 'pending') {
+              deliveryStatus = 'confirmed';
+            }
+
+            // Also check if paymentStatus is completed, which means order is confirmed
+            if (order.paymentStatus === 'completed' && deliveryStatus === 'pending') {
               deliveryStatus = 'confirmed';
             }
 
