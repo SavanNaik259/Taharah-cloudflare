@@ -446,32 +446,6 @@ background-color: #000 !important;
                 </div>-->
             </div>
         </section>
-
-        <!-- Product Reviews Section -->
-        <section class="reviews-section" style="padding: 60px 0; background: #f8fafc;">
-            <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
-                <h2 style="font-family: 'Playfair Display', serif; font-size: 36px; margin-bottom: 30px; text-align: center;">Customer Reviews</h2>
-
-                <div id="reviews-summary" style="text-align: center; margin-bottom: 40px; display: none;">
-                    <div style="font-size: 48px; font-weight: bold; color: #c8a97e;" id="average-rating">0.0</div>
-                    <div style="font-size: 24px; color: #fbbf24; margin: 10px 0;" id="average-stars"></div>
-                    <div style="color: #64748b;" id="total-reviews-text">0 reviews</div>
-                </div>
-
-                <div id="reviews-container" style="display: grid; gap: 24px;">
-                    <div id="reviews-loading" style="text-align: center; padding: 40px; color: #64748b;">
-                        <i class="fas fa-spinner fa-spin" style="font-size: 32px; margin-bottom: 16px;"></i>
-                        <p>Loading reviews...</p>
-                    </div>
-                </div>
-
-                <div id="no-reviews" style="display: none; text-align: center; padding: 40px; color: #64748b;">
-                    <i class="fas fa-star" style="font-size: 48px; opacity: 0.3; margin-bottom: 16px;"></i>
-                    <h3>No Reviews Yet</h3>
-                    <p>Be the first to review this product!</p>
-                </div>
-            </div>
-        </section>
     </main>
 
     <a href="https://wa.me/919310250047?text=Hi! I'm interested in this product. Can you help me?" class="whatsapp-btn">
@@ -599,8 +573,6 @@ background-color: #000 !important;
 
     <!-- New Cart System -->
     <script src="js/firebase/firebase-auth.js"></script>
-    <!-- Firebase Reviews Manager -->
-    <script src="js/firebase/firebase-reviews-manager.js"></script>
     <script src="js/cart-local-storage.js?v=1.0.0"></script>
     <script src="js/firebase/firebase-cart-manager.js?v=1.0.0"></script>
     <script src="js/cart-manager.js?v=1.0.1"></script>
@@ -1010,111 +982,8 @@ background-color: #000 !important;
     <!-- Product Detail Loader -->
     <script src="js/product-detail-loader.js"></script>
     <script src="js/product-gallery.js"></script>
-
+    
     <!-- Currency Converter -->
     <script src="js/currency-converter.js?v=1.0.1"></script>
-
-    <!-- Make functions global -->
-      window.addToCart = addToCart;
-      window.addToWishlist = addToWishlist;
-
-      // Load and display product reviews
-      async function loadProductReviews(productId) {
-        const reviewsContainer = document.getElementById('reviews-container');
-        const reviewsLoading = document.getElementById('reviews-loading');
-        const noReviews = document.getElementById('no-reviews');
-        const reviewsSummary = document.getElementById('reviews-summary');
-
-        try {
-          const result = await FirebaseReviewsManager.getProductReviews(productId);
-
-          reviewsLoading.style.display = 'none';
-
-          if (result.success && result.reviews.length > 0) {
-            // Show summary
-            reviewsSummary.style.display = 'block';
-            document.getElementById('average-rating').textContent = result.averageRating.toFixed(1);
-            document.getElementById('average-stars').innerHTML = generateStarHTML(result.averageRating);
-            document.getElementById('total-reviews-text').textContent = `${result.totalReviews} ${result.totalReviews === 1 ? 'review' : 'reviews'}`;
-
-            // Display reviews
-            reviewsContainer.innerHTML = result.reviews.map(review => `
-              <div style="background: white; padding: 24px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
-                  <div>
-                    <div style="font-weight: 600; color: #1e293b; margin-bottom: 4px;">${review.userName}</div>
-                    <div style="color: #fbbf24; font-size: 18px;">${generateStarHTML(review.rating)}</div>
-                  </div>
-                  <div style="color: #64748b; font-size: 14px;">
-                    ${new Date(review.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                  </div>
-                </div>
-                ${review.verified ? '<div style="color: #10b981; font-size: 12px; margin-bottom: 12px;"><i class="fas fa-check-circle"></i> Verified Purchase</div>' : ''}
-                ${review.comment ? `<p style="color: #374151; line-height: 1.6; margin-bottom: 16px;">${review.comment}</p>` : ''}
-                ${review.images && review.images.length > 0 ? `
-                  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; margin-top: 16px;">
-                    ${review.images.map(img => `
-                      <img src="${img}" alt="Review image" 
-                           style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; cursor: pointer;"
-                           onclick="openImageModal('${img}')">
-                    `).join('')}
-                  </div>
-                ` : ''}
-              </div>
-            `).join('');
-          } else {
-            noReviews.style.display = 'block';
-          }
-        } catch (error) {
-          console.error('Error loading reviews:', error);
-          reviewsLoading.innerHTML = '<p style="color: #dc2626;">Failed to load reviews. Please try again later.</p>';
-        }
-      }
-
-      function generateStarHTML(rating) {
-        const fullStars = Math.floor(rating);
-        const hasHalfStar = rating % 1 >= 0.5;
-        let html = '';
-
-        for (let i = 0; i < 5; i++) {
-          if (i < fullStars) {
-            html += '<i class="fas fa-star"></i>';
-          } else if (i === fullStars && hasHalfStar) {
-            html += '<i class="fas fa-star-half-alt"></i>';
-          } else {
-            html += '<i class="far fa-star"></i>';
-          }
-        }
-
-        return html;
-      }
-
-      function openImageModal(imageUrl) {
-        const modal = document.createElement('div');
-        modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; display: flex; align-items: center; justify-content: center;';
-        modal.innerHTML = `
-          <div style="position: relative; max-width: 90%; max-height: 90%;">
-            <img src="${imageUrl}" style="max-width: 100%; max-height: 90vh; border-radius: 8px;">
-            <button onclick="this.parentElement.parentElement.remove()" 
-                    style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 20px;">
-              ×
-            </button>
-          </div>
-        `;
-        document.body.appendChild(modal);
-        modal.addEventListener('click', (e) => {
-          if (e.target === modal) modal.remove();
-        });
-      }
-
-      // Load reviews when product is loaded
-      document.addEventListener('DOMContentLoaded', function() {
-        // Wait for product ID to be available
-        const checkProductId = setInterval(() => {
-          const productId = new URLSearchParams(window.location.search).get('id');
-          if (productId) {
-            clearInterval(checkProductId);
-            loadProductReviews(productId);
-          }
-        }, 100);
-      });
+</body>
+</html>

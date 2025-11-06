@@ -1,19 +1,16 @@
+
+
+
+
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
+    
     // Temporary admin dashboard access - allow all operations for debugging
     // TODO: Restrict these rules in production
     match /{document=**} {
       allow read, write: if true; // TEMPORARY: Allow all access for admin dashboard debugging
-    }
-
-    // Product reviews collection
-    match /productReviews/{reviewId} {
-      allow read: if true;
-      allow create: if request.auth != null;
-      allow update: if request.auth != null && request.auth.uid == resource.data.userId;
-      allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
     }
   }
 }
