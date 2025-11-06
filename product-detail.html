@@ -1022,8 +1022,13 @@ background-color: #000 !important;
                 console.log('Loading reviews for product:', productId);
                 const result = await FirebaseReviewsManager.loadProductReviews(productId);
 
+                console.log('Reviews loaded:', result);
+                console.log('Number of reviews:', result.reviews ? result.reviews.length : 0);
+
                 if (result.success && result.reviews.length > 0) {
                     const reviewsHTML = result.reviews.map(review => {
+                        console.log('Processing review:', review);
+                        console.log('Review images:', review.images);
                         const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
                         const reviewDate = review.createdAt ? new Date(review.createdAt.toDate()).toLocaleDateString('en-US', {
                             year: 'numeric',
@@ -1068,7 +1073,15 @@ background-color: #000 !important;
 
                     reviewsContainer.innerHTML = summaryHTML;
                 } else {
-                    reviewsContainer.innerHTML = '<div class="no-reviews-message">No reviews yet. Be the first to review this product!</div>';
+                    console.log('No reviews found for this product');
+                    reviewsContainer.innerHTML = `
+                        <div class="no-reviews-message">
+                            <p>No reviews yet. Be the first to review this product!</p>
+                            <p style="font-size: 14px; color: #999; margin-top: 10px;">
+                                Purchase this product and leave a review with photos from your profile page.
+                            </p>
+                        </div>
+                    `;
                 }
             } catch (error) {
                 console.error('Error loading reviews:', error);
