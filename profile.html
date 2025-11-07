@@ -2528,16 +2528,27 @@
           </form>
         `;
 
-        // Re-attach event listeners
-        setupReviewForm(existingReview);
-
         modal.classList.add('show');
+        
+        // Re-attach event listeners AFTER modal is shown and DOM is updated
+        setTimeout(() => {
+          setupReviewForm(existingReview);
+        }, 50);
       }
 
       function setupReviewForm(existingReview = null) {
-        // Star rating functionality with instant submission
+        console.log('Setting up review form, existing review:', existingReview);
+        
+        // Star rating functionality
         const stars = document.querySelectorAll('.star-rating i');
         const ratingInput = document.getElementById('review-rating');
+
+        if (!stars.length || !ratingInput) {
+          console.error('Review form elements not found in DOM');
+          return;
+        }
+
+        console.log('Found', stars.length, 'stars and rating input');
 
         // Set existing rating if editing
         if (existingReview && existingReview.rating) {
@@ -2550,12 +2561,22 @@
           });
         }
 
-        stars.forEach(star => {
+        // Remove any existing listeners to prevent duplicates
+        const newStars = [];
+        stars.forEach((star, index) => {
+          const newStar = star.cloneNode(true);
+          star.parentNode.replaceChild(newStar, star);
+          newStars.push(newStar);
+        });
+
+        // Attach click handlers to new stars
+        newStars.forEach(star => {
           star.addEventListener('click', function() {
             const rating = this.dataset.rating;
+            console.log('Star clicked, rating:', rating);
             ratingInput.value = rating;
 
-            stars.forEach((s, index) => {
+            newStars.forEach((s, index) => {
               if (index < rating) {
                 s.classList.remove('far');
                 s.classList.add('fas', 'active');
@@ -2569,7 +2590,16 @@
 
         // Form submission for full review
         const form = document.getElementById('review-form');
-        form.addEventListener('submit', handleReviewSubmit);
+        if (form) {
+          // Remove existing listener by cloning
+          const newForm = form.cloneNode(true);
+          form.parentNode.replaceChild(newForm, form);
+          
+          newForm.addEventListener('submit', handleReviewSubmit);
+          console.log('Review form submit handler attached');
+        } else {
+          console.error('Review form not found');
+        }
       }
 
       // Submit rating only (instant)
@@ -2655,12 +2685,11 @@
           if (!hasRating && !hasComment && !hasImages) {
             showNotification('Please provide at least a rating, review text, or upload images', 'error');
             submitBtn.disabled = false;
-            submitText.textContent = reviewId ? 'Update' : 'Submit Review';
+            submitText.textContent = existingReviewId ? 'Update' : 'Submit Review';
             return;
           }
 
           // Handle image uploads
-          const imageInput = document.getElementById('review-images');
           const imageUrls = [];
           
           if (imageInput && imageInput.files.length > 0) {
@@ -2682,7 +2711,7 @@
               if (file.size > 5 * 1024 * 1024) {
                 showNotification('Image file is too large. Maximum size is 5MB.', 'error');
                 submitBtn.disabled = false;
-                submitText.textContent = 'Submit Review';
+                submitText.textContent = existingReviewId ? 'Update' : 'Submit Review';
                 return;
               }
 
@@ -2700,7 +2729,7 @@
                 console.error('Error uploading image:', uploadError);
                 showNotification('Failed to upload image. Please try again.', 'error');
                 submitBtn.disabled = false;
-                submitText.textContent = 'Submit Review';
+                submitText.textContent = existingReviewId ? 'Update' : 'Submit Review';
                 return;
               }
             }
@@ -2766,7 +2795,8 @@
           }
         } finally {
           submitBtn.disabled = false;
-          submitText.textContent = 'Submit Review';
+          const existingReviewId = document.getElementById('review-id').value;
+          submitText.textContent = existingReviewId ? 'Update' : 'Submit Review';
         }
       }
 
