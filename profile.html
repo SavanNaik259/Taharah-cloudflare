@@ -1889,7 +1889,7 @@
       async function loadOrderReviews(orderId, products) {
         console.log('🔍 loadOrderReviews called for order:', orderId);
         console.log('🔍 Products in order:', products);
-        
+
         const orderCard = document.querySelector(`[data-order-id="${orderId}"]`);
         if (!orderCard) {
           console.error('❌ Order card not found for:', orderId);
@@ -1904,7 +1904,7 @@
           console.log('⚠️ Reviews container already exists, removing it');
           reviewsContainer.remove();
         }
-        
+
         // Always create a fresh container
         reviewsContainer = document.createElement('div');
         reviewsContainer.className = 'order-reviews-section';
@@ -1918,21 +1918,21 @@
           }
 
           console.log('👤 Current user:', user.uid);
-          
+
           // Always show the Write Review button by default
           reviewsContainer.innerHTML = `
             <div class="order-actions" style="margin-top: 15px;">
               <button class="review-order-btn shop-now-button" data-order-id="${orderId}" data-order-ref="${orderId}" style="background-color: #c8a97e; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background-color 0.3s;">Write a Review</button>
             </div>
           `;
-          
+
           // Append to order card
           orderCard.appendChild(reviewsContainer);
           console.log('✅ Write Review button added to order card');
 
           // Try to load existing reviews in the background
           const allReviews = [];
-          
+
           for (const product of products) {
             const productId = product.productId || product.id;
             if (!productId) {
@@ -1941,18 +1941,18 @@
             }
 
             console.log('🔍 Checking reviews for product:', productId);
-            
+
             const result = await FirebaseReviewsManager.loadProductReviews(productId);
             if (result.success && result.reviews.length > 0) {
               console.log('📝 Found', result.reviews.length, 'reviews for product:', productId);
-              
+
               // Filter reviews for this order and this user
               const orderReviews = result.reviews.filter(r => 
                 r.orderId === orderId && r.userId === user.uid
               );
-              
+
               console.log('📝 Filtered to', orderReviews.length, 'reviews for this order and user');
-              
+
               allReviews.push(...orderReviews.map(r => ({ 
                 ...r, 
                 productName: product.name, 
@@ -1966,7 +1966,7 @@
           if (allReviews.length > 0) {
             // Replace the button with submitted reviews
             let reviewsHTML = '<div style="margin-bottom: 15px; font-weight: 600; color: #333;">Your Reviews:</div>';
-            
+
             allReviews.forEach(review => {
               const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
               const imagesHTML = review.images && review.images.length > 0 
@@ -2188,13 +2188,15 @@
         <form id="review-form">
           <input type="hidden" id="review-product-id">
           <input type="hidden" id="review-order-id">
+          <input type="hidden" id="review-id">
+          <input type="hidden" id="existing-review-images" value='[]'>
 
           <div class="form-group">
             <label>Product: <span id="review-product-name" style="font-weight: normal;"></span></label>
           </div>
 
           <div class="form-group">
-            <label for="review-rating">Rating *</label>
+            <label for="review-rating">Rating (Optional)</label>
             <div class="star-rating" id="star-rating">
               <i class="far fa-star" data-rating="1"></i>
               <i class="far fa-star" data-rating="2"></i>
@@ -2202,18 +2204,26 @@
               <i class="far fa-star" data-rating="4"></i>
               <i class="far fa-star" data-rating="5"></i>
             </div>
-            <input type="hidden" id="review-rating" name="rating" required>
+            <input type="hidden" id="review-rating" name="rating">
+            <small style="color: #666; display: block; margin-top: 5px;">Click on a star to rate</small>
           </div>
 
           <div class="form-group">
-            <label for="review-comment">Your Review *</label>
-            <textarea id="review-comment" name="comment" rows="4" required placeholder="Share your experience with this product..."></textarea>
+            <label for="review-comment">Your Review (Optional)</label>
+            <textarea id="review-comment" name="comment" rows="4" placeholder="Share your experience with this product..."></textarea>
           </div>
 
           <div class="form-group">
             <label for="review-images">Upload Images (Optional)</label>
+
+            <!-- Existing images preview -->
+            <div id="existing-images-container" style="display: none; margin-bottom: 15px;">
+              <label style="font-size: 14px; color: #666; margin-bottom: 8px; display: block;">Current Images:</label>
+              <div id="existing-images-preview" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+            </div>
+
             <input type="file" id="review-images" accept="image/*" multiple style="padding: 8px;">
-            <small style="color: #777; display: block; margin-top: 5px;">You can upload up to 3 images</small>
+            <small style="color: #777; display: block; margin-top: 5px;">You can upload up to 3 images total (including existing ones)</small>
           </div>
 
           <div class="modal-buttons">
@@ -2358,12 +2368,54 @@
         gap: 10px;
         flex-wrap: wrap;
       }
+      
+      /* Style for image previews in review modal */
+      .review-image-preview {
+        position: relative;
+        width: 80px;
+        height: 80px;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #ddd;
+      }
+
+      .review-image-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .delete-image-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background-color: rgba(255, 0, 0, 0.7);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
+        line-height: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+
+      .delete-image-btn:hover {
+        background-color: rgba(255, 0, 0, 1);
+      }
     </style>
 
     <script>
       // Review Modal Functions
       let currentReviewOrderId = null;
       let currentReviewProducts = [];
+      let uploadedImageFiles = []; // To keep track of newly uploaded files
+      let existingReviewImagesData = []; // To store URLs of existing images
 
       function openReviewModal(orderId, orderRef, options = {}) {
         currentReviewOrderId = orderId;
@@ -2378,14 +2430,6 @@
         }
 
         // Find the order to get products - MUST get actual order data
-        const orderCard = document.querySelector(`[data-order-id="${orderId}"]`);
-        if (!orderCard) {
-          console.error("Order card not found for ID:", orderId);
-          showNotification('Could not find order details. Please refresh the page.', 'error');
-          return;
-        }
-
-        // Get the actual order data from Firebase to ensure we have product IDs
         firebase.firestore()
           .collection('users')
           .doc(firebase.auth().currentUser.uid)
@@ -2408,16 +2452,14 @@
               return;
             }
 
-            // Map products with their actual IDs from Firestore
             currentReviewProducts = items.map(item => ({
               name: item.name || 'Product',
               image: item.image || '/images/product-placeholder.jpg',
-              id: item.productId || item.id || '' // Get ID from order data
+              id: item.productId || item.id || ''
             }));
 
             console.log('Products loaded for review:', currentReviewProducts);
 
-            // Validate that all products have IDs
             const missingIds = currentReviewProducts.filter(p => !p.id);
             if (missingIds.length > 0) {
               console.error('Some products missing IDs:', missingIds);
@@ -2425,7 +2467,6 @@
               return;
             }
 
-            // Continue with modal display
             if (currentReviewProducts.length === 1) {
               showReviewForm(currentReviewProducts[0]);
             } else {
@@ -2436,8 +2477,7 @@
             console.error('Error loading order for review:', error);
             showNotification('Failed to load order details: ' + error.message, 'error');
           });
-
-        }
+      }
 
       function showProductSelector() {
         const modal = document.getElementById('review-modal');
@@ -2474,7 +2514,11 @@
 
         const isEditing = existingReview !== null;
         const modalTitle = isEditing ? 'Edit Your Review' : 'Write a Review';
-        
+
+        // Initialize existing images data
+        existingReviewImagesData = existingReview && existingReview.images ? [...existingReview.images] : [];
+        uploadedImageFiles = []; // Reset newly uploaded files
+
         modalContent.innerHTML = `
           <div class="modal-header">
             <h3>${modalTitle}</h3>
@@ -2484,6 +2528,7 @@
             <input type="hidden" id="review-product-id" value="${product.id}">
             <input type="hidden" id="review-order-id" value="${currentReviewOrderId}">
             <input type="hidden" id="review-id" value="${existingReview ? existingReview.id : ''}">
+            <input type="hidden" id="existing-review-images" value='${JSON.stringify(existingReviewImagesData)}'>
 
             <div class="form-group">
               <label>Product: <span id="review-product-name" style="font-weight: normal;">${product.name}</span></label>
@@ -2509,14 +2554,15 @@
 
             <div class="form-group">
               <label for="review-images">Upload Images (Optional)</label>
+
+              <!-- Existing images preview -->
+              <div id="existing-images-container" style="${existingReviewImagesData.length === 0 ? 'display: none;' : 'display: block;'} margin-bottom: 15px;">
+                <label style="font-size: 14px; color: #666; margin-bottom: 8px; display: block;">Current Images:</label>
+                <div id="existing-images-preview" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+              </div>
+
               <input type="file" id="review-images" accept="image/*" multiple style="padding: 8px;">
-              <small style="color: #777; display: block; margin-top: 5px;">You can upload up to 3 images</small>
-            </div>
-            
-            <div style="background: #f0f7ff; padding: 12px; border-radius: 6px; margin-top: 15px; border-left: 4px solid #c8a97e;">
-              <small style="color: #555; display: block;">
-                <strong>Note:</strong> You can submit a review with just stars, text, or images - any combination works!
-              </small>
+              <small style="color: #777; display: block; margin-top: 5px;">You can upload up to 3 images total (including existing ones)</small>
             </div>
 
             <div class="modal-buttons">
@@ -2529,17 +2575,60 @@
         `;
 
         modal.classList.add('show');
-        
+
         // Re-attach event listeners AFTER modal is shown and DOM is updated
         setTimeout(() => {
           setupReviewForm(existingReview);
+          displayExistingImages(); // Display existing images after form is ready
         }, 50);
+      }
+
+      function displayExistingImages() {
+        const previewContainer = document.getElementById('existing-images-preview');
+        if (!previewContainer) return;
+
+        previewContainer.innerHTML = ''; // Clear previous previews
+
+        existingReviewImagesData.forEach((imageUrl, index) => {
+          const imgElement = document.createElement('div');
+          imgElement.className = 'review-image-preview';
+          imgElement.innerHTML = `
+            <img src="${imageUrl}" alt="Review Image ${index + 1}">
+            <button type="button" class="delete-image-btn" data-image-url="${imageUrl}" onclick="removeExistingImage(event, '${imageUrl}')">&times;</button>
+          `;
+          previewContainer.appendChild(imgElement);
+        });
+      }
+
+      function removeExistingImage(event, imageUrl) {
+        event.preventDefault();
+        event.stopPropagation(); // Prevent form submission
+
+        // Remove from the array that will be submitted
+        existingReviewImagesData = existingReviewImagesData.filter(url => url !== imageUrl);
+        
+        // Update the hidden input value
+        document.getElementById('existing-review-images').value = JSON.stringify(existingReviewImagesData);
+
+        // Remove the image element from the DOM
+        event.target.closest('.review-image-preview').remove();
+
+        // Hide the container if no images are left
+        if (existingReviewImagesData.length === 0) {
+          document.getElementById('existing-images-container').style.display = 'none';
+        }
+
+        // Update the small text to reflect remaining upload capacity
+        const remainingCapacity = 3 - (uploadedImageFiles.length + existingReviewImagesData.length);
+        const smallTextElement = document.querySelector('#review-images').nextElementSibling;
+        if (smallTextElement) {
+            smallTextElement.textContent = `You can upload up to ${Math.max(0, remainingCapacity)} more images.`;
+        }
       }
 
       function setupReviewForm(existingReview = null) {
         console.log('Setting up review form, existing review:', existingReview);
-        
-        // Star rating functionality
+
         const starContainer = document.getElementById('star-rating');
         const ratingInput = document.getElementById('review-rating');
 
@@ -2562,14 +2651,12 @@
           });
         }
 
-        // Use event delegation on the container
         starContainer.onclick = function(e) {
           if (e.target.tagName === 'I' && e.target.dataset.rating) {
             const rating = parseInt(e.target.dataset.rating);
             console.log('Star clicked, rating:', rating);
             ratingInput.value = rating;
 
-            // Update all stars
             stars.forEach((star, index) => {
               if (index < rating) {
                 star.classList.remove('far');
@@ -2582,33 +2669,32 @@
           }
         };
 
-        // Form submission for full review
         const form = document.getElementById('review-form');
         if (form) {
-          // Remove existing listener by cloning
           const newForm = form.cloneNode(true);
           form.parentNode.replaceChild(newForm, form);
-          
           newForm.addEventListener('submit', handleReviewSubmit);
           console.log('Review form submit handler attached');
-          
-          // Re-setup stars after form clone
-          setTimeout(() => setupStarRating(existingReview), 50);
+          setTimeout(() => setupStarRating(existingReview), 50); // Re-setup stars after clone
         } else {
           console.error('Review form not found');
         }
+        
+        // Handle file input changes
+        const imageInput = document.getElementById('review-images');
+        if (imageInput) {
+          imageInput.addEventListener('change', handleImageInputChange);
+        }
       }
-
-      // Separate function for star rating to ensure it works after form clone
+      
       function setupStarRating(existingReview = null) {
         const starContainer = document.getElementById('star-rating');
         const ratingInput = document.getElementById('review-rating');
-        
+
         if (!starContainer || !ratingInput) return;
-        
+
         const stars = starContainer.querySelectorAll('i');
-        
-        // Set existing rating if editing
+
         if (existingReview && existingReview.rating) {
           ratingInput.value = existingReview.rating;
           stars.forEach((s, index) => {
@@ -2618,13 +2704,11 @@
             }
           });
         }
-        
+
         starContainer.onclick = function(e) {
           if (e.target.tagName === 'I' && e.target.dataset.rating) {
             const rating = parseInt(e.target.dataset.rating);
-            console.log('Star clicked, rating:', rating);
             ratingInput.value = rating;
-
             stars.forEach((star, index) => {
               if (index < rating) {
                 star.classList.remove('far');
@@ -2636,6 +2720,67 @@
             });
           }
         };
+      }
+
+      function handleImageInputChange(event) {
+        const files = Array.from(event.target.files);
+        const maxTotalImages = 3;
+        const currentImageCount = existingReviewImagesData.length;
+        const newFilesAllowed = maxTotalImages - currentImageCount;
+
+        if (files.length > newFilesAllowed) {
+            alert(`You can only upload ${newFilesAllowed} more image(s). Please select fewer files.`);
+            event.target.value = ''; // Clear the input
+            return;
+        }
+
+        // Store new files
+        uploadedImageFiles = files;
+
+        // Update the small text
+        const smallTextElement = event.target.nextElementSibling;
+        if (smallTextElement) {
+            smallTextElement.textContent = `You can upload up to ${Math.max(0, newFilesAllowed - files.length)} more images.`;
+        }
+
+        // Preview new images
+        const previewContainer = document.getElementById('existing-images-preview');
+        if (!previewContainer) return;
+        
+        // Clear only the previously uploaded previews, not existing ones
+        document.querySelectorAll('.review-image-preview:not(.existing)').forEach(el => el.remove());
+
+        files.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imgElement = document.createElement('div');
+                imgElement.className = 'review-image-preview';
+                imgElement.innerHTML = `
+                    <img src="${e.target.result}" alt="Uploaded Image ${index + 1}">
+                    <button type="button" class="delete-image-btn" data-file-index="${index}" onclick="removeNewImage(event, ${index})">&times;</button>
+                `;
+                previewContainer.appendChild(imgElement);
+            }
+            reader.readAsDataURL(file);
+        });
+      }
+
+      function removeNewImage(event, index) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Remove from the uploadedImageFiles array
+        uploadedImageFiles.splice(index, 1);
+
+        // Remove the element from DOM
+        event.target.closest('.review-image-preview').remove();
+
+        // Update the small text
+        const remainingCapacity = 3 - (existingReviewImagesData.length + uploadedImageFiles.length);
+        const smallTextElement = document.querySelector('#review-images').nextElementSibling;
+        if (smallTextElement) {
+            smallTextElement.textContent = `You can upload up to ${Math.max(0, remainingCapacity)} more images.`;
+        }
       }
 
       // Submit rating only (instant)
@@ -2663,7 +2808,6 @@
 
           if (result.success) {
             showNotification('Rating submitted successfully!', 'success');
-            // Reload orders to show updated review
             const user = firebase.auth().currentUser;
             if (user) {
               setTimeout(() => {
@@ -2695,45 +2839,41 @@
           const existingReviewId = document.getElementById('review-id').value;
           const imageInput = document.getElementById('review-images');
 
-          // Validate product ID first
           if (!productId || productId.trim() === '') {
             console.error('Product ID is missing:', { productId, productName, orderId });
             showNotification('Product information is missing. Please close and try again.', 'error');
             submitBtn.disabled = false;
-            submitText.textContent = reviewId ? 'Update' : 'Submit Review';
+            submitText.textContent = existingReviewId ? 'Update' : 'Submit Review';
             return;
           }
 
-          // Validate order ID
           if (!orderId || orderId.trim() === '') {
             console.error('Order ID is missing');
             showNotification('Order information is missing. Please refresh the page.', 'error');
             submitBtn.disabled = false;
-            submitText.textContent = reviewId ? 'Update' : 'Submit Review';
+            submitText.textContent = existingReviewId ? 'Update' : 'Submit Review';
             return;
           }
 
-          // Check if at least one field is filled (rating, comment, or images)
           const hasRating = rating && parseInt(rating) > 0;
           const hasComment = comment && comment.trim().length > 0;
-          const hasImages = imageInput && imageInput.files && imageInput.files.length > 0;
+          const hasNewImages = uploadedImageFiles.length > 0;
+          const hasExistingImages = existingReviewImagesData.length > 0;
 
-          if (!hasRating && !hasComment && !hasImages) {
+          if (!hasRating && !hasComment && !hasNewImages && !hasExistingImages) {
             showNotification('Please provide at least a rating, review text, or upload images', 'error');
             submitBtn.disabled = false;
             submitText.textContent = existingReviewId ? 'Update' : 'Submit Review';
             return;
           }
 
-          // Handle image uploads
-          const imageUrls = [];
-          
-          if (imageInput && imageInput.files.length > 0) {
+          let imageUrls = [...existingReviewImagesData]; // Start with existing images
+
+          if (hasNewImages) {
             submitText.innerHTML = '<div class="loading-spinner"></div>Uploading images...';
-            
-            const files = Array.from(imageInput.files).slice(0, 3);
+            const files = uploadedImageFiles.slice(0, 3 - imageUrls.length); // Ensure total doesn't exceed 3
             const user = firebase.auth().currentUser;
-            
+
             if (!user) {
               showNotification('You must be logged in to upload images.', 'error');
               submitBtn.disabled = false;
@@ -2743,7 +2883,7 @@
 
             for (let i = 0; i < files.length; i++) {
               const file = files[i];
-              
+
               if (file.size > 5 * 1024 * 1024) {
                 showNotification('Image file is too large. Maximum size is 5MB.', 'error');
                 submitBtn.disabled = false;
@@ -2755,11 +2895,10 @@
                 const timestamp = Date.now();
                 const fileName = `review_${user.uid}_${timestamp}_${i}.${file.name.split('.').pop()}`;
                 const storageRef = firebase.storage().ref(`reviews/${productId}/${fileName}`);
-                
+
                 const uploadTask = await storageRef.put(file);
                 const downloadURL = await uploadTask.ref.getDownloadURL();
                 imageUrls.push(downloadURL);
-                
                 console.log(`Uploaded image ${i + 1}/${files.length}:`, downloadURL);
               } catch (uploadError) {
                 console.error('Error uploading image:', uploadError);
@@ -2769,8 +2908,7 @@
                 return;
               }
             }
-            
-            console.log('All images uploaded successfully:', imageUrls);
+            console.log('All new images uploaded successfully. Total images:', imageUrls.length);
           }
 
           submitText.innerHTML = '<div class="loading-spinner"></div>Submitting review...';
@@ -2781,29 +2919,20 @@
             orderId: orderId.trim(),
             rating: rating ? parseInt(rating) : 0,
             comment: comment ? comment.trim() : '',
-            images: imageUrls
+            images: imageUrls // This will contain both existing and newly uploaded image URLs
           };
 
-          // Include review ID if editing existing review
           if (existingReviewId && existingReviewId.trim() !== '') {
             reviewData.id = existingReviewId.trim();
             console.log('Updating existing review:', existingReviewId);
           }
 
           console.log('Submitting review with data:', reviewData);
-          console.log('Product ID length:', reviewData.productId.length);
-          console.log('Product ID value:', JSON.stringify(reviewData.productId));
-          console.log('Images count:', imageUrls.length);
-          console.log('Has rating:', !!reviewData.rating);
-          console.log('Has comment:', !!reviewData.comment);
-          console.log('Has images:', imageUrls.length > 0);
-
           const result = await FirebaseReviewsManager.submitReview(reviewData);
 
           if (result.success) {
             showNotification('Review submitted successfully! Thank you for your feedback.', 'success');
             closeReviewModal();
-            // Reload orders to update review status
             const user = firebase.auth().currentUser;
             if (user) {
               await loadUserOrders(user.uid);
@@ -2813,13 +2942,6 @@
           }
         } catch (error) {
           console.error('Error submitting review:', error);
-          console.error('Error details:', {
-            code: error.code,
-            message: error.message,
-            stack: error.stack
-          });
-          
-          // Provide a more user-friendly error message
           if (error.code === 'permission-denied') {
             showNotification('Permission denied. Please ensure you are logged in.', 'error');
           } else if (error.code === 'unauthenticated') {
@@ -2831,8 +2953,8 @@
           }
         } finally {
           submitBtn.disabled = false;
-          const existingReviewId = document.getElementById('review-id').value;
-          submitText.textContent = existingReviewId ? 'Update' : 'Submit Review';
+          const currentReviewId = document.getElementById('review-id').value;
+          submitText.textContent = currentReviewId ? 'Update' : 'Submit Review';
         }
       }
 
@@ -2843,20 +2965,20 @@
         }
         currentReviewOrderId = null;
         currentReviewProducts = [];
+        uploadedImageFiles = []; // Clear uploaded files
+        existingReviewImagesData = []; // Clear existing images data
       }
 
       // Make functions global
       window.openReviewModal = openReviewModal;
       window.closeReviewModal = closeReviewModal;
-      window.selectProductForReview = selectProductForReview; // Needed for the product selector
+      window.selectProductForReview = selectProductForReview;
 
-      // Add event listener for review buttons after orders are loaded
-      // This delegation is more efficient than adding listeners to each button
       document.addEventListener('click', function(e) {
         if (e.target.closest('.review-order-btn')) {
           const btn = e.target.closest('.review-order-btn');
           const orderId = btn.dataset.orderId;
-          const orderRef = btn.dataset.orderRef; // Not currently used, but might be useful
+          const orderRef = btn.dataset.orderRef;
           openReviewModal(orderId, orderRef);
         }
       });
@@ -2893,16 +3015,13 @@
 
     <script>
         function openWhatsAppChat() {
-            // Open WhatsApp with pre-filled message
             window.open('https://wa.me/919310250047?text=Hi! I need help with my profile or orders. Can you assist me?', '_blank');
         }
     </script>
   </body>
   <!-- Fix for closeCartDirectly error -->
   <script>
-    // Define the missing closeCartDirectly function
     window.closeCartDirectly = function() {
-      // Call the regular closeCart function
       if (window.closeCart) {
         return window.closeCart();
       }
