@@ -228,6 +228,7 @@ a {
     margin: 0;
     display: inline-block;
     white-space: nowrap;
+    will-change: transform;
 }
 
 .promo-banner a {
@@ -240,13 +241,13 @@ a {
     color: #6b5538;
 }
 
-/* Continuous scroll animation */
+/* Continuous scroll animation - scrolls through 25% of content for seamless loop */
 @keyframes scroll-left {
     0% {
         transform: translateX(0);
     }
     100% {
-        transform: translateX(-50%);
+        transform: translateX(-25%);
     }
 }
 
@@ -264,7 +265,7 @@ a {
     
     .promo-banner .banner-text {
         font-size: 12px;
-        animation: scroll-left 20s linear infinite;
+        animation: scroll-left 40s linear infinite;
     }
 }
 
