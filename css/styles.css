@@ -231,6 +231,7 @@ a {
     will-change: transform;
     letter-spacing: 1.5px;
     word-spacing: 4px;
+    animation: scroll-left 30s linear infinite;
 }
 
 .promo-banner a {
@@ -267,7 +268,7 @@ a {
     
     .promo-banner .banner-text {
         font-size: 14px;
-        animation: scroll-left 40s linear infinite;
+        animation: scroll-left 20s linear infinite;
         letter-spacing: 1.2px;
         word-spacing: 3px;
     }
