@@ -211,29 +211,23 @@ a {
 
 /* Promo Banner */
 .promo-banner {
-    background-color: #b3a681!important; /* Updated to match footer bottom background color */
-    color: #3393;
-    padding: 20x 0!important; /* Increased height from 15px to 20px */
+    background-color: #b3a681!important;
+    color: #333;
+    padding: 12px 0!important;
     text-align: center;
     position: relative;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
+    overflow: hidden;
+    width: 100%;
 }
 
-.promo-banner p {
+.promo-banner .banner-text {
     font-size: 14px;
     margin: 0;
-    transition: opacity 0.3s ease-in-out;
-}
-
-/* For banner text transitions */
-.promo-banner p.fade-out {
-    opacity: 0;
-}
-
-.promo-banner p.fade-in {
-    opacity: 1;
+    display: inline-block;
+    white-space: nowrap;
 }
 
 .promo-banner a {
@@ -246,26 +240,32 @@ a {
     color: #6b5538;
 }
 
-.banner-arrow {
-    background: none;
-    border: none;
-    color: #8b704c;
-    cursor: pointer;
-    position: absolute;
-    padding: 5px;
-    font-weight: 600;
+/* Continuous scroll animation */
+@keyframes scroll-left {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
 }
 
-.banner-arrow:hover {
-    color: #6b5538;
+/* Pause animation on hover */
+.promo-banner:hover .banner-text {
+    animation-play-state: paused;
 }
 
-.banner-prev {
-    left: 20px;
-}
-
-.banner-next {
-    right: 20px;
+/* Responsive banner */
+@media (max-width: 768px) {
+    .promo-banner {
+        font-size: 12px;
+        padding: 10px 0!important;
+    }
+    
+    .promo-banner .banner-text {
+        font-size: 12px;
+        animation: scroll-left 20s linear infinite;
+    }
 }
 
 /* Navigation */

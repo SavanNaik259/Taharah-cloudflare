@@ -1,16 +1,15 @@
-// Banner rotator script with continuous auto-scroll animation
+// Banner rotator script with continuous auto-scroll animation (marquee style)
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Banner rotator script loaded');
 
     // Elements
+    const promoBanner = document.querySelector('.promo-banner');
     const bannerText = document.querySelector('.promo-banner .banner-text');
 
-    if (!bannerText) {
-        console.error('Banner text element not found');
+    if (!promoBanner || !bannerText) {
+        console.error('Banner elements not found');
         return;
     }
-
-    let currentBannerIndex = 0;
 
     // Banner content array
     const bannerContents = [
@@ -43,44 +42,30 @@ document.addEventListener('DOMContentLoaded', function() {
         return bannerContents[index];
     }
 
-    // Function to display a specific banner with smooth fade transition
-    function showBanner(index) {
-        console.log('Showing banner ' + index);
-
-        // Fade out
-        bannerText.style.opacity = '0';
-
-        // Wait for fade out to complete then change text and fade in
-        setTimeout(function() {
-            bannerText.innerHTML = getBannerContent(index);
-
-            // Fade in
-            bannerText.style.opacity = '1';
-
-            console.log('Banner content updated to: ' + index);
-        }, 500);
+    // Create continuous scrolling content
+    function createScrollingBanner() {
+        // Combine both banner messages with separator
+        const combinedContent = bannerContents.map((content, index) => getBannerContent(index)).join(' &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; ');
+        
+        // Duplicate the content to create seamless loop
+        const scrollContent = combinedContent + ' &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; ' + combinedContent;
+        
+        bannerText.innerHTML = scrollContent;
     }
 
-    // Function to display the next banner
-    function nextBanner() {
-        currentBannerIndex = (currentBannerIndex + 1) % 2;
-        showBanner(currentBannerIndex);
-    }
+    // Initialize scrolling banner
+    createScrollingBanner();
+
+    // Apply CSS animation for continuous scroll
+    bannerText.style.display = 'inline-block';
+    bannerText.style.whiteSpace = 'nowrap';
+    bannerText.style.paddingRight = '100%';
+    bannerText.style.animation = 'scroll-left 30s linear infinite';
 
     // Listen for language change events
     document.addEventListener('languageChanged', function() {
-        showBanner(currentBannerIndex);
+        createScrollingBanner();
     });
 
-    // Set initial opacity and show first banner
-    bannerText.style.opacity = '1';
-    bannerText.style.transition = 'opacity 0.5s ease-in-out';
-
-    // Show the first banner
-    showBanner(0);
-
-    // Auto-rotate the banner every 4 seconds (4000ms)
-    setInterval(nextBanner, 4000);
-
-    console.log('Banner auto-rotation set up with continuous scrolling');
+    console.log('Banner continuous auto-scroll animation set up');
 });
