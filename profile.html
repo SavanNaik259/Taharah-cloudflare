@@ -2222,8 +2222,16 @@
               <div id="existing-images-preview" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
             </div>
 
-            <input type="file" id="review-images" accept="image/*" multiple style="padding: 8px;">
-            <small style="color: #777; display: block; margin-top: 5px;">You can upload up to 3 images total (including existing ones)</small>
+            <!-- Custom styled file input -->
+            <div class="custom-file-upload">
+              <input type="file" id="review-images" accept="image/*" multiple class="file-input-hidden">
+              <label for="review-images" class="file-upload-label">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <span class="file-upload-text">Choose Images</span>
+                <span class="file-count-badge">0 selected</span>
+              </label>
+            </div>
+            <small style="color: #777; display: block; margin-top: 8px;">You can upload up to 3 images total (including existing ones). Supported formats: JPG, PNG, GIF</small>
           </div>
 
           <div class="modal-buttons">
@@ -2434,6 +2442,82 @@
         flex-wrap: wrap;
       }
       
+      /* Custom File Upload Styling */
+      .custom-file-upload {
+        position: relative;
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+      }
+
+      .file-input-hidden {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+        overflow: hidden;
+      }
+
+      .file-upload-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 16px 24px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 2px dashed #c8a97e;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .file-upload-label:hover {
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+        border-color: #b39063;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(200, 169, 126, 0.2);
+      }
+
+      .file-upload-label:active {
+        transform: translateY(0);
+      }
+
+      .file-upload-label i {
+        font-size: 24px;
+        color: #c8a97e;
+        transition: transform 0.3s ease;
+      }
+
+      .file-upload-label:hover i {
+        transform: scale(1.1);
+        color: #b39063;
+      }
+
+      .file-upload-text {
+        font-size: 15px;
+        font-weight: 500;
+        color: #333;
+        letter-spacing: 0.3px;
+      }
+
+      .file-count-badge {
+        background: #c8a97e;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-left: auto;
+        transition: all 0.3s ease;
+      }
+
+      .file-upload-label:hover .file-count-badge {
+        background: #b39063;
+        transform: scale(1.05);
+      }
+
       /* Style for image previews in review modal */
       .review-image-preview {
         position: relative;
@@ -2793,9 +2877,18 @@
         const currentImageCount = existingReviewImagesData.length;
         const newFilesAllowed = maxTotalImages - currentImageCount;
 
+        // Update file count badge
+        const fileCountBadge = document.querySelector('.file-count-badge');
+        if (fileCountBadge) {
+            fileCountBadge.textContent = `${files.length} selected`;
+        }
+
         if (files.length > newFilesAllowed) {
             alert(`You can only upload ${newFilesAllowed} more image(s). Please select fewer files.`);
             event.target.value = ''; // Clear the input
+            if (fileCountBadge) {
+                fileCountBadge.textContent = '0 selected';
+            }
             return;
         }
 
@@ -2803,9 +2896,9 @@
         uploadedImageFiles = files;
 
         // Update the small text
-        const smallTextElement = event.target.nextElementSibling;
+        const smallTextElement = event.target.parentElement.nextElementSibling;
         if (smallTextElement) {
-            smallTextElement.textContent = `You can upload up to ${Math.max(0, newFilesAllowed - files.length)} more images.`;
+            smallTextElement.textContent = `You can upload up to ${Math.max(0, newFilesAllowed - files.length)} more images. Supported formats: JPG, PNG, GIF`;
         }
 
         // Preview new images
@@ -2840,11 +2933,18 @@
         // Remove the element from DOM
         event.target.closest('.review-image-preview').remove();
 
+        // Update file count badge
+        const fileCountBadge = document.querySelector('.file-count-badge');
+        if (fileCountBadge) {
+            fileCountBadge.textContent = `${uploadedImageFiles.length} selected`;
+        }
+
         // Update the small text
         const remainingCapacity = 3 - (existingReviewImagesData.length + uploadedImageFiles.length);
-        const smallTextElement = document.querySelector('#review-images').nextElementSibling;
+        const fileInput = document.querySelector('#review-images');
+        const smallTextElement = fileInput ? fileInput.parentElement.nextElementSibling : null;
         if (smallTextElement) {
-            smallTextElement.textContent = `You can upload up to ${Math.max(0, remainingCapacity)} more images.`;
+            smallTextElement.textContent = `You can upload up to ${Math.max(0, remainingCapacity)} more images. Supported formats: JPG, PNG, GIF`;
         }
       }
 
