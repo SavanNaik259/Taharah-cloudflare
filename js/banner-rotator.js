@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Apply CSS animation for continuous scroll
     bannerText.style.display = 'inline-block';
     bannerText.style.whiteSpace = 'nowrap';
-    bannerText.style.animation = 'scroll-left 30s linear infinite';
+    bannerText.style.animation = 'scroll-left 20s linear infinite';
 
     // Listen for language change events
     document.addEventListener('languageChanged', function() {
