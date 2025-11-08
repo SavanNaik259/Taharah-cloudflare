@@ -2540,14 +2540,15 @@
         console.log('Setting up review form, existing review:', existingReview);
         
         // Star rating functionality
-        const stars = document.querySelectorAll('.star-rating i');
+        const starContainer = document.getElementById('star-rating');
         const ratingInput = document.getElementById('review-rating');
 
-        if (!stars.length || !ratingInput) {
+        if (!starContainer || !ratingInput) {
           console.error('Review form elements not found in DOM');
           return;
         }
 
+        const stars = starContainer.querySelectorAll('i');
         console.log('Found', stars.length, 'stars and rating input');
 
         // Set existing rating if editing
@@ -2561,32 +2562,25 @@
           });
         }
 
-        // Remove any existing listeners to prevent duplicates
-        const newStars = [];
-        stars.forEach((star, index) => {
-          const newStar = star.cloneNode(true);
-          star.parentNode.replaceChild(newStar, star);
-          newStars.push(newStar);
-        });
-
-        // Attach click handlers to new stars
-        newStars.forEach(star => {
-          star.addEventListener('click', function() {
-            const rating = this.dataset.rating;
+        // Use event delegation on the container
+        starContainer.onclick = function(e) {
+          if (e.target.tagName === 'I' && e.target.dataset.rating) {
+            const rating = parseInt(e.target.dataset.rating);
             console.log('Star clicked, rating:', rating);
             ratingInput.value = rating;
 
-            newStars.forEach((s, index) => {
+            // Update all stars
+            stars.forEach((star, index) => {
               if (index < rating) {
-                s.classList.remove('far');
-                s.classList.add('fas', 'active');
+                star.classList.remove('far');
+                star.classList.add('fas', 'active');
               } else {
-                s.classList.remove('fas', 'active');
-                s.classList.add('far');
+                star.classList.remove('fas', 'active');
+                star.classList.add('far');
               }
             });
-          });
-        });
+          }
+        };
 
         // Form submission for full review
         const form = document.getElementById('review-form');
@@ -2597,9 +2591,51 @@
           
           newForm.addEventListener('submit', handleReviewSubmit);
           console.log('Review form submit handler attached');
+          
+          // Re-setup stars after form clone
+          setTimeout(() => setupStarRating(existingReview), 50);
         } else {
           console.error('Review form not found');
         }
+      }
+
+      // Separate function for star rating to ensure it works after form clone
+      function setupStarRating(existingReview = null) {
+        const starContainer = document.getElementById('star-rating');
+        const ratingInput = document.getElementById('review-rating');
+        
+        if (!starContainer || !ratingInput) return;
+        
+        const stars = starContainer.querySelectorAll('i');
+        
+        // Set existing rating if editing
+        if (existingReview && existingReview.rating) {
+          ratingInput.value = existingReview.rating;
+          stars.forEach((s, index) => {
+            if (index < existingReview.rating) {
+              s.classList.remove('far');
+              s.classList.add('fas', 'active');
+            }
+          });
+        }
+        
+        starContainer.onclick = function(e) {
+          if (e.target.tagName === 'I' && e.target.dataset.rating) {
+            const rating = parseInt(e.target.dataset.rating);
+            console.log('Star clicked, rating:', rating);
+            ratingInput.value = rating;
+
+            stars.forEach((star, index) => {
+              if (index < rating) {
+                star.classList.remove('far');
+                star.classList.add('fas', 'active');
+              } else {
+                star.classList.remove('fas', 'active');
+                star.classList.add('far');
+              }
+            });
+          }
+        };
       }
 
       // Submit rating only (instant)
