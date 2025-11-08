@@ -4564,7 +4564,7 @@ For hover state
     width: 100%;
     background-color: #000;
     color: white;
-    padding: 10px 0;
+    padding: 12px 20px;
     text-align: center;
     font-size: 14px;
     font-weight: 500;
@@ -4572,6 +4572,13 @@ For hover state
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
+}
+
+.banner-text {
+    margin: 0;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
 }
 
 .promo-banner a {
@@ -4579,41 +4586,19 @@ For hover state
     text-decoration: underline;
     margin-left: 5px;
     font-weight: bold;
+    transition: color 0.3s ease;
 }
 
 .promo-banner a:hover {
     color: rgba(255, 255, 255, 0.8);
 }
 
-/* Banner fade transitions */
-.fade-in {
-    opacity: 1;
-    transition: opacity 0.3s ease-in;
-}
-
-.fade-out {
-    opacity: 0;
-    transition: opacity 0.3s ease-out;
-}
-
-.banner-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: transparent;
-    color: white;
-    border: none;
-    font-size: 16px;
-    cursor: pointer;
-    padding: 5px;
-}
-
-.banner-prev {
-    left: 10px;
-}
-
-.banner-next {
-    right: 10px;
+/* Responsive banner */
+@media (max-width: 768px) {
+    .promo-banner {
+        font-size: 12px;
+        padding: 10px 15px;
+    }
 }
 
 /* WhatsApp Button */

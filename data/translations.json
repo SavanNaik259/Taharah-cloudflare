@@ -146,12 +146,12 @@
     "your_cart_empty": "Your cart is empty",
     "your_wishlist_empty": "Your wishlist is empty",
     "how_can_help": "How can I help you?",
-    "banner_text_1": "Save 21% on exclusive selections",
+    "banner_text_1": "Free shipping on orders over ₹50,000",
     "banner_link_1": "Shop Now",
-    "banner_text_2": "Free shipping on orders over ₹1999",
-    "banner_link_2": "Learn More",
-    "banner_text_3": "New arrivals for the festive season",
-    "banner_link_3": "View Collection"
+    "banner_text_2": "New arrivals for the festive season",
+    "banner_link_2": "View Collection",
+    "banner_text_3": "Save 21% on exclusive selections",
+    "banner_link_3": "Shop Now"
   },
   "hi": {
     "home": "होम",
@@ -300,12 +300,12 @@
     "your_cart_empty": "आपकी कार्ट खाली है",
     "your_wishlist_empty": "आपकी विशलिस्ट खाली है",
     "how_can_help": "मैं आपकी कैसे मदद कर सकता हूँ?",
-    "banner_text_1": "विशेष चयन पर 21% की बचत करें",
+    "banner_text_1": "₹50,000 से अधिक के ऑर्डर पर मुफ्त शिपिंग",
     "banner_link_1": "अभी खरीदें",
-    "banner_text_2": "₹1999 से अधिक के ऑर्डर पर मुफ्त शिपिंग",
-    "banner_link_2": "अधिक जानें",
-    "banner_text_3": "त्योहारी सीजन के लिए नए आगमन",
-    "banner_link_3": "संग्रह देखें"
+    "banner_text_2": "त्योहारी सीजन के लिए नए आगमन",
+    "banner_link_2": "संग्रह देखें",
+    "banner_text_3": "विशेष चयन पर 21% की बचत करें",
+    "banner_link_3": "अभी खरीदें"
   },
   "es": {
     "home": "Inicio",
@@ -412,7 +412,10 @@
     "personal_styling": "Estilismo Personal",
     "all_collection": "Toda la Colección",
     "view_all": "VER TODO",
-    "add_set_to_bag": "Añadir Set a la Bolsa"
+    "add_set_to_bag": "Añadir Set a la Bolsa",
+    "banner_text_1": "Envío gratuito en pedidos superiores a ₹50,000",
+    "banner_text_2": "Novedades para la temporada festiva",
+    "banner_link_2": "Ver Colección"
   },
   "fr": {
     "home": "Accueil",
@@ -519,7 +522,10 @@
     "personal_styling": "Stylisme Personnel",
     "all_collection": "Toute la Collection",
     "view_all": "VOIR TOUT",
-    "add_set_to_bag": "Ajouter l'Ensemble au Panier"
+    "add_set_to_bag": "Ajouter l'Ensemble au Panier",
+    "banner_text_1": "Livraison gratuite pour les commandes supérieures à 50 000 ₹",
+    "banner_text_2": "Nouveautés pour la saison des fêtes",
+    "banner_link_2": "Voir la Collection"
   },
   "ar": {
     "home": "الرئيسية",
@@ -626,7 +632,10 @@
     "personal_styling": "التصميم الشخصي",
     "all_collection": "جميع المجموعات",
     "view_all": "عرض الكل",
-    "add_set_to_bag": "أضف المجموعة إلى الحقيبة"
+    "add_set_to_bag": "أضف المجموعة إلى الحقيبة",
+    "banner_text_1": "شحن مجاني للطلبات التي تزيد عن 50,000 روبية هندية",
+    "banner_text_2": "وافدون جدد لموسم الأعياد",
+    "banner_link_2": "عرض المجموعة"
   },
   "de": {
     "home": "Startseite",
@@ -733,6 +742,9 @@
     "personal_styling": "Persönliches Styling",
     "all_collection": "Alle Kollektion",
     "view_all": "ALLE ANSEHEN",
-    "add_set_to_bag": "Set zur Tasche Hinzufügen"
+    "add_set_to_bag": "Set zur Tasche Hinzufügen",
+    "banner_text_1": "Kostenloser Versand für Bestellungen über 50.000 ₹",
+    "banner_text_2": "Neuheiten für die festliche Jahreszeit",
+    "banner_link_2": "Kollektion ansehen"
   }
 }
