@@ -121,7 +121,7 @@
 .shop-products {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0;
+    padding: 0 15px;
     width: 100%;
     box-sizing: border-box;
 }
@@ -253,7 +253,7 @@
     }
 
     .shop-products {
-        padding: 0;
+        padding: 0 15px;
     }
 
     .shop-products-section {
@@ -285,7 +285,7 @@
     }
 
     .shop-products {
-        padding: 0;
+        padding: 0 15px;
     }
 
     .shop-products-section {
@@ -330,7 +330,7 @@
     }
 
     .shop-products {
-        padding: 0;
+        padding: 0 12px;
     }
 
     .shop-products-section {
