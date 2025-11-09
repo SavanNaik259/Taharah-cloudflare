@@ -716,9 +716,21 @@
                     <label for="productCategory">Category</label>
                     <select id="productCategory" name="productCategory" required>
                         <option value="">Select Category</option>
+                        <option value="new-arrivals">New Arrivals</option>
                         <option value="featured-collection">Featured Collection</option>
                         <option value="saree-collection">Saree Collection</option>
-                        <option value="new-arrivals">New Arrivals</option>
+                        <option value="gold-necklace">Gold Necklace</option>
+                        <option value="silver-necklace">Silver Necklace</option>
+                        <option value="meenakari-necklace">Meenakari Necklace</option>
+                        <option value="gold-earrings">Gold Earrings</option>
+                        <option value="silver-earrings">Silver Earrings</option>
+                        <option value="meenakari-earrings">Meenakari Earrings</option>
+                        <option value="gold-bangles">Gold Bangles</option>
+                        <option value="silver-bangles">Silver Bangles</option>
+                        <option value="meenakari-bangles">Meenakari Bangles</option>
+                        <option value="gold-rings">Gold Rings</option>
+                        <option value="silver-rings">Silver Rings</option>
+                        <option value="meenakari-rings">Meenakari Rings</option>
                     </select>
                 </div>
 
@@ -1753,11 +1765,6 @@
             // Check if this is a compressed image
             const imageFile = selectedImages[index];
             const isCompressed = imageFile && imageFile.isCompressed;
-
-            // Add compressed class if applicable
-            if (isCompressed) {
-                div.classList.add('compressed');
-            }
 
             // Create compression info for display
             let compressionInfo = '';
