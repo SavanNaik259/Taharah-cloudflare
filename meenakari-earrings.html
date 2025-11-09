@@ -80,13 +80,7 @@
     <header class="header">
         <!-- Promo Banner -->
         <div class="promo-banner">
-            <button class="banner-arrow banner-prev">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <p>Save 21% on exclusive selections - <a href="#">Shop Now</a></p>
-            <button class="banner-arrow banner-next">
-                <i class="fas fa-chevron-right"></i>
-            </button>
+            <p class="banner-text"></p>
         </div>
 
         <!-- New Responsive Navigation -->
@@ -193,6 +187,44 @@
 
     <!-- Overlay for menu background -->
     <div class="menu-overlay" id="menuOverlay"></div>
+
+    <!-- Search Overlay -->
+    <div class="search-overlay" id="searchOverlay">
+        <div class="search-container">
+            <div class="search-header">
+                <div class="search-input-container">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search for products..." data-translate-placeholder="search">
+                    <i class="fas fa-search search-input-icon"></i>
+                </div>
+                <button class="search-close-btn" id="searchCloseBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="search-filters">
+                <button class="search-filter-btn active" data-filter="all" data-translate="all">All</button>
+                <button class="search-filter-btn" data-filter="saree" data-translate="jewelry">jewelry</button>
+                <button class="search-filter-btn" data-filter="lehenga" data-translate="earrings">Earrings</button>
+                <button class="search-filter-btn" data-filter="suit" data-translate="rings">Rings</button>
+            </div>
+
+            <div class="search-content">
+                <div class="search-results-header">
+                    <span class="search-results-count" data-translate-dynamic>0 results found</span>
+                    <button class="search-clear-btn" data-translate-dynamic>Clear all</button>
+                </div>
+
+                <div class="search-results-grid" id="searchResultsGrid">
+                    <!-- Search results will be populated here -->
+                </div>
+
+                <div class="search-no-results" id="searchNoResults" style="display: none;">
+                    <h3 data-translate="no_products_found">No results found</h3>
+                    <p data-translate-dynamic>Try adjusting your search or browse our collections</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Hero Section with Background Image -->
     <section class="new-arrivals-hero">
@@ -318,87 +350,115 @@
       <!-- Footer Toggle Script -->
           <script src="js/footer-toggle.js"></script>
 
-      <!-- Minimalist Collapsible Footer -->
-          <footer class="footer-minimalist">
-              <div class="container">
-                  <!-- Info Section -->
-                  <div class="footer-section">
-                      <button class="footer-toggle" data-section="info-content">
-                          <span class="footer-title">Info</span>
-                          <i class="fas fa-chevron-down"></i>
-                      </button>
-                      <div class="footer-content" id="info-content">
-                          <ul>
-                              <li><a href="about-us.html">About Us</a></li>
-                              <li><a href="terms-conditions.html#shipping-and-delivery">Shipping Policy</a></li>
-                              <li><a href="terms-conditions.html#returns-and-refunds">Returns & Exchanges</a></li>
-                              <li><a href="#">Terms and Conditions</a></li>
-                              <li><a href="#">Privacy Policy</a></li>
-                          </ul>
-                      </div>
-                  </div>
+    <!-- Minimalist Collapsible Footer -->
+    <footer class="footer-minimalist">
+        <div class="container">
+            <!-- Info Section -->
+            <div class="footer-section">
+                <button class="footer-toggle" data-section="info-content">
+                    <span class="footer-title" data-translate="info">Info</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="footer-content" id="info-content">
+                    <ul>
+                        <li><a href="about-us.html" data-translate="about_us">About Us</a></li>
+                        <li><a href="terms-conditions.html#shipping-and-delivery" data-translate-dynamic>Shipping Policy</a></li>
+                        <li><a href="terms-conditions.html#returns-and-refunds" data-translate-dynamic>Returns & Exchanges</a></li>
+                        <li><a href="terms-conditions.html" data-translate-dynamic>Terms and Conditions</a></li>
+                        <li><a href="privacy-policy.html" data-translate-dynamic>Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
 
-                  <!-- Categories Section -->
-                  <div class="footer-section">
-                      <button class="footer-toggle" data-section="categories-content">
-                          <span class="footer-title">Categories</span>
-                          <i class="fas fa-chevron-down"></i>
-                      </button>
-                      <div class="footer-content" id="categories-content">
-                          <ul>
-                              <li><a href="all-collection.html">Necklace</a></li>
-                              <li><a href="all-collection.html">Earrings</a></li>
-                              <li><a href="all-collection.html">Bangles</a></li>
-                              <li><a href="all-collection.html">Rings</a></li>
-                          </ul>
-                      </div>
-                  </div>
+            <!-- Categories Section -->
+            <div class="footer-section">
+                <button class="footer-toggle" data-section="categories-content">
+                    <span class="footer-title" data-translate="categories">Categories</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="footer-content" id="categories-content">
+                    <ul>
+                        <li><a href="all-collection.html" data-translate="necklaces">Necklace</a></li>
+                        <li><a href="all-collection.html" data-translate="earrings">Earrings</a></li>
+                        <li><a href="all-collection.html" data-translate="bangles">Bangles</a></li>
+                        <li><a href="all-collection.html" data-translate="rings">Rings</a></li>
+                    </ul>
+                </div>
+            </div>
 
-                  <!-- Collection Section -->
-                  <div class="footer-section">
-                      <button class="footer-toggle" data-section="collection-content">
-                          <span class="footer-title">Collection</span>
-                          <i class="fas fa-chevron-down"></i>
-                      </button>
-                      <div class="footer-content" id="collection-content">
-                          <ul>
-                              <li><a href="all-collection.html">All Collection</a></li>
-                              <li><a href="meenakari-earrings.html">Meenakari Earrings</a></li>
-                              <li><a href="new-arrivals.html">New Arrivals</a></li>
-                          </ul>
-                      </div>
-                  </div>
+            <!-- Collection Section -->
+            <div class="footer-section">
+                <button class="footer-toggle" data-section="collection-content">
+                    <span class="footer-title" data-translate-dynamic>Collection</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="footer-content" id="collection-content">
+                    <ul>
+                        <li><a href="all-collection.html" data-translate="all_collections">All Collection</a></li>
+                        <li><a href="featured-collection.html" data-translate="featured">Featured Collection</a></li>
+                        <li><a href="new-arrivals.html" data-translate="new_arrivals">New Arrivals</a></li>
+                    </ul>
+                </div>
+            </div>
 
-                  <!-- Exclusive Benefits Section -->
-                  <div class="footer-section">
-                      <button class="footer-toggle" data-section="benefits-content">
-                          <span class="footer-title">Exclusive benefits</span>
-                          <i class="fas fa-chevron-down"></i>
-                      </button>
-                      <div class="footer-content" id="benefits-content">
-                          <ul>
-                              <li><a href="#">Personal Styling</a></li>
-                          </ul>
-                      </div>
-                  </div>
+            <!-- Exclusive Benefits Section -->
+            <div class="footer-section">
+                <button class="footer-toggle" data-section="benefits-content">
+                    <span class="footer-title" data-translate-dynamic>Exclusive benefits</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="footer-content" id="benefits-content">
+                    <ul>
+                        <li><a href="#" data-translate-dynamic>Personal Styling</a></li>
+                    </ul>
+                </div>
+            </div>
 
+            <!-- Social Media Icons Section -->
+            <div class="footer-social-section">
+                <h3 class="social-section-title" data-translate="follow_social">Follow us on social media</h3>
+                <div class="social-icons-container">
+                    <a href="https://www.instagram.com" target="_blank" class="social-icon-link">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://www.facebook.com" target="_blank" class="social-icon-link">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="https://www.youtube.com" target="_blank" class="social-icon-link">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                </div>
+            </div>
 
+            <!-- Download Our App Section -->
+            <div class="footer-app-section">
+                <h3 class="app-section-title" data-translate="download_app">Download Our App</h3>
+                <div class="app-buttons-container">
+                    <a href="#" class="app-store-button">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="Download on App Store">
+                    </a>
+                    <a href="#" class="google-play-button">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play">
+                    </a>
+                </div>
+            </div>
 
-        <div class="footer-bottom">
+            <div class="footer-bottom">
             <div class="container">
                 <div class="footer-info">
                     <div class="copyright">
-                        <p>&copy; 2025 Nazakat. All rights reserved. | Developed by <a href="https://savannaik.netlify.app/" target="_blank" style="color: #9c7c38; text-decoration: none; font-weight: 500;">Savan Naik</a></p>
+                        <p data-translate-dynamic>&copy; 2025 Royal Meenakari. All rights reserved. | Developed by <a href="https://savannaik.netlify.app/" target="_blank" style="color: #9c7c38; text-decoration: none; font-weight: 500;">Savan Naik</a></p>
                     </div>
 
                     <div class="footer-links">
-                        <a href="terms-conditions.html">Terms and Conditions</a>
-                        <a href="privacy-policy.html">Privacy Policy</a>
-                        </div>
+                        <a href="terms-conditions.html" data-translate-dynamic>Terms and Conditions</a>
+                        <a href="privacy-policy.html" data-translate-dynamic>Privacy Policy</a>
+
+                    </div>
 
                     <div class="payment-methods">
                         <span><i class="fab fa-cc-amex"></i></span>
-                        <!-- <span><i class="fab fa-apple-pay"></i></span>
+                       <!-- <span><i class="fab fa-apple-pay"></i></span>
                         <span><i class="fab fa-cc-diners-club"></i></span>-->
                         <span><i class="fab fa-cc-discover"></i></span>
                         <span><i class="fab fa-google-pay"></i></span>
@@ -409,8 +469,9 @@
                     </div>
                 </div>
             </div>
+            </div>
         </div>
-      </footer>
+    </footer>
 
     <!-- Meenakari Earrings Products Loader -->
     <script>
@@ -911,5 +972,14 @@
 
     <!-- Out of Stock Handler -->
     <script src="js/out-of-stock-handler.js?v=1.0.0"></script>
+
+    <!-- WhatsApp Tooltip Auto-Show -->
+    <script src="js/whatsapp-tooltip.js"></script>
+
+    <!-- Currency Converter -->
+    <script src="js/currency-converter.js?v=1.0.0"></script>
+
+    <!-- Language Translator -->
+    <script src="js/language-translator.js?v=1.0.0"></script>
   </body>
 </html>
