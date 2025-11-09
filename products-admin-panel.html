@@ -2144,6 +2144,21 @@
                 });
 
                 console.log('Product updated successfully in Firebase Storage');
+                
+                // Invalidate cache for this category to force fresh load on category pages
+                try {
+                    const cacheKeys = [
+                        `${category.replace(/-/g, '')}Products`,
+                        `${category.replace(/-/g, '')}ProductsTime`,
+                        `${category.replace(/-/g, '')}ProductsETag`
+                    ];
+                    cacheKeys.forEach(key => localStorage.removeItem(key));
+                    localStorage.setItem('lastProductUpdate', Date.now().toString());
+                    console.log(`✅ Invalidated cache for ${category} category after update`);
+                } catch (e) {
+                    console.warn('Could not clear cache, but products were saved successfully:', e);
+                }
+                
                 return true;
 
             } catch (error) {
@@ -2275,6 +2290,22 @@
                 });
 
                 console.log('Products JSON file updated successfully with', existingProducts.length, 'products');
+
+                // Invalidate cache for this category to force fresh load on category pages
+                try {
+                    const cacheKeys = [
+                        `${category.replace(/-/g, '')}Products`,
+                        `${category.replace(/-/g, '')}ProductsTime`,
+                        `${category.replace(/-/g, '')}ProductsETag`
+                    ];
+                    cacheKeys.forEach(key => localStorage.removeItem(key));
+                    
+                    // Set a global flag to invalidate all caches
+                    localStorage.setItem('lastProductUpdate', Date.now().toString());
+                    console.log(`✅ Invalidated cache for ${category} category - fresh products will load on next visit`);
+                } catch (e) {
+                    console.warn('Could not clear cache, but products were saved successfully:', e);
+                }
 
                 // Skip verification to avoid the "Failed to fetch" error
                 console.log('Save completed successfully, skipping verification to avoid fetch errors');
