@@ -57,6 +57,36 @@ exports.handler = async (event, context) => {
       };
     }
 
+    // Validate category parameter
+    const validCategories = [
+      'featured-collection', 
+      'saree-collection', 
+      'new-arrivals',
+      'gold-necklace',
+      'silver-necklace',
+      'meenakari-necklace',
+      'gold-earrings',
+      'silver-earrings',
+      'meenakari-earrings',
+      'gold-bangles',
+      'silver-bangles',
+      'meenakari-bangles',
+      'gold-rings',
+      'silver-rings',
+      'meenakari-rings'
+    ];
+
+    if (!validCategories.includes(category)) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({
+          success: false,
+          message: `Invalid category. Must be one of: ${validCategories.join(', ')}`
+        })
+      };
+    }
+
     // Detect if this is a cache-busting request from admin panel
     const isCacheBust = !!cacheBust;
     if (isCacheBust) {
@@ -73,14 +103,14 @@ exports.handler = async (event, context) => {
     // Check if this is a bandwidth test category
     const isBandwidthTest = category.startsWith('bandwidth-test-');
     let storageUrl;
-    
+
     if (isBandwidthTest) {
       storageUrl = `https://firebasestorage.googleapis.com/v0/b/auric-a0c92.firebasestorage.app/o/bandwidthTest%2F${category}-products.json?alt=media`;
     } else {
       // Use the correct path structure for your Firebase Storage
       storageUrl = `https://firebasestorage.googleapis.com/v0/b/auric-a0c92.firebasestorage.app/o/productData%2F${category}-products.json?alt=media`;
     }
-    
+
     // Add cache busting to Firebase Storage URL for admin panel requests
     if (isCacheBust) {
       storageUrl += `&fbCacheBust=${cacheBust}`;
@@ -98,7 +128,7 @@ exports.handler = async (event, context) => {
         'X-Cache-Bust': `${Date.now()}`  // Force cache invalidation
       }
     } : {};
-    
+
     const response = await fetch(storageUrl, fetchOptions);
 
     if (!response.ok) {
@@ -155,7 +185,7 @@ exports.handler = async (event, context) => {
       // Use shorter max-age with stale-while-revalidate for better performance
       responseHeaders['Cache-Control'] = 'public, max-age=86400, stale-while-revalidate=31536000, stale-if-error=31536000'; // 1 day cache, 1 year stale
       responseHeaders['Netlify-CDN-Cache-Control'] = 'public, max-age=31536000, durable, stale-while-revalidate=31536000'; // Netlify CDN specific with longer cache
-      
+
       // Generate consistent ETag based on product data to ensure proper cache validation
       if (etag) {
         responseHeaders['ETag'] = etag;
@@ -166,7 +196,7 @@ exports.handler = async (event, context) => {
         responseHeaders['ETag'] = `"${productHash}"`;
         console.log(`Generated fallback ETag: ${responseHeaders['ETag']}`);
       }
-      
+
       // Add immutable directive for better CDN caching
       responseHeaders['Cache-Control'] += ', immutable';
     }
