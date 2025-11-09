@@ -478,7 +478,7 @@
                 const now = Date.now();
 
                 if (!forceRefresh && !cacheInvalidated && cachedProducts && (now - lastFetchTime) < CACHE_DURATION) {
-                    console.log('Using memory cached featured products');
+                    console.log('Using memory cached silver-necklace products');
                     return cachedProducts;
                 }
 
@@ -490,7 +490,7 @@
                         const storedETag = localStorage.getItem('silvernecklaceProductsETag');
 
                         if (stored && storedTime && (now - parseInt(storedTime)) < SHORT_CACHE_DURATION) {
-                            console.log('Using localStorage cached featured products');
+                            console.log('Using localStorage cached silver-necklace products');
                             cachedProducts = JSON.parse(stored);
                             cachedETag = storedETag;
                             lastFetchTime = parseInt(storedTime);
@@ -504,7 +504,7 @@
                 let products = [];
 
                 try {
-                    console.log('Loading featured products from Netlify CDN...');
+                    console.log('Loading silver-necklace products from Netlify CDN...');
 
                     // Use Netlify function for proper CDN caching
                     let netlifyEndpoint = '/.netlify/functions/load-products?category=silver-necklace';
@@ -569,7 +569,7 @@
 
                     const data = await response.json();
                     if (!data.success) {
-                        throw new Error(data.message || 'Failed to load featured products from Netlify function');
+                        throw new Error(data.message || 'Failed to load silver-necklace products from Netlify function');
                     }
 
                     products = data.products || [];
