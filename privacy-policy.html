@@ -283,62 +283,22 @@ background-color: #000 !important;
         <nav class="navbar">
             <div class="nav-container">
                 <!-- Logo -->
-                <a href="index.html" class="brand">
-                    <img src="images/logos/IMG_20250801_204447.jpg" alt="Nazakat" class="brand-logo">
-                </a>
+                <a href="index.html" class="brand">Royal Meenakari</a>
 
                 <!-- Mobile Toggle Button -->
                 <div class="hamburger" id="navToggle"><img src="images/icons/bars-staggered (2).png" alt=""style="width: 25px; height: 25px;">
-                </div>
-              <!--  <div class="hamburger" id="navToggle">
-                    <i class="fas fa-bars"></i>
-                </div>-->
-
-                <!-- Navigation Links -->
-                <div class="nav-menu" id="navMenu">
-                    <!-- Close button for mobile menu in the top right corner -->
-                    <i id="closeMenu" class="fa-solid fa-xmark meenu-close" onclick="closeMobileMenu()" style="font-size: 24px; margin-left: 90%; color: #333;" ></i>
-
-                    <ul class="nav-list">
-                        <li class="nav-item"><a href="new-arrivals.html" class="nav-link">New Arrivals</a></li>
-                        <li class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle">Collections <i class="fas fa-chevron-down"></i></a>
-                            <ul class="dropdown-menu">
-                                <li><a href="all-collection.html">All Collection</a></li>
-                                <li><a href="featured-collection.html">Featured Collection</a></li>
-                                <li><a href="saree-collection.html">Saree Collection</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item"><a href="about-us.html" class="nav-link">About</a></li>
-                        <li class="nav-item"><a href="index.html#customer-reviews" class="nav-link">Testimonials</a></li>
-                        <li class="nav-item"><a href="order-track.html" class="nav-link">Order Track</a></li>
-                        <li class="nav-item"><a href="contact-us.html" class="nav-link">Contact</a></li>
-                    </ul>
-
-                    <!-- Mobile account links in separate div after Contact -->
-                    <div class="mobile-account-links mobile-special">
-                        <a href="#" class="mobile-account-link">
-                            <img src="images/icons/user.png" alt="Cart" style="width: 18px; height: 18px;">  &nbsp; Account
-                        </a>
-                        <a href="#" class="mobile-account-link wishlist-toggle">
-                            <img src="images/icons/heart.png" alt="Cart" style="width: 18px; height: 18px;"> &nbsp;   Wishlist (<span class="mobile-wishlist-count">0</span>)
-                        </a>
-                        <a href="#" class="mobile-account-link mobile-cart-toggle">
-                            <img src="images/icons/cart-minus.png" alt="Cart" style="width:18px; height: 18px; vertical-align: middle;">  &nbsp; Shopping Bag (<span class="mobile-cart-count">0</span>)
-                        </a>
-                    </div>
                 </div>
 
                 <!-- Navigation Icons -->
                 <div class="nav-icons">
                     <a href="#" class="icon-link search-icon">
-                        <img src="images/icons/search.png" alt="Search" style="width: 20px; height: 20px;">
+                        <img src="images/icons/search.png" alt="Cart" style="width: 20px; height: 20px;">
                     </a>
-                    <a href="login.html" class="icon-link account-icon" id="user-icon">
-                        <img src="images/icons/user.png" alt="User" style="width: 25px; height: 25px;">
+                    <a href="#" class="icon-link account-icon" id="user-icon">
+                        <img src="images/icons/user.png" alt="Cart" style="width: 25px; height: 25px;">
                     </a>
                     <a href="#" class="icon-link wishlist-icon-container wishlist-toggle">
-                        <img src="images/icons/heart.png" alt="Wishlist" style="width: 20px; height: 20px;">
+                        <img src="images/icons/heart.png" alt="Cart" style="width: 20px; height: 20px;">
                         <div class="wishlist-count">0</div>
                     </a>
                     <a href="#" class="icon-link cart-icon-container cart-toggle" id="cartToggleButton">
@@ -348,6 +308,41 @@ background-color: #000 !important;
                 </div>
             </div>
         </nav>
+
+        <!-- Navigation Links - Moved outside nav-container to avoid backdrop-filter containing block -->
+        <div class="nav-menu" id="navMenu">
+            <!-- Close button for mobile menu in the top right corner -->
+            <i id="closeMenu" class="fa-solid fa-xmark meenu-close" onclick="closeMobileMenu()" style="font-size: 24px; margin-left: 90%; color: #333;" ></i>
+
+            <ul class="nav-list">
+                <li class="nav-item"><a href="new-arrivals.html" class="nav-link">New Arrivals</a></li>
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle">Collection <i class="fas fa-chevron-down"></i></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="all-collection.html">All Collection</a></li>
+                        <li><a href="saree-collection.html">Saree collection</a></li>
+                        <li><a href="featured-collection.html">Featured collection</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a href="about-us.html" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="index.html#testimonials" class="nav-link">Testimonials</a></li>
+                <li class="nav-item"><a href="https://www.dtdc.in/trace.asp" class="nav-link">Order Track</a></li>
+                <li class="nav-item"><a href="contact-us.html" class="nav-link">Contact</a></li>
+            </ul>
+
+            <!-- Mobile account links in separate div after Contact -->
+            <div class="mobile-account-links mobile-special">
+                <a href="login.html" class="mobile-account-link">
+                    <img src="images/icons/user.png" alt="Cart" style="width: 18px; height: 18px;">  &nbsp; Account
+                </a>
+                <a href="#" class="mobile-account-link wishlist-toggle">
+                    <img src="images/icons/heart.png" alt="Cart" style="width: 18px; height: 18px;"> &nbsp;   Wishlist (<span class="mobile-wishlist-count">0</span>)
+                </a>
+                <a href="#" class="mobile-account-link mobile-cart-toggle">
+                    <img src="images/icons/cart-minus.png" alt="Cart" style="width:18px; height: 18px; vertical-align: middle;">  &nbsp; Shopping Bag (<span class="mobile-cart-count">0</span>)
+                </a>
+            </div>
+        </div>
     </header>
     <!-- Overlay for menu background -->
     <div class="menu-overlay" id="menuOverlay"></div>
