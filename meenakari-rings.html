@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meenakari Rings - Royal Meenakari</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="css/cart.css">
+    <link rel="stylesheet" href="css/mobile-menu.css">
+    <link rel="stylesheet" href="css/shop.css">
+</head>
+<body>
+    <header class="header">
+        <div class="promo-banner"><p class="banner-text"></p></div>
+        <nav class="navbar">
+            <div class="nav-container">
+                <a href="index.html" class="brand">Royal Meenakari</a>
+                <div class="hamburger" id="navToggle"><img src="images/icons/bars-staggered (2).png" alt="Menu" style="width: 25px; height: 25px;"></div>
+                <div class="nav-icons">
+                    <a href="#" class="icon-link search-icon"><img src="images/icons/search.png" alt="Search" style="width: 20px; height: 20px;"></a>
+                    <a href="login.html" class="icon-link account-icon" id="user-icon"><img src="images/icons/user.png" alt="Account" style="width: 25px; height: 25px;"></a>
+                    <a href="#" class="icon-link wishlist-icon-container wishlist-toggle"><img src="images/icons/heart.png" alt="Wishlist" style="width: 20px; height: 20px;"><div class="wishlist-count">0</div></a>
+                    <a href="#" class="icon-link cart-icon-container cart-toggle" id="cartToggleButton"><img src="images/icons/cart-minus.png" alt="Cart" style="width: 20px; height: 20px;"><div class="cart-count">0</div></a>
+                </div>
+            </div>
+        </nav>
+        <div class="nav-menu" id="navMenu">
+            <i id="closeMenu" class="fa-solid fa-xmark meenu-close" onclick="closeMobileMenu()" style="font-size: 24px; margin-left: 90%; color: #333;"></i>
+            <ul class="nav-list">
+                <li class="nav-item"><a href="new-arrivals.html" class="nav-link">New Arrivals</a></li>
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle"><span>Collections</span> <i class="fas fa-chevron-down"></i></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="all-collection.html">All Collection</a></li>
+                        <li><a href="featured-collection.html">Featured Collection</a></li>
+                        <li class="dropdown-submenu"><a href="#"><span>Necklace</span> <i class="fas fa-chevron-right"></i></a><ul class="dropdown-submenu-list"><li><a href="gold-necklace.html">Gold Necklace</a></li><li><a href="silver-necklace.html">Silver Necklace</a></li><li><a href="meenakari-necklace.html">Meenakari Necklace</a></li></ul></li>
+                        <li class="dropdown-submenu"><a href="#"><span>Earrings</span> <i class="fas fa-chevron-right"></i></a><ul class="dropdown-submenu-list"><li><a href="gold-earrings.html">Gold Earrings</a></li><li><a href="silver-earrings.html">Silver Earrings</a></li><li><a href="meenakari-earrings.html">Meenakari Earrings</a></li></ul></li>
+                        <li class="dropdown-submenu"><a href="#"><span>Bangles</span> <i class="fas fa-chevron-right"></i></a><ul class="dropdown-submenu-list"><li><a href="gold-bangles.html">Gold Bangles</a></li><li><a href="silver-bangles.html">Silver Bangles</a></li><li><a href="meenakari-bangles.html">Meenakari Bangles</a></li></ul></li>
+                        <li class="dropdown-submenu"><a href="#"><span>Rings</span> <i class="fas fa-chevron-right"></i></a><ul class="dropdown-submenu-list"><li><a href="gold-rings.html">Gold Rings</a></li><li><a href="silver-rings.html">Silver Rings</a></li><li><a href="meenakari-rings.html">Meenakari Rings</a></li></ul></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a href="about-us.html" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="#customer-reviews" class="nav-link">Testimonials</a></li>
+                <li class="nav-item"><a href="book-appointment.html" class="nav-link">Book Appointment</a></li>
+                <li class="nav-item"><a href="order-track.html" class="nav-link">Order Track</a></li>
+                <li><a href="contact-us.html" class="nav-link">Contact</a></li>
+            </ul>
+            <div class="mobile-account-links mobile-special">
+                <a href="login.html" class="mobile-account-link"><img src="images/icons/user.png" alt="Account" style="width: 18px; height: 18px;"> &nbsp; <span>Account</span></a>
+                <a href="#" class="mobile-account-link wishlist-toggle"><img src="images/icons/heart.png" alt="Wishlist" style="width: 18px; height: 18px;"> &nbsp; <span>Wishlist</span> (<span class="mobile-wishlist-count">0</span>)</a>
+                <a href="#" class="mobile-account-link mobile-cart-toggle"><img src="images/icons/cart-minus.png" alt="Cart" style="width:18px; height: 18px;"> &nbsp; <span>Shopping Bag</span> (<span class="mobile-cart-count">0</span>)</a>
+            </div>
+        </div>
+    </header>
+    <div class="menu-overlay" id="menuOverlay"></div>
+    <section class="shop-hero"><div class="hero-content"><h1 class="hero-title">Meenakari Rings</h1><p class="hero-subtitle">Discover our exquisite collection of meenakari rings</p></div></section>
+    <section class="shop-products-section"><div class="shop-products"><div class="products-grid" id="meenakari-rings-products-grid"></div></div></section>
+    <div class="cart-panel"><div class="cart-panel-header"><h3>Your Shopping Bag</h3><button class="close-cart-btn">×</button></div><div class="cart-items"><div class="empty-cart-message">Your cart is empty</div></div><div class="cart-panel-footer"><div class="cart-panel-subtotal"><span>Subtotal:</span><span class="subtotal-amount">₹0.00</span></div><div class="cart-panel-buttons"><button class="view-cart-btn continue-shopping-btn">Continue Shopping</button><a href="checkout.html" class="checkout-btn">Checkout</a></div></div></div>
+    <div class="cart-panel-overlay"></div>
+    <div class="wishlist-panel"><div class="wishlist-panel-header"><h3>Your Wishlist</h3><button class="close-wishlist-btn">×</button></div><div class="wishlist-items"><div class="empty-wishlist-message">Your wishlist is empty</div></div></div>
+    <div class="wishlist-panel-overlay"></div>
+    <footer class="footer"><div class="footer-content"><div class="footer-section"><h3>About Us</h3><p>Royal Meenakari - Timeless elegance in every piece</p></div><div class="footer-section"><h3>Quick Links</h3><ul><li><a href="about-us.html">About</a></li><li><a href="contact-us.html">Contact</a></li><li><a href="privacy-policy.html">Privacy Policy</a></li><li><a href="terms-conditions.html">Terms & Conditions</a></li></ul></div><div class="footer-section"><h3>Contact</h3><p>Email: info@royalmeenakari.com</p><p>Phone: +91 1234567890</p></div></div><div class="footer-bottom"><p>&copy; 2025 Royal Meenakari. All rights reserved.</p></div></footer>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/banner-rotator.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/mobile-menu.js"></script>
+    <script src="js/cart-manager.js"></script>
+    <script src="js/wishlist-manager.js"></script>
+    <script src="js/firebase/firebase-cart-manager.js"></script>
+    <script src="js/firebase/firebase-wishlist-manager.js"></script>
+    <script src="js/firebase/firebase-auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const productsGrid = document.getElementById('meenakari-rings-products-grid');
+            if (!productsGrid) return;
+            productsGrid.innerHTML = '<div class="loading-spinner"></div>';
+            try {
+                const response = await fetch('/.netlify/functions/load-products?category=meenakari-rings&cacheBust=' + Date.now());
+                const data = await response.json();
+                if (data.success && data.products && data.products.length > 0) {
+                    productsGrid.innerHTML = '';
+                    data.products.forEach(product => {
+                        productsGrid.innerHTML += `<div class="product-item" data-product-id="${product.id}"><a href="product-detail.html?id=${product.id}"><div class="product-image"><img src="${product.image || product.mainImage}" alt="${product.name}"><button class="add-to-wishlist" data-product-id="${product.id}" onclick="event.preventDefault(); event.stopPropagation();"><i class="far fa-heart"></i></button></div><div class="product-details"><h3 class="product-name">${product.name}</h3><div class="product-pricing"><span class="current-price">₹${product.price.toLocaleString('en-IN')}</span></div></div></a></div>`;
+                    });
+                    if (typeof WishlistManager !== 'undefined') WishlistManager.updateWishlistButtonsState();
+                } else {
+                    productsGrid.innerHTML = '<p class="no-products">No products found in this category yet.</p>';
+                }
+            } catch (error) {
+                console.error('Error loading products:', error);
+                productsGrid.innerHTML = '<p class="error-message">Error loading products. Please try again later.</p>';
+            }
+        });
+    </script>
+</body>
+</html>
