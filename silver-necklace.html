@@ -80,13 +80,7 @@
     <header class="header">
         <!-- Promo Banner -->
         <div class="promo-banner">
-            <button class="banner-arrow banner-prev">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <p>Save 21% on exclusive selections - <a href="#">Shop Now</a></p>
-            <button class="banner-arrow banner-next">
-                <i class="fas fa-chevron-right"></i>
-            </button>
+            <p class="banner-text"></p>
         </div>
 
         <!-- New Responsive Navigation -->
@@ -312,13 +306,15 @@
         </div>
     </div>
 
-      <div class="whatsapp-btn">
-          <i class="fab fa-whatsapp"></i>
-      </div>
-      <!-- Footer Toggle Script -->
-          <script src="js/footer-toggle.js"></script>
+      <!-- WhatsApp Floating Button -->
+    <a href="https://wa.me/919310250047?text=Hi! I'm interested in your jewelry collection" class="whatsapp-btn" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
 
-      <!-- Minimalist Collapsible Footer -->
+    <!-- Footer Toggle Script -->
+    <script src="js/footer-toggle.js"></script>
+
+    <!-- Minimalist Collapsible Footer -->
           <footer class="footer-minimalist">
               <div class="container">
                   <!-- Info Section -->
@@ -338,8 +334,63 @@
                       </div>
                   </div>
 
-                  <!-- Categories Section -->
+                  <!-- Exclusive Benefits Section -->
                   <div class="footer-section">
+                      <button class="footer-toggle" data-section="benefits-content">
+                          <span class="footer-title">Exclusive benefits</span>
+                          <i class="fas fa-chevron-down"></i>
+                      </button>
+                      <div class="footer-content" id="benefits-content">
+                          <ul>
+                              <li><a href="#">Personal Styling</a></li>
+                          </ul>
+                      </div>
+                  </div>
+              </div>
+          </footer>
+
+          <!-- Bottom Footer -->
+          <div class="footer-bottom">
+              <div class="container">
+                  <div class="footer-info">
+                      <div class="copyright">
+                          <p>&copy; 2025 Royal Meenakari. All rights reserved. | Developed by <a href="https://savannaik.netlify.app/" target="_blank" style="color: #9c7c38; text-decoration: none; font-weight: 500;">Savan Naik</a></p>
+                      </div>
+
+                      <div class="footer-links">
+                          <a href="terms-conditions.html">Terms and Conditions</a>
+                          <a href="privacy-policy.html">Privacy Policy</a>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+    <!-- Banner Rotator Script -->
+    <script src="js/banner-rotator.js"></script>
+
+    <!-- Scripts -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/error-handler.js"></script>
+    <script src="js/firebase/firebase-init.js"></script>
+    <script src="js/firebase/firebase-auth.js"></script>
+    <script src="js/cart-manager.js"></script>
+    <script src="js/wishlist-manager.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/search-ui.js"></script>
+    <script src="js/search-manager.js"></script>
+    <script src="js/netlify-helpers.js"></script>
+    <script src="js/language-translator.js"></script>
+    <script src="js/currency-converter.js"></script>
+    <script src="js/out-of-stock-handler.js"></script>
+
+    <!-- Page-specific product loader -->
+    <script>
+        // Set the page type for product loading
+        window.currentPage = 'silver-necklace';
+    </script>
+    <script src="js/new-arrivals-page-loader.js"></script>
+</body>
+</html>
                       <button class="footer-toggle" data-section="categories-content">
                           <span class="footer-title">Categories</span>
                           <i class="fas fa-chevron-down"></i>
