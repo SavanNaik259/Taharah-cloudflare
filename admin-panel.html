@@ -531,7 +531,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 24px;
-            margin-bottom: 24px;
+            margin-bottom: 32px;
         }
 
         .stat-card {
@@ -2587,11 +2587,7 @@
                 </div>
             </div>
 
-            <!-- Inventory Section (Duplicate ID - Assuming this is a mistake and intended for something else) -->
-            <!-- The duplicate ID 'inventory' for a content section might cause issues. -->
-            <!-- Assuming this section is intended for a different purpose or should be removed if redundant -->
-            <!-- For now, commenting it out to avoid potential conflicts -->
-            <!--
+            <!-- Inventory Section -->
             <div id="inventory" class="content-section">
                 <div class="card">
                     <div class="card-header">
@@ -2616,7 +2612,6 @@
                     </div>
                 </div>
             </div>
-            -->
 
             <!-- Analytics Section -->
             <div id="analytics" class="content-section analytics-section">
@@ -4521,8 +4516,8 @@
             } else if (sectionName === 'products') {
                 loadProducts();
             } else if (sectionName === 'inventory') {
-                loadInventorySummary(); // Load summary stats first
-                showInventoryTab('out-of-stock'); // Show default tab content
+                loadInventorySummary();
+                showInventoryTab('out-of-stock'); // Show default tab
             } else if (sectionName === 'customers') {
                 // Customers data is already loaded, just refresh display
                 updateCustomersDisplay();
@@ -4538,11 +4533,6 @@
                         trafficSourcesChart.resize();
                         trafficSourcesChart.update();
                     }
-                    // Also resize other charts that might be affected
-                    if (visitorTrendsChart) visitorTrendsChart.resize();
-                    if (deviceChart) deviceChart.resize();
-                    if (window.countryChart) window.countryChart.resize();
-                    if (window.cityChart) window.cityChart.resize();
                 }, 100);
             } else if (sectionName === 'notifications') {
                 loadNotifications(); // Load notifications when the section is shown
@@ -5059,7 +5049,7 @@
                 <td>₹${parseFloat(product.price || 0).toLocaleString('en-IN')}</td>
                 <td><span class="stock-count ${statusClass}">${stock}</span></td>
                 <td>
-                    <span class="status-badge ${statusClass === 'zero' ? 'status-cancelled' : statusClass === 'low' ? 'status-pending' : 'status === 'normal' ? 'status-confirmed' : ''}">
+                    <span class="status-badge ${statusClass === 'zero' ? 'status-cancelled' : statusClass === 'low' ? 'status-pending' : 'status-confirmed'}">
                         ${statusText}
                     </span>
                 </td>
@@ -7889,7 +7879,7 @@
                                 '#8b5cf6',
                                 '#06b6d4',
                                 '#84cc16',
-                                '#f59e0b',
+                                '#f97316',
                                 '#ec4899',
                                 '#06b6d4',
                                 '#84cc16',
@@ -8422,7 +8412,7 @@
                     </div>
                 `).join('');
 
-            document.getElementById('realtime-traffic-sources').innerHTML = html || '<div style="text-align: center; padding: 20px;#color: #64748b;">No recent traffic</div>';
+            document.getElementById('realtime-traffic-sources').innerHTML = html || '<div style="text-align: center; padding: 20px; color: #64748b;">No recent traffic</div>';
         }
 
         // Get time ago
@@ -9195,6 +9185,170 @@
             } catch (error) {
                 console.error('❌ [CITY CHART] Error updating city chart:', error);
                 // Don't throw error to avoid breaking the analytics display
+            }
+        }
+
+        // Helper function to get country flag emoji
+        function getCountryFlag(countryName) {
+            const flagMap = {
+                'India': '🇮🇳', 'United States': '🇺🇸', 'United Kingdom': '🇬🇧', 'Canada': '🇨🇦',
+                'Australia': '🇦🇺', 'Germany': '🇩🇪', 'France': '🇫🇷', 'Japan': '🇯🇵',
+                'China': '🇨🇳', 'Brazil': '🇧🇷', 'Russia': '🇷🇺', 'South Korea': '🇰🇷',
+                'Mexico': '🇲🇽', 'Italy': '🇮🇹', 'Spain': '🇪🇸', 'Netherlands': '🇳🇱',
+                'Sweden': '🇸🇪', 'Norway': '🇳🇴', 'Denmark': '🇩🇰', 'Finland': '🇫🇮',
+                'Switzerland': '🇨🇭', 'Austria': '🇦🇹', 'Belgium': '🇧🇪', 'Poland': '🇵🇱',
+                'Turkey': '🇹🇷', 'Saudi Arabia': '🇸🇦', 'United Arab Emirates': '🇦🇪',
+                'Singapore': '🇸🇬', 'Thailand': '🇹🇭', 'Philippines': '🇵🇭', 'Indonesia': '🇮🇩',
+                'Malaysia': '🇲🇾', 'Vietnam': '🇻🇳', 'South Africa': '🇿🇦', 'Nigeria': '🇳🇬',
+                'Egypt': '🇪🇬', 'Israel': '🇮🇱', 'New Zealand': '🇳🇿', 'Ireland': '🇮🇪',
+                'Portugal': '🇵🇹', 'Greece': '🇬🇷', 'Czech Republic': '🇨🇿', 'Hungary': '🇭🇺',
+                'Romania': '🇷🇴', 'Bulgaria': '🇧🇬', 'Croatia': '🇭🇷', 'Slovenia': '🇸🇮',
+                'Slovakia': '🇸🇰', 'Lithuania': '🇱🇹', 'Latvia': '🇱🇻', 'Estonia': '🇪🇪',
+                'Ukraine': '🇺🇦', 'Belarus': '🇧🇾', 'Moldova': '🇲🇩', 'Georgia': '🇬🇪',
+                'Armenia': '🇦🇲', 'Azerbaijan': '🇦🇿', 'Kazakhstan': '🇰🇿', 'Uzbekistan': '🇺🇿'
+            };
+            return flagMap[countryName] || '🌍';
+        }
+
+        // Display location error with helpful information
+        function displayLocationError(errorMessage) {
+            const countryStatsElement = document.getElementById('country-stats');
+            if (countryStatsElement) {
+                countryStatsElement.innerHTML = `
+                    <div style="text-align: center; padding: 30px; color: #dc2626;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #fca5a5; margin-bottom: 16px;"></i>
+                        <h3 style="margin: 0 0 8px 0; color: #dc2626;">Error Loading Location Data</h3>
+                        <p style="margin: 0 0 16px 0; font-size: 14px; color: #6b7280;">${escapeHtml(errorMessage)}</p>
+                        <button onclick="refreshLocationData()" class="btn btn-primary" style="padding: 8px 16px; font-size: 14px;">
+                            <i class="fas fa-retry"></i> Try Again
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Update Location Charts with Real Data
+        function updateLocationCharts(locationData) {
+            console.log('📊 [LOCATION CHARTS] Updating charts with location data:', locationData);
+
+            try {
+                // Validate input data
+                if (!locationData || typeof locationData !== 'object') {
+                    console.warn('⚠️ [LOCATION CHARTS] Invalid location data provided');
+                    return;
+                }
+
+                const { top_countries = [], total_visitors = 0 } = locationData;
+
+                // Update country chart if it exists and is properly initialized
+                if (window.countryChart) {
+                    // Validate chart structure
+                    if (!window.countryChart.data || !window.countryChart.data.datasets || !window.countryChart.data.datasets[0]) {
+                        console.error('❌ [LOCATION CHARTS] Country chart has invalid structure');
+                        return;
+                    }
+
+                    if (top_countries.length > 0) {
+                        // Use up to 5 countries for the chart
+                        const countries = top_countries.slice(0, 5);
+                        const labels = countries.map(c => c.country || 'Unknown');
+                        const data = countries.map(c => c.visitors || 0);
+
+                        // Generate colors dynamically based on data length
+                        const colors = [
+                            '#3b82f6', // Blue
+                            '#10b981', // Green  
+                            '#f59e0b', // Yellow
+                            '#ef4444', // Red
+                            '#8b5cf6', // Purple
+                            '#f97316', // Orange
+                            '#06b6d4', // Cyan
+                            '#84cc16', // Lime
+                            '#ec4899', // Pink
+                            '#6b7280'  // Gray
+                        ];
+
+                        // Update chart data
+                        window.countryChart.data.labels = labels;
+                        window.countryChart.data.datasets[0].data = data;
+                        window.countryChart.data.datasets[0].backgroundColor = colors.slice(0, labels.length);
+
+                        // Update chart with animation
+                        window.countryChart.update('active');
+
+                        console.log('✅ [LOCATION CHARTS] Country chart updated with real data:', {
+                            countries: labels,
+                            visitors: data,
+                            totalCountries: top_countries.length
+                        });
+
+                    } else {
+                        // No data - show empty state
+                        window.countryChart.data.labels = ['No Data'];
+                        window.countryChart.data.datasets[0].data = [1];
+                        window.countryChart.data.datasets[0].backgroundColor = ['#e5e7eb'];
+                        window.countryChart.update('none'); // No animation for empty state
+
+                        console.log('📊 [LOCATION CHARTS] Country chart updated with empty state');
+                    }
+                } else {
+                    console.log('⚠️ [LOCATION CHARTS] Country chart not initialized');
+                    // Try to initialize the chart if it doesn't exist
+                    initializeLocationCharts();
+
+                    // Retry updating after initialization
+                    setTimeout(() => {
+                        if (window.countryChart && top_countries.length > 0) {
+                            updateLocationCharts(locationData);
+                        }
+                    }, 100);
+                }
+
+                // Update city chart with real data if available
+                if (window.cityChart) {
+                    const { top_cities = [] } = locationData;
+
+                    if (top_cities.length > 0) {
+                        // Use the existing updateCityChart function to display real data
+                        updateCityChart(locationData);
+                        console.log('📊 [LOCATION CHARTS] City chart updated with real data');
+                    } else {
+                        // Only show "not available" state if there's genuinely no city data
+                        window.cityChart.data.labels = ['City Data Not Available'];
+                        window.cityChart.data.datasets[0].data = [1];
+                        window.cityChart.data.datasets[0].backgroundColor = ['#e5e7eb'];
+                        window.cityChart.update('none');
+
+                        console.log('📊 [LOCATION CHARTS] City chart updated to show not available state (no city data found)');
+                    }
+                } else {
+                    console.log('⚠️ [LOCATION CHARTS] City chart not initialized');
+                }
+
+                console.log('✅ [LOCATION CHARTS] Charts update completed');
+
+            } catch (error) {
+                console.error('❌ [LOCATION CHARTS] Error updating charts:', error);
+                console.error('❌ [LOCATION CHARTS] Error details:', {
+                    message: error.message,
+                    stack: error.stack,
+                    locationData: locationData
+                });
+
+                // Try to reinitialize charts on error
+                try {
+                    console.log('🔄 [LOCATION CHARTS] Attempting to reinitialize charts after error...');
+                    initializeLocationCharts();
+                } catch (reinitError) {
+                    console.error('❌ [LOCATION CHARTS] Failed to reinitialize charts:', reinitError);
+                }
             }
         }
 
