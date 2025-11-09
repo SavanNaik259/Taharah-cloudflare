@@ -5016,6 +5016,13 @@ For hover state
     border-top: 1px solid #e0e0e0;
 }
 
+/* Add padding on mobile to prevent bottom nav from covering footer */
+@media (max-width: 768px) {
+    .footer-bottom {
+        padding-bottom: 90px;
+    }
+}
+
 .footer-info {
     display: flex;
     flex-wrap: wrap;
