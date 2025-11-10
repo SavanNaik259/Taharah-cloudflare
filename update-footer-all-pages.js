@@ -124,19 +124,6 @@ const FOOTER_HTML = `
                     </a>
                 </div>
             </div>
-
-            <!-- Payment Methods Section -->
-            <div class="footer-payment">
-                <div class="payment-icons">
-                    <span><i class="fab fa-cc-amex"></i></span>
-                    <span><i class="fab fa-cc-discover"></i></span>
-                    <span><i class="fab fa-google-pay"></i></span>
-                    <span><i class="fab fa-cc-mastercard"></i></span>
-                    <span><i class="fab fa-cc-paypal"></i></span>
-                    <span class="union-pay">UP</span>
-                    <span><i class="fab fa-cc-visa"></i></span>
-                </div>
-            </div>
         </div>
 
         <!-- Footer Bottom -->
