@@ -4925,10 +4925,9 @@ For hover state
     max-height: 0;
     opacity: 0;
     overflow: hidden;
-    transition: max-height 0.4s ease-out, 
-                opacity 0.4s ease-out, 
-                margin-top 0.4s ease-out;
-    display: block;
+    transition: max-height 0.3s ease-out, 
+                opacity 0.3s ease-out, 
+                margin-top 0.3s ease-out;
 }
 
 .subcategory-list.show {
@@ -4939,15 +4938,18 @@ For hover state
 
 .subcategory-list li {
     margin-bottom: 8px;
+}
+
+.subcategory-list:not(.show) li {
     opacity: 0;
-    transform: translateX(-10px);
-    transition: opacity 0.2s ease-out, 
-                transform 0.2s ease-out;
+    transform: translateY(-5px);
 }
 
 .subcategory-list.show li {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
+    transition: opacity 0.3s ease-out, 
+                transform 0.3s ease-out;
 }
 
 .subcategory-list.show li:nth-child(1) {
@@ -4960,6 +4962,14 @@ For hover state
 
 .subcategory-list.show li:nth-child(3) {
     transition-delay: 0.15s;
+}
+
+.subcategory-list.show li:nth-child(4) {
+    transition-delay: 0.2s;
+}
+
+.subcategory-list.show li:nth-child(5) {
+    transition-delay: 0.25s;
 }
 
 .subcategory-list li a {
