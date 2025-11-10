@@ -4942,7 +4942,14 @@ For hover state
 .subcategory-list li {
     opacity: 0;
     transform: translateX(-10px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-bottom: 8px;
+}
+
+.subcategory-list li a {
+    display: block;
+    transition: color 0.2s ease, padding-left 0.2s ease;
 }
 
 .subcategory-list.show li {
@@ -4960,6 +4967,19 @@ For hover state
 
 .subcategory-list.show li:nth-child(3) {
     transition-delay: 0.2s;
+}
+
+.subcategory-list.show li:nth-child(4) {
+    transition-delay: 0.25s;
+}
+
+.subcategory-list.show li:nth-child(5) {
+    transition-delay: 0.3s;
+}
+
+.subcategory-list li a:hover {
+    color: #333;
+    padding-left: 5px;
 }
 
 /* Social Media Icons Section */
