@@ -4925,14 +4925,13 @@ For hover state
     max-height: 0;
     opacity: 0;
     overflow: hidden;
-    transition: max-height 0.4s ease-out, 
-                opacity 0.4s ease-out, 
-                margin-top 0.4s ease-out;
-    display: block;
+    transition: max-height 0.3s ease-out, 
+                opacity 0.3s ease-out, 
+                margin-top 0.3s ease-out;
 }
 
 .subcategory-list.show {
-    max-height: 500px;
+    max-height: 300px;
     opacity: 1;
     margin-top: 8px;
 }
