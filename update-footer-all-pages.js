@@ -2,104 +2,157 @@
 const fs = require('fs');
 const path = require('path');
 
-const footerHTML = `
+const FOOTER_HTML = `
     <!-- Minimalist Collapsible Footer -->
-    <footer class="footer">
-        <div class="footer-container">
-            <button class="footer-toggle" aria-label="Toggle footer">
-                <span class="footer-toggle-text">Info</span>
-                <i class="fi fi-rs-angle-small-down"></i>
-            </button>
-            
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>Categories</h3>
-                    <ul>
-                        <li><a href="gold-necklace.html">Gold Necklace</a></li>
-                        <li><a href="gold-earrings.html">Gold Earrings</a></li>
-                        <li><a href="gold-rings.html">Gold Rings</a></li>
-                        <li><a href="gold-bangles.html">Gold Bangles</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-section">
-                    <h3>Collection</h3>
-                    <ul>
-                        <li><a href="featured-collection.html">Featured Collection</a></li>
-                        <li><a href="new-arrivals.html">New Arrivals</a></li>
-                        <li><a href="saree-collection.html">Saree Collection</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-section">
-                    <h3>Exclusive benefits</h3>
+    <footer class="footer-minimalist">
+        <div class="container">
+            <!-- Info Section -->
+            <div class="footer-section">
+                <button class="footer-toggle" data-section="info-content">
+                    <span class="footer-title">Info</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="footer-content" id="info-content">
                     <ul>
                         <li><a href="about-us.html">About Us</a></li>
                         <li><a href="contact-us.html">Contact Us</a></li>
                         <li><a href="book-appointment.html">Book Appointment</a></li>
                     </ul>
                 </div>
+            </div>
 
-                <div class="footer-section social-section">
-                    <h3>Follow us on social media</h3>
-                    <div class="social-links">
-                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                        <a href="#" aria-label="Pinterest"><i class="fab fa-pinterest-p"></i></a>
-                    </div>
-                    
-                    <div class="app-download">
-                        <h3>Download Our App</h3>
-                        <div class="app-buttons">
-                            <a href="#" class="app-store">
-                                <i class="fab fa-apple"></i>
-                                <span>Download on<br><strong>App Store</strong></span>
-                            </a>
-                            <a href="#" class="play-store">
-                                <i class="fab fa-google-play"></i>
-                                <span>Get it on<br><strong>Google Play</strong></span>
-                            </a>
-                        </div>
-                    </div>
+            <!-- Categories Section -->
+            <div class="footer-section">
+                <button class="footer-toggle" data-section="categories-content">
+                    <span class="footer-title">Categories</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="footer-content" id="categories-content">
+                    <ul>
+                        <li class="category-with-sub">
+                            <div class="category-item-header">
+                                <a href="gold-necklace.html">Gold</a>
+                                <i class="fas fa-plus category-toggle-icon"></i>
+                            </div>
+                            <ul class="subcategory-list">
+                                <li><a href="gold-necklace.html">Necklace</a></li>
+                                <li><a href="gold-earrings.html">Earrings</a></li>
+                                <li><a href="gold-rings.html">Rings</a></li>
+                                <li><a href="gold-bangles.html">Bangles</a></li>
+                            </ul>
+                        </li>
+                        <li class="category-with-sub">
+                            <div class="category-item-header">
+                                <a href="silver-necklace.html">Silver</a>
+                                <i class="fas fa-plus category-toggle-icon"></i>
+                            </div>
+                            <ul class="subcategory-list">
+                                <li><a href="silver-necklace.html">Necklace</a></li>
+                                <li><a href="silver-earrings.html">Earrings</a></li>
+                                <li><a href="silver-rings.html">Rings</a></li>
+                                <li><a href="silver-bangles.html">Bangles</a></li>
+                            </ul>
+                        </li>
+                        <li class="category-with-sub">
+                            <div class="category-item-header">
+                                <a href="meenakari-necklace.html">Meenakari</a>
+                                <i class="fas fa-plus category-toggle-icon"></i>
+                            </div>
+                            <ul class="subcategory-list">
+                                <li><a href="meenakari-necklace.html">Necklace</a></li>
+                                <li><a href="meenakari-earrings.html">Earrings</a></li>
+                                <li><a href="meenakari-rings.html">Rings</a></li>
+                                <li><a href="meenakari-bangles.html">Bangles</a></li>
+                            </ul>
+                        </li>
+                    </ul>
                 </div>
             </div>
 
-            <div class="footer-bottom">
-                <div class="copyright">
-                    <p>&copy; 2025 Royal Meenakari. All rights reserved. | Developed by <a href="https://savannaik.netlify.app/" target="_blank" style="color: #9c7c38; text-decoration: none; font-weight: 500;">Savan Naik</a></p>
+            <!-- Collection Section -->
+            <div class="footer-section">
+                <button class="footer-toggle" data-section="collection-content">
+                    <span class="footer-title">Collection</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="footer-content" id="collection-content">
+                    <ul>
+                        <li><a href="all-collection.html">All Collection</a></li>
+                        <li><a href="featured-collection.html">Featured Collection</a></li>
+                        <li><a href="new-arrivals.html">New Arrivals</a></li>
+                        <li><a href="saree-collection.html">Saree Collection</a></li>
+                    </ul>
                 </div>
+            </div>
 
+            <!-- Exclusive Benefits Section -->
+            <div class="footer-section">
+                <button class="footer-toggle" data-section="benefits-content">
+                    <span class="footer-title">Exclusive benefits</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="footer-content" id="benefits-content">
+                    <ul>
+                        <li><a href="book-appointment.html">Book an Appointment</a></li>
+                        <li><a href="#">Free Shipping on Orders Over ₹5000</a></li>
+                        <li><a href="#">Easy Returns & Exchanges</a></li>
+                        <li><a href="#">Lifetime Warranty</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Social Media Section -->
+            <div class="footer-social-section">
+                <h4 class="social-section-title">Follow us on social media</h4>
+                <div class="social-icons-container">
+                    <a href="#" class="social-icon-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-icon-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-icon-link" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-icon-link" aria-label="Pinterest"><i class="fab fa-pinterest-p"></i></a>
+                </div>
+            </div>
+
+            <!-- Download App Section -->
+            <div class="footer-app-section">
+                <h3 class="app-section-title">Download Our App</h3>
+                <div class="app-buttons-container">
+                    <a href="#" class="app-store-button">
+                        <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on App Store">
+                    </a>
+                    <a href="#" class="google-play-button">
+                        <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play">
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Bottom -->
+        <div class="footer-bottom">
+            <div class="footer-info">
+                <div class="copyright">
+                    <p>&copy; 2025 Royal Meenakari. All rights reserved. | Developed by <a href="#">Savan Naik</a></p>
+                </div>
                 <div class="footer-links">
                     <a href="terms-conditions.html">Terms and Conditions</a>
                     <a href="privacy-policy.html">Privacy Policy</a>
                 </div>
-
-                <button class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" aria-label="Back to top">
-                    <span>UP</span>
-                    <i class="fi fi-rs-angle-small-up"></i>
-                </button>
             </div>
         </div>
     </footer>
 
-    <!-- Bottom Navigation Bar -->
+    <!-- Bottom Navigation Bar (Mobile Only) -->
     <nav class="bottom-nav">
         <a href="index.html" class="bottom-nav-item">
             <i class="fi fi-rs-home"></i>
-            <span data-translate="home">Home</span>
+            <span>Home</span>
         </a>
         <a href="all-collection.html" class="bottom-nav-item">
             <i class="fi fi-rs-shopping-cart"></i>
-            <span data-translate="shop">Shop</span>
-        </a>
-        <a href="https://wa.me/919310250047?text=Hi! I need help. Can you assist me?" class="bottom-nav-item chat-btn">
-            <i class="fab fa-whatsapp"></i>
-            <span data-translate="help">How can I help you?</span>
+            <span>Shop</span>
         </a>
         <a href="profile.html" class="bottom-nav-item">
             <i class="fi fi-rs-user"></i>
-            <span data-translate="account">Account</span>
+            <span>Account</span>
         </a>
         <div class="bottom-nav-item currency-selector-wrapper">
             <span id="selected-currency-flag" class="currency-flag-display">🇮🇳</span>
@@ -109,7 +162,6 @@ const footerHTML = `
                 <option value="USD">🇺🇸 USD</option>
                 <option value="EUR">🇪🇺 EUR</option>
                 <option value="GBP">🇬🇧 GBP</option>
-                <option value="AUD">🇦🇺 AUD</option>
             </select>
         </div>
         <div class="bottom-nav-item language-selector-wrapper">
@@ -126,7 +178,7 @@ const footerHTML = `
         </div>
         <a href="#" class="bottom-nav-item" id="bottomNavCart">
             <i class="fi fi-rs-shopping-bag"></i>
-            <span data-translate="bag">Bag</span>
+            <span>Bag</span>
         </a>
     </nav>
 
@@ -134,53 +186,55 @@ const footerHTML = `
     <script src="js/footer-toggle.js"></script>
 `;
 
-const pagesToUpdate = [
-    'all-collection.html',
-    'featured-collection.html',
-    'new-arrivals.html',
-    'saree-collection.html',
-    'gold-necklace.html',
-    'gold-earrings.html',
-    'gold-rings.html',
-    'gold-bangles.html',
-    'silver-necklace.html',
-    'silver-earrings.html',
-    'silver-rings.html',
-    'silver-bangles.html',
-    'meenakari-necklace.html',
-    'meenakari-earrings.html',
-    'meenakari-rings.html',
-    'meenakari-bangles.html',
-    'about-us.html',
-    'contact-us.html'
+const files = [
+    "login.html",
+    "signup.html",
+    "profile.html",
+    "book-appointment.html",
+    "all-collection.html",
+    "featured-collection.html",
+    "new-arrivals.html",
+    "saree-collection.html",
+    "gold-necklace.html",
+    "gold-earrings.html",
+    "gold-rings.html",
+    "gold-bangles.html",
+    "silver-necklace.html",
+    "silver-earrings.html",
+    "silver-rings.html",
+    "silver-bangles.html",
+    "meenakari-necklace.html",
+    "meenakari-earrings.html",
+    "meenakari-rings.html",
+    "meenakari-bangles.html",
+    "about-us.html",
+    "contact-us.html"
 ];
 
-console.log('Starting footer update process...\n');
+console.log('Starting footer and bottom nav update...\n');
 
-pagesToUpdate.forEach(file => {
-    const filePath = path.join(__dirname, file);
-    
-    if (!fs.existsSync(filePath)) {
-        console.log(`⚠️  Skipping ${file} - file not found`);
-        return;
-    }
+files.forEach(file => {
+    try {
+        if (!fs.existsSync(file)) {
+            console.log(`⚠️  File not found: ${file}`);
+            return;
+        }
 
-    let content = fs.readFileSync(filePath, 'utf8');
-    
-    // Remove old footer if exists
-    content = content.replace(/<footer[\s\S]*?<\/footer>/gi, '');
-    content = content.replace(/<nav class="bottom-nav">[\s\S]*?<\/nav>/gi, '');
-    content = content.replace(/<!-- Footer Toggle Script -->\s*<script src="js\/footer-toggle.js"><\/script>/gi, '');
-    content = content.replace(/<!-- Minimalist Collapsible Footer -->/gi, '');
-    
-    // Add new footer and nav before closing body tag
-    if (content.includes('</body>')) {
-        content = content.replace('</body>', footerHTML + '\n</body>');
-        fs.writeFileSync(filePath, content, 'utf8');
+        let content = fs.readFileSync(file, 'utf8');
+        
+        // Remove old footer and bottom nav
+        content = content.replace(/<footer class="footer-minimalist">[\s\S]*?<\/footer>/g, '');
+        content = content.replace(/<nav class="bottom-nav">[\s\S]*?<\/nav>/g, '');
+        content = content.replace(/<script src="js\/footer-toggle\.js"><\/script>/g, '');
+        
+        // Add new footer before closing body tag
+        content = content.replace('</body>', `${FOOTER_HTML}\n</body>`);
+        
+        fs.writeFileSync(file, content, 'utf8');
         console.log(`✅ Updated ${file}`);
-    } else {
-        console.log(`⚠️  Skipping ${file} - no closing body tag found`);
+    } catch (error) {
+        console.error(`❌ Error updating ${file}:`, error.message);
     }
 });
 
-console.log('\n✨ Footer update complete!');
+console.log('\n✨ Footer and bottom nav update complete!');
