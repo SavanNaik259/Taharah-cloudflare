@@ -4904,22 +4904,33 @@ For hover state
     color: #999;
     font-size: 12px;
     cursor: pointer;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, color 0.3s ease;
     padding: 5px;
     flex: 0 0 auto;
 }
 
+.category-toggle-icon:hover {
+    color: #666;
+}
+
 .category-toggle-icon.active {
     transform: rotate(45deg);
+    color: #333;
 }
 
 .subcategory-list {
-    transition: all 0.3s ease;
+    max-height: 0;
+    opacity: 0;
     overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+    margin-left: 15px;
 }
 
 .subcategory-list.show {
     display: block !important;
+    max-height: 500px;
+    opacity: 1;
+    margin-top: 8px;
 }
 
 /* Social Media Icons Section */
