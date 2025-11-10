@@ -731,15 +731,118 @@ background-color: #000 !important;
                     </li>
                     <li>
                         <i class="fab fa-whatsapp"></i>
-                        
+                        <a href="https://wa.me/918963815289">+91 89638 15289</a>
+                    </li>
+                </ul>
+
+                <div class="social-links">
+                    <h3>Follow Us</h3>
+                    <div class="social-icons">
+                        <a href="https://www.facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.youtube.com" target="_blank"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Form (Right Side) - Now displays message about WhatsApp -->
+            <div class="contact-form">
+                <h2 style="font-family: 'Playfair Display', serif; font-size: 36px; color: #5E2900; margin-bottom: 20px;">Send Us a Message</h2>
+                <p style="font-family: 'Poppins', sans-serif; font-size: 16px; color: #666; line-height: 1.7; margin-bottom: 30px;">
+                    For quick responses, please reach out to us via WhatsApp at <a href="https://wa.me/918963815289" style="color: #25D366; font-weight: 600;">+91 89638 15289</a> or call us directly at <a href="tel:+919310250047" style="color: #d4af37; font-weight: 600;">+91 93102 50047</a>.
+                </p>
+                <p style="font-family: 'Poppins', sans-serif; font-size: 16px; color: #666; line-height: 1.7;">
+                    You can also email us at <a href="mailto:nazakat2407@gmail.com" style="color: #d4af37; font-weight: 600;">nazakat2407@gmail.com</a> and we'll get back to you as soon as possible.
+                </p>
+                <div style="margin-top: 40px; padding: 30px; background: linear-gradient(135deg, #f9f5f0 0%, #ede5d8 100%); border-radius: 8px;">
+                    <h3 style="font-family: 'Playfair Display', serif; font-size: 24px; color: #5E2900; margin-bottom: 15px;">Business Hours</h3>
+                    <p style="font-family: 'Poppins', sans-serif; font-size: 15px; color: #666; margin: 8px 0;">
+                        <strong>Monday - Saturday:</strong> 10:00 AM - 7:00 PM
+                    </p>
+                    <p style="font-family: 'Poppins', sans-serif; font-size: 15px; color: #666; margin: 8px 0;">
+                        <strong>Sunday:</strong> 11:00 AM - 6:00 PM
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Search Overlay -->
+    <div class="search-overlay" id="searchOverlay">
+        <div class="search-container">
+            <div class="search-header">
+                <div class="search-input-container">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search for products...">
+                    <i class="fas fa-search search-input-icon"></i>
+                </div>
+                <button class="search-close-btn" id="searchCloseBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="search-filters">
+                <button class="search-filter-btn active" data-filter="all">All</button>
+                <button class="search-filter-btn" data-filter="saree">Jewelry</button>
+                <button class="search-filter-btn" data-filter="lehenga">Earrings</button>
+                <button class="search-filter-btn" data-filter="suit">Rings</button>
+            </div>
+
+            <div class="search-content">
+                <div class="search-results-header">
+                    <span class="search-results-count">0 results found</span>
+                    <button class="search-clear-btn">Clear all</button>
+                </div>
+
+                <div class="search-results-grid" id="searchResultsGrid">
+                    <!-- Search results will be populated here -->
+                </div>
+
+                <div class="search-no-results" id="searchNoResults" style="display: none;">
+                    <h3>No results found</h3>
+                    <p>Try adjusting your search or browse our collections</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay for menu background -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+
+    <!-- Cart Panel -->
+    <div id="auricCartPanel" class="cart-panel" style="position:fixed !important; top:0 !important; right:-400px !important; width:400px !important; max-width:90% !important; height:100% !important; background:#ffffff !important; box-shadow:-2px 0 10px rgba(0,0,0,0.3) !important; z-index:999999 !important; transition:right 0.3s ease-in-out !important; display:flex !important; flex-direction:column !important; overflow:hidden !important; visibility:visible !important; pointer-events:auto !important;">
+      <div class="cart-panel-header">
+        <h3>Your Shopping Bag</h3>
+        <button class="close-cart-btn" onclick="closeCartDirectly(); return false;">×</button>
+      </div>
+      <div class="cart-items">
+        <div class="empty-cart-message">Your cart is empty</div>
+      </div>
+      <div class="cart-panel-footer">
+        <div class="cart-panel-subtotal">
+          <span>Subtotal:</span>
+          <span class="subtotal-amount">₹0.00</span>
+        </div>
+        <div class="cart-panel-buttons">
+          <button class="view-cart-btn continue-shopping-btn" onclick="closeCartDirectly(); return false;">Continue Shopping</button>
+          <a href="checkout.html" class="checkout-btn">Checkout</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cart Overlay -->
+    <div id="auricCartOverlay" class="cart-panel-overlay" onclick="closeCartDirectly(); return false;" style="position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; background:rgba(0,0,0,0.5) !important; z-index:999998 !important; display:none !important; visibility:hidden !important;"></div>
+
+    <!-- Fix for closeCartDirectly error -->
+    <script>
+      window.closeCartDirectly = function() {
+        if (window.closeCart) {
+          return window.closeCart();
+        }
+      };
+    </script>
 
     <!-- WhatsApp Tooltip Script -->
     <script src="js/whatsapp-tooltip.js"></script>
-
-    
-
-
-    
 
     <!-- Search Scripts -->
     <script src="js/search-manager.js"></script>
@@ -787,72 +890,9 @@ background-color: #000 !important;
         });
     </script>
 
-    <!-- Contact Form Script -->
+    <!-- Firebase Authentication Check -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const contactForm = document.getElementById('contactForm');
-            const submitBtn = document.getElementById('submitBtn');
-            const successMessage = document.getElementById('successMessage');
-            const errorMessage = document.getElementById('errorMessage');
-
-            contactForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-
-                // Hide previous messages
-                successMessage.style.display = 'none';
-                errorMessage.style.display = 'none';
-
-                // Show loading state
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="loading-spinner"></span>Sending...';
-
-                try {
-                    // Gather form data
-                    const formData = {
-                        firstName: document.getElementById('firstName').value,
-                        lastName: document.getElementById('lastName').value,
-                        email: document.getElementById('email').value,
-                        phone: document.getElementById('phone').value,
-                        subject: document.getElementById('subject').value,
-                        message: document.getElementById('message').value,
-                        timestamp: new Date().toISOString()
-                    };
-
-                    // Send to Netlify function
-                    const response = await fetch('/api/send-contact-email', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(formData)
-                    });
-
-                    const result = await response.json();
-
-                    if (response.ok && result.success) {
-                        // Show success message
-                        successMessage.style.display = 'block';
-                        contactForm.reset();
-
-                        // Scroll to success message
-                        successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    } else {
-                        throw new Error(result.message || 'Failed to send message');
-                    }
-                } catch (error) {
-                    console.error('Error sending contact form:', error);
-                    errorMessage.style.display = 'block';
-                    errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                } finally {
-                    // Reset button state
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<span class="btn-text">Send Message</span>';
-                }
-            });
-
-            // Firebase Authentication Check
-            const FirebaseAuth = window.FirebaseAuth;
-
             function handleAuthentication() {
                 const FirebaseAuth = window.FirebaseAuth;
 
