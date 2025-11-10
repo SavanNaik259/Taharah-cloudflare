@@ -4919,42 +4919,34 @@ For hover state
 }
 
 .subcategory-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 0 15px;
     max-height: 0;
     opacity: 0;
     overflow: hidden;
-    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-                opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-                margin 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                padding 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    margin-left: 15px;
-    padding: 0;
+    transition: max-height 0.3s ease-out, 
+                opacity 0.3s ease-out, 
+                margin-top 0.3s ease-out;
 }
 
 .subcategory-list.show {
-    display: block !important;
-    max-height: 500px;
+    max-height: 300px;
     opacity: 1;
     margin-top: 8px;
-    padding-top: 5px;
-    padding-bottom: 5px;
 }
 
 .subcategory-list li {
-    opacity: 0;
-    transform: translateY(-5px);
-    transition: opacity 0.25s ease-out, 
-                transform 0.25s ease-out;
     margin-bottom: 8px;
-}
-
-.subcategory-list li a {
-    display: block;
-    transition: color 0.2s ease, padding-left 0.2s ease;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: opacity 0.2s ease-out, 
+                transform 0.2s ease-out;
 }
 
 .subcategory-list.show li {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
 }
 
 .subcategory-list.show li:nth-child(1) {
@@ -4969,17 +4961,13 @@ For hover state
     transition-delay: 0.15s;
 }
 
-.subcategory-list.show li:nth-child(4) {
-    transition-delay: 0.2s;
-}
-
-.subcategory-list.show li:nth-child(5) {
-    transition-delay: 0.25s;
-}
-
-/* Closing animation */
-.subcategory-list:not(.show) li {
-    transition-delay: 0s !important;
+.subcategory-list li a {
+    display: block;
+    color: #666;
+    text-decoration: none;
+    font-size: 14px;
+    padding: 5px 0;
+    transition: color 0.2s ease, padding-left 0.2s ease;
 }
 
 .subcategory-list li a:hover {
