@@ -4941,9 +4941,9 @@ For hover state
 
 .subcategory-list li {
     opacity: 0;
-    transform: translateX(-10px);
-    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-                transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(-5px);
+    transition: opacity 0.25s ease-out, 
+                transform 0.25s ease-out;
     margin-bottom: 8px;
 }
 
@@ -4954,27 +4954,32 @@ For hover state
 
 .subcategory-list.show li {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
 }
 
 .subcategory-list.show li:nth-child(1) {
-    transition-delay: 0.1s;
+    transition-delay: 0.05s;
 }
 
 .subcategory-list.show li:nth-child(2) {
-    transition-delay: 0.15s;
+    transition-delay: 0.1s;
 }
 
 .subcategory-list.show li:nth-child(3) {
-    transition-delay: 0.2s;
+    transition-delay: 0.15s;
 }
 
 .subcategory-list.show li:nth-child(4) {
-    transition-delay: 0.25s;
+    transition-delay: 0.2s;
 }
 
 .subcategory-list.show li:nth-child(5) {
-    transition-delay: 0.3s;
+    transition-delay: 0.25s;
+}
+
+/* Closing animation */
+.subcategory-list:not(.show) li {
+    transition-delay: 0s !important;
 }
 
 .subcategory-list li a:hover {
