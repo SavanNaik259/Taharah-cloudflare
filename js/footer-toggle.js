@@ -25,4 +25,39 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
+
+    // Category Subcategory Toggle Functionality
+    const categoryToggleIcons = document.querySelectorAll('.category-toggle-icon');
+
+    categoryToggleIcons.forEach(icon => {
+        icon.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Toggle active class on icon
+            this.classList.toggle('active');
+
+            // Find the subcategory list
+            const categoryItem = this.closest('.category-with-sub');
+            const subcategoryList = categoryItem.querySelector('.subcategory-list');
+
+            // Toggle subcategory visibility
+            if (subcategoryList) {
+                subcategoryList.classList.toggle('show');
+            }
+        });
+    });
+
+    // Prevent category link from navigating when clicking on the category name
+    const categoryHeaders = document.querySelectorAll('.category-item-header a');
+    categoryHeaders.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Trigger the icon click instead
+            const icon = this.parentElement.querySelector('.category-toggle-icon');
+            if (icon) {
+                icon.click();
+            }
+        });
+    });
 });

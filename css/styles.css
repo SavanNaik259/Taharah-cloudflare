@@ -4883,6 +4883,39 @@ For hover state
     color: #333;
 }
 
+/* Category with subcategories styling */
+.category-with-sub {
+    position: relative;
+}
+
+.category-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+}
+
+.category-toggle-icon {
+    color: #999;
+    font-size: 12px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    padding: 5px;
+}
+
+.category-toggle-icon.active {
+    transform: rotate(45deg);
+}
+
+.subcategory-list {
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.subcategory-list.show {
+    display: block !important;
+}
+
 /* Social Media Icons Section */
 .footer-social-section {
     margin-top: 10px;
