@@ -1,4 +1,3 @@
-
 // Footer Toggle Functionality
 document.addEventListener('DOMContentLoaded', function() {
     const footerToggles = document.querySelectorAll('.footer-toggle');
@@ -35,35 +34,16 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             e.stopPropagation();
 
+            // Toggle active class on icon
+            this.classList.toggle('active');
+
             // Find the subcategory list
             const categoryItem = this.closest('.category-with-sub');
             const subcategoryList = categoryItem.querySelector('.subcategory-list');
 
-            if (!subcategoryList) return;
-
-            // Get current state
-            const isCurrentlyOpen = subcategoryList.classList.contains('show');
-
-            // Close all other subcategories first
-            document.querySelectorAll('.subcategory-list.show').forEach(openList => {
-                if (openList !== subcategoryList) {
-                    openList.classList.remove('show');
-                    const otherIcon = openList.closest('.category-with-sub').querySelector('.category-toggle-icon');
-                    if (otherIcon) {
-                        otherIcon.classList.remove('active');
-                    }
-                }
-            });
-
-            // Toggle current subcategory
-            if (isCurrentlyOpen) {
-                // Closing
-                subcategoryList.classList.remove('show');
-                this.classList.remove('active');
-            } else {
-                // Opening
-                subcategoryList.classList.add('show');
-                this.classList.add('active');
+            // Toggle subcategory visibility
+            if (subcategoryList) {
+                subcategoryList.classList.toggle('show');
             }
         });
     });
