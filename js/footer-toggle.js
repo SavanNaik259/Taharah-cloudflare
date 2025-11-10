@@ -35,19 +35,26 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             e.stopPropagation();
 
+            console.log('Plus icon clicked');
+
             // Find the subcategory list
             const categoryItem = this.closest('.category-with-sub');
             if (!categoryItem) {
+                console.log('No category-with-sub parent found');
                 return;
             }
 
             const subcategoryList = categoryItem.querySelector('.subcategory-list');
             if (!subcategoryList) {
+                console.log('No subcategory-list found');
                 return;
             }
 
+            console.log('Subcategory list found:', subcategoryList);
+
             // Get current state
             const isCurrentlyOpen = subcategoryList.classList.contains('show');
+            console.log('Currently open:', isCurrentlyOpen);
 
             // Close all other subcategories first
             document.querySelectorAll('.subcategory-list.show').forEach(openList => {
@@ -65,10 +72,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Closing
                 subcategoryList.classList.remove('show');
                 this.classList.remove('active');
+                console.log('Closing subcategory');
             } else {
                 // Opening
                 subcategoryList.classList.add('show');
                 this.classList.add('active');
+                console.log('Opening subcategory');
             }
         });
     });
