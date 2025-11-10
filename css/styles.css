@@ -4890,9 +4890,14 @@ For hover state
 
 .category-item-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
+    gap: 8px;
     padding: 5px 0;
+}
+
+.category-item-header a {
+    flex: 0 0 auto;
 }
 
 .category-toggle-icon {
@@ -4901,6 +4906,7 @@ For hover state
     cursor: pointer;
     transition: transform 0.3s ease;
     padding: 5px;
+    flex: 0 0 auto;
 }
 
 .category-toggle-icon.active {
