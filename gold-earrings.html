@@ -27,6 +27,178 @@
     <!-- Initialize Firebase -->
 
 
+    <!-- Header -->
+    <header class="site-header">
+        <!-- Promo Banner with rotation -->
+        <div class="promo-banner">
+            <div class="promo-content" id="promoBanner">
+                <span class="promo-text active">Free Shipping on Orders Above ₹5000</span>
+                <span class="promo-text">Cash on Delivery Available</span>
+                <span class="promo-text">Easy Returns Within 7 Days</span>
+            </div>
+        </div>
+
+        <!-- Main Navbar -->
+        <nav class="main-nav">
+            <div class="nav-container">
+                <!-- Hamburger Menu -->
+                <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                    <i class="fi fi-rs-menu-burger"></i>
+                </button>
+
+                <!-- Logo/Branding -->
+                <div class="logo">
+                    <a href="index.html">
+                        <h1>Royal Meenakari</h1>
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation Links -->
+                <ul class="nav-links desktop-nav">
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link" data-translate="shop">Shop</a>
+                        <div class="dropdown-menu">
+                            <a href="all-collection.html" data-translate="all_collections">All Collection</a>
+                            <a href="featured-collection.html" data-translate="featured">Featured Collection</a>
+                            <a href="new-arrivals.html" data-translate="new_arrivals">New Arrivals</a>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link" data-translate="categories">Categories</a>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-column">
+                                <h4 data-translate="necklaces">Necklace</h4>
+                                <a href="gold-necklace.html" data-translate-dynamic>Gold Necklace</a>
+                                <a href="silver-necklace.html" data-translate-dynamic>Silver Necklace</a>
+                                <a href="meenakari-necklace.html" data-translate-dynamic>Meenakari Necklace</a>
+                            </div>
+                            <div class="dropdown-column">
+                                <h4 data-translate="earrings">Earrings</h4>
+                                <a href="gold-earrings.html" data-translate-dynamic>Gold Earrings</a>
+                                <a href="silver-earrings.html" data-translate-dynamic>Silver Earrings</a>
+                                <a href="meenakari-earrings.html" data-translate-dynamic>Meenakari Earrings</a>
+                            </div>
+                            <div class="dropdown-column">
+                                <h4 data-translate="bangles">Bangles</h4>
+                                <a href="gold-bangles.html" data-translate-dynamic>Gold Bangles</a>
+                                <a href="silver-bangles.html" data-translate-dynamic>Silver Bangles</a>
+                                <a href="meenakari-bangles.html" data-translate-dynamic>Meenakari Bangles</a>
+                            </div>
+                            <div class="dropdown-column">
+                                <h4 data-translate="rings">Rings</h4>
+                                <a href="gold-rings.html" data-translate-dynamic>Gold Rings</a>
+                                <a href="silver-rings.html" data-translate-dynamic>Silver Rings</a>
+                                <a href="meenakari-rings.html" data-translate-dynamic>Meenakari Rings</a>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="nav-item"><a href="about-us.html" class="nav-link" data-translate="about_us">About Us</a></li>
+                    <li class="nav-item"><a href="contact-us.html" class="nav-link" data-translate="contact_us">Contact Us</a></li>
+                </ul>
+
+                <!-- Right Icons -->
+                <div class="nav-icons">
+                    <a href="#" class="icon-link search-icon" aria-label="Search">
+                        <i class="fi fi-rs-search"></i>
+                    </a>
+                    <a href="login.html" class="icon-link" id="user-icon" aria-label="Account">
+                        <i class="fi fi-rs-user"></i>
+                    </a>
+                    <a href="#" class="icon-link wishlist-icon" aria-label="Wishlist">
+                        <i class="fi fi-rs-heart"></i>
+                        <span class="wishlist-count">0</span>
+                    </a>
+                    <a href="#" class="icon-link cart-icon-container" id="cartToggleButton" aria-label="Cart">
+                        <i class="fi fi-rs-shopping-bag"></i>
+                        <span class="cart-count">0</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Mobile Menu Sidebar -->
+    <div class="sidebar-menu" id="sidebarMenu">
+        <div class="sidebar-header">
+            <button class="close-menu" id="closeMenu" aria-label="Close menu">
+                <i class="fi fi-rs-cross"></i>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <ul class="sidebar-links">
+                <li><a href="index.html" data-translate="home">Home</a></li>
+                <li class="has-submenu">
+                    <a href="#" id="earringsLink">
+                        <span data-translate="earrings">Earrings</span>
+                        <i class="fi fi-rs-angle-small-right"></i>
+                    </a>
+                    <ul class="submenu" id="earringsSubmenu">
+                        <li><a href="gold-earrings.html" data-translate-dynamic>Gold Earrings</a></li>
+                        <li><a href="silver-earrings.html" data-translate-dynamic>Silver Earrings</a></li>
+                        <li><a href="meenakari-earrings.html" data-translate-dynamic>Meenakari Earrings</a></li>
+                    </ul>
+                </li>
+                <li class="has-submenu">
+                    <a href="#" id="necklaceLink">
+                        <span data-translate="necklaces">Necklace</span>
+                        <i class="fi fi-rs-angle-small-right"></i>
+                    </a>
+                    <ul class="submenu" id="necklaceSubmenu">
+                        <li><a href="gold-necklace.html" data-translate-dynamic>Gold Necklace</a></li>
+                        <li><a href="silver-necklace.html" data-translate-dynamic>Silver Necklace</a></li>
+                        <li><a href="meenakari-necklace.html" data-translate-dynamic>Meenakari Necklace</a></li>
+                    </ul>
+                </li>
+                <li class="has-submenu">
+                    <a href="#" id="banglesLink">
+                        <span data-translate="bangles">Bangles</span>
+                        <i class="fi fi-rs-angle-small-right"></i>
+                    </a>
+                    <ul class="submenu" id="banglesSubmenu">
+                        <li><a href="gold-bangles.html" data-translate-dynamic>Gold Bangles</a></li>
+                        <li><a href="silver-bangles.html" data-translate-dynamic>Silver Bangles</a></li>
+                        <li><a href="meenakari-bangles.html" data-translate-dynamic>Meenakari Bangles</a></li>
+                    </ul>
+                </li>
+                <li class="has-submenu">
+                    <a href="#" id="chainsLink">
+                        <span data-translate="rings">Rings</span>
+                        <i class="fi fi-rs-angle-small-right"></i>
+                    </a>
+                    <ul class="submenu" id="chainsSubmenu">
+                        <li><a href="gold-rings.html" data-translate-dynamic>Gold Rings</a></li>
+                        <li><a href="silver-rings.html" data-translate-dynamic>Silver Rings</a></li>
+                        <li><a href="meenakari-rings.html" data-translate-dynamic>Meenakari Rings</a></li>
+                    </ul>
+                </li>
+                <li class="has-submenu">
+                    <a href="#" id="collectionsLink">
+                        <span data-translate="collections">Collections</span>
+                        <i class="fi fi-rs-angle-small-right"></i>
+                    </a>
+                    <ul class="submenu" id="collectionsSubmenu">
+                        <li><a href="all-collection.html" data-translate="all_collections">All Collection</a></li>
+                        <li><a href="featured-collection.html" data-translate="featured">Featured Collection</a></li>
+                        <li><a href="new-arrivals.html" data-translate="new_arrivals">New Arrivals</a></li>
+                    </ul>
+                </li>
+                <li><a href="about-us.html" data-translate="about_us">About Us</a></li>
+                <li><a href="contact-us.html" data-translate="contact_us">Contact Us</a></li>
+            </ul>
+
+            <!-- Mobile Account Links -->
+            <div class="mobile-account-links">
+                <a href="login.html" class="mobile-account-link" data-translate="login">
+                    <i class="fi fi-rs-user"></i>
+                    <span>Login</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Overlay for menu background -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+
     <!-- Gold Earrings Products Loader -->
     <script>
         // Gold Earrings Products Loader
