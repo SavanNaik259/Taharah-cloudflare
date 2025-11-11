@@ -224,6 +224,74 @@
     <!-- Currency and Language Selector CSS -->
     <link rel="stylesheet" href="css/currency-converter.css?v=1.0.0">
     <link rel="stylesheet" href="css/language-selector.css?v=1.0.0">
+
+    <style>
+        /* Force black navigation elements */
+        .nav-link {
+            color: #000 !important;
+        }
+
+        .nav-link:hover {
+            color: #333 !important;
+        }
+
+        .dropdown-toggle i {
+            color: #000 !important;
+        }
+
+        .meenu-close {
+            color: #000 !important;
+        }
+
+        .mobile-account-link {
+            color: #000 !important;
+        }
+
+        .mobile-account-links .mobile-account-link {
+            color: #000 !important;
+        }
+
+        /* Navigation icons - make them black */
+        .nav-icons .icon-link img {
+            filter: brightness(0) !important;
+        }
+
+        /* Hamburger menu icon - make it black */
+        .hamburger img {
+            filter: brightness(0) !important;
+        }
+
+        /* Mobile account links images */
+        .mobile-account-link img {
+            filter: brightness(0) !important;
+        }
+
+        /* Dropdown menu items */
+        .dropdown-menu li a {
+            color: #000 !important;
+        }
+
+        .dropdown-menu li a:hover {
+            color: #333 !important;
+            background-color: #f5f5f5 !important;
+        }
+
+        /* Mobile menu text color */
+        .nav-menu {
+            color: #000 !important;
+        }
+
+        .nav-menu * {
+            color: #000 !important;
+        }
+
+        /* Hide mobile menu close button on large devices */
+        @media (min-width: 769px) {
+            #closeMenu {
+                display: none !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- WhatsApp Tooltip Script -->
@@ -264,7 +332,45 @@
                 </div>
             </div>
         </nav>
+
+        <!-- Navigation Links - Moved outside nav-container -->
+        <div class="nav-menu" id="navMenu">
+            <!-- Close button for mobile menu -->
+            <i id="closeMenu" class="fa-solid fa-xmark meenu-close" onclick="closeMobileMenu()" style="font-size: 24px; margin-left: 90%; color: #333;"></i>
+
+            <ul class="nav-list">
+                <li class="nav-item"><a href="new-arrivals.html" class="nav-link">New Arrivals</a></li>
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle">Collections <i class="fas fa-chevron-down"></i></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="all-collection.html">All Collection</a></li>
+                        <li><a href="featured-collection.html">Featured Collection</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a href="about-us.html" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="#" class="nav-link">Testimonials</a></li>
+                <li class="nav-item"><a href="book-appointment.html" class="nav-link">Book Appointment</a></li>
+                <li class="nav-item"><a href="#" class="nav-link">Order Track</a></li>
+                <li><a href="contact-us.html" class="nav-link">Contact</a></li>
+            </ul>
+
+            <!-- Mobile account links -->
+            <div class="mobile-account-links mobile-special">
+                <a href="login.html" class="mobile-account-link">
+                    <img src="images/icons/user.png" alt="Account" style="width: 18px; height: 18px;">  &nbsp; Account
+                </a>
+                <a href="#" class="mobile-account-link wishlist-toggle">
+                    <img src="images/icons/heart.png" alt="Wishlist" style="width: 18px; height: 18px;"> &nbsp;   Wishlist (<span class="mobile-wishlist-count">0</span>)
+                </a>
+                <a href="#" class="mobile-account-link mobile-cart-toggle">
+                    <img src="images/icons/cart-minus.png" alt="Cart" style="width:18px; height: 18px; vertical-align: middle;">  &nbsp; Shopping Bag (<span class="mobile-cart-count">0</span>)
+                </a>
+            </div>
+        </div>
     </header>
+
+    <!-- Overlay for menu background -->
+    <div class="menu-overlay" id="menuOverlay"></div>
 
     <div class="appointment-container">
         <div class="appointment-header">
@@ -725,6 +831,9 @@
             <span data-translate="bag">Bag</span>
         </a>
     </nav>
+
+    <!-- Navigation Script -->
+    <script src="js/navigation.js?v=1.0.4"></script>
 
     <!-- Footer Toggle Script -->
     <script src="js/footer-toggle.js"></script>
