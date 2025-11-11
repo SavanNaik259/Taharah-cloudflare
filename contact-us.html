@@ -587,38 +587,9 @@ background-color: #000 !important;
     </style>
 
     <!-- Nazakat Analytics Tracking - Load AFTER Firebase is ready -->
-    <script>
-        // Wait for Firebase to be fully initialized before loading analytics
-        function loadAnalyticsScript() {
-            if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
-                console.log('🔥 Firebase ready, loading analytics script...');
-                const script = document.createElement('script');
-                script.src = 'js/nazakat-analytics.js?v=1.0.1';
-                script.onload = function() {
-                    console.log('📊 Analytics script loaded successfully');
-                };
-                script.onerror = function() {
-                    console.error('❌ Failed to load analytics script');
-                };
-                document.head.appendChild(script);
-            } else {
-                console.log('⏳ Firebase not ready, retrying in 500ms...');
-                setTimeout(loadAnalyticsScript, 500);
-            }
-        }
-
-        // Start loading analytics after a brief delay to ensure Firebase init
-        setTimeout(loadAnalyticsScript, 1000);
-    </script>
-
-    <!-- Flaticon CSS for bottom nav icons -->
-    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-thin-straight/css/uicons-thin-straight.css'>
-    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-solid-straight/css/uicons-solid-straight.css'>
-    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-straight/css/uicons-regular-straight.css'>
-    
-    <!-- Currency and Language Selector CSS -->
-    <link rel="stylesheet" href="css/currency-converter.css?v=1.0.0">
-    <link rel="stylesheet" href="css/language-selector.css?v=1.0.0">
+    <script src="js/nazakat-analytics.js?v=1.0.1"></script>
+    <!-- WhatsApp Tooltip Script -->
+    <script src="js/whatsapp-tooltip.js"></script>
 </head>
 <body>
 <!-- Header -->
@@ -968,7 +939,7 @@ background-color: #000 !important;
                 <span class="footer-toggle-text">Info</span>
                 <i class="fi fi-rs-angle-small-down"></i>
             </button>
-            
+
             <div class="footer-content">
                 <div class="footer-section">
                     <h3>Categories</h3>
@@ -1006,7 +977,7 @@ background-color: #000 !important;
                         <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
                         <a href="#" aria-label="Pinterest"><i class="fab fa-pinterest-p"></i></a>
                     </div>
-                    
+
                     <div class="app-download">
                         <h3>Download Our App</h3>
                         <div class="app-buttons">
@@ -1047,23 +1018,23 @@ background-color: #000 !important;
 
 
     <!-- Minimalist Collapsible Footer -->
-    
+
 
     <!-- Bottom Navigation Bar (Mobile Only) -->
-    
+
 
     <!-- Footer Toggle Script -->
-    
+
 
 
     <!-- Minimalist Collapsible Footer -->
-    
+
 
     <!-- Bottom Navigation Bar (Mobile Only) -->
-    
+
 
     <!-- Footer Toggle Script -->
-    
+
 
 
     <!-- Minimalist Collapsible Footer -->
