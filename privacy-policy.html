@@ -470,13 +470,33 @@ background-color: #000 !important;
     <script src="js/main.js"></script>
 
     <!-- Initialize search after all scripts are loaded -->
-    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ensure search functionality is working
+            setTimeout(() => {
+                if (typeof SearchManager !== 'undefined') {
+                    console.log('SearchManager available');
+                }
+                if (typeof SearchUI !== 'undefined') {
+                    console.log('SearchUI available');
+                }
 
-    <!-- Currency Converter -->
-    
-
-    <!-- Language Translator -->
-    
+                // Manual search icon setup as backup
+                const searchIcon = document.querySelector('.search-icon');
+                if (searchIcon && !searchIcon.hasAttribute('data-search-attached')) {
+                    searchIcon.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        console.log('Manual search icon click handler triggered');
+                        if (typeof SearchUI !== 'undefined' && SearchUI.openSearch) {
+                            SearchUI.openSearch();
+                        }
+                    });
+                    searchIcon.setAttribute('data-search-attached', 'true');
+                    console.log('Manual search icon handler attached');
+                }
+            }, 500);
+        });
+    </script>
 
 
     <!-- Minimalist Collapsible Footer -->
@@ -592,6 +612,9 @@ background-color: #000 !important;
                     </a>
                     <a href="https://www.facebook.com" target="_blank" class="social-icon-link">
                         <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="https://www.youtube.com" target="_blank" class="social-icon-link">
+                        <i class="fab fa-youtube"></i>
                     </a>
                 </div>
             </div>
