@@ -18,6 +18,68 @@
     <link rel="stylesheet" href="css/shop.css?v=1.0.2">
     <link rel="stylesheet" href="css/new-arrivals-grid.css?v=2.0.0">
 
+    <!-- Flaticon CSS for bottom nav icons -->
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-thin-straight/css/uicons-thin-straight.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-solid-straight/css/uicons-solid-straight.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-straight/css/uicons-regular-straight.css'>
+    
+    <!-- Currency and Language Selector CSS -->
+    <link rel="stylesheet" href="css/currency-converter.css?v=1.0.0">
+    <link rel="stylesheet" href="css/language-selector.css?v=1.0.0">
+
+    <style>
+        /* Force black navigation elements */
+        .nav-link {
+            color: #000 !important;
+        }
+
+        .nav-link:hover {
+            color: #333 !important;
+        }
+
+        .dropdown-toggle i {
+            color: #000 !important;
+        }
+
+        .meenu-close {
+            color: #000 !important;
+        }
+
+        .mobile-account-link {
+            color: #000 !important;
+        }
+
+        /* Navigation icons - make them black */
+        .nav-icons .icon-link img {
+            filter: brightness(0) !important;
+        }
+
+        .hamburger img {
+            filter: brightness(0) !important;
+        }
+
+        .mobile-account-link img {
+            filter: brightness(0) !important;
+        }
+
+        .dropdown-menu li a {
+            color: #000 !important;
+        }
+
+        .dropdown-menu li a:hover {
+            color: #333 !important;
+            background-color: #f5f5f5 !important;
+        }
+
+        .nav-menu {
+            color: #000 !important;
+        }
+
+        .nav-menu * {
+            color: #000 !important;
+        }
+    </style>
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -531,10 +593,97 @@
     <script src="js/whatsapp-tooltip.js"></script>
 
     <!-- Currency Converter -->
-
+    <script src="js/currency-converter.js?v=1.0.0"></script>
 
     <!-- Language Translator -->
+    <script src="js/language-translator.js?v=1.0.0"></script>
 
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="promo-banner">
+            <button class="banner-arrow banner-prev">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <p>Save 21% on exclusive selections - <a href="#">Shop Now</a></p>
+            <button class="banner-arrow banner-next">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <nav class="navbar">
+            <div class="nav-container">
+                <a href="index.html" class="brand">Royal Meenakari</a>
+                <div class="hamburger" id="navToggle">
+                    <img src="images/icons/bars-staggered (2).png" alt="Menu" style="width: 25px; height: 25px;">
+                </div>
+                <div class="nav-icons">
+                    <a href="#" class="icon-link search-icon">
+                        <img src="images/icons/search.png" alt="Search" style="width: 20px; height: 20px;">
+                    </a>
+                    <a href="login.html" class="icon-link account-icon" id="user-icon">
+                        <img src="images/icons/user.png" alt="Account" style="width: 25px; height: 25px;">
+                    </a>
+                    <a href="#" class="icon-link wishlist-icon-container wishlist-toggle">
+                        <img src="images/icons/heart.png" alt="Wishlist" style="width: 20px; height: 20px;">
+                        <div class="wishlist-count">0</div>
+                    </a>
+                    <a href="#" class="icon-link cart-icon-container cart-toggle" id="cartToggleButton">
+                        <img src="images/icons/cart-minus.png" alt="Cart" style="width: 20px; height: 20px;">
+                        <div class="cart-count">0</div>
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Navigation Links -->
+        <div class="nav-menu" id="navMenu">
+            <i id="closeMenu" class="fa-solid fa-xmark meenu-close" onclick="closeMobileMenu()" style="font-size: 24px; margin-left: 90%; color: #333;"></i>
+
+            <ul class="nav-list">
+                <li class="nav-item"><a href="new-arrivals.html" class="nav-link">New Arrivals</a></li>
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle">Collections <i class="fas fa-chevron-down"></i></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="all-collection.html">All Collection</a></li>
+                        <li><a href="featured-collection.html">Featured Collection</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a href="about-us.html" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="#" class="nav-link">Testimonials</a></li>
+                <li class="nav-item"><a href="book-appointment.html" class="nav-link">Book Appointment</a></li>
+                <li class="nav-item"><a href="#" class="nav-link">Order Track</a></li>
+                <li><a href="contact-us.html" class="nav-link">Contact</a></li>
+            </ul>
+
+            <!-- Mobile account links -->
+            <div class="mobile-account-links mobile-special">
+                <a href="login.html" class="mobile-account-link">
+                    <img src="images/icons/user.png" alt="Account" style="width: 18px; height: 18px;">  &nbsp; Account
+                </a>
+                <a href="#" class="mobile-account-link wishlist-toggle">
+                    <img src="images/icons/heart.png" alt="Wishlist" style="width: 18px; height: 18px;"> &nbsp; Wishlist (<span class="mobile-wishlist-count">0</span>)
+                </a>
+                <a href="#" class="mobile-account-link mobile-cart-toggle">
+                    <img src="images/icons/cart-minus.png" alt="Cart" style="width:18px; height: 18px; vertical-align: middle;">  &nbsp; Shopping Bag (<span class="mobile-cart-count">0</span>)
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Overlay for menu background -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+
+    <!-- Gold Earrings Products Section -->
+    <section class="featured-products" style="padding: 80px 20px 40px; min-height: 500px;">
+        <div class="container">
+            <h2 class="section-title" style="text-align: center; margin-bottom: 40px; color: #6D3E25; font-size: 32px;">Gold Earrings</h2>
+            <div class="products-grid" id="gold-earrings-products-grid">
+                <!-- Products will be loaded here by JavaScript -->
+            </div>
+        </div>
+    </section>
 
     <!-- Minimalist Collapsible Footer -->
     <footer class="footer">
