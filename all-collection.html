@@ -438,7 +438,7 @@
                 // Function to load products from a single category
                 async function loadFromCategory(category, isPrimary = false) {
                     try {
-                        console.log(`\n🔍 [${category}] Starting load...`);
+                        console.log(`\n🔍 [${category}] Starting load... (isPrimary: ${isPrimary})`);
 
                         let netlifyEndpoint = `/.netlify/functions/load-products?category=${category}`;
 
@@ -466,7 +466,7 @@
                             cache: (forceRefresh || cacheInvalidated) ? 'no-store' : 'default'
                         });
 
-                        console.log(`📊 [${category}] Response status: ${response.status}`);
+                        console.log(`📊 [${category}] Response status: ${response.status}, OK: ${response.ok}`);
 
                         if (!response.ok) {
                             if (isPrimary) {
@@ -594,12 +594,13 @@
                         if (!product.image && product.mainImage) {
                             product.image = product.mainImage;
                         } else if (!product.image && product.images && product.images.length > 0) {
-                            product.image = product.images[0].url;
+                            product.image = product.images[0].url || product.images[0];
                         }
 
-                        const isValid = product.name && product.price && product.image && product.id;
+                        // More lenient validation - only require id, name, and price
+                        const isValid = product.id && product.name && product.price;
                         if (!isValid) {
-                            console.warn(`Skipping invalid product at index ${index}:`, {
+                            console.warn(`❌ Skipping invalid product at index ${index}:`, {
                                 id: product.id,
                                 name: product.name,
                                 price: product.price,
@@ -609,11 +610,20 @@
                                 sourceCategory: product.sourceCategory
                             });
                         } else {
+                            // Log valid product for debugging
+                            if (index < 3) {
+                                console.log(`✅ Valid product ${index}:`, {
+                                    id: product.id,
+                                    name: product.name,
+                                    category: product.sourceCategory,
+                                    hasImage: !!product.image
+                                });
+                            }
                             validatedProducts.push(product);
                         }
                     });
 
-                    console.log(`Validated ${validatedProducts.length} products out of ${allProducts.length}`);
+                    console.log(`✅ Validated ${validatedProducts.length} products out of ${allProducts.length}`);
 
                     // Remove duplicates based on product ID but keep track of what we're removing
                     const uniqueProducts = [];
@@ -667,23 +677,32 @@
              * Generate HTML for a product item
              */
             function generateProductHTML(product) {
+                // Ensure product has required fields
+                if (!product || !product.id || !product.name || !product.price) {
+                    console.warn('Invalid product data:', product);
+                    return '';
+                }
+
+                // Handle image URL - check multiple possible fields
+                let imageUrl = product.image || product.mainImage || (product.images && product.images.length > 0 ? product.images[0].url : '') || 'images/product-placeholder.jpg';
+                
                 const formattedPrice = new Intl.NumberFormat('en-IN', {
                     style: 'currency',
                     currency: 'INR',
                     minimumFractionDigits: 0
                 }).format(product.price);
 
-                // Add category badge
+                // Add category badge with better formatting
                 const categoryBadge = product.sourceCategory ?
-                    `<div class="product-category-badge">${product.sourceCategory.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>` : '';
+                    `<div class="product-category-badge">${product.sourceCategory.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>` : '';
 
                 return `
                     <div class="product-item" data-product-id="${product.id}">
                         <a href="product-detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">
                             <div class="product-image">
-                                <img src="${product.image}" alt="${product.name}" loading="lazy">
+                                <img src="${imageUrl}" alt="${product.name}" loading="lazy" onerror="this.src='images/product-placeholder.jpg'">
                                 ${categoryBadge}
-                                <button class="add-to-wishlist" data-product-id="${product.id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-image="${product.image}" onclick="event.preventDefault(); event.stopPropagation();">
+                                <button class="add-to-wishlist" data-product-id="${product.id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-image="${imageUrl}" onclick="event.preventDefault(); event.stopPropagation();">
                                     <i class="far fa-heart"></i>
                                 </button>
                             </div>
@@ -740,12 +759,37 @@
                     const products = await loadAllProducts();
 
                     if (products.length > 0) {
-                        const productsHTML = products.map(product => generateProductHTML(product)).join('');
-                        productsGrid.innerHTML = productsHTML;
-
-                        // Setup event listeners for wishlist buttons
-                        setupWishlistEventListeners();
+                        console.log(`📦 Rendering ${products.length} products to grid...`);
+                        
+                        // Generate HTML for each product
+                        const productsHTMLArray = products.map((product, idx) => {
+                            const html = generateProductHTML(product);
+                            if (!html && idx < 3) {
+                                console.warn(`⚠️ Failed to generate HTML for product ${idx}:`, product);
+                            }
+                            return html;
+                        }).filter(html => html); // Remove empty strings
+                        
+                        const productsHTML = productsHTMLArray.join('');
+                        
+                        if (productsHTML) {
+                            productsGrid.innerHTML = productsHTML;
+                            console.log(`✅ Successfully rendered ${productsHTMLArray.length} products to grid`);
+                            
+                            // Setup event listeners for wishlist buttons
+                            setupWishlistEventListeners();
+                        } else {
+                            console.error('❌ No valid HTML generated from products');
+                            productsGrid.innerHTML = `
+                                <div class="no-products-message" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 60px 20px;">
+                                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ff9800; margin-bottom: 20px;"></i>
+                                    <h3 style="color: #6D3E25; margin-bottom: 10px;">Error Rendering Products</h3>
+                                    <p style="color: #666;">Products were loaded but couldn't be displayed. Please refresh the page.</p>
+                                </div>
+                            `;
+                        }
                     } else {
+                        console.log('ℹ️ No products loaded');
                         productsGrid.innerHTML = `
                             <div class="no-products-message" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 60px 20px;">
                                 <i class="fas fa-gem" style="font-size: 48px; color: #6D3E25; margin-bottom: 20px;"></i>
