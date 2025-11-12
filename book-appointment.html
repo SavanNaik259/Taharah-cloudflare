@@ -959,42 +959,55 @@
     <script src="js/firebase/firebase-wishlist-manager.js?v=1.0.0"></script>
     <script src="js/wishlist-manager.js?v=1.0.0"></script>
 
-    <!-- Initialize All Navigation Systems -->
+    <!-- Initialize Cart Manager and All Navigation Icons -->
     <script>
-        // Wait for all scripts to load before initializing
-        window.addEventListener('load', function() {
-            console.log('🚀 Starting navigation systems initialization on book-appointment page...');
-            
-            // Small delay to ensure all scripts are fully loaded
-            setTimeout(function() {
-                initializeNavigationSystems();
-            }, 100);
-        });
-
-        function initializeNavigationSystems() {
-            console.log('📋 Initializing all navigation icons and panels...');
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Initializing all navigation systems on book-appointment page...');
             
             // 1. Initialize Cart Manager
             if (typeof CartManager !== 'undefined') {
-                try {
-                    CartManager.init();
-                    console.log('✅ Cart Manager initialized');
-                    
-                    // Set up global cart functions
-                    window.openCart = function() {
+                CartManager.init();
+                console.log('✅ Cart manager initialized');
+                
+                // Set up global cart functions
+                window.openCart = CartManager.openCartPanel;
+                window.closeCart = CartManager.closeCartPanel;
+                window.toggleCart = CartManager.toggleCartPanel;
+                
+                // Desktop cart icon
+                const desktopCartIcon = document.querySelector('.cart-toggle, #cartToggleButton');
+                if (desktopCartIcon) {
+                    desktopCartIcon.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('🛒 Desktop cart icon clicked');
                         CartManager.openCartPanel();
-                    };
-                    window.closeCart = function() {
-                        CartManager.closeCartPanel();
-                    };
-                    window.toggleCart = function() {
-                        CartManager.toggleCartPanel();
-                    };
-                    
-                    // Attach cart icon event listeners
-                    attachCartEventListeners();
-                } catch (error) {
-                    console.error('❌ Error initializing Cart Manager:', error);
+                    });
+                    console.log('✅ Desktop cart icon event listener attached');
+                }
+                
+                // Mobile cart icon
+                const mobileCartIcon = document.querySelector('.mobile-cart-toggle');
+                if (mobileCartIcon) {
+                    mobileCartIcon.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('🛒 Mobile cart icon clicked');
+                        CartManager.openCartPanel();
+                    });
+                    console.log('✅ Mobile cart icon event listener attached');
+                }
+                
+                // Bottom nav cart
+                const bottomNavCart = document.getElementById('bottomNavCart');
+                if (bottomNavCart) {
+                    bottomNavCart.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('🛒 Bottom nav cart clicked');
+                        CartManager.openCartPanel();
+                    });
+                    console.log('✅ Bottom nav cart event listener attached');
                 }
             } else {
                 console.error('❌ CartManager is not defined!');
@@ -1002,169 +1015,79 @@
             
             // 2. Initialize Wishlist Manager
             if (typeof WishlistManager !== 'undefined') {
-                try {
-                    WishlistManager.init();
-                    console.log('✅ Wishlist Manager initialized');
-                    
-                    // Set up global wishlist functions
-                    window.openWishlist = function() {
+                WishlistManager.init();
+                console.log('✅ Wishlist manager initialized');
+                
+                // Desktop wishlist icon
+                const desktopWishlistIcon = document.querySelector('.wishlist-toggle');
+                if (desktopWishlistIcon) {
+                    desktopWishlistIcon.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('❤️ Desktop wishlist icon clicked');
                         WishlistManager.openWishlistPanel();
-                    };
-                    window.closeWishlist = function() {
-                        WishlistManager.closeWishlistPanel();
-                    };
-                    
-                    // Attach wishlist icon event listeners
-                    attachWishlistEventListeners();
-                } catch (error) {
-                    console.error('❌ Error initializing Wishlist Manager:', error);
+                    });
+                    console.log('✅ Desktop wishlist icon event listener attached');
+                }
+                
+                // Mobile wishlist icon
+                const mobileWishlistIcon = document.querySelector('.mobile-account-links .wishlist-toggle');
+                if (mobileWishlistIcon) {
+                    mobileWishlistIcon.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('❤️ Mobile wishlist icon clicked');
+                        WishlistManager.openWishlistPanel();
+                    });
+                    console.log('✅ Mobile wishlist icon event listener attached');
                 }
             } else {
                 console.error('❌ WishlistManager is not defined!');
             }
             
-            // 3. Initialize Search UI
+            // 3. Initialize Search functionality
             if (typeof SearchUI !== 'undefined') {
-                try {
-                    SearchUI.init();
-                    console.log('✅ Search UI initialized');
-                    
-                    // Attach search icon event listeners
-                    attachSearchEventListeners();
-                } catch (error) {
-                    console.error('❌ Error initializing Search UI:', error);
+                console.log('✅ SearchUI is available');
+                
+                // Desktop search icon
+                const desktopSearchIcon = document.querySelector('.search-icon');
+                if (desktopSearchIcon) {
+                    desktopSearchIcon.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('🔍 Desktop search icon clicked');
+                        SearchUI.openSearch();
+                    });
+                    console.log('✅ Desktop search icon event listener attached');
                 }
             } else {
                 console.error('❌ SearchUI is not defined!');
             }
             
-            // 4. Attach Account icon event listeners
-            attachAccountEventListeners();
-            
-            console.log('✅ All navigation systems initialized successfully');
-        }
-
-        function attachCartEventListeners() {
-            // Desktop cart icon
-            const desktopCartIcons = document.querySelectorAll('.cart-toggle, #cartToggleButton, .cart-icon-container');
-            desktopCartIcons.forEach(function(icon) {
-                icon.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('🛒 Desktop cart icon clicked');
-                    if (typeof CartManager !== 'undefined') {
-                        CartManager.openCartPanel();
-                    }
-                });
-            });
-            if (desktopCartIcons.length > 0) {
-                console.log('✅ Desktop cart icons attached:', desktopCartIcons.length);
-            }
-            
-            // Mobile cart icon
-            const mobileCartIcons = document.querySelectorAll('.mobile-cart-toggle');
-            mobileCartIcons.forEach(function(icon) {
-                icon.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('🛒 Mobile cart icon clicked');
-                    if (typeof CartManager !== 'undefined') {
-                        CartManager.openCartPanel();
-                    }
-                });
-            });
-            if (mobileCartIcons.length > 0) {
-                console.log('✅ Mobile cart icons attached:', mobileCartIcons.length);
-            }
-            
-            // Bottom nav cart
-            const bottomNavCart = document.getElementById('bottomNavCart');
-            if (bottomNavCart) {
-                bottomNavCart.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('🛒 Bottom nav cart clicked');
-                    if (typeof CartManager !== 'undefined') {
-                        CartManager.openCartPanel();
-                    }
-                });
-                console.log('✅ Bottom nav cart attached');
-            }
-        }
-
-        function attachWishlistEventListeners() {
-            // Desktop wishlist icons
-            const desktopWishlistIcons = document.querySelectorAll('.wishlist-toggle, .wishlist-icon-container');
-            desktopWishlistIcons.forEach(function(icon) {
-                icon.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('❤️ Desktop wishlist icon clicked');
-                    if (typeof WishlistManager !== 'undefined') {
-                        WishlistManager.openWishlistPanel();
-                    }
-                });
-            });
-            if (desktopWishlistIcons.length > 0) {
-                console.log('✅ Desktop wishlist icons attached:', desktopWishlistIcons.length);
-            }
-            
-            // Mobile wishlist icons
-            const mobileWishlistIcons = document.querySelectorAll('.mobile-account-links .wishlist-toggle');
-            mobileWishlistIcons.forEach(function(icon) {
-                icon.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('❤️ Mobile wishlist icon clicked');
-                    if (typeof WishlistManager !== 'undefined') {
-                        WishlistManager.openWishlistPanel();
-                    }
-                });
-            });
-            if (mobileWishlistIcons.length > 0) {
-                console.log('✅ Mobile wishlist icons attached:', mobileWishlistIcons.length);
-            }
-        }
-
-        function attachSearchEventListeners() {
-            // Desktop search icons
-            const searchIcons = document.querySelectorAll('.search-icon, .icon-link.search-icon');
-            searchIcons.forEach(function(icon) {
-                icon.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('🔍 Search icon clicked');
-                    if (typeof SearchUI !== 'undefined') {
-                        SearchUI.openSearch();
-                    }
-                });
-            });
-            if (searchIcons.length > 0) {
-                console.log('✅ Search icons attached:', searchIcons.length);
-            }
-        }
-
-        function attachAccountEventListeners() {
-            // Desktop account icons
-            const accountIcons = document.querySelectorAll('.account-icon, #user-icon');
-            accountIcons.forEach(function(icon) {
-                icon.addEventListener('click', function(e) {
+            // 4. Account/User icon functionality
+            const accountIcon = document.querySelector('.account-icon, #user-icon');
+            if (accountIcon) {
+                accountIcon.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     console.log('👤 Account icon clicked - redirecting to login');
                     window.location.href = 'login.html';
                 });
-            });
-            if (accountIcons.length > 0) {
-                console.log('✅ Account icons attached:', accountIcons.length);
+                console.log('✅ Account icon event listener attached');
             }
             
-            // Mobile account links (let default behavior work)
-            const mobileAccountLinks = document.querySelectorAll('.mobile-account-links a[href="login.html"]');
-            if (mobileAccountLinks.length > 0) {
-                console.log('✅ Mobile account links ready:', mobileAccountLinks.length);
+            // 5. Mobile account link
+            const mobileAccountLink = document.querySelector('.mobile-account-links a[href="login.html"]');
+            if (mobileAccountLink) {
+                mobileAccountLink.addEventListener('click', function(e) {
+                    console.log('👤 Mobile account link clicked');
+                    // Let default behavior handle navigation
+                });
+                console.log('✅ Mobile account link ready');
             }
-        }
+            
+            console.log('✅ All navigation systems initialized successfully on book-appointment page');
+        });
     </script>
 
 </body>
