@@ -224,6 +224,7 @@
     <!-- Currency and Language Selector CSS -->
     <link rel="stylesheet" href="css/currency-converter.css?v=1.0.0">
     <link rel="stylesheet" href="css/language-selector.css?v=1.0.0">
+    <link rel="stylesheet" href="css/search.css">
 
     <style>
         /* Force black navigation elements */
@@ -411,6 +412,44 @@
 
     <!-- Overlay for menu background -->
     <div class="menu-overlay" id="menuOverlay"></div>
+
+    <!-- Search Overlay -->
+    <div class="search-overlay" id="searchOverlay">
+        <div class="search-container">
+            <div class="search-header">
+                <div class="search-input-container">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search for products..." data-translate-placeholder="search">
+                    <i class="fas fa-search search-input-icon"></i>
+                </div>
+                <button class="search-close-btn" id="searchCloseBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="search-filters">
+                <button class="search-filter-btn active" data-filter="all" data-translate="all">All</button>
+                <button class="search-filter-btn" data-filter="jewelry" data-translate="jewelry">Jewelry</button>
+                <button class="search-filter-btn" data-filter="earrings" data-translate="earrings">Earrings</button>
+                <button class="search-filter-btn" data-filter="rings" data-translate="rings">Rings</button>
+            </div>
+
+            <div class="search-content">
+                <div class="search-results-header">
+                    <span class="search-results-count" data-translate-dynamic>0 results found</span>
+                    <button class="search-clear-btn" data-translate-dynamic>Clear all</button>
+                </div>
+
+                <div class="search-results-grid" id="searchResultsGrid">
+                    <!-- Search results will be populated here -->
+                </div>
+
+                <div class="search-no-results" id="searchNoResults" style="display: none;">
+                    <h3 data-translate="no_products_found">No results found</h3>
+                    <p data-translate-dynamic>Try adjusting your search or browse our collections</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="appointment-container">
         <div class="appointment-header">
@@ -974,6 +1013,39 @@
 
     <!-- Main.js for cart/wishlist event delegation -->
     <script src="js/main.js"></script>
+
+    <!-- Search System Scripts -->
+    <script src="js/search-manager.js?v=1.0.0"></script>
+    <script src="js/search-ui.js?v=1.0.0"></script>
+
+    <!-- Initialize search after all scripts are loaded -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ensure search functionality is working
+            setTimeout(() => {
+                if (typeof SearchManager !== 'undefined') {
+                    console.log('SearchManager available');
+                }
+                if (typeof SearchUI !== 'undefined') {
+                    console.log('SearchUI available');
+                }
+
+                // Manual search icon setup as backup
+                const searchIcon = document.querySelector('.search-icon');
+                if (searchIcon && !searchIcon.hasAttribute('data-search-attached')) {
+                    searchIcon.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        console.log('Manual search icon click handler triggered');
+                        if (typeof SearchUI !== 'undefined' && SearchUI.openSearch) {
+                            SearchUI.openSearch();
+                        }
+                    });
+                    searchIcon.setAttribute('data-search-attached', 'true');
+                    console.log('Manual search icon handler attached');
+                }
+            }, 500);
+        });
+    </script>
 
 </body>
 </html>
