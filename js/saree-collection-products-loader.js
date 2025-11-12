@@ -14,7 +14,10 @@ const JewelrySubcategoriesLoader = (function() {
     const MAX_PRODUCTS_TO_DISPLAY = 6; // Number of random products to display
     
     // All jewelry subcategories to load from
+    // Using actual categories that exist in Firebase Storage
     const JEWELRY_SUBCATEGORIES = [
+        'featured-collection',
+        'new-arrivals',
         'gold-necklace', 'silver-necklace', 'meenakari-necklace',
         'gold-earrings', 'silver-earrings', 'meenakari-earrings',
         'gold-bangles', 'silver-bangles', 'meenakari-bangles',
