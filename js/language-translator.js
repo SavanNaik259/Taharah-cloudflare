@@ -237,32 +237,23 @@ const LanguageTranslator = (function() {
         if (selector) {
             selector.value = currentLanguage;
             
-            // Update all option elements with flag, code, and name
             Array.from(selector.options).forEach(option => {
                 const langCode = option.value;
                 const langInfo = LANGUAGES[langCode];
                 if (langInfo) {
-                    // Format: 🇬🇧 EN - English
                     option.textContent = `${langInfo.flag} ${langCode.toUpperCase()} - ${langInfo.name}`;
-                    option.setAttribute('data-flag', langInfo.flag);
-                    option.setAttribute('data-name', langInfo.name);
                 }
             });
         }
 
-        // Update flag display
         const flagDisplay = document.getElementById('selected-language-flag');
         if (flagDisplay) {
             flagDisplay.textContent = LANGUAGES[currentLanguage].flag;
-            flagDisplay.style.fontSize = '24px';
         }
 
-        // Update code display
         const codeDisplay = document.getElementById('selected-language-code');
         if (codeDisplay) {
             codeDisplay.textContent = currentLanguage.toUpperCase();
-            codeDisplay.style.fontSize = '11px';
-            codeDisplay.style.fontWeight = '600';
         }
     }
 
