@@ -768,15 +768,59 @@
         </div>
     </section>
 
-    <!-- Gold Earrings Products Section -->
-    <section class="featured-products" style="padding: 80px 20px 40px; min-height: 500px;">
-        <div class="container">
-            <h2 class="section-title" style="text-align: center; margin-bottom: 40px; color: #6D3E25; font-size: 32px;">Gold Earrings</h2>
+    <!-- Product Grid Section -->
+    <section class="shop-products-section">
+        <div class="shop-products">
             <div class="products-grid" id="gold-earrings-products-grid">
-                <!-- Products will be loaded here by JavaScript -->
+                <!-- Products will be loaded here dynamically -->
             </div>
         </div>
     </section>
+
+    <!-- Cart Panel - Standard implementation -->
+    <div class="cart-panel">
+      <div class="cart-panel-header">
+        <h3>Your Shopping Bag</h3>
+        <button class="close-cart-btn">×</button>
+      </div>
+      <div class="cart-items">
+        <!-- Cart items will be inserted here by JavaScript -->
+        <div class="empty-cart-message">Your cart is empty</div>
+      </div>
+      <div class="cart-panel-footer">
+        <div class="cart-panel-subtotal">
+          <span>Subtotal:</span>
+          <span class="subtotal-amount">₹0.00</span>
+        </div>
+        <div class="cart-panel-buttons">
+          <button class="view-cart-btn continue-shopping-btn">Continue Shopping</button>
+          <a href="checkout.html" class="checkout-btn">Checkout</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cart Overlay -->
+    <div class="cart-panel-overlay"></div>
+
+    <!-- Wishlist Panel - Standard implementation -->
+    <div class="wishlist-panel">
+      <div class="wishlist-panel-header">
+        <h3 data-translate="wishlist">My Wishlist</h3>
+        <button class="close-wishlist-btn">×</button>
+      </div>
+      <div class="wishlist-items">
+        <!-- Wishlist items will be inserted here by JavaScript -->
+        <div class="empty-wishlist-message" data-translate-dynamic>Your wishlist is empty</div>
+      </div>
+      <div class="wishlist-panel-footer">
+        <div class="wishlist-panel-actions">
+          <button class="clear-wishlist-btn" data-translate-dynamic>Clear Wishlist</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wishlist Overlay -->
+    <div class="wishlist-overlay"></div>
 
     <!-- Minimalist Collapsible Footer -->
     <footer class="footer">
