@@ -126,16 +126,16 @@
           }
       }
     </style>
-  
+
     <!-- Flaticon CSS for bottom nav icons -->
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-thin-straight/css/uicons-thin-straight.css'>
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-solid-straight/css/uicons-solid-straight.css'>
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-straight/css/uicons-regular-straight.css'>
-    
+
     <!-- Currency and Language Selector CSS -->
     <link rel="stylesheet" href="css/currency-converter.css?v=1.0.0">
     <link rel="stylesheet" href="css/language-selector.css?v=1.0.0">
-    
+
     <!-- WhatsApp Tooltip Script -->
     <script src="js/whatsapp-tooltip.js"></script>
 </head>
@@ -352,17 +352,17 @@
       <!-- Minimalist Collapsible Footer -->
 
     <!-- WhatsApp Button -->
-    
+
 
     <!-- Bottom Navigation Bar -->
 
     <!-- Footer Toggle Script -->
 
     <!-- Currency Converter -->
-    
+
 
     <!-- Language Translator -->
-    
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -457,17 +457,30 @@
       const loginButton = document.getElementById('login-button');
       const emailInput = document.getElementById('email'); // Added for resend verification
 
-      // Check if user is already logged in
-      if (FirebaseAuth.isLoggedIn()) {
-        console.log("User is already logged in, redirecting to home page...");
-        window.location.href = 'index.html';
-      }
+      // Prevent redirect loop on login page when already logged in
+      const checkInitialAuthState = async () => {
+        if (FirebaseAuth.isLoggedIn()) {
+          console.log("User is already logged in on login page");
 
-      // Store email for resend functionality when user gets signed out for unverified email
-      let pendingVerificationEmail = null;
-      let isProcessingLogin = false; // Flag to prevent auth observer conflicts
+          // Only redirect if this is NOT a direct navigation (check referrer)
+          const referrer = document.referrer;
+          const isDirectNavigation = !referrer || referrer === '' || referrer === window.location.href;
 
-      // Also set up auth state observer to catch auth changes
+          if (!isDirectNavigation) {
+            console.log("User navigated from another page, redirecting to profile...");
+            window.location.replace('profile.html');
+          } else {
+            console.log("Direct navigation to login page while logged in, redirecting to home...");
+            window.location.replace('index.html');
+          }
+        }
+      };
+
+      // Run the check after a short delay to allow navigation.js to set the correct href
+      setTimeout(checkInitialAuthState, 100);
+
+
+      // Set up auth state observer to catch auth changes during login process
       FirebaseAuth.observeAuthState(async (user) => {
         if (user && !isProcessingLogin) {
           console.log("Auth state changed - user is signed in:", user.uid);
@@ -481,8 +494,8 @@
               console.log("Email verification result:", emailVerified);
 
               if (emailVerified) {
-                console.log("User email is verified, redirecting to home page");
-                window.location.href = 'index.html';
+                console.log("User email is verified, redirecting to profile page");
+                window.location.replace('profile.html');
               } else {
                 console.log("User email not verified, signing out...");
                 // Store email for resend functionality
@@ -491,9 +504,8 @@
               }
             } catch (error) {
               console.error("Error checking email verification:", error);
-              // If there's an error checking verification, allow user to stay signed in
-              // but redirect to profile where they can see verification status
-              window.location.href = 'index.html';
+              // If there's an error checking verification, redirect to profile
+              window.location.replace('profile.html');
             }
           }, 1000); // 1 second delay
         } else {
@@ -1057,7 +1069,7 @@
     <div id="auricCartOverlay" class="cart-panel-overlay" onclick="closeCartDirectly(); return false;" style="position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; background:rgba(0,0,0,0.5) !important; z-index:999998 !important; display:none !important; visibility:hidden !important;"></div>
 
     <!-- WhatsApp Button -->
-    
+
 
     <script>
         function openWhatsAppChat() {
@@ -1065,25 +1077,25 @@
             window.open('https://wa.me/919310250047?text=Hi! I need help with my account. Can you assist me?', '_blank');
         }
     </script>
-  
-    <!-- Minimalist Collapsible Footer -->
-    
-
-    <!-- Bottom Navigation Bar (Mobile Only) -->
-    
-
-    <!-- Footer Toggle Script -->
-    
-
 
     <!-- Minimalist Collapsible Footer -->
-    
+
 
     <!-- Bottom Navigation Bar (Mobile Only) -->
-    
+
 
     <!-- Footer Toggle Script -->
-    
+
+
+
+    <!-- Minimalist Collapsible Footer -->
+
+
+    <!-- Bottom Navigation Bar (Mobile Only) -->
+
+
+    <!-- Footer Toggle Script -->
+
 
 
     <!-- Minimalist Collapsible Footer -->

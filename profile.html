@@ -575,16 +575,16 @@
         100% { transform: rotate(360deg); }
       }
     </style>
-  
+
     <!-- Flaticon CSS for bottom nav icons -->
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-thin-straight/css/uicons-thin-straight.css'>
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-solid-straight/css/uicons-solid-straight.css'>
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-straight/css/uicons-regular-straight.css'>
-    
+
     <!-- Currency and Language Selector CSS -->
     <link rel="stylesheet" href="css/currency-converter.css?v=1.0.0">
     <link rel="stylesheet" href="css/language-selector.css?v=1.0.0">
-    
+
     <!-- WhatsApp Tooltip Script -->
     <script src="js/whatsapp-tooltip.js"></script>
 </head>
@@ -888,7 +888,15 @@
 
       // Main initialization
       document.addEventListener('DOMContentLoaded', () => {
-        // Initialize Firebase first
+        // Check session first for immediate feedback
+        const session = FirebaseAuth && FirebaseAuth.getSession();
+        if (!session || !session.loggedIn) {
+          console.log("No active session found, redirecting to login");
+          window.location.replace("login.html");
+          return;
+        }
+
+        // Initialize Firebase after session check passes
         setTimeout(() => {
           initializeProfile();
         }, 100);
@@ -2643,163 +2651,6 @@
         }
       }
 
-      function setupReviewForm(existingReview = null) {
-        console.log('Setting up review form, existing review:', existingReview);
-
-        const starContainer = document.getElementById('star-rating');
-        const ratingInput = document.getElementById('review-rating');
-
-        if (!starContainer || !ratingInput) {
-          console.error('Review form elements not found in DOM');
-          return;
-        }
-
-        const stars = starContainer.querySelectorAll('i');
-        console.log('Found', stars.length, 'stars and rating input');
-
-        // Set existing rating if editing
-        if (existingReview && existingReview.rating) {
-          ratingInput.value = existingReview.rating;
-          stars.forEach((s, index) => {
-            if (index < existingReview.rating) {
-              s.classList.remove('far');
-              s.classList.add('fas', 'active');
-            }
-          });
-        }
-
-        starContainer.onclick = function(e) {
-          if (e.target.tagName === 'I' && e.target.dataset.rating) {
-            const rating = parseInt(e.target.dataset.rating);
-            console.log('Star clicked, rating:', rating);
-            ratingInput.value = rating;
-
-            stars.forEach((star, index) => {
-              if (index < rating) {
-                star.classList.remove('far');
-                star.classList.add('fas', 'active');
-              } else {
-                star.classList.remove('fas', 'active');
-                star.classList.add('far');
-              }
-            });
-          }
-        };
-
-        const form = document.getElementById('review-form');
-        if (form) {
-          const newForm = form.cloneNode(true);
-          form.parentNode.replaceChild(newForm, form);
-          newForm.addEventListener('submit', handleReviewSubmit);
-          console.log('Review form submit handler attached');
-          setTimeout(() => setupStarRating(existingReview), 50); // Re-setup stars after clone
-        } else {
-          console.error('Review form not found');
-        }
-
-        // Handle file input changes
-        const imageInput = document.getElementById('review-images');
-        if (imageInput) {
-          imageInput.addEventListener('change', handleImageInputChange);
-        }
-      }
-
-      function setupStarRating(existingReview = null) {
-        const starContainer = document.getElementById('star-rating');
-        const ratingInput = document.getElementById('review-rating');
-
-        if (!starContainer || !ratingInput) return;
-
-        const stars = starContainer.querySelectorAll('i');
-
-        if (existingReview && existingReview.rating) {
-          ratingInput.value = existingReview.rating;
-          stars.forEach((s, index) => {
-            if (index < existingReview.rating) {
-              s.classList.remove('far');
-              s.classList.add('fas', 'active');
-            }
-          });
-        }
-
-        starContainer.onclick = function(e) {
-          if (e.target.tagName === 'I' && e.target.dataset.rating) {
-            const rating = parseInt(e.target.dataset.rating);
-            ratingInput.value = rating;
-            stars.forEach((star, index) => {
-              if (index < rating) {
-                star.classList.remove('far');
-                star.classList.add('fas', 'active');
-              } else {
-                star.classList.remove('fas', 'active');
-                star.classList.add('far');
-              }
-            });
-          }
-        };
-      }
-
-      function handleImageInputChange(event) {
-        const files = Array.from(event.target.files);
-        const maxTotalImages = 3;
-        const currentImageCount = existingReviewImagesData.length;
-        const newFilesAllowed = maxTotalImages - currentImageCount;
-
-        if (files.length > newFilesAllowed) {
-            alert(`You can only upload ${newFilesAllowed} more image(s). Please select fewer files.`);
-            event.target.value = ''; // Clear the input
-            return;
-        }
-
-        // Store new files
-        uploadedImageFiles = files;
-
-        // Update the small text
-        const smallTextElement = event.target.nextElementSibling;
-        if (smallTextElement) {
-            smallTextElement.textContent = `You can upload up to ${Math.max(0, newFilesAllowed - files.length)} more images.`;
-        }
-
-        // Preview new images
-        const previewContainer = document.getElementById('existing-images-preview');
-        if (!previewContainer) return;
-
-        // Clear only the previously uploaded previews, not existing ones
-        document.querySelectorAll('.review-image-preview:not(.existing)').forEach(el => el.remove());
-
-        files.forEach((file, index) => {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const imgElement = document.createElement('div');
-                imgElement.className = 'review-image-preview';
-                imgElement.innerHTML = `
-                    <img src="${e.target.result}" alt="Uploaded Image ${index + 1}">
-                    <button type="button" class="delete-image-btn" data-file-index="${index}" onclick="removeNewImage(event, ${index})">&times;</button>
-                `;
-                previewContainer.appendChild(imgElement);
-            }
-            reader.readAsDataURL(file);
-        });
-      }
-
-      function removeNewImage(event, index) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        // Remove from the uploadedImageFiles array
-        uploadedImageFiles.splice(index, 1);
-
-        // Remove the element from DOM
-        event.target.closest('.review-image-preview').remove();
-
-        // Update the small text
-        const remainingCapacity = 3 - (existingReviewImagesData.length + uploadedImageFiles.length);
-        const smallTextElement = document.querySelector('#review-images').nextElementSibling;
-        if (smallTextElement) {
-            smallTextElement.textContent = `You can upload up to ${Math.max(0, remainingCapacity)} more images.`;
-        }
-      }
-
       // Submit rating only (instant)
       async function submitRatingOnly(rating) {
         const productId = document.getElementById('review-product-id').value;
@@ -3070,7 +2921,7 @@
     <div id="auricCartOverlay" class="cart-panel-overlay" onclick="closeCartDirectly(); return false;" style="position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; background:rgba(0,0,0,0.5) !important; z-index:999998 !important; display:none !important; visibility:hidden !important;"></div>
 
     <!-- WhatsApp Button -->
-    
+
 
     <!-- Bottom Navigation Bar -->
 
@@ -3082,25 +2933,25 @@
         }
       };
     </script>
-  
-    <!-- Minimalist Collapsible Footer -->
-    
-
-    <!-- Bottom Navigation Bar (Mobile Only) -->
-    
-
-    <!-- Footer Toggle Script -->
-    
-
 
     <!-- Minimalist Collapsible Footer -->
-    
+
 
     <!-- Bottom Navigation Bar (Mobile Only) -->
-    
+
 
     <!-- Footer Toggle Script -->
-    
+
+
+
+    <!-- Minimalist Collapsible Footer -->
+
+
+    <!-- Bottom Navigation Bar (Mobile Only) -->
+
+
+    <!-- Footer Toggle Script -->
+
 
 
     <!-- Minimalist Collapsible Footer -->

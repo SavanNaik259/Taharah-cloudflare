@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
             dropdown.classList.toggle('active');
         }
     }
-    
+
     /**
      * Toggle submenu dropdowns on mobile
      */
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.stopPropagation();
 
             const submenu = this.closest('.dropdown-submenu');
-            
+
             if (submenu) {
                 // Close other open submenus in the same parent dropdown
                 const parentDropdown = submenu.closest('.dropdown-menu');
@@ -119,10 +119,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     });
                 }
-                
+
                 // Toggle active class on submenu
                 submenu.classList.toggle('active');
-                
+
                 // Toggle the submenu list visibility with explicit display
                 const submenuList = submenu.querySelector('.dropdown-submenu-list');
                 if (submenuList) {
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
     dropdownToggles.forEach(toggle => {
         toggle.addEventListener('click', toggleDropdown);
     });
-    
+
     // Add click events to submenu toggles for mobile
     const submenuToggles = document.querySelectorAll('.dropdown-submenu > a');
     submenuToggles.forEach(toggle => {
@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Check if user is logged in using the proper FirebaseAuth method
         let isLoggedIn = false;
-        
+
         if (window.FirebaseAuth && typeof window.FirebaseAuth.isLoggedIn === 'function') {
             // Use the proper authentication check that includes email verification
             isLoggedIn = window.FirebaseAuth.isLoggedIn();
@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (window.firebase && window.firebase.auth) {
             // Initial check
             updateAccountIcon();
-            
+
             // Set up auth state observer
             firebase.auth().onAuthStateChanged((user) => {
                 console.log('Auth state changed in navigation:', user ? 'logged in' : 'logged out');
@@ -246,7 +246,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(initializeAuthStateCheck, 200);
         }
     }
-    
+
     // Start initialization check
     initializeAuthStateCheck();
 
@@ -256,12 +256,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function setupSearchIcon() {
         // Find search icon in navigation - using the correct selector
         const searchIcon = document.querySelector('.search-icon');
-        
+
         if (searchIcon) {
             searchIcon.addEventListener('click', function(e) {
                 e.preventDefault();
                 console.log('Search icon clicked');
-                
+
                 // Open search overlay if SearchUI is available
                 if (typeof SearchUI !== 'undefined' && SearchUI.openSearch) {
                     SearchUI.openSearch();
@@ -277,4 +277,40 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Setup search icon after DOM is loaded
     setupSearchIcon();
+
+    // User icon authentication state management
+    const userIcon = document.getElementById('user-icon');
+
+    // Check auth state immediately without observer to prevent race conditions
+    if (userIcon) {
+        // Use synchronous session check first
+        const isLoggedIn = typeof FirebaseAuth !== 'undefined' && FirebaseAuth.isLoggedIn();
+
+        if (isLoggedIn) {
+            userIcon.href = "profile.html";
+            userIcon.classList.add('logged-in');
+            console.log("Auth state changed in navigation:", "logged in");
+        } else {
+            userIcon.href = "login.html";
+            userIcon.classList.remove('logged-in');
+            console.log("Auth state changed in navigation:", "logged out");
+        }
+
+        // Set up auth state observer for real-time updates
+        if (typeof FirebaseAuth !== 'undefined' && FirebaseAuth.observeAuthState) {
+            FirebaseAuth.observeAuthState(function(user) {
+                if (user) {
+                    // User is signed in, update icon to go to profile
+                    console.log("Auth state updated in navigation:", "logged in");
+                    userIcon.href = "profile.html";
+                    userIcon.classList.add('logged-in');
+                } else {
+                    // User is not signed in, update icon to go to login
+                    console.log("Auth state updated in navigation:", "logged out");
+                    userIcon.href = "login.html";
+                    userIcon.classList.remove('logged-in');
+                }
+            });
+        }
+    }
 });
