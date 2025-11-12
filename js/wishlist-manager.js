@@ -525,8 +525,8 @@ const WishlistManager = (function() {
 
         if (!panel) {
             const wishlistPanelHTML = `
-                <div class="wishlist-overlay"></div>
-                <div class="wishlist-panel">
+                <div class="wishlist-overlay" style="position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; background:rgba(0,0,0,0.5) !important; z-index:999998 !important; display:none !important; visibility:hidden !important; opacity:0 !important;"></div>
+                <div class="wishlist-panel" style="position:fixed !important; top:0 !important; right:-400px !important; width:400px !important; max-width:90% !important; height:100% !important; background:#ffffff !important; box-shadow:-2px 0 10px rgba(0,0,0,0.3) !important; z-index:999999 !important; transition:right 0.3s ease-in-out !important; display:flex !important; flex-direction:column !important; overflow:hidden !important; visibility:visible !important; pointer-events:auto !important;">
                     <div class="wishlist-panel-header">
                         <h3 data-translate="wishlist">Your Wishlist</h3>
                         <button class="close-wishlist-btn">&times;</button>
@@ -545,17 +545,22 @@ const WishlistManager = (function() {
             document.body.insertAdjacentHTML('beforeend', wishlistPanelHTML);
             panel = document.querySelector('.wishlist-panel');
             overlay = document.querySelector('.wishlist-overlay');
+        } else {
+            // Ensure existing panel has inline styles to stay hidden
+            if (panel && !panel.style.right) {
+                panel.style.cssText = 'position:fixed !important; top:0 !important; right:-400px !important; width:400px !important; max-width:90% !important; height:100% !important; background:#ffffff !important; box-shadow:-2px 0 10px rgba(0,0,0,0.3) !important; z-index:999999 !important; transition:right 0.3s ease-in-out !important; display:flex !important; flex-direction:column !important; overflow:hidden !important; visibility:visible !important; pointer-events:auto !important;';
+            }
+            if (overlay && !overlay.style.display) {
+                overlay.style.cssText = 'position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; background:rgba(0,0,0,0.5) !important; z-index:999998 !important; display:none !important; visibility:hidden !important; opacity:0 !important;';
+            }
         }
 
-        // Ensure the panel uses consistent CSS by removing any conflicting inline styles
+        // Remove any active classes that might show the panel
         if (panel) {
-            panel.style.right = '';
-            panel.style.display = '';
             panel.classList.remove('open', 'active');
         }
 
         if (overlay) {
-            overlay.style.display = '';
             overlay.classList.remove('open', 'active');
         }
 
