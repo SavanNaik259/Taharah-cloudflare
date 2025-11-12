@@ -1020,62 +1020,16 @@
 
     <!-- Initialize all functionality after scripts are loaded -->
     <script>
-        // Prevent panels from auto-opening by ensuring they're hidden BEFORE any managers initialize
-        (function() {
-            const cartPanel = document.querySelector('.cart-panel');
-            const wishlistPanel = document.querySelector('.wishlist-panel');
-            const cartOverlay = document.querySelector('.cart-panel-overlay');
-            const wishlistOverlay = document.querySelector('.wishlist-overlay');
-            
-            if (cartPanel) {
-                cartPanel.classList.remove('active', 'open');
-            }
-            if (wishlistPanel) {
-                wishlistPanel.classList.remove('active', 'open');
-            }
-            if (cartOverlay) {
-                cartOverlay.classList.remove('active', 'open');
-            }
-            if (wishlistOverlay) {
-                wishlistOverlay.classList.remove('active', 'open');
-            }
-        })();
-
         document.addEventListener('DOMContentLoaded', function() {
-            // Force close any panels that might have opened
-            const cartPanel = document.querySelector('.cart-panel');
-            const wishlistPanel = document.querySelector('.wishlist-panel');
-            const cartOverlay = document.querySelector('.cart-panel-overlay');
-            const wishlistOverlay = document.querySelector('.wishlist-overlay');
-            
-            if (cartPanel) cartPanel.classList.remove('active', 'open');
-            if (wishlistPanel) wishlistPanel.classList.remove('active', 'open');
-            if (cartOverlay) cartOverlay.classList.remove('active', 'open');
-            if (wishlistOverlay) wishlistOverlay.classList.remove('active', 'open');
-            
-            // Now initialize cart and wishlist managers
+            // Initialize cart and wishlist managers
             if (typeof CartManager !== 'undefined' && typeof CartManager.init === 'function') {
                 CartManager.init();
                 console.log('CartManager initialized on book-appointment page');
-                
-                // Force close cart panel after initialization
-                setTimeout(() => {
-                    if (typeof CartManager.closeCartPanel === 'function') {
-                        CartManager.closeCartPanel();
-                    }
-                }, 100);
             }
             
             if (typeof WishlistManager !== 'undefined' && typeof WishlistManager.init === 'function') {
                 WishlistManager.init();
                 console.log('WishlistManager initialized on book-appointment page');
-                
-                // Force close wishlist panel after initialization
-                setTimeout(() => {
-                    if (typeof WishlistManager.closeWishlistPanel === 'function') {
-                        WishlistManager.closeWishlistPanel();
-                    }
-                }, 100);
             }
             
             // Ensure search functionality is working

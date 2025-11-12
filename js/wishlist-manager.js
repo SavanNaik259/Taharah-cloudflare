@@ -437,9 +437,8 @@ const WishlistManager = (function() {
         await saveWishlist();
 
         // Only show the wishlist panel if it was a user-initiated action
-        // Don't show during initialization, product loading, or on book-appointment page
-        const currentPage = window.location.pathname;
-        if (!isInitializing && !currentPage.includes('book-appointment')) {
+        // Don't show during initialization or product loading
+        if (!isInitializing) {
             openWishlistPanel();
         }
 
