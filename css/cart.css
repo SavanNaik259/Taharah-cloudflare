@@ -15,7 +15,7 @@
   background: #ffffff;
   box-shadow: -2px 0 10px rgba(0,0,0,0.3);
   z-index: 999999;
-  display: none;
+  display: flex;
   flex-direction: column;
   overflow: hidden;
   transform: translateX(100%);
@@ -35,7 +35,7 @@
   background: #ffffff;
   box-shadow: -2px 0 10px rgba(0,0,0,0.3);
   z-index: 999999;
-  display: none;
+  display: flex;
   flex-direction: column;
   overflow: hidden;
   /* Performance optimizations */
@@ -53,14 +53,12 @@
 
 /* Active states - instant display */
 .cart-panel.active {
-  display: flex;
   transform: translateX(0);
   visibility: visible;
   pointer-events: auto;
 }
 
 .wishlist-panel.active {
-  display: flex;
   transform: translateX(0) translateZ(0);
   opacity: 1;
   pointer-events: auto;
@@ -79,7 +77,6 @@
   height: 100%;
   background: rgba(0,0,0,0.5);
   z-index: 9998;
-  display: none;
   opacity: 0;
   visibility: hidden;
   backdrop-filter: blur(2px);
@@ -87,7 +84,6 @@
 
 .cart-panel-overlay.active,
 .wishlist-overlay.active {
-  display: block;
   opacity: 1;
   visibility: visible;
 }
@@ -587,14 +583,12 @@
 
 /* Closing states - instant hide */
 .cart-panel.closing {
-  display: none;
   transform: translateX(100%);
   visibility: hidden;
   pointer-events: none;
 }
 
 .wishlist-panel.closing {
-  display: none;
   transform: translateX(100%) translateZ(0);
   opacity: 0;
   pointer-events: none;
@@ -603,7 +597,6 @@
 
 .cart-panel-overlay.closing,
 .wishlist-overlay.closing {
-  display: none;
   opacity: 0;
   visibility: hidden;
 }
