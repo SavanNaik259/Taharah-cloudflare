@@ -430,7 +430,7 @@
                 // Load products from all categories with better error handling
                 const productPromises = categories.map(async (category) => {
                     try {
-                        console.log(`Loading products from ${category}...`);
+                        console.log(`🔍 Loading products from ${category}...`);
 
                         let netlifyEndpoint = `/.netlify/functions/load-products?category=${category}`;
 
@@ -438,7 +438,7 @@
                         if (forceRefresh || cacheInvalidated) {
                             const timestamp = Date.now();
                             netlifyEndpoint += `&cacheBust=${timestamp}`;
-                            console.log(`Added cache busting parameter for ${category}:`, timestamp);
+                            console.log(`⏰ Added cache busting for ${category}:`, timestamp);
                         }
 
                         // Prepare headers for cache control
@@ -453,7 +453,7 @@
                             netlifyHeaders['Expires'] = '0';
                         }
 
-                        console.log(`Fetching from: ${netlifyEndpoint}`);
+                        console.log(`📡 Fetching from: ${netlifyEndpoint}`);
 
                         const response = await fetch(netlifyEndpoint, {
                             method: 'GET',
@@ -461,39 +461,47 @@
                             cache: (forceRefresh || cacheInvalidated) ? 'no-store' : 'default'
                         });
 
-                        console.log(`Response status for ${category}: ${response.status}`);
+                        console.log(`📊 Response status for ${category}: ${response.status}`);
 
                         if (!response.ok) {
-                            console.warn(`Failed to load ${category}: ${response.status} ${response.statusText}`);
+                            console.warn(`⚠️ Failed to load ${category}: ${response.status} ${response.statusText}`);
                             return [];
                         }
 
                         const data = await response.json();
-                        console.log(`Raw response data for ${category}:`, data);
+                        console.log(`📦 Data received for ${category}:`, {
+                            success: data.success,
+                            productsCount: (data.products || []).length,
+                            hasProducts: !!(data.products && data.products.length > 0)
+                        });
 
-                        if (!data.success) {
-                            console.warn(`No success flag for ${category}:`, data.message);
-                            // Still try to use products even if success is false
-                            const products = data.products || [];
-                            console.log(`Found ${products.length} products in ${category} despite no success flag`);
-
-                            return products.map(product => ({
-                                ...product,
-                                sourceCategory: category
-                            }));
+                        // Handle both success and non-success cases
+                        const products = data.products || [];
+                        
+                        if (products.length === 0) {
+                            console.warn(`⚠️ No products found for ${category}`);
+                            return [];
                         }
 
-                        const products = data.products || [];
-                        console.log(`Successfully loaded ${products.length} products from ${category}`);
+                        console.log(`✅ Successfully loaded ${products.length} products from ${category}`);
 
-                        // Add category information to each product
-                        return products.map(product => ({
-                            ...product,
-                            sourceCategory: category
-                        }));
+                        // Add category information to each product with validation
+                        return products.map(product => {
+                            // Ensure product has required fields
+                            if (!product.image && product.mainImage) {
+                                product.image = product.mainImage;
+                            } else if (!product.image && product.images && product.images.length > 0) {
+                                product.image = product.images[0].url;
+                            }
+
+                            return {
+                                ...product,
+                                sourceCategory: category
+                            };
+                        });
 
                     } catch (error) {
-                        console.error(`Error loading ${category} products:`, error);
+                        console.error(`❌ Error loading ${category} products:`, error);
                         console.error(`Error details for ${category}:`, {
                             message: error.message,
                             stack: error.stack
@@ -505,13 +513,29 @@
                 try {
                     // Wait for all category loads to complete
                     const categoryResults = await Promise.all(productPromises);
-                    console.log('Category results:', categoryResults.map((result, i) => ({ category: categories[i], count: result.length })));
+                    
+                    // Detailed logging of what was loaded
+                    console.log('📊 Category Loading Summary:');
+                    categoryResults.forEach((result, i) => {
+                        console.log(`  ${categories[i]}: ${result.length} products`);
+                    });
 
                     // Combine all products
                     allProducts = categoryResults.flat();
 
-                    console.log('Combined products from all categories:', allProducts.length);
-                    console.log('Sample of combined products:', allProducts.slice(0, 3));
+                    console.log('📦 Total combined products:', allProducts.length);
+                    console.log('📋 Products by category:', 
+                        categories.map((cat, i) => `${cat}: ${categoryResults[i].length}`).join(', ')
+                    );
+                    
+                    if (allProducts.length > 0) {
+                        console.log('✅ Sample products:', allProducts.slice(0, 3).map(p => ({
+                            id: p.id,
+                            name: p.name,
+                            category: p.sourceCategory,
+                            hasImage: !!p.image
+                        })));
+                    }
 
                     // Validate and normalize products with better logging
                     const validatedProducts = [];
