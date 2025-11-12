@@ -938,10 +938,41 @@
     <!-- Initialize Cart Manager -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Initializing cart system on book-appointment page...');
+            
             // Initialize cart manager
             if (typeof CartManager !== 'undefined') {
                 CartManager.init();
                 console.log('Cart manager initialized on book-appointment page');
+                
+                // Set up global cart functions
+                window.openCart = CartManager.openCartPanel;
+                window.closeCart = CartManager.closeCartPanel;
+                window.toggleCart = CartManager.toggleCartPanel;
+                
+                // Add direct event listeners for cart toggle buttons
+                const cartToggleButtons = document.querySelectorAll('.cart-toggle, #cartToggleButton, .mobile-cart-toggle');
+                cartToggleButtons.forEach(function(button) {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        console.log('Cart toggle button clicked on book-appointment page');
+                        CartManager.toggleCartPanel();
+                    });
+                });
+                
+                // Add event listener for bottom nav cart
+                const bottomNavCart = document.getElementById('bottomNavCart');
+                if (bottomNavCart) {
+                    bottomNavCart.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        console.log('Bottom nav cart clicked');
+                        CartManager.openCartPanel();
+                    });
+                }
+                
+                console.log('Cart event listeners set up successfully');
+            } else {
+                console.error('CartManager is not defined!');
             }
         });
     </script>
