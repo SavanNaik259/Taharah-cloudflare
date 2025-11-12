@@ -194,11 +194,25 @@ const ProductDetailLoader = (function() {
         }
 
         // Update product description
-        const descriptionElements = document.querySelectorAll('.product-description, .product-details p, .description');
-        descriptionElements.forEach(element => {
-            element.textContent = product.description || '';
-            console.log('Updated product description element');
-        });
+        const descriptionSection = document.querySelector('.product-description');
+        if (descriptionSection) {
+            // Find or create the description paragraph
+            let descriptionPara = descriptionSection.querySelector('p');
+            if (!descriptionPara) {
+                descriptionPara = document.createElement('p');
+                descriptionSection.appendChild(descriptionPara);
+            }
+            descriptionPara.textContent = product.description || 'No description available.';
+            
+            // Ensure the heading exists
+            let descriptionHeading = descriptionSection.querySelector('h3');
+            if (!descriptionHeading) {
+                descriptionHeading = document.createElement('h3');
+                descriptionHeading.textContent = 'Product Description';
+                descriptionSection.insertBefore(descriptionHeading, descriptionPara);
+            }
+            console.log('Updated product description with heading and content');
+        }
 
         // Update main product image - check multiple possible image properties
         const imageUrl = product.image || product.imageUrl || product.mainImage || (product.images && product.images[0] && product.images[0].url);
