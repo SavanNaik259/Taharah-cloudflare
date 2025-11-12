@@ -408,11 +408,15 @@
 
                 let allProducts = [];
 
-                // Categories to load from - including all main categories and subcategories
-                const categories = [
+                // Primary categories that we know exist
+                const primaryCategories = [
                     'new-arrivals', 
                     'featured-collection', 
-                    'saree-collection',
+                    'saree-collection'
+                ];
+
+                // Subcategories to try loading (may or may not exist)
+                const subcategories = [
                     'gold-necklace',
                     'silver-necklace',
                     'meenakari-necklace',
@@ -427,33 +431,34 @@
                     'meenakari-rings'
                 ];
 
-                // Load products from all categories with better error handling
-                const productPromises = categories.map(async (category) => {
+                console.log('🔄 Starting to load all collection products...');
+                console.log('📂 Primary categories:', primaryCategories);
+                console.log('📂 Subcategories to check:', subcategories);
+
+                // Function to load products from a single category
+                async function loadFromCategory(category, isPrimary = false) {
                     try {
-                        console.log(`🔍 Loading products from ${category}...`);
+                        console.log(`\n🔍 [${category}] Starting load...`);
 
                         let netlifyEndpoint = `/.netlify/functions/load-products?category=${category}`;
 
-                        // Add cache busting parameter if force refresh or cache invalidated
                         if (forceRefresh || cacheInvalidated) {
                             const timestamp = Date.now();
                             netlifyEndpoint += `&cacheBust=${timestamp}`;
-                            console.log(`⏰ Added cache busting for ${category}:`, timestamp);
+                            console.log(`⏰ [${category}] Cache busting: ${timestamp}`);
                         }
 
-                        // Prepare headers for cache control
                         const netlifyHeaders = {
                             'Content-Type': 'application/json'
                         };
 
-                        // Add cache control headers for force refresh
                         if (forceRefresh || cacheInvalidated) {
                             netlifyHeaders['Cache-Control'] = 'no-cache, no-store, must-revalidate';
                             netlifyHeaders['Pragma'] = 'no-cache';
                             netlifyHeaders['Expires'] = '0';
                         }
 
-                        console.log(`📡 Fetching from: ${netlifyEndpoint}`);
+                        console.log(`📡 [${category}] Fetching from: ${netlifyEndpoint}`);
 
                         const response = await fetch(netlifyEndpoint, {
                             method: 'GET',
@@ -461,33 +466,38 @@
                             cache: (forceRefresh || cacheInvalidated) ? 'no-store' : 'default'
                         });
 
-                        console.log(`📊 Response status for ${category}: ${response.status}`);
+                        console.log(`📊 [${category}] Response status: ${response.status}`);
 
                         if (!response.ok) {
-                            console.warn(`⚠️ Failed to load ${category}: ${response.status} ${response.statusText}`);
-                            return [];
+                            if (isPrimary) {
+                                console.error(`❌ [${category}] CRITICAL: Primary category failed to load!`);
+                            } else {
+                                console.log(`ℹ️ [${category}] Category file not found (this is okay for subcategories)`);
+                            }
+                            return { category, products: [], exists: false };
                         }
 
                         const data = await response.json();
-                        console.log(`📦 Data received for ${category}:`, {
-                            success: data.success,
-                            productsCount: (data.products || []).length,
-                            hasProducts: !!(data.products && data.products.length > 0)
-                        });
-
-                        // Handle both success and non-success cases
                         const products = data.products || [];
                         
+                        console.log(`📦 [${category}] Received ${products.length} products`);
+                        console.log(`✅ [${category}] Data structure:`, {
+                            success: data.success,
+                            productsCount: products.length,
+                            sampleProduct: products.length > 0 ? {
+                                id: products[0].id,
+                                name: products[0].name,
+                                hasImage: !!products[0].image || !!products[0].mainImage
+                            } : 'No products'
+                        });
+
                         if (products.length === 0) {
-                            console.warn(`⚠️ No products found for ${category}`);
-                            return [];
+                            console.log(`⚠️ [${category}] Empty products array`);
+                            return { category, products: [], exists: true };
                         }
 
-                        console.log(`✅ Successfully loaded ${products.length} products from ${category}`);
-
-                        // Add category information to each product with validation
-                        return products.map(product => {
-                            // Ensure product has required fields
+                        // Normalize and add category information
+                        const normalizedProducts = products.map(product => {
                             if (!product.image && product.mainImage) {
                                 product.image = product.mainImage;
                             } else if (!product.image && product.images && product.images.length > 0) {
@@ -500,28 +510,67 @@
                             };
                         });
 
+                        console.log(`✅ [${category}] Successfully loaded ${normalizedProducts.length} products`);
+                        return { category, products: normalizedProducts, exists: true };
+
                     } catch (error) {
-                        console.error(`❌ Error loading ${category} products:`, error);
-                        console.error(`Error details for ${category}:`, {
-                            message: error.message,
-                            stack: error.stack
-                        });
-                        return [];
+                        console.error(`❌ [${category}] Error:`, error.message);
+                        if (isPrimary) {
+                            console.error(`❌ [${category}] CRITICAL ERROR:`, error);
+                        }
+                        return { category, products: [], exists: false, error: error.message };
                     }
-                });
+                }
+
+                // Load from all categories
+                const productPromises = [
+                    ...primaryCategories.map(cat => loadFromCategory(cat, true)),
+                    ...subcategories.map(cat => loadFromCategory(cat, false))
+                ];
 
                 try {
                     // Wait for all category loads to complete
                     const categoryResults = await Promise.all(productPromises);
                     
-                    // Detailed logging of what was loaded
-                    console.log('📊 Category Loading Summary:');
-                    categoryResults.forEach((result, i) => {
-                        console.log(`  ${categories[i]}: ${result.length} products`);
+                    // Detailed diagnostic logging
+                    console.log('\n📊 ============ LOADING SUMMARY ============');
+                    console.log(`Total categories checked: ${categoryResults.length}`);
+                    
+                    const existingCategories = categoryResults.filter(r => r.exists);
+                    const missingCategories = categoryResults.filter(r => !r.exists);
+                    const categoriesWithProducts = categoryResults.filter(r => r.products.length > 0);
+                    const emptyCategories = categoryResults.filter(r => r.exists && r.products.length === 0);
+                    
+                    console.log(`✅ Categories that exist: ${existingCategories.length}`);
+                    console.log(`❌ Categories not found: ${missingCategories.length}`);
+                    console.log(`📦 Categories with products: ${categoriesWithProducts.length}`);
+                    console.log(`📭 Empty categories: ${emptyCategories.length}`);
+                    
+                    console.log('\n📋 Detailed breakdown:');
+                    categoryResults.forEach(result => {
+                        const status = result.exists ? 
+                            (result.products.length > 0 ? '✅' : '📭') : '❌';
+                        console.log(`${status} ${result.category}: ${result.products.length} products ${result.error ? `(Error: ${result.error})` : ''}`);
                     });
+                    
+                    console.log('\n🔧 Categories found with products:');
+                    categoriesWithProducts.forEach(result => {
+                        console.log(`  - ${result.category}: ${result.products.length} products`);
+                    });
+                    
+                    if (missingCategories.length > 0) {
+                        console.log('\n⚠️ Missing categories (not uploaded to Firebase Storage):');
+                        missingCategories.forEach(result => {
+                            console.log(`  - ${result.category}`);
+                        });
+                    }
+                    
+                    console.log('=========================================\n');
 
-                    // Combine all products
-                    allProducts = categoryResults.flat();
+                    // Combine all products from successful loads
+                    allProducts = categoryResults
+                        .filter(result => result.products.length > 0)
+                        .flatMap(result => result.products);
 
                     console.log('📦 Total combined products:', allProducts.length);
                     console.log('📋 Products by category:', 
