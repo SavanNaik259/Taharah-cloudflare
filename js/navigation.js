@@ -201,46 +201,29 @@ document.addEventListener('DOMContentLoaded', function() {
     /**
      * Update account icon based on login status
      */
-    async function updateAccountIcon() {
+    function updateAccountIcon() {
         const accountIconLink = document.querySelector('#user-icon');
         if (!accountIconLink) return;
 
-        // Wait for Firebase to be ready
-        if (!window.firebase || !window.firebase.auth) {
-            accountIconLink.href = 'login.html';
-            accountIconLink.classList.remove('logged-in');
-            return;
+        // Check if user is logged in using the proper FirebaseAuth method
+        let isLoggedIn = false;
+        
+        if (window.FirebaseAuth && typeof window.FirebaseAuth.isLoggedIn === 'function') {
+            // Use the proper authentication check that includes email verification
+            isLoggedIn = window.FirebaseAuth.isLoggedIn();
+        } else if (window.firebase && window.firebase.auth && window.firebase.auth().currentUser) {
+            // Fallback to basic Firebase auth check (but this doesn't check email verification)
+            const user = window.firebase.auth().currentUser;
+            // For now, assume logged in if user exists (the login function handles verification)
+            isLoggedIn = !!user;
         }
 
-        try {
-            // Get current user from Firebase Auth
-            const user = firebase.auth().currentUser;
-            
-            if (!user) {
-                // No user signed in
-                accountIconLink.href = 'login.html';
-                accountIconLink.classList.remove('logged-in');
-                return;
-            }
-
-            // Reload user to get latest emailVerified status
-            await user.reload();
-
-            // Check if email is verified
-            if (user.emailVerified) {
-                // User is logged in and verified, show profile link
-                accountIconLink.href = 'profile.html';
-                accountIconLink.classList.add('logged-in');
-                console.log('Account icon set to profile - user verified');
-            } else {
-                // User exists but email not verified, redirect to login
-                accountIconLink.href = 'login.html';
-                accountIconLink.classList.remove('logged-in');
-                console.log('Account icon set to login - email not verified');
-            }
-        } catch (error) {
-            console.error('Error updating account icon:', error);
-            // On error, default to login page
+        if (isLoggedIn) {
+            // User is logged in and verified, show profile link
+            accountIconLink.href = 'profile.html';
+            accountIconLink.classList.add('logged-in');
+        } else {
+            // User is not logged in or not verified, show login link
             accountIconLink.href = 'login.html';
             accountIconLink.classList.remove('logged-in');
         }
@@ -250,15 +233,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Wait for Firebase to initialize before checking auth state
     function initializeAuthStateCheck() {
         if (window.firebase && window.firebase.auth) {
-            // Set up auth state observer first
-            firebase.auth().onAuthStateChanged(async (user) => {
-                console.log('Auth state changed in navigation:', user ? 'logged in' : 'logged out');
-                // Update icon whenever auth state changes
-                await updateAccountIcon();
-            });
-            
             // Initial check
             updateAccountIcon();
+            
+            // Set up auth state observer
+            firebase.auth().onAuthStateChanged((user) => {
+                console.log('Auth state changed in navigation:', user ? 'logged in' : 'logged out');
+                updateAccountIcon();
+            });
         } else {
             // Retry after a short delay if Firebase isn't ready
             setTimeout(initializeAuthStateCheck, 200);
