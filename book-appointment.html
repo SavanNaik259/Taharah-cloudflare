@@ -633,6 +633,30 @@
         });
     </script>
 
+    <!-- Cart Panel -->
+    <div class="cart-panel">
+        <div class="cart-panel-header">
+            <h3>Your Shopping Bag</h3>
+            <button class="close-cart-btn">&times;</button>
+        </div>
+        <div class="cart-items">
+            <div class="empty-cart-message">Your cart is empty</div>
+        </div>
+        <div class="cart-panel-footer">
+            <div class="cart-panel-subtotal">
+                <span>Subtotal:</span>
+                <span class="subtotal-amount">₹0.00</span>
+            </div>
+            <div class="cart-panel-buttons">
+                <button class="view-cart-btn continue-shopping-btn">Continue Shopping</button>
+                <a href="checkout.html" class="checkout-btn">Checkout</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cart Overlay -->
+    <div class="cart-panel-overlay"></div>
+
     <!-- WhatsApp Button -->
     
 
@@ -905,6 +929,22 @@
 
     <!-- Banner Rotator Script -->
     <script src="js/banner-rotator.js"></script>
+
+    <!-- Cart System Scripts -->
+    <script src="js/cart-local-storage.js?v=1.0.0"></script>
+    <script src="js/firebase/firebase-cart-manager.js?v=1.0.0"></script>
+    <script src="js/cart-manager.js?v=1.0.1"></script>
+
+    <!-- Initialize Cart Manager -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize cart manager
+            if (typeof CartManager !== 'undefined') {
+                CartManager.init();
+                console.log('Cart manager initialized on book-appointment page');
+            }
+        });
+    </script>
 
 </body>
 </html>
