@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nazakat</title>
+    <title>Royal Meenakari - Product Details</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/futura-pt" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css?v=1.0.4">
@@ -325,7 +325,7 @@ background-color: #000 !important;
                     <div class="product-meta">
                         <div class="meta-item">
                             <span class="meta-label">Brand:</span>
-                            <span class="meta-value">Nazakat</span>
+                            <span class="meta-value">Royal Meenakari</span>
                         </div>
                         <div class="meta-item">
                             <span class="meta-label">Availability:</span>
@@ -339,12 +339,6 @@ background-color: #000 !important;
                             <span class="meta-label">Category:</span>
                             <span class="meta-value">Loading...</span>
                         </div>
-                    </div>
-
-                    <div class="product-quantity">
-                        <button class="quantity-btn decrement">-</button>
-                        <input type="text" value="1" class="quantity-input" readonly>
-                        <button class="quantity-btn increment">+</button>
                     </div>
 
                     <div class="product-actions">
@@ -740,24 +734,8 @@ background-color: #000 !important;
                 // Get DOM elements
                 const addToCartBtn = document.querySelector('.add-to-cart-btn');
                 const addToWishlistBtn = document.querySelector('.add-to-wishlist-btn');
-                const quantityInput = document.querySelector('.quantity-input');
-                const incrementBtn = document.querySelector('.quantity-btn.increment');
-                const decrementBtn = document.querySelector('.quantity-btn.decrement');
                 // Get Buy Now button
                 const buyNowBtn = document.querySelector('.buy-now-btn');
-
-                // Quantity controls
-                incrementBtn.addEventListener('click', function() {
-                    let currentQty = parseInt(quantityInput.value);
-                    quantityInput.value = currentQty + 1;
-                });
-
-                decrementBtn.addEventListener('click', function() {
-                    let currentQty = parseInt(quantityInput.value);
-                    if (currentQty > 1) {
-                        quantityInput.value = currentQty - 1;
-                    }
-                });
 
                 // Toast notification function
                 function showToast(message, type = 'success') {
@@ -833,7 +811,7 @@ background-color: #000 !important;
                 // Buy Now button click handler
                 if (buyNowBtn) {
                     buyNowBtn.addEventListener('click', async function() {
-                        const quantity = parseInt(quantityInput.value);
+                        const quantity = 1;
 
                         // Get current product details from DOM
                         const currentProductDetails = getCurrentProductDetails();

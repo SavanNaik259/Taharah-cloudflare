@@ -6280,6 +6280,26 @@ For hover state
     color: #8B7355;
 }
 
+/* Currency selector in bottom nav */
+.bottom-nav-item.currency-selector-wrapper {
+    position: relative;
+}
+
+.currency-flag-display,
+.currency-code-display {
+    font-size: 12px;
+}
+
+.currency-select {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+}
+
 /* Language selector in bottom nav */
 .bottom-nav-item.language-selector-wrapper {
     position: relative;
