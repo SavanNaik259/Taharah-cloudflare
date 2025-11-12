@@ -550,7 +550,7 @@ background-color: #000 !important;
             to { transform: rotate(360deg); }
         }
 
-        /* WhatsApp Button Styles */
+        /* WhatsApp Button Styles *
         .whatsapp-btn {
             position: fixed;
             bottom: 20px;
@@ -578,30 +578,6 @@ background-color: #000 !important;
             font-size: 28px;
         }
 
-        .whatsapp-tooltip {
-            position: absolute;
-            bottom: 100%; /* Position above the button */
-            right: 100%; /* Align to the right of the button */
-            transform: translateX(10px); /* Offset to the right */
-            background-color: #333;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 5px;
-            font-size: 14px;
-            white-space: nowrap;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            margin-bottom: 5px; /* Space between tooltip and button */
-            white-space: nowrap;
-        }
-
-        .whatsapp-btn:hover .whatsapp-tooltip {
-            opacity: 1;
-            visibility: visible;
-        }
-
-
         @media (max-width: 768px) {
             .whatsapp-btn {
                 width: 50px;
@@ -613,7 +589,7 @@ background-color: #000 !important;
             .whatsapp-btn i {
                 font-size: 24px;
             }
-        }
+        }*/
     </style>
 
     <!-- Nazakat Analytics Tracking - Load AFTER Firebase is ready -->
@@ -782,7 +758,7 @@ background-color: #000 !important;
                     <div class="social-icons">
                         <a href="https://www.facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
                         <a href="https://www.instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
-
+                    
                     </div>
                 </div>
             </div>
@@ -1003,7 +979,7 @@ background-color: #000 !important;
         });
     </script>
 
-
+                                
 
 
     <!-- Minimalist Collapsible Footer -->
@@ -1164,9 +1140,8 @@ background-color: #000 !important;
     </footer>
 
     <!-- WhatsApp Button -->
-      <a href="https://wa.me/918963815289" target="_blank" class="whatsapp-btn" aria-label="Chat on WhatsApp">
+      <a href="https://wa.me/918963815289?text=Hi! I would like to know more about your services. Can you help me?" class="whatsapp-btn">
           <i class="fab fa-whatsapp"></i>
-          <div class="whatsapp-tooltip" data-translate="how_can_help">How can I help you?</div>
       </a>
 
     <!-- Bottom Navigation Bar -->
