@@ -408,15 +408,11 @@
 
                 let allProducts = [];
 
-                // Primary categories that we know exist
-                const primaryCategories = [
+                // All categories to try loading (both primary and subcategories)
+                const allCategories = [
                     'new-arrivals', 
                     'featured-collection', 
-                    'saree-collection'
-                ];
-
-                // Subcategories to try loading (may or may not exist)
-                const subcategories = [
+                    'saree-collection',
                     'gold-necklace',
                     'silver-necklace',
                     'meenakari-necklace',
@@ -432,13 +428,12 @@
                 ];
 
                 console.log('🔄 Starting to load all collection products...');
-                console.log('📂 Primary categories:', primaryCategories);
-                console.log('📂 Subcategories to check:', subcategories);
+                console.log('📂 Categories to check:', allCategories);
 
                 // Function to load products from a single category
-                async function loadFromCategory(category, isPrimary = false) {
+                async function loadFromCategory(category) {
                     try {
-                        console.log(`\n🔍 [${category}] Starting load... (isPrimary: ${isPrimary})`);
+                        console.log(`\n🔍 [${category}] Starting load...`);
 
                         let netlifyEndpoint = `/.netlify/functions/load-products?category=${category}`;
 
@@ -469,11 +464,7 @@
                         console.log(`📊 [${category}] Response status: ${response.status}, OK: ${response.ok}`);
 
                         if (!response.ok) {
-                            if (isPrimary) {
-                                console.error(`❌ [${category}] CRITICAL: Primary category failed to load!`);
-                            } else {
-                                console.log(`ℹ️ [${category}] Category file not found (this is okay for subcategories)`);
-                            }
+                            console.log(`ℹ️ [${category}] Category file not found or not available`);
                             return { category, products: [], exists: false };
                         }
 
@@ -523,10 +514,7 @@
                 }
 
                 // Load from all categories
-                const productPromises = [
-                    ...primaryCategories.map(cat => loadFromCategory(cat, true)),
-                    ...subcategories.map(cat => loadFromCategory(cat, false))
-                ];
+                const productPromises = allCategories.map(cat => loadFromCategory(cat));
 
                 try {
                     // Wait for all category loads to complete
