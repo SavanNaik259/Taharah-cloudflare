@@ -320,13 +320,15 @@
                 <!-- Navigation Icons - Exact match to RIDHI MEHRA design -->
                 <div class="nav-icons">
                     <a href="#" class="icon-link search-icon">
-                        <img src="images/icons/search.png" alt="Search" style="width: 20px; height: 20px;">
+                        <img src="images/icons/search.png" alt="Cart" style="width: 20px; height: 20px;">
                     </a>
-                    <a href="login.html" class="icon-link account-icon" id="user-icon">
-                        <img src="images/icons/user.png" alt="Account" style="width: 25px; height: 25px;">
+                    <a href="#" class="icon-link account-icon" id="user-icon">
+                        <img src="images/icons/user.png" alt="Cart" style="width: 25px; height: 25px;">
+
                     </a>
                     <a href="#" class="icon-link wishlist-icon-container wishlist-toggle">
-                        <img src="images/icons/heart.png" alt="Wishlist" style="width: 20px; height: 20px;">
+                        <img src="images/icons/heart.png" alt="Cart" style="width: 20px; height: 20px;">
+
                         <div class="wishlist-count">0</div>
                     </a>
                     <a href="#" class="icon-link cart-icon-container cart-toggle" id="cartToggleButton">
@@ -397,10 +399,10 @@
             <!-- Mobile account links in separate div after Contact -->
             <div class="mobile-account-links mobile-special">
                 <a href="login.html" class="mobile-account-link">
-                    <img src="images/icons/user.png" alt="Account" style="width: 18px; height: 18px;">  &nbsp; <span data-translate="account">Account</span>
+                    <img src="images/icons/user.png" alt="Cart" style="width: 18px; height: 18px;">  &nbsp; <span data-translate="account">Account</span>
                 </a>
                 <a href="#" class="mobile-account-link wishlist-toggle">
-                    <img src="images/icons/heart.png" alt="Wishlist" style="width: 18px; height: 18px;"> &nbsp;   <span data-translate="wishlist">Wishlist</span> (<span class="mobile-wishlist-count">0</span>)
+                    <img src="images/icons/heart.png" alt="Cart" style="width: 18px; height: 18px;"> &nbsp;   <span data-translate="wishlist">Wishlist</span> (<span class="mobile-wishlist-count">0</span>)
                 </a>
                 <a href="#" class="mobile-account-link mobile-cart-toggle">
                     <img src="images/icons/cart-minus.png" alt="Cart" style="width:18px; height: 18px; vertical-align: middle;">  &nbsp; <span data-translate="shopping_bag">Shopping Bag</span> (<span class="mobile-cart-count">0</span>)
@@ -973,14 +975,80 @@
                 <option value="de">DE</option>
             </select>
         </div>
-        <a href="#" class="bottom-nav-item cart-toggle" id="bottomNavCart">
+        <a href="#" class="bottom-nav-item" id="bottomNavCart">
             <i class="fi fi-rs-shopping-bag"></i>
             <span data-translate="bag">Bag</span>
         </a>
     </nav>
 
-    <!-- Navigation Script -->
+    <script>
+      // Network status monitoring
+      let isOnline = navigator.onLine;
+      window.addEventListener('online', () => {
+        console.log('Network connection restored');
+        isOnline = true;
+        document.dispatchEvent(new CustomEvent('network-status-changed', { detail: { online: true } }));
+      });
+      window.addEventListener('offline', () => {
+        console.log('Network connection lost');
+        isOnline = false;
+        document.dispatchEvent(new CustomEvent('network-status-changed', { detail: { online: false } }));
+      });
+    </script>
+
+    <!-- Navigation scripts -->
     <script src="js/navigation.js?v=1.0.4"></script>
+    <script src="js/banner-rotator.js"></script>
+
+    <!-- Global Error Handler - Place this before any other scripts -->
+    <script src="js/error-handler.js"></script>
+
+    <!-- Firebase Auth Module -->
+    <script src="js/firebase/firebase-auth.js"></script>
+
+    <!-- Cart System Scripts -->
+    <script src="js/cart-local-storage.js?v=1.0.0"></script>
+    <script src="js/firebase/firebase-cart-manager.js?v=1.0.0"></script>
+    <script src="js/cart-manager.js?v=1.0.1"></script>
+
+    <!-- Wishlist Scripts -->
+    <script src="js/wishlist-local-storage.js?v=1.0.0"></script>
+    <script src="js/firebase/firebase-wishlist-manager.js?v=1.0.0"></script>
+    <script src="js/wishlist-manager.js?v=1.0.0"></script>
+    <script src="js/main.js"></script>
+
+    <!-- Search functionality - load in correct order -->
+    <script src="js/search-manager.js"></script>
+    <script src="js/search-ui.js"></script>
+
+    <!-- Initialize search after all scripts are loaded -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ensure search functionality is working
+            setTimeout(() => {
+                if (typeof SearchManager !== 'undefined') {
+                    console.log('SearchManager available');
+                }
+                if (typeof SearchUI !== 'undefined') {
+                    console.log('SearchUI available');
+                }
+
+                // Manual search icon setup as backup
+                const searchIcon = document.querySelector('.search-icon');
+                if (searchIcon && !searchIcon.hasAttribute('data-search-attached')) {
+                    searchIcon.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        console.log('Manual search icon click handler triggered');
+                        if (typeof SearchUI !== 'undefined' && SearchUI.openSearch) {
+                            SearchUI.openSearch();
+                        }
+                    });
+                    searchIcon.setAttribute('data-search-attached', 'true');
+                    console.log('Manual search icon handler attached');
+                }
+            }, 500);
+        });
+    </script>
 
     <!-- Footer Toggle Script -->
     <script src="js/footer-toggle.js"></script>
@@ -991,35 +1059,24 @@
     <!-- Language Translator -->
     <script src="js/language-translator.js?v=1.0.0"></script>
 
-    <!-- Search System Scripts -->
-    <script src="js/search-manager.js?v=1.0.0"></script>
-    <script src="js/search-ui.js?v=1.0.0"></script>
-
-    <!-- Banner Rotator Script -->
-    <script src="js/banner-rotator.js"></script>
-
-    <!-- Firebase Auth Module -->
-    <script src="js/firebase/firebase-auth.js"></script>
-
-    <!-- Cart System Scripts - LOAD BEFORE INITIALIZATION -->
-    <script src="js/cart-local-storage.js?v=1.0.0"></script>
-    <script src="js/firebase/firebase-cart-manager.js?v=1.0.0"></script>
-    <script src="js/cart-manager.js?v=1.0.1"></script>
-
-    <!-- Wishlist System Scripts - LOAD BEFORE INITIALIZATION -->
-    <script src="js/wishlist-local-storage.js?v=1.0.0"></script>
-    <script src="js/firebase/firebase-wishlist-manager.js?v=1.0.0"></script>
-    <script src="js/wishlist-manager.js?v=1.0.0"></script>
-
-    <!-- Main.js for cart/wishlist event delegation -->
-    <script src="js/main.js"></script>
-
-    <!-- Search System Scripts -->
-    <script src="js/search-manager.js?v=1.0.0"></script>
-    <script src="js/search-ui.js?v=1.0.0"></script>
-
-    <!-- Main.js for cart/wishlist event delegation - This handles all cart/wishlist interactions -->
-    <script src="js/main.js"></script>
+    <script>
+        // Bottom Navigation Cart Handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const bottomNavCart = document.getElementById('bottomNavCart');
+            if (bottomNavCart) {
+                bottomNavCart.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // Open cart panel (assuming the cart panel functionality exists)
+                    if (typeof openCart === 'function') {
+                        openCart();
+                    } else {
+                        // Fallback to cart page
+                        window.location.href = 'checkout.html';
+                    }
+                });
+            }
+        });
+    </script>
 
 </body>
 </html>
