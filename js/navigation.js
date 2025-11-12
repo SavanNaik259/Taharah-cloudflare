@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
             dropdown.classList.toggle('active');
         }
     }
-
+    
     /**
      * Toggle submenu dropdowns on mobile
      */
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.stopPropagation();
 
             const submenu = this.closest('.dropdown-submenu');
-
+            
             if (submenu) {
                 // Close other open submenus in the same parent dropdown
                 const parentDropdown = submenu.closest('.dropdown-menu');
@@ -119,10 +119,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     });
                 }
-
+                
                 // Toggle active class on submenu
                 submenu.classList.toggle('active');
-
+                
                 // Toggle the submenu list visibility with explicit display
                 const submenuList = submenu.querySelector('.dropdown-submenu-list');
                 if (submenuList) {
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
     dropdownToggles.forEach(toggle => {
         toggle.addEventListener('click', toggleDropdown);
     });
-
+    
     // Add click events to submenu toggles for mobile
     const submenuToggles = document.querySelectorAll('.dropdown-submenu > a');
     submenuToggles.forEach(toggle => {
@@ -201,81 +201,52 @@ document.addEventListener('DOMContentLoaded', function() {
     /**
      * Update account icon based on login status
      */
-    async function updateAccountIcon() {
+    function updateAccountIcon() {
         const accountIconLink = document.querySelector('#user-icon');
         if (!accountIconLink) return;
 
-        // Wait for Firebase to be ready
-        if (!window.firebase || !window.firebase.auth) {
-            accountIconLink.href = 'login.html';
-            accountIconLink.classList.remove('logged-in');
-            return;
+        // Check if user is logged in using the proper FirebaseAuth method
+        let isLoggedIn = false;
+        
+        if (window.FirebaseAuth && typeof window.FirebaseAuth.isLoggedIn === 'function') {
+            // Use the proper authentication check that includes email verification
+            isLoggedIn = window.FirebaseAuth.isLoggedIn();
+        } else if (window.firebase && window.firebase.auth && window.firebase.auth().currentUser) {
+            // Fallback to basic Firebase auth check (but this doesn't check email verification)
+            const user = window.firebase.auth().currentUser;
+            // For now, assume logged in if user exists (the login function handles verification)
+            isLoggedIn = !!user;
         }
 
-        try {
-            // Get current user from Firebase Auth
-            const user = firebase.auth().currentUser;
-
-            if (!user) {
-                // No user signed in
-                accountIconLink.href = 'login.html';
-                accountIconLink.classList.remove('logged-in');
-                console.log('Account icon: No user - set to login');
-                return;
-            }
-
-            // Reload user to get latest emailVerified status
-            await user.reload();
-
-            // Check if email is verified
-            if (user.emailVerified) {
-                // User is logged in and verified, show profile link
-                accountIconLink.href = 'profile.html';
-                accountIconLink.classList.add('logged-in');
-                console.log('Account icon: User verified - set to profile');
-            } else {
-                // User exists but email not verified, redirect to login
-                accountIconLink.href = 'login.html';
-                accountIconLink.classList.remove('logged-in');
-                console.log('Account icon: Email not verified - set to login');
-            }
-        } catch (error) {
-            console.error('Error updating account icon:', error);
-            // On error, default to login page
+        if (isLoggedIn) {
+            // User is logged in and verified, show profile link
+            accountIconLink.href = 'profile.html';
+            accountIconLink.classList.add('logged-in');
+        } else {
+            // User is not logged in or not verified, show login link
             accountIconLink.href = 'login.html';
             accountIconLink.classList.remove('logged-in');
         }
     }
 
 
-    // Track if auth observer is already set up to prevent duplicates
-    let authObserverInitialized = false;
-
     // Wait for Firebase to initialize before checking auth state
     function initializeAuthStateCheck() {
         if (window.firebase && window.firebase.auth) {
-            // Only set up auth state observer once
-            if (!authObserverInitialized) {
-                authObserverInitialized = true;
-
-                // Set up auth state observer
-                firebase.auth().onAuthStateChanged(async (user) => {
-                    console.log('Navigation auth state changed:', user ? 'logged in' : 'logged out');
-                    // Update icon whenever auth state changes
-                    await updateAccountIcon();
-                });
-
-                console.log('Navigation auth observer initialized');
-            }
-
-            // Do initial check
+            // Initial check
             updateAccountIcon();
+            
+            // Set up auth state observer
+            firebase.auth().onAuthStateChanged((user) => {
+                console.log('Auth state changed in navigation:', user ? 'logged in' : 'logged out');
+                updateAccountIcon();
+            });
         } else {
             // Retry after a short delay if Firebase isn't ready
             setTimeout(initializeAuthStateCheck, 200);
         }
     }
-
+    
     // Start initialization check
     initializeAuthStateCheck();
 
@@ -285,12 +256,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function setupSearchIcon() {
         // Find search icon in navigation - using the correct selector
         const searchIcon = document.querySelector('.search-icon');
-
+        
         if (searchIcon) {
             searchIcon.addEventListener('click', function(e) {
                 e.preventDefault();
                 console.log('Search icon clicked');
-
+                
                 // Open search overlay if SearchUI is available
                 if (typeof SearchUI !== 'undefined' && SearchUI.openSearch) {
                     SearchUI.openSearch();
