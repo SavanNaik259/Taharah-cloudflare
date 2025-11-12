@@ -318,19 +318,17 @@
 
                 <!-- Navigation Icons - Exact match to RIDHI MEHRA design -->
                 <div class="nav-icons">
-                    <a href="#" class="icon-link search-icon">
-                        <img src="images/icons/search.png" alt="Cart" style="width: 20px; height: 20px;">
+                    <a href="#" class="icon-link search-icon" onclick="event.preventDefault(); if(typeof SearchUI !== 'undefined') SearchUI.openSearch();">
+                        <img src="images/icons/search.png" alt="Search" style="width: 20px; height: 20px;">
                     </a>
-                    <a href="#" class="icon-link account-icon" id="user-icon">
-                        <img src="images/icons/user.png" alt="Cart" style="width: 25px; height: 25px;">
-
+                    <a href="login.html" class="icon-link account-icon" id="user-icon">
+                        <img src="images/icons/user.png" alt="Account" style="width: 25px; height: 25px;">
                     </a>
-                    <a href="#" class="icon-link wishlist-icon-container wishlist-toggle">
-                        <img src="images/icons/heart.png" alt="Cart" style="width: 20px; height: 20px;">
-
+                    <a href="#" class="icon-link wishlist-icon-container wishlist-toggle" onclick="event.preventDefault(); if(typeof WishlistManager !== 'undefined') WishlistManager.toggleWishlistPanel();">
+                        <img src="images/icons/heart.png" alt="Wishlist" style="width: 20px; height: 20px;">
                         <div class="wishlist-count">0</div>
                     </a>
-                    <a href="#" class="icon-link cart-icon-container cart-toggle" id="cartToggleButton">
+                    <a href="#" class="icon-link cart-icon-container cart-toggle" id="cartToggleButton" onclick="event.preventDefault(); if(typeof CartManager !== 'undefined') CartManager.toggleCartPanel();">
                         <img src="images/icons/cart-minus.png" alt="Cart" style="width: 20px; height: 20px;">
                         <div class="cart-count">0</div>
                     </a>
@@ -911,7 +909,7 @@
                 <option value="de">DE</option>
             </select>
         </div>
-        <a href="#" class="bottom-nav-item" id="bottomNavCart">
+        <a href="#" class="bottom-nav-item cart-toggle" id="bottomNavCart">
             <i class="fi fi-rs-shopping-bag"></i>
             <span data-translate="bag">Bag</span>
         </a>
@@ -933,62 +931,21 @@
     <script src="js/search-manager.js?v=1.0.0"></script>
     <script src="js/search-ui.js?v=1.0.0"></script>
 
-    <!-- Initialize Cart Manager and All Navigation Icons -->
-    <script>
-        // Wait for all scripts to load before initializing
-        function initializeNavigationSystems() {
-            console.log('Initializing all navigation systems on book-appointment page...');
-
-            // Wait a moment to ensure all managers are loaded
-            setTimeout(function() {
-                // 1. Initialize Cart Manager
-                if (typeof CartManager !== 'undefined') {
-                    CartManager.init();
-                    console.log('✅ Cart manager initialized');
-                } else {
-                    console.error('❌ CartManager is not defined!');
-                }
-
-                // 2. Initialize Wishlist Manager
-                if (typeof WishlistManager !== 'undefined') {
-                    WishlistManager.init();
-                    console.log('✅ Wishlist manager initialized');
-                } else {
-                    console.error('❌ WishlistManager is not defined!');
-                }
-
-                // 3. Initialize Search functionality - the managers handle their own event listeners
-                if (typeof SearchUI !== 'undefined') {
-                    console.log('✅ SearchUI is available');
-                } else {
-                    console.error('❌ SearchUI is not defined!');
-                }
-
-                console.log('✅ All navigation systems initialized successfully on book-appointment page');
-            }, 500);
-        }
-
-        // Initialize when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeNavigationSystems);
-        } else {
-            // DOM is already ready, initialize immediately
-            initializeNavigationSystems();
-        }
-    </script>
-
     <!-- Banner Rotator Script -->
     <script src="js/banner-rotator.js"></script>
 
-    <!-- Cart System Scripts -->
+    <!-- Cart System Scripts - LOAD BEFORE INITIALIZATION -->
     <script src="js/cart-local-storage.js?v=1.0.0"></script>
     <script src="js/firebase/firebase-cart-manager.js?v=1.0.0"></script>
     <script src="js/cart-manager.js?v=1.0.1"></script>
 
-    <!-- Wishlist System Scripts -->
+    <!-- Wishlist System Scripts - LOAD BEFORE INITIALIZATION -->
     <script src="js/wishlist-local-storage.js?v=1.0.0"></script>
     <script src="js/firebase/firebase-wishlist-manager.js?v=1.0.0"></script>
     <script src="js/wishlist-manager.js?v=1.0.0"></script>
+
+    <!-- Main.js for cart/wishlist event delegation -->
+    <script src="js/main.js"></script>
 
 </body>
 </html>
