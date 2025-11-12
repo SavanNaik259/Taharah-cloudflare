@@ -33,7 +33,7 @@ Preferred communication style: Simple, everyday language.
 - **User Management**: Includes authentication, profile management, and order history.
 - **Payment Gateway**: Secure Razorpay integration with server-side validation.
 - **Email Notifications**: Automated order confirmations and status updates.
-- **Product Management**: Supports multiple categories (e.g., featured-collection, saree-collection, plus 12 submenu categories: gold/silver/meenakari variants of necklaces, earrings, bangles, rings) with an admin panel for product upload, editing, and deletion. Products are loaded from Firebase Cloud Storage via a CDN proxy using Netlify functions.
+- **Product Management**: Supports multiple categories (e.g., featured-collection, new-arrivals, plus 12 jewelry subcategories: gold/silver/meenakari variants of necklaces, earrings, bangles, rings) with an admin panel for product upload, editing, and deletion. Products are loaded from Firebase Cloud Storage via a CDN proxy using Netlify functions.
 - **Wishlist**: Users can save products to a wishlist, persisted across sessions and login states via Firebase.
 - **Checkout System**: A robust checkout process handles both authenticated and guest users, with comprehensive error handling.
 - **Bandwidth Optimization**: Advanced CDN caching, `stale-while-revalidate`, ETag validation, and extended client-side cache durations (24 hours memory, 1 hour `localStorage`) significantly reduce bandwidth usage.
