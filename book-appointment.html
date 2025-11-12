@@ -1018,73 +1018,40 @@
     <script src="js/search-manager.js?v=1.0.0"></script>
     <script src="js/search-ui.js?v=1.0.0"></script>
 
-    <!-- Initialize all functionality after scripts are loaded -->
+    <!-- Main.js for cart/wishlist event delegation - This handles all cart/wishlist interactions -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize cart and wishlist managers
-            if (typeof CartManager !== 'undefined' && typeof CartManager.init === 'function') {
-                CartManager.init();
-                console.log('CartManager initialized on book-appointment page');
-            }
-            
-            if (typeof WishlistManager !== 'undefined' && typeof WishlistManager.init === 'function') {
-                WishlistManager.init();
-                console.log('WishlistManager initialized on book-appointment page');
-            }
-            
-            // Ensure search functionality is working
-            setTimeout(() => {
-                if (typeof SearchManager !== 'undefined') {
-                    console.log('SearchManager available');
-                }
-                if (typeof SearchUI !== 'undefined') {
-                    console.log('SearchUI available');
-                }
-
-                // Manual search icon setup as backup
-                const searchIcon = document.querySelector('.search-icon');
-                if (searchIcon && !searchIcon.hasAttribute('data-search-attached')) {
-                    searchIcon.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        console.log('Manual search icon click handler triggered');
-                        if (typeof SearchUI !== 'undefined' && SearchUI.openSearch) {
-                            SearchUI.openSearch();
-                        }
-                    });
-                    searchIcon.setAttribute('data-search-attached', 'true');
-                    console.log('Manual search icon handler attached');
-                }
+        // Wait for all scripts to load before initializing
+        window.addEventListener('load', function() {
+            // Small delay to ensure all managers are ready
+            setTimeout(function() {
+                console.log('Initializing cart and wishlist managers...');
                 
-                // Ensure cart toggle buttons work
-                document.querySelectorAll('.cart-toggle, #cartToggleButton, .mobile-cart-toggle').forEach(btn => {
-                    if (!btn.hasAttribute('data-cart-attached')) {
-                        btn.addEventListener('click', function(e) {
-                            e.preventDefault();
-                            console.log('Cart toggle clicked on book-appointment');
-                            if (typeof CartManager !== 'undefined' && CartManager.toggleCartPanel) {
-                                CartManager.toggleCartPanel();
-                            }
-                        });
-                        btn.setAttribute('data-cart-attached', 'true');
+                // Initialize CartManager if available
+                if (typeof CartManager !== 'undefined' && typeof CartManager.init === 'function') {
+                    try {
+                        CartManager.init();
+                        console.log('CartManager initialized successfully');
+                    } catch (error) {
+                        console.error('Error initializing CartManager:', error);
                     }
-                });
+                } else {
+                    console.warn('CartManager not available');
+                }
                 
-                // Ensure wishlist toggle buttons work
-                document.querySelectorAll('.wishlist-toggle').forEach(btn => {
-                    if (!btn.hasAttribute('data-wishlist-attached')) {
-                        btn.addEventListener('click', function(e) {
-                            e.preventDefault();
-                            console.log('Wishlist toggle clicked on book-appointment');
-                            if (typeof WishlistManager !== 'undefined' && WishlistManager.toggleWishlistPanel) {
-                                WishlistManager.toggleWishlistPanel();
-                            }
-                        });
-                        btn.setAttribute('data-wishlist-attached', 'true');
+                // Initialize WishlistManager if available
+                if (typeof WishlistManager !== 'undefined' && typeof WishlistManager.init === 'function') {
+                    try {
+                        WishlistManager.init();
+                        console.log('WishlistManager initialized successfully');
+                    } catch (error) {
+                        console.error('Error initializing WishlistManager:', error);
                     }
-                });
+                } else {
+                    console.warn('WishlistManager not available');
+                }
                 
-                console.log('All navigation handlers attached on book-appointment page');
-            }, 500);
+                console.log('Initialization complete');
+            }, 100);
         });
     </script>
 
