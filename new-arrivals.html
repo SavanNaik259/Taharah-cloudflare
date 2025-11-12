@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="css/currency-converter.css?v=1.0.0">
     <link rel="stylesheet" href="css/language-selector.css?v=1.0.0">
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-straight/css/uicons-regular-straight.css'>
-    
+
     <!-- WhatsApp Tooltip Script -->
     <script src="js/whatsapp-tooltip.js"></script>
 </head>
@@ -42,7 +42,7 @@
         appId: "1:878979958342:web:e6092f7522488d21eaec47",
         measurementId: "G-ZYZ750JHMB"
       };
-      
+
       // Make firebaseConfig available globally for analytics
       window.firebaseConfig = firebaseConfig;
 
@@ -82,7 +82,7 @@
             }
         }
     </style>
-    
+
     <!-- Nazakat Analytics Tracking - Load AFTER Firebase is ready -->
     <script>
         // Wait for Firebase to be fully initialized before loading analytics
@@ -103,7 +103,7 @@
                 setTimeout(loadAnalyticsScript, 500);
             }
         }
-        
+
         // Start loading analytics after a brief delay to ensure Firebase init
         setTimeout(loadAnalyticsScript, 1000);
     </script>
@@ -240,6 +240,12 @@
         </div>
     </section>
 
+    <!-- WhatsApp Button -->
+    <a href="https://wa.me/918963815289?text=Hi! I would like to know more about your services. Can you help me?" class="whatsapp-btn">
+        <i class="fab fa-whatsapp"></i>
+        <div class="whatsapp-tooltip" data-translate="how_can_help">How can I help you?</div>
+    </a>
+
     <!-- Product Grid Section -->
     <section class="shop-products-section">
         <div class="shop-products">
@@ -297,7 +303,7 @@
     <div class="wishlist-overlay"></div>
 
     <!-- WhatsApp Button -->
-    
+
 
     <!-- Filter Modal (Hidden Initially) -->
     <div class="filter-modal">
@@ -349,10 +355,10 @@
       <div class="whatsapp-btn">
           <i class="fab fa-whatsapp"></i>
       </div>
-      
 
-      
-          
+
+
+
     <!-- New Arrivals Page Loader (Grid Layout) -->
     <script src="js/new-arrivals-page-loader.js?v=1.0.1"></script>
 
@@ -458,7 +464,7 @@
                 if (typeof SearchUI !== 'undefined') {
                     console.log('SearchUI available');
                 }
-                
+
                 // Manual search icon setup as backup
                 const searchIcon = document.querySelector('.search-icon');
                 if (searchIcon && !searchIcon.hasAttribute('data-search-attached')) {
@@ -475,7 +481,7 @@
             }, 500);
         });
     </script>
-  
+
 
 
     <!-- Minimalist Collapsible Footer -->

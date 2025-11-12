@@ -478,6 +478,75 @@ background-color: #000 !important;
                 font-size: 32px;
             }
         }
+
+        /* WhatsApp Button Styles */
+        .whatsapp-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background-color: #25D366;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .whatsapp-btn:hover {
+            transform: scale(1.1);
+            background-color: #128C7E;
+        }
+
+        .whatsapp-btn .fab.fa-whatsapp {
+            font-size: 30px;
+        }
+
+        .whatsapp-tooltip {
+            position: absolute;
+            bottom: 70px; /* Position above the button */
+            right: 20px;
+            background-color: #fff;
+            color: #333;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 1001;
+        }
+
+        .whatsapp-btn:hover .whatsapp-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Make sure the tooltip is visible on mobile */
+        @media (max-width: 768px) {
+            .whatsapp-tooltip {
+                bottom: 75px; /* Adjust position for smaller screens if needed */
+                right: 10px; /* Adjust position for smaller screens if needed */
+            }
+            .whatsapp-btn {
+                bottom: 15px;
+                right: 15px;
+                width: 50px;
+                height: 50px;
+            }
+            .whatsapp-btn .fab.fa-whatsapp {
+                font-size: 26px;
+            }
+        }
+
     </style>
 
     <!-- Nazakat Analytics Tracking - Load AFTER Firebase is ready -->
@@ -624,6 +693,12 @@ background-color: #000 !important;
         </div>
     </header>
 
+    <!-- WhatsApp Button -->
+    <a href="https://wa.me/918963815289" target="_blank" class="whatsapp-btn" aria-label="Chat on WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+        <div class="whatsapp-tooltip" data-translate="how_can_help">How can I help you?</div>
+    </a>
+
     <!-- Overlay for menu background -->
     <div class="menu-overlay" id="menuOverlay"></div>
 
@@ -698,9 +773,6 @@ background-color: #000 !important;
             <p>Our commitment extends beyond creating beautiful jewellery – we are dedicated to supporting traditional artisans, preserving ancient meenakari techniques, and ensuring that this priceless heritage continues to shine for centuries to come.</p>
         </div>
     </section>
-
-    <!-- WhatsApp Button -->
-
 
     <!-- WhatsApp Tooltip Script -->
     <script src="js/whatsapp-tooltip.js"></script>
