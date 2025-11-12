@@ -562,7 +562,7 @@
 
                     console.log('📦 Total combined products:', allProducts.length);
                     console.log('📋 Products by category:', 
-                        categories.map((cat, i) => `${cat}: ${categoryResults[i].length}`).join(', ')
+                        categoryResults.map(r => `${r.category}: ${r.products.length}`).join(', ')
                     );
                     
                     if (allProducts.length > 0) {
@@ -574,60 +574,45 @@
                         })));
                     }
 
-                    // Validate and normalize products with better logging
-                    const validatedProducts = [];
-
-                    allProducts.forEach((product, index) => {
+                    // Normalize products - ensure all have required fields
+                    allProducts = allProducts.map((product, index) => {
                         // Handle different image structures from admin panel vs original data
                         if (!product.image && product.mainImage) {
                             product.image = product.mainImage;
                         } else if (!product.image && product.images && product.images.length > 0) {
                             product.image = product.images[0].url || product.images[0];
                         }
-
-                        // More lenient validation - only require id, name, and price
-                        const isValid = product.id && product.name && product.price;
-                        if (!isValid) {
-                            console.warn(`❌ Skipping invalid product at index ${index}:`, {
-                                id: product.id,
-                                name: product.name,
-                                price: product.price,
-                                image: product.image,
-                                hasMainImage: !!product.mainImage,
-                                hasImages: product.images && product.images.length > 0,
-                                sourceCategory: product.sourceCategory
-                            });
-                        } else {
-                            // Log valid product for debugging
-                            if (index < 3) {
-                                console.log(`✅ Valid product ${index}:`, {
-                                    id: product.id,
-                                    name: product.name,
-                                    category: product.sourceCategory,
-                                    hasImage: !!product.image
-                                });
-                            }
-                            validatedProducts.push(product);
+                        
+                        // Ensure image fallback
+                        if (!product.image) {
+                            product.image = 'images/product-placeholder.jpg';
                         }
+
+                        // Ensure all required fields exist with defaults
+                        return {
+                            id: product.id || `product-${index}`,
+                            name: product.name || 'Unnamed Product',
+                            price: product.price || 0,
+                            image: product.image,
+                            sourceCategory: product.sourceCategory || 'uncategorized',
+                            ...product
+                        };
                     });
 
-                    console.log(`✅ Validated ${validatedProducts.length} products out of ${allProducts.length}`);
+                    console.log(`✅ Normalized ${allProducts.length} products`);
 
-                    // Remove duplicates based on product ID but keep track of what we're removing
+                    // Remove duplicates based on product ID
                     const uniqueProducts = [];
                     const seenIds = new Set();
-                    const duplicatesRemoved = [];
 
-                    validatedProducts.forEach(product => {
+                    allProducts.forEach(product => {
                         if (!seenIds.has(product.id)) {
                             seenIds.add(product.id);
                             uniqueProducts.push(product);
-                        } else {
-                            duplicatesRemoved.push(product.id);
                         }
                     });
 
-                    console.log(`Removed ${duplicatesRemoved.length} duplicates:`, duplicatesRemoved);
+                    console.log(`✅ After deduplication: ${uniqueProducts.length} unique products`);
                     allProducts = uniqueProducts;
 
                     // Limit products if needed
