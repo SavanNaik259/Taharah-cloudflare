@@ -126,7 +126,7 @@ const PolkiProductsLoader = (function() {
                 console.log('Deployed site detected - using Netlify function endpoint');
 
                 // Use Netlify function endpoint for proper cache control
-                let netlifyEndpoint = '/.netlify/functions/load-products?category=all-collection';
+                let netlifyEndpoint = '/.netlify/functions/load-products?category=featured-collection';
 
                 // Add cache busting parameter if force refresh or cache invalidated
                 if (forceRefresh || cacheInvalidated) {
