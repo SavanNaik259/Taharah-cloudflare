@@ -39,12 +39,13 @@ exports.handler = async (event, context) => {
 
   // Get category from query parameters - declare outside try block for catch access
   const category = event.queryStringParameters?.category;
+  const categories = event.queryStringParameters?.categories;
 
   try {
     const cacheBust = event.queryStringParameters?.cacheBust;
-    const ifNoneMatch = event.headers['if-none-match']; // Client ETag for 304 responses
+    const ifNoneMatch = event.headers['if-none-match'];
 
-    if (!category) {
+    if (!category && !categories) {
       return {
         statusCode: 400,
         headers,
@@ -52,16 +53,111 @@ exports.handler = async (event, context) => {
           success: false,
           products: [],
           error: 'Category parameter is required',
-          message: 'Please provide a category parameter: ?category=featured-collection'
+          message: 'Please provide a category parameter: ?category=featured-collection or ?categories=cat1,cat2,cat3'
         })
       };
     }
 
-    // Detect if this is a cache-busting request from admin panel
     const isCacheBust = !!cacheBust;
+
+    if (categories) {
+      const categoryList = categories.split(',').map(c => c.trim()).filter(c => c);
+      console.log(`Loading products from multiple categories: ${categoryList.join(', ')}`);
+
+      if (isCacheBust) {
+        headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+        headers['Pragma'] = 'no-cache';
+        headers['Expires'] = '0';
+      }
+
+      const fetchOptions = isCacheBust ? {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'X-Cache-Bust': `${Date.now()}`
+        }
+      } : {};
+
+      const productPromises = categoryList.map(async (cat) => {
+        const isBandwidthTest = cat.startsWith('bandwidth-test-');
+        let storageUrl;
+        
+        if (isBandwidthTest) {
+          storageUrl = `https://firebasestorage.googleapis.com/v0/b/auric-a0c92.firebasestorage.app/o/bandwidthTest%2F${cat}-products.json?alt=media`;
+        } else {
+          storageUrl = `https://firebasestorage.googleapis.com/v0/b/auric-a0c92.firebasestorage.app/o/productData%2F${cat}-products.json?alt=media`;
+        }
+
+        if (isCacheBust) {
+          storageUrl += `&fbCacheBust=${cacheBust}`;
+        }
+
+        try {
+          const response = await fetch(storageUrl, fetchOptions);
+          if (!response.ok) {
+            console.log(`Category ${cat} not found or error: ${response.status}`);
+            return [];
+          }
+          const categoryProducts = await response.json();
+          return Array.isArray(categoryProducts) ? categoryProducts : [];
+        } catch (error) {
+          console.error(`Error fetching category ${cat}:`, error);
+          return [];
+        }
+      });
+
+      const productsArrays = await Promise.all(productPromises);
+      const allProducts = productsArrays.flat();
+
+      const sortedCategories = categoryList.sort().join(',');
+      const compositeETag = require('crypto')
+        .createHash('md5')
+        .update(sortedCategories + JSON.stringify(allProducts))
+        .digest('hex');
+      const formattedETag = `"${compositeETag}"`;
+
+      if (!isCacheBust && ifNoneMatch === formattedETag) {
+        console.log('Client has current version (composite ETag match), returning 304');
+        return {
+          statusCode: 304,
+          headers: {
+            ...headers,
+            'ETag': formattedETag,
+            'Cache-Control': 'public, max-age=86400, stale-while-revalidate=31536000'
+          }
+        };
+      }
+
+      console.log(`Successfully loaded ${allProducts.length} products from ${categoryList.length} categories`);
+
+      const responseHeaders = {
+        ...headers
+      };
+
+      if (isCacheBust) {
+        responseHeaders['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+        responseHeaders['Pragma'] = 'no-cache';
+        responseHeaders['Expires'] = '0';
+      } else {
+        responseHeaders['Cache-Control'] = 'public, max-age=86400, stale-while-revalidate=31536000, stale-if-error=31536000, immutable';
+        responseHeaders['Netlify-CDN-Cache-Control'] = 'public, max-age=31536000, durable, stale-while-revalidate=31536000';
+        responseHeaders['ETag'] = formattedETag;
+      }
+
+      return {
+        statusCode: 200,
+        headers: responseHeaders,
+        body: JSON.stringify({
+          success: true,
+          products: allProducts,
+          message: `Loaded ${allProducts.length} products from ${categoryList.length} categories`
+        })
+      };
+    }
+
     if (isCacheBust) {
       console.log(`Loading ${category} products with cache busting (${cacheBust}) for admin panel...`);
-      // Add cache-busting headers for admin panel requests
       headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
       headers['Pragma'] = 'no-cache';
       headers['Expires'] = '0';
@@ -69,19 +165,15 @@ exports.handler = async (event, context) => {
       console.log(`Loading ${category} products from Cloud Storage...`);
     }
 
-    // Use direct Firebase Storage URL with alt=media for CDN caching
-    // Check if this is a bandwidth test category
     const isBandwidthTest = category.startsWith('bandwidth-test-');
     let storageUrl;
     
     if (isBandwidthTest) {
       storageUrl = `https://firebasestorage.googleapis.com/v0/b/auric-a0c92.firebasestorage.app/o/bandwidthTest%2F${category}-products.json?alt=media`;
     } else {
-      // Use the correct path structure for your Firebase Storage
       storageUrl = `https://firebasestorage.googleapis.com/v0/b/auric-a0c92.firebasestorage.app/o/productData%2F${category}-products.json?alt=media`;
     }
     
-    // Add cache busting to Firebase Storage URL for admin panel requests
     if (isCacheBust) {
       storageUrl += `&fbCacheBust=${cacheBust}`;
       console.log(`Fetching with cache busting from Firebase Storage: ${storageUrl}`);
@@ -89,13 +181,12 @@ exports.handler = async (event, context) => {
       console.log(`Fetching from Firebase Storage CDN: ${storageUrl}`);
     }
 
-    // Use fetch to get the file from Firebase Storage CDN
     const fetchOptions = isCacheBust ? {
       cache: 'no-store',
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
-        'X-Cache-Bust': `${Date.now()}`  // Force cache invalidation
+        'X-Cache-Bust': `${Date.now()}`
       }
     } : {};
     
@@ -119,7 +210,6 @@ exports.handler = async (event, context) => {
 
     const products = await response.json();
 
-    // Get cache headers from Firebase Storage response to pass through
     const cacheControl = response.headers.get('cache-control') || response.headers.get('Cache-Control');
     const etag = response.headers.get('etag') || response.headers.get('ETag');
 

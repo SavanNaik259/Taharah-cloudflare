@@ -33,7 +33,6 @@ const ProductDetailLoader = (function() {
         const allCategories = [
             'featured-collection',
             'new-arrivals',
-            'saree-collection',
             'gold-necklace',
             'silver-necklace',
             'meenakari-necklace',
@@ -53,7 +52,6 @@ const ProductDetailLoader = (function() {
         // Check product ID prefix to prioritize search order
         if (productId.startsWith('FEA-')) return ['featured-collection', ...allCategories.filter(c => c !== 'featured-collection')];
         if (productId.startsWith('NEW-')) return ['new-arrivals', ...allCategories.filter(c => c !== 'new-arrivals')];
-        if (productId.startsWith('SAR-')) return ['saree-collection', ...allCategories.filter(c => c !== 'saree-collection')];
         if (productId.startsWith('GOL-')) {
             // Gold products - prioritize gold categories
             return ['gold-necklace', 'gold-earrings', 'gold-bangles', 'gold-rings', ...allCategories.filter(c => !c.startsWith('gold'))];
