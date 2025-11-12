@@ -1019,41 +1019,7 @@
     <script src="js/search-ui.js?v=1.0.0"></script>
 
     <!-- Main.js for cart/wishlist event delegation - This handles all cart/wishlist interactions -->
-    <script>
-        // Wait for all scripts to load before initializing
-        window.addEventListener('load', function() {
-            // Small delay to ensure all managers are ready
-            setTimeout(function() {
-                console.log('Initializing cart and wishlist managers...');
-                
-                // Initialize CartManager if available
-                if (typeof CartManager !== 'undefined' && typeof CartManager.init === 'function') {
-                    try {
-                        CartManager.init();
-                        console.log('CartManager initialized successfully');
-                    } catch (error) {
-                        console.error('Error initializing CartManager:', error);
-                    }
-                } else {
-                    console.warn('CartManager not available');
-                }
-                
-                // Initialize WishlistManager if available
-                if (typeof WishlistManager !== 'undefined' && typeof WishlistManager.init === 'function') {
-                    try {
-                        WishlistManager.init();
-                        console.log('WishlistManager initialized successfully');
-                    } catch (error) {
-                        console.error('Error initializing WishlistManager:', error);
-                    }
-                } else {
-                    console.warn('WishlistManager not available');
-                }
-                
-                console.log('Initialization complete');
-            }, 100);
-        });
-    </script>
+    <script src="js/main.js"></script>
 
 </body>
 </html>
