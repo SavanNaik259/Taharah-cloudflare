@@ -1018,9 +1018,20 @@
     <script src="js/search-manager.js?v=1.0.0"></script>
     <script src="js/search-ui.js?v=1.0.0"></script>
 
-    <!-- Initialize search after all scripts are loaded -->
+    <!-- Initialize all functionality after scripts are loaded -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize cart and wishlist managers
+            if (typeof CartManager !== 'undefined' && typeof CartManager.init === 'function') {
+                CartManager.init();
+                console.log('CartManager initialized on book-appointment page');
+            }
+            
+            if (typeof WishlistManager !== 'undefined' && typeof WishlistManager.init === 'function') {
+                WishlistManager.init();
+                console.log('WishlistManager initialized on book-appointment page');
+            }
+            
             // Ensure search functionality is working
             setTimeout(() => {
                 if (typeof SearchManager !== 'undefined') {
@@ -1043,6 +1054,36 @@
                     searchIcon.setAttribute('data-search-attached', 'true');
                     console.log('Manual search icon handler attached');
                 }
+                
+                // Ensure cart toggle buttons work
+                document.querySelectorAll('.cart-toggle, #cartToggleButton, .mobile-cart-toggle').forEach(btn => {
+                    if (!btn.hasAttribute('data-cart-attached')) {
+                        btn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            console.log('Cart toggle clicked on book-appointment');
+                            if (typeof CartManager !== 'undefined' && CartManager.toggleCartPanel) {
+                                CartManager.toggleCartPanel();
+                            }
+                        });
+                        btn.setAttribute('data-cart-attached', 'true');
+                    }
+                });
+                
+                // Ensure wishlist toggle buttons work
+                document.querySelectorAll('.wishlist-toggle').forEach(btn => {
+                    if (!btn.hasAttribute('data-wishlist-attached')) {
+                        btn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            console.log('Wishlist toggle clicked on book-appointment');
+                            if (typeof WishlistManager !== 'undefined' && WishlistManager.toggleWishlistPanel) {
+                                WishlistManager.toggleWishlistPanel();
+                            }
+                        });
+                        btn.setAttribute('data-wishlist-attached', 'true');
+                    }
+                });
+                
+                console.log('All navigation handlers attached on book-appointment page');
             }, 500);
         });
     </script>
