@@ -408,8 +408,24 @@
 
                 let allProducts = [];
 
-                // Categories to load from - using exact same names as in individual loaders
-                const categories = ['new-arrivals', 'featured-collection', 'saree-collection'];
+                // Categories to load from - including all main categories and subcategories
+                const categories = [
+                    'new-arrivals', 
+                    'featured-collection', 
+                    'saree-collection',
+                    'gold-necklace',
+                    'silver-necklace',
+                    'meenakari-necklace',
+                    'gold-earrings',
+                    'silver-earrings',
+                    'meenakari-earrings',
+                    'gold-bangles',
+                    'silver-bangles',
+                    'meenakari-bangles',
+                    'gold-rings',
+                    'silver-rings',
+                    'meenakari-rings'
+                ];
 
                 // Load products from all categories with better error handling
                 const productPromises = categories.map(async (category) => {
