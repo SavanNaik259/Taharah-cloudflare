@@ -1120,19 +1120,23 @@ background-color: #000 !important;
             const urlParams = new URLSearchParams(window.location.search);
             const productId = urlParams.get('id');
 
+            const reviewsSection = document.querySelector('.product-reviews-section');
+            const reviewsContainer = document.getElementById('reviews-container');
+
+            // ALWAYS hide the section initially to prevent "Loading reviews..." from showing
+            if (reviewsSection) {
+                reviewsSection.style.display = 'none';
+            }
+
             if (!productId) {
                 console.warn('No product ID found in URL');
                 return;
             }
-
-            const reviewsSection = document.querySelector('.product-reviews-section');
-            const reviewsContainer = document.getElementById('reviews-container');
             
             try {
                 // Wait for FirebaseReviewsManager to be available
                 if (typeof FirebaseReviewsManager === 'undefined') {
                     console.error('FirebaseReviewsManager not loaded');
-                    reviewsSection.style.display = 'none';
                     return;
                 }
 
@@ -1142,9 +1146,8 @@ background-color: #000 !important;
                 console.log('Reviews loaded:', result);
                 console.log('Number of reviews:', result.reviews ? result.reviews.length : 0);
 
-                if (result.success && result.reviews.length > 0) {
-                    reviewsSection.style.display = 'block';
-                    
+                // ONLY show the section if there are actual reviews
+                if (result.success && result.reviews && result.reviews.length > 0) {
                     const reviewsHTML = result.reviews.map(review => {
                         console.log('Processing review:', review);
                         console.log('Review images:', review.images);
@@ -1191,13 +1194,14 @@ background-color: #000 !important;
                     `;
 
                     reviewsContainer.innerHTML = summaryHTML;
+                    reviewsSection.style.display = 'block';
+                    console.log('Reviews section displayed with', result.reviews.length, 'reviews');
                 } else {
-                    console.log('No reviews found for this product');
-                    reviewsSection.style.display = 'none';
+                    console.log('No reviews found - section remains hidden');
                 }
             } catch (error) {
                 console.error('Error loading reviews:', error);
-                reviewsSection.style.display = 'none';
+                // Section already hidden, no need to hide again
             }
         }
 
