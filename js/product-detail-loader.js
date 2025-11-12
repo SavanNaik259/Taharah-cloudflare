@@ -29,15 +29,46 @@ const ProductDetailLoader = (function() {
      * Determine all possible categories to search
      */
     function getSearchCategories(productId) {
-        if (!productId) return ['featured-collection', 'new-arrivals', 'saree-collection'];
+        // Define all possible categories including subcategories
+        const allCategories = [
+            'featured-collection',
+            'new-arrivals',
+            'saree-collection',
+            'gold-necklace',
+            'silver-necklace',
+            'meenakari-necklace',
+            'gold-earrings',
+            'silver-earrings',
+            'meenakari-earrings',
+            'gold-bangles',
+            'silver-bangles',
+            'meenakari-bangles',
+            'gold-rings',
+            'silver-rings',
+            'meenakari-rings'
+        ];
 
-        // Check product ID prefix first
-        if (productId.startsWith('BRI-')) return ['featured-collection'];
-        if (productId.startsWith('NEW-')) return ['new-arrivals'];
-        if (productId.startsWith('POL-')) return ['saree-collection'];
+        if (!productId) return allCategories;
+
+        // Check product ID prefix to prioritize search order
+        if (productId.startsWith('FEA-')) return ['featured-collection', ...allCategories.filter(c => c !== 'featured-collection')];
+        if (productId.startsWith('NEW-')) return ['new-arrivals', ...allCategories.filter(c => c !== 'new-arrivals')];
+        if (productId.startsWith('SAR-')) return ['saree-collection', ...allCategories.filter(c => c !== 'saree-collection')];
+        if (productId.startsWith('GOL-')) {
+            // Gold products - prioritize gold categories
+            return ['gold-necklace', 'gold-earrings', 'gold-bangles', 'gold-rings', ...allCategories.filter(c => !c.startsWith('gold'))];
+        }
+        if (productId.startsWith('SIL-')) {
+            // Silver products - prioritize silver categories
+            return ['silver-necklace', 'silver-earrings', 'silver-bangles', 'silver-rings', ...allCategories.filter(c => !c.startsWith('silver'))];
+        }
+        if (productId.startsWith('MEE-')) {
+            // Meenakari products - prioritize meenakari categories
+            return ['meenakari-necklace', 'meenakari-earrings', 'meenakari-bangles', 'meenakari-rings', ...allCategories.filter(c => !c.startsWith('meenakari'))];
+        }
 
         // If no prefix match, search all categories
-        return ['featured-collection', 'new-arrivals', 'saree-collection'];
+        return allCategories;
     }
 
     /**
