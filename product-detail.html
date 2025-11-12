@@ -586,7 +586,7 @@ background-color: #000 !important;
             <i class="fi fi-rs-shop"></i>
             <span data-translate="shop">Shop</span>
         </a>
-        <a href="login.html" class="bottom-nav-item">
+        <a href="login.html" class="bottom-nav-item" id="bottomNavAccount">
             <i class="fi fi-rs-user"></i>
             <span data-translate="account">Account</span>
         </a>
@@ -620,6 +620,44 @@ background-color: #000 !important;
             <span data-translate="bag">Bag</span>
         </a>
     </nav>
+
+    <!-- Bottom Navigation Cart Handler -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const bottomNavCart = document.getElementById('bottomNavCart');
+            const bottomNavAccount = document.getElementById('bottomNavAccount');
+            
+            if (bottomNavCart) {
+                bottomNavCart.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // Open cart panel
+                    if (typeof toggleCartDirectly === 'function') {
+                        toggleCartDirectly();
+                    } else if (typeof CartManager !== 'undefined' && CartManager.openCartPanel) {
+                        CartManager.openCartPanel();
+                    }
+                });
+            }
+            
+            // Update account link based on login status
+            if (bottomNavAccount) {
+                function updateBottomNavAccount() {
+                    if (window.FirebaseAuth && typeof window.FirebaseAuth.isLoggedIn === 'function') {
+                        const isLoggedIn = window.FirebaseAuth.isLoggedIn();
+                        bottomNavAccount.href = isLoggedIn ? 'profile.html' : 'login.html';
+                    }
+                }
+                
+                // Initial check
+                setTimeout(updateBottomNavAccount, 500);
+                
+                // Listen for auth state changes
+                if (window.firebase && window.firebase.auth) {
+                    firebase.auth().onAuthStateChanged(updateBottomNavAccount);
+                }
+            }
+        });
+    </script>
 
     <!-- Footer Toggle Script -->
     <script src="js/footer-toggle.js"></script>
