@@ -332,8 +332,12 @@ window.CartManager = (function() {
         // Save cart
         await saveCart();
 
-        // Show the cart panel
-        openCartPanel();
+        // Only show the cart panel if this was triggered by user action (not during init)
+        // Check if we're on a page that should auto-open cart (not book-appointment)
+        const currentPage = window.location.pathname;
+        if (!currentPage.includes('book-appointment')) {
+            openCartPanel();
+        }
     }
 
     /**
