@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -220,7 +220,7 @@
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-thin-straight/css/uicons-thin-straight.css'>
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-solid-straight/css/uicons-solid-straight.css'>
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-straight/css/uicons-regular-straight.css'>
-    
+
     <!-- Currency and Language Selector CSS -->
     <link rel="stylesheet" href="css/currency-converter.css?v=1.0.0">
     <link rel="stylesheet" href="css/language-selector.css?v=1.0.0">
@@ -497,7 +497,7 @@
                         <option value="">Select purpose</option>
                         <option value="browse">Browse Collection</option>
                         <option value="custom">Custom Jewelry Design</option>
-                        <option value="bridal">Bridal Jewelry</option>
+                        <option value=" bridal">Bridal Jewelry</option>
                         <option value="repair">Repair/Maintenance</option>
                         <option value="other">Other</option>
                     </select>
@@ -596,9 +596,6 @@
                     createdAt: new Date().toISOString()
                 };
 
-                // Save to Firestore
-                await db.collection('appointments').add(formData);
-
                 // Send email notification
                 const response = await fetch('/.netlify/functions/send-appointment-email', {
                     method: 'POST',
@@ -611,6 +608,9 @@
                 if (!response.ok) {
                     throw new Error('Email notification failed');
                 }
+
+                // Save to Firestore
+                await db.collection('appointments').add(formData);
 
                 // Show success message
                 successMsg.style.display = 'block';
@@ -653,10 +653,10 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Cart Overlay -->
     <div class="cart-panel-overlay"></div>
-    
+
     <!-- Wishlist Panel -->
     <div class="wishlist-panel">
         <div class="wishlist-panel-header">
@@ -672,12 +672,12 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Wishlist Overlay -->
     <div class="wishlist-overlay"></div>
 
     <!-- WhatsApp Button -->
-    
+
 
     <!-- WhatsApp Tooltip Script -->
     <script src="js/whatsapp-tooltip.js"></script>
@@ -691,23 +691,23 @@
     <!-- Footer Toggle Script -->
 
     <!-- Minimalist Collapsible Footer -->
-    
+
 
     <!-- Bottom Navigation Bar (Mobile Only) -->
-    
+
 
     <!-- Footer Toggle Script -->
-    
+
 
 
     <!-- Minimalist Collapsible Footer -->
-    
+
 
     <!-- Bottom Navigation Bar (Mobile Only) -->
-    
+
 
     <!-- Footer Toggle Script -->
-    
+
 
 
     <!-- Minimalist Collapsible Footer -->
@@ -929,21 +929,26 @@
     <!-- Language Translator -->
     <script src="js/language-translator.js?v=1.0.0"></script>
 
+    <!-- Search System Scripts -->
+    <script src="js/search-manager.js?v=1.0.0"></script>
+    <script src="js/search-ui.js?v=1.0.0"></script>
+
     <!-- Initialize Cart Manager and All Navigation Icons -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        // Wait for all scripts to load before initializing
+        function initializeNavigationSystems() {
             console.log('Initializing all navigation systems on book-appointment page...');
-            
+
             // 1. Initialize Cart Manager
             if (typeof CartManager !== 'undefined') {
                 CartManager.init();
                 console.log('✅ Cart manager initialized');
-                
+
                 // Set up global cart functions
                 window.openCart = CartManager.openCartPanel;
                 window.closeCart = CartManager.closeCartPanel;
                 window.toggleCart = CartManager.toggleCartPanel;
-                
+
                 // Desktop cart icon
                 const desktopCartIcon = document.querySelector('.cart-toggle, #cartToggleButton');
                 if (desktopCartIcon) {
@@ -955,7 +960,7 @@
                     });
                     console.log('✅ Desktop cart icon event listener attached');
                 }
-                
+
                 // Mobile cart icon
                 const mobileCartIcon = document.querySelector('.mobile-cart-toggle');
                 if (mobileCartIcon) {
@@ -967,7 +972,7 @@
                     });
                     console.log('✅ Mobile cart icon event listener attached');
                 }
-                
+
                 // Bottom nav cart
                 const bottomNavCart = document.getElementById('bottomNavCart');
                 if (bottomNavCart) {
@@ -982,12 +987,12 @@
             } else {
                 console.error('❌ CartManager is not defined!');
             }
-            
+
             // 2. Initialize Wishlist Manager
             if (typeof WishlistManager !== 'undefined') {
                 WishlistManager.init();
                 console.log('✅ Wishlist manager initialized');
-                
+
                 // Desktop wishlist icon
                 const desktopWishlistIcon = document.querySelector('.wishlist-toggle');
                 if (desktopWishlistIcon) {
@@ -999,7 +1004,7 @@
                     });
                     console.log('✅ Desktop wishlist icon event listener attached');
                 }
-                
+
                 // Mobile wishlist icon
                 const mobileWishlistIcon = document.querySelector('.mobile-account-links .wishlist-toggle');
                 if (mobileWishlistIcon) {
@@ -1014,11 +1019,11 @@
             } else {
                 console.error('❌ WishlistManager is not defined!');
             }
-            
+
             // 3. Initialize Search functionality
             if (typeof SearchUI !== 'undefined') {
                 console.log('✅ SearchUI is available');
-                
+
                 // Desktop search icon
                 const desktopSearchIcon = document.querySelector('.search-icon');
                 if (desktopSearchIcon) {
@@ -1033,7 +1038,7 @@
             } else {
                 console.error('❌ SearchUI is not defined!');
             }
-            
+
             // 4. Account/User icon functionality
             const accountIcon = document.querySelector('.account-icon, #user-icon');
             if (accountIcon) {
@@ -1045,7 +1050,7 @@
                 });
                 console.log('✅ Account icon event listener attached');
             }
-            
+
             // 5. Mobile account link
             const mobileAccountLink = document.querySelector('.mobile-account-links a[href="login.html"]');
             if (mobileAccountLink) {
@@ -1055,9 +1060,17 @@
                 });
                 console.log('✅ Mobile account link ready');
             }
-            
+
             console.log('✅ All navigation systems initialized successfully on book-appointment page');
-        });
+        }
+
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeNavigationSystems);
+        } else {
+            // DOM is already ready, initialize immediately
+            initializeNavigationSystems();
+        }
     </script>
 
     <!-- Banner Rotator Script -->
@@ -1067,142 +1080,11 @@
     <script src="js/cart-local-storage.js?v=1.0.0"></script>
     <script src="js/firebase/firebase-cart-manager.js?v=1.0.0"></script>
     <script src="js/cart-manager.js?v=1.0.1"></script>
-    
+
     <!-- Wishlist System Scripts -->
     <script src="js/wishlist-local-storage.js?v=1.0.0"></script>
     <script src="js/firebase/firebase-wishlist-manager.js?v=1.0.0"></script>
     <script src="js/wishlist-manager.js?v=1.0.0"></script>
-
-    <!-- Initialize Cart Manager and All Navigation Icons -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Initializing all navigation systems on book-appointment page...');
-            
-            // 1. Initialize Cart Manager
-            if (typeof CartManager !== 'undefined') {
-                CartManager.init();
-                console.log('✅ Cart manager initialized');
-                
-                // Set up global cart functions
-                window.openCart = CartManager.openCartPanel;
-                window.closeCart = CartManager.closeCartPanel;
-                window.toggleCart = CartManager.toggleCartPanel;
-                
-                // Desktop cart icon
-                const desktopCartIcon = document.querySelector('.cart-toggle, #cartToggleButton');
-                if (desktopCartIcon) {
-                    desktopCartIcon.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log('🛒 Desktop cart icon clicked');
-                        CartManager.openCartPanel();
-                    });
-                    console.log('✅ Desktop cart icon event listener attached');
-                }
-                
-                // Mobile cart icon
-                const mobileCartIcon = document.querySelector('.mobile-cart-toggle');
-                if (mobileCartIcon) {
-                    mobileCartIcon.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log('🛒 Mobile cart icon clicked');
-                        CartManager.openCartPanel();
-                    });
-                    console.log('✅ Mobile cart icon event listener attached');
-                }
-                
-                // Bottom nav cart
-                const bottomNavCart = document.getElementById('bottomNavCart');
-                if (bottomNavCart) {
-                    bottomNavCart.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log('🛒 Bottom nav cart clicked');
-                        CartManager.openCartPanel();
-                    });
-                    console.log('✅ Bottom nav cart event listener attached');
-                }
-            } else {
-                console.error('❌ CartManager is not defined!');
-            }
-            
-            // 2. Initialize Wishlist Manager
-            if (typeof WishlistManager !== 'undefined') {
-                WishlistManager.init();
-                console.log('✅ Wishlist manager initialized');
-                
-                // Desktop wishlist icon
-                const desktopWishlistIcon = document.querySelector('.wishlist-toggle');
-                if (desktopWishlistIcon) {
-                    desktopWishlistIcon.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log('❤️ Desktop wishlist icon clicked');
-                        WishlistManager.openWishlistPanel();
-                    });
-                    console.log('✅ Desktop wishlist icon event listener attached');
-                }
-                
-                // Mobile wishlist icon
-                const mobileWishlistIcon = document.querySelector('.mobile-account-links .wishlist-toggle');
-                if (mobileWishlistIcon) {
-                    mobileWishlistIcon.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log('❤️ Mobile wishlist icon clicked');
-                        WishlistManager.openWishlistPanel();
-                    });
-                    console.log('✅ Mobile wishlist icon event listener attached');
-                }
-            } else {
-                console.error('❌ WishlistManager is not defined!');
-            }
-            
-            // 3. Initialize Search functionality
-            if (typeof SearchUI !== 'undefined') {
-                console.log('✅ SearchUI is available');
-                
-                // Desktop search icon
-                const desktopSearchIcon = document.querySelector('.search-icon');
-                if (desktopSearchIcon) {
-                    desktopSearchIcon.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log('🔍 Desktop search icon clicked');
-                        SearchUI.openSearch();
-                    });
-                    console.log('✅ Desktop search icon event listener attached');
-                }
-            } else {
-                console.error('❌ SearchUI is not defined!');
-            }
-            
-            // 4. Account/User icon functionality
-            const accountIcon = document.querySelector('.account-icon, #user-icon');
-            if (accountIcon) {
-                accountIcon.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('👤 Account icon clicked - redirecting to login');
-                    window.location.href = 'login.html';
-                });
-                console.log('✅ Account icon event listener attached');
-            }
-            
-            // 5. Mobile account link
-            const mobileAccountLink = document.querySelector('.mobile-account-links a[href="login.html"]');
-            if (mobileAccountLink) {
-                mobileAccountLink.addEventListener('click', function(e) {
-                    console.log('👤 Mobile account link clicked');
-                    // Let default behavior handle navigation
-                });
-                console.log('✅ Mobile account link ready');
-            }
-            
-            console.log('✅ All navigation systems initialized successfully on book-appointment page');
-        });
-    </script>
 
 </body>
 </html>
