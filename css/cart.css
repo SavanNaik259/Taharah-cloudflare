@@ -8,7 +8,7 @@
 .cart-panel {
   position: fixed;
   top: 0;
-  right: -400px !important;
+  right: 0;
   width: 400px;
   max-width: 90%;
   height: 100%;
@@ -19,9 +19,8 @@
   flex-direction: column;
   overflow: hidden;
   transform: translateX(100%);
-  visibility: hidden !important;
+  visibility: hidden;
   pointer-events: none;
-  opacity: 0;
 }
 
 /* ================ WISHLIST PANEL CONTAINER ================ */
@@ -29,7 +28,7 @@
 .wishlist-panel {
   position: fixed;
   top: 0;
-  right: -400px !important;
+  right: 0;
   width: 400px;
   max-width: 90%;
   height: 100%;
@@ -42,9 +41,9 @@
   /* Performance optimizations */
   will-change: transform, opacity;
   transform: translateX(100%) translateZ(0);
-  opacity: 0 !important;
+  opacity: 0;
   pointer-events: none;
-  visibility: hidden !important;
+  visibility: hidden;
   backface-visibility: hidden;
   /* Consistent transition - defined once for all states */
   transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
@@ -54,19 +53,16 @@
 
 /* Active states - instant display */
 .cart-panel.active {
-  right: 0 !important;
   transform: translateX(0);
-  visibility: visible !important;
+  visibility: visible;
   pointer-events: auto;
-  opacity: 1;
 }
 
 .wishlist-panel.active {
-  right: 0 !important;
   transform: translateX(0) translateZ(0);
-  opacity: 1 !important;
+  opacity: 1;
   pointer-events: auto;
-  visibility: visible !important;
+  visibility: visible;
   /* Transition delay adjustments for opening */
   transition-delay: 0s;
 }
@@ -81,17 +77,15 @@
   height: 100%;
   background: rgba(0,0,0,0.5);
   z-index: 9998;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  display: none !important;
+  opacity: 0;
+  visibility: hidden;
   backdrop-filter: blur(2px);
 }
 
 .cart-panel-overlay.active,
 .wishlist-overlay.active {
-  opacity: 1 !important;
-  visibility: visible !important;
-  display: block !important;
+  opacity: 1;
+  visibility: visible;
 }
 
 /* ================ CART PANEL HEADER ================ */
