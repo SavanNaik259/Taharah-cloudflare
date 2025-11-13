@@ -50,9 +50,9 @@
 }
 
 .brand-logo {
-    height: 45px;
+    height: 52px;
     width: auto;
-    max-width: 500px;
+    max-width: 550px;
     object-fit: contain;
     transition: all 0.3s ease;
 }
@@ -546,8 +546,8 @@
     }
 
     .brand-logo {
-        height: 65px; /* Increased from 50px for larger logo image */
-        max-width: 600px; /* Increased max-width to accommodate larger logo */
+        height: 75px; /* Increased from 65px for larger logo image */
+        max-width: 650px; /* Increased max-width to accommodate larger logo */
     }
 
     .nav-menu {
@@ -759,8 +759,8 @@
     }
 
     .brand-logo {
-        height: 60px; /* Increased size for tablet */
-        max-width: 500px; /* Increased max-width */
+        height: 70px; /* Increased size for tablet */
+        max-width: 550px; /* Increased max-width */
     }
 
     .nav-icons {
@@ -1148,8 +1148,8 @@
     }
 
     .brand-logo {
-        height: 50px; /* Increased size for mobile */
-        max-width: 320px; /* Increased max-width */
+        height: 58px; /* Increased size for mobile */
+        max-width: 360px; /* Increased max-width */
     }
 
     .icon-link {
@@ -1195,8 +1195,8 @@
     }
 
     .brand-logo {
-        height: 42px; /* Increased logo height */
-        max-width: 240px; /* Increased max-width */
+        height: 48px; /* Increased logo height */
+        max-width: 280px; /* Increased max-width */
     }
 
     .new-arrivals-edit {
