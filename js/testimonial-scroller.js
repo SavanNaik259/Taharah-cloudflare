@@ -81,7 +81,24 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
     
     // Fetch product details to get image and price
     try {
-        const categories = ['featured-collection', 'new-arrivals', 'saree-collection'];
+        // Search in all possible categories
+        const categories = [
+            'featured-collection', 
+            'new-arrivals', 
+            'saree-collection',
+            'gold-necklace',
+            'silver-necklace',
+            'meenakari-necklace',
+            'gold-earrings',
+            'silver-earrings',
+            'meenakari-earrings',
+            'gold-bangles',
+            'silver-bangles',
+            'meenakari-bangles',
+            'gold-rings',
+            'silver-rings',
+            'meenakari-rings'
+        ];
         let productDetails = null;
         
         for (const category of categories) {
