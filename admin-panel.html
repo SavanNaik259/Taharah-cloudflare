@@ -2109,6 +2109,10 @@
                 <i class="fas fa-chart-line"></i>
                 Analytics
             </a>
+            <a href="#" class="nav-item" onclick="showSection('watch-buy')">
+                <i class="fas fa-video"></i>
+                Watch & Buy Videos
+            </a>
             <a href="index.html" class="nav-item">
                 <i class="fas fa-home"></i>
                 Back to Store
@@ -2985,6 +2989,168 @@
                             <i class="fas fa-bell-slash fa-3x" style="margin-bottom: 16px; opacity: 0.3;"></i>
                             <h3>No New Notifications</h3>
                             <p>All caught up! No new notifications to display.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Watch & Buy Section -->
+            <div id="watch-buy" class="content-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Watch & Buy Video Management</h2>
+                        <button class="btn btn-secondary" onclick="loadWatchBuyVideos()">
+                            <i class="fas fa-sync-alt"></i>
+                            Refresh
+                        </button>
+                    </div>
+                    <div class="card-content">
+                        <div style="margin-bottom: 20px; padding: 16px; background: #f0f9ff; border-left: 4px solid #3b82f6; border-radius: 4px;">
+                            <p style="margin: 0; color: #1e40af; font-size: 14px;">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>How it works:</strong> Enter the Product SKU ID for each video. The product name will be automatically fetched and displayed as the link below the video.
+                            </p>
+                        </div>
+
+                        <div id="watch-buy-loading" class="loading">
+                            <i class="fas fa-spinner"></i>
+                            Loading video configurations...
+                        </div>
+
+                        <div id="watch-buy-content" style="display: none;">
+                            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+                                <!-- Video 1 -->
+                                <div class="card" style="padding: 20px;">
+                                    <h4 style="margin: 0 0 16px 0; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                                        <i class="fas fa-video" style="color: #3b82f6;"></i>
+                                        Video 1
+                                    </h4>
+                                    <div style="margin-bottom: 12px;">
+                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Product SKU ID:</label>
+                                        <input type="text" id="video1-sku" class="video-sku-input" placeholder="e.g., FEA-001" 
+                                               style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
+                                    </div>
+                                    <div style="margin-bottom: 12px;">
+                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Current Product:</label>
+                                        <div id="video1-product-name" style="padding: 10px; background: #f8fafc; border-radius: 4px; font-size: 13px; color: #475569; min-height: 40px;">
+                                            Not linked
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm" onclick="saveVideoLink(1)" style="width: 100%;">
+                                        <i class="fas fa-save"></i> Save Link
+                                    </button>
+                                </div>
+
+                                <!-- Video 2 -->
+                                <div class="card" style="padding: 20px;">
+                                    <h4 style="margin: 0 0 16px 0; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                                        <i class="fas fa-video" style="color: #3b82f6;"></i>
+                                        Video 2
+                                    </h4>
+                                    <div style="margin-bottom: 12px;">
+                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Product SKU ID:</label>
+                                        <input type="text" id="video2-sku" class="video-sku-input" placeholder="e.g., FEA-002"
+                                               style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
+                                    </div>
+                                    <div style="margin-bottom: 12px;">
+                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Current Product:</label>
+                                        <div id="video2-product-name" style="padding: 10px; background: #f8fafc; border-radius: 4px; font-size: 13px; color: #475569; min-height: 40px;">
+                                            Not linked
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm" onclick="saveVideoLink(2)" style="width: 100%;">
+                                        <i class="fas fa-save"></i> Save Link
+                                    </button>
+                                </div>
+
+                                <!-- Video 3 -->
+                                <div class="card" style="padding: 20px;">
+                                    <h4 style="margin: 0 0 16px 0; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                                        <i class="fas fa-video" style="color: #3b82f6;"></i>
+                                        Video 3
+                                    </h4>
+                                    <div style="margin-bottom: 12px;">
+                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Product SKU ID:</label>
+                                        <input type="text" id="video3-sku" class="video-sku-input" placeholder="e.g., FEA-003"
+                                               style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
+                                    </div>
+                                    <div style="margin-bottom: 12px;">
+                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Current Product:</label>
+                                        <div id="video3-product-name" style="padding: 10px; background: #f8fafc; border-radius: 4px; font-size: 13px; color: #475569; min-height: 40px;">
+                                            Not linked
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm" onclick="saveVideoLink(3)" style="width: 100%;">
+                                        <i class="fas fa-save"></i> Save Link
+                                    </button>
+                                </div>
+
+                                <!-- Video 4 -->
+                                <div class="card" style="padding: 20px;">
+                                    <h4 style="margin: 0 0 16px 0; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                                        <i class="fas fa-video" style="color: #3b82f6;"></i>
+                                        Video 4
+                                    </h4>
+                                    <div style="margin-bottom: 12px;">
+                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Product SKU ID:</label>
+                                        <input type="text" id="video4-sku" class="video-sku-input" placeholder="e.g., FEA-004"
+                                               style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
+                                    </div>
+                                    <div style="margin-bottom: 12px;">
+                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Current Product:</label>
+                                        <div id="video4-product-name" style="padding: 10px; background: #f8fafc; border-radius: 4px; font-size: 13px; color: #475569; min-height: 40px;">
+                                            Not linked
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm" onclick="saveVideoLink(4)" style="width: 100%;">
+                                        <i class="fas fa-save"></i> Save Link
+                                    </button>
+                                </div>
+
+                                <!-- Video 5 -->
+                                <div class="card" style="padding: 20px;">
+                                    <h4 style="margin: 0 0 16px 0; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                                        <i class="fas fa-video" style="color: #3b82f6;"></i>
+                                        Video 5
+                                    </h4>
+                                    <div style="margin-bottom: 12px;">
+                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Product SKU ID:</label>
+                                        <input type="text" id="video5-sku" class="video-sku-input" placeholder="e.g., FEA-005"
+                                               style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
+                                    </div>
+                                    <div style="margin-bottom: 12px;">
+                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Current Product:</label>
+                                        <div id="video5-product-name" style="padding: 10px; background: #f8fafc; border-radius: 4px; font-size: 13px; color: #475569; min-height: 40px;">
+                                            Not linked
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm" onclick="saveVideoLink(5)" style="width: 100%;">
+                                        <i class="fas fa-save"></i> Save Link
+                                    </button>
+                                </div>
+
+                                <!-- Video 6 -->
+                                <div class="card" style="padding: 20px;">
+                                    <h4 style="margin: 0 0 16px 0; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                                        <i class="fas fa-video" style="color: #3b82f6;"></i>
+                                        Video 6
+                                    </h4>
+                                    <div style="margin-bottom: 12px;">
+                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Product SKU ID:</label>
+                                        <input type="text" id="video6-sku" class="video-sku-input" placeholder="e.g., FEA-006"
+                                               style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
+                                    </div>
+                                    <div style="margin-bottom: 12px;">
+                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Current Product:</label>
+                                        <div id="video6-product-name" style="padding: 10px; background: #f8fafc; border-radius: 4px; font-size: 13px; color: #475569; min-height: 40px;">
+                                            Not linked
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm" onclick="saveVideoLink(6)" style="width: 100%;">
+                                        <i class="fas fa-save"></i> Save Link
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -4462,6 +4628,156 @@
 
         // Make function global
         window.markAsDelivered = markAsDelivered;
+
+        // Watch & Buy Video Management Functions
+        async function loadWatchBuyVideos() {
+            console.log('Loading Watch & Buy video configurations...');
+            
+            const loadingElement = document.getElementById('watch-buy-loading');
+            const contentElement = document.getElementById('watch-buy-content');
+            
+            if (loadingElement) loadingElement.style.display = 'flex';
+            if (contentElement) contentElement.style.display = 'none';
+            
+            try {
+                // Load video links from Firestore
+                const videoLinksDoc = await db.collection('settings').doc('watchBuyVideos').get();
+                
+                if (videoLinksDoc.exists) {
+                    const videoLinks = videoLinksDoc.data();
+                    console.log('Loaded video links:', videoLinks);
+                    
+                    // Populate each video's SKU and product name
+                    for (let i = 1; i <= 6; i++) {
+                        const videoData = videoLinks[`video${i}`];
+                        if (videoData && videoData.productSKU) {
+                            document.getElementById(`video${i}-sku`).value = videoData.productSKU;
+                            
+                            // Fetch and display product name
+                            await fetchAndDisplayProductName(i, videoData.productSKU);
+                        }
+                    }
+                } else {
+                    console.log('No video links configured yet');
+                }
+                
+                if (loadingElement) loadingElement.style.display = 'none';
+                if (contentElement) contentElement.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading Watch & Buy videos:', error);
+                if (loadingElement) {
+                    loadingElement.innerHTML = `
+                        <div style="text-align: center; color: #dc2626;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Error loading video configurations: ${error.message}
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        async function fetchAndDisplayProductName(videoNumber, sku) {
+            const productNameElement = document.getElementById(`video${videoNumber}-product-name`);
+            
+            try {
+                // Search for product across all categories
+                const categories = ['featured-collection', 'new-arrivals', 'saree-collection'];
+                let productFound = null;
+                
+                for (const category of categories) {
+                    const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.products) {
+                            productFound = data.products.find(p => p.id === sku);
+                            if (productFound) break;
+                        }
+                    }
+                }
+                
+                if (productFound) {
+                    const price = parseFloat(productFound.price || 0).toLocaleString('en-IN');
+                    productNameElement.innerHTML = `
+                        <div style="font-weight: 600; color: #1e293b; margin-bottom: 4px;">${productFound.name}</div>
+                        <div style="color: #059669; font-size: 12px;">₹${price}</div>
+                        <div style="color: #64748b; font-size: 11px; margin-top: 4px;">SKU: ${sku}</div>
+                    `;
+                } else {
+                    productNameElement.innerHTML = `<span style="color: #dc2626;">Product not found for SKU: ${sku}</span>`;
+                }
+            } catch (error) {
+                console.error('Error fetching product:', error);
+                productNameElement.innerHTML = `<span style="color: #dc2626;">Error loading product</span>`;
+            }
+        }
+
+        async function saveVideoLink(videoNumber) {
+            const skuInput = document.getElementById(`video${videoNumber}-sku`);
+            const sku = skuInput.value.trim().toUpperCase();
+            
+            if (!sku) {
+                alert('Please enter a Product SKU ID');
+                skuInput.focus();
+                return;
+            }
+            
+            showGlobalLoader(`Saving link for Video ${videoNumber}...`);
+            
+            try {
+                // Validate that product exists
+                const categories = ['featured-collection', 'new-arrivals', 'saree-collection'];
+                let productFound = null;
+                
+                for (const category of categories) {
+                    const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.products) {
+                            productFound = data.products.find(p => p.id === sku);
+                            if (productFound) break;
+                        }
+                    }
+                }
+                
+                if (!productFound) {
+                    hideGlobalLoader();
+                    alert(`Product with SKU "${sku}" not found in any collection. Please check the SKU and try again.`);
+                    return;
+                }
+                
+                // Save to Firestore
+                await db.collection('settings').doc('watchBuyVideos').set({
+                    [`video${videoNumber}`]: {
+                        productSKU: sku,
+                        productName: productFound.name,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }
+                }, { merge: true });
+                
+                // Update display
+                await fetchAndDisplayProductName(videoNumber, sku);
+                
+                hideGlobalLoader();
+                
+                showSuccessModal({
+                    icon: '<i class="fas fa-check-circle"></i>',
+                    title: 'Video Link Saved!',
+                    message: `Video ${videoNumber} has been successfully linked to "${productFound.name}"`
+                });
+                
+                console.log(`Video ${videoNumber} linked to product ${sku}`);
+                
+            } catch (error) {
+                hideGlobalLoader();
+                console.error('Error saving video link:', error);
+                alert(`Error saving video link: ${error.message}`);
+            }
+        }
+
+        // Make functions global
+        window.loadWatchBuyVideos = loadWatchBuyVideos;
+        window.saveVideoLink = saveVideoLink;
 
         // Logout is now handled by the logout-confirmation.js modal system
 

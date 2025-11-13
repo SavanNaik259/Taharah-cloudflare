@@ -10,7 +10,118 @@
 document.addEventListener('DOMContentLoaded', function() {
     initBuyAndWatchVideos();
     initCustomerTestimonialVideos();
+    loadWatchBuyProductLinks();
 });
+
+/**
+ * Load Watch & Buy video product links from Firestore
+ */
+async function loadWatchBuyProductLinks() {
+    if (typeof firebase === 'undefined' || typeof db === 'undefined') {
+        console.log('Firebase not available, skipping Watch & Buy product links');
+        return;
+    }
+    
+    try {
+        console.log('Loading Watch & Buy product links from Firestore...');
+        
+        const videoLinksDoc = await db.collection('settings').doc('watchBuyVideos').get();
+        
+        if (!videoLinksDoc.exists) {
+            console.log('No Watch & Buy video links configured yet');
+            return;
+        }
+        
+        const videoLinks = videoLinksDoc.data();
+        console.log('Loaded Watch & Buy video links:', videoLinks);
+        
+        // Update each video's product link
+        for (let i = 1; i <= 6; i++) {
+            const videoData = videoLinks[`video${i}`];
+            if (videoData && videoData.productSKU) {
+                await updateVideoProductLink(i, videoData.productSKU, videoData.productName);
+            }
+        }
+        
+        console.log('Watch & Buy product links updated successfully');
+        
+    } catch (error) {
+        console.error('Error loading Watch & Buy product links:', error);
+    }
+}
+
+/**
+ * Update a video's product link
+ */
+async function updateVideoProductLink(videoNumber, sku, productName) {
+    // Find the video container
+    const videoContainers = document.querySelectorAll('.testimonial-item');
+    if (!videoContainers[videoNumber - 1]) {
+        console.warn(`Video container ${videoNumber} not found`);
+        return;
+    }
+    
+    const videoContainer = videoContainers[videoNumber - 1];
+    
+    // Find or create the product link element
+    let productLink = videoContainer.querySelector('.video-product-link');
+    
+    if (!productLink) {
+        // Create new product link element
+        productLink = document.createElement('a');
+        productLink.className = 'video-product-link';
+        productLink.href = `product-detail.html?id=${sku}`;
+        
+        // Insert it at the bottom of the video container
+        const videoWrapper = videoContainer.querySelector('.video-container');
+        if (videoWrapper) {
+            videoWrapper.appendChild(productLink);
+        }
+    }
+    
+    // Fetch product details to get image and price
+    try {
+        const categories = ['featured-collection', 'new-arrivals', 'saree-collection'];
+        let productDetails = null;
+        
+        for (const category of categories) {
+            const response = await fetch(`/.netlify/functions/load-products?category=${category}`);
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.products) {
+                    productDetails = data.products.find(p => p.id === sku);
+                    if (productDetails) break;
+                }
+            }
+        }
+        
+        if (productDetails) {
+            const imageUrl = productDetails.mainImage || productDetails.image || '/images/product-placeholder.jpg';
+            
+            productLink.innerHTML = `
+                <img src="${imageUrl}" alt="${productName}" class="video-product-link-image">
+                <p class="video-product-link-text">${productName}</p>
+                <span class="video-product-link-arrow">→</span>
+            `;
+            
+            console.log(`Updated Video ${videoNumber} with product: ${productName}`);
+        } else {
+            // Fallback if product details not found
+            productLink.innerHTML = `
+                <p class="video-product-link-text">${productName}</p>
+                <span class="video-product-link-arrow">→</span>
+            `;
+        }
+        
+    } catch (error) {
+        console.error(`Error fetching product details for video ${videoNumber}:`, error);
+        // Fallback display
+        productLink.innerHTML = `
+            <p class="video-product-link-text">${productName}</p>
+            <span class="video-product-link-arrow">→</span>
+        `;
+    }
+}
 
 function initBuyAndWatchVideos() {
     const scrollContainer = document.querySelector('.testimonials-scroll');
