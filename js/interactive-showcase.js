@@ -28,8 +28,8 @@ const InteractiveShowcase = (function() {
         console.log('Loading showcase products from Firebase...');
 
         const showcaseProductIds = [
-            'SAR-002',
-            'NEW-003',                                     'SAR-005' 
+            'FEA-002',
+            'NEW-003',                                     'FEA-005' 
         ];
 
         // Dot classes for positioning on the image
