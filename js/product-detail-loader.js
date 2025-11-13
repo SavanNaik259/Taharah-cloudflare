@@ -112,7 +112,7 @@ const ProductDetailLoader = (function() {
 
                 const products = data.products || [];
                 console.log(`Found ${products.length} products in category ${category}`);
-                
+
                 // Debug: Log all product IDs in this category
                 if (products.length > 0) {
                     console.log(`Product IDs in ${category}:`, products.map(p => p.id));
@@ -201,7 +201,7 @@ const ProductDetailLoader = (function() {
                 descriptionSection.appendChild(descriptionPara);
             }
             descriptionPara.textContent = product.description || 'No description available.';
-            
+
             // Ensure the heading exists
             let descriptionHeading = descriptionSection.querySelector('h3');
             if (!descriptionHeading) {
@@ -215,7 +215,7 @@ const ProductDetailLoader = (function() {
         // Update main product image - check multiple possible image properties
         const imageUrl = product.image || product.imageUrl || product.mainImage || (product.images && product.images[0] && product.images[0].url);
         const mainImageElements = document.querySelectorAll('.product-main-image, .main-image img, .product-image img, .gallery-main img');
-        
+
         if (mainImageElements.length > 0 && imageUrl) {
             mainImageElements.forEach(img => {
                 img.src = imageUrl;
@@ -270,7 +270,7 @@ const ProductDetailLoader = (function() {
             if (categoryMetaItem) {
                 // Determine category from product ID or use the category from search
                 let categoryName = 'Unknown';
-                
+
                 if (product.category) {
                     categoryName = product.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
                 } else if (product.id) {
@@ -289,7 +289,7 @@ const ProductDetailLoader = (function() {
                         }
                     }
                 }
-                
+
                 categoryMetaItem.textContent = categoryName;
                 console.log('Updated category to:', categoryName);
             } else {
@@ -342,10 +342,10 @@ const ProductDetailLoader = (function() {
         // Find main image element directly and in containers
         const directMainImages = document.querySelectorAll('.product-main-image');
         const mainImageContainers = document.querySelectorAll('.main-image, .gallery-main');
-        
+
         if (images.length > 0) {
             const mainImage = images.find(img => img.isMain) || images[0];
-            
+
             // Update direct main image elements
             directMainImages.forEach(img => {
                 if (mainImage.url) {
@@ -359,7 +359,7 @@ const ProductDetailLoader = (function() {
                     img.alt = '';
                 }
             });
-            
+
             // Update main images in containers
             mainImageContainers.forEach(container => {
                 const mainImg = container.querySelector('img');
@@ -383,7 +383,7 @@ const ProductDetailLoader = (function() {
                 img.src = '';
                 img.alt = '';
             });
-            
+
             mainImageContainers.forEach(container => {
                 const mainImg = container.querySelector('img');
                 if (mainImg) {
@@ -397,7 +397,7 @@ const ProductDetailLoader = (function() {
         // Find thumbnail container and handle multiple images
         const thumbnailContainers = document.querySelectorAll('.thumbnail-gallery, .product-thumbnails, .gallery-thumbs');
         console.log('Found thumbnail containers:', thumbnailContainers.length);
-        
+
         if (thumbnailContainers.length > 0) {
             thumbnailContainers.forEach((container, containerIndex) => {
                 // Clear existing thumbnails to prevent duplicates
@@ -410,7 +410,7 @@ const ProductDetailLoader = (function() {
                     const uniqueImages = images.filter((image, index, self) => 
                         index === self.findIndex(img => img.url === image.url)
                     );
-                    
+
                     console.log(`Creating ${uniqueImages.length} unique thumbnails out of ${images.length} total images`);
 
                     uniqueImages.forEach((image, index) => {
@@ -432,7 +432,7 @@ const ProductDetailLoader = (function() {
                             // Update active thumbnail
                             document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
                             thumbnailElement.classList.add('active');
-                            
+
                             console.log('Thumbnail clicked, updated main image to:', image.url);
                         });
 
@@ -480,12 +480,12 @@ const ProductDetailLoader = (function() {
         if (skuElements.length > 0) {
             skuElements[0].textContent = 'Not Available';
         }
-        
+
         const categoryElements = document.querySelectorAll('.meta-item:nth-child(4) .meta-value');
         if (categoryElements.length > 0) {
             categoryElements[0].textContent = 'Not Available';
         }
-        
+
         console.log('Updated placeholders to show "Not Available"');
     }
 
