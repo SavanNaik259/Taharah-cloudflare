@@ -22,7 +22,9 @@ const InteractiveShowcase = (function () {
     }
 
     /**
-     * Load showcase products from Firebase by product IDs
+     * Load showcase products from Firebase by produc
+     *
+     * t IDs
      */
     async function setupSampleProducts() {
         console.log("Loading showcase products from Firebase...");
