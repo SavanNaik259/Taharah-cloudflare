@@ -33,7 +33,6 @@ const ProductDetailLoader = (function() {
         const allCategories = [
             'featured-collection',
             'new-arrivals',
-            'saree-collection',
             'gold-necklace',
             'silver-necklace',
             'meenakari-necklace',
@@ -55,18 +54,18 @@ const ProductDetailLoader = (function() {
         if (productId.startsWith('NEW-')) return ['new-arrivals', ...allCategories.filter(c => c !== 'new-arrivals')];
         if (productId.startsWith('GOL-')) {
             // Gold products - prioritize gold categories
-            return ['gold-necklace', 'gold-earrings', 'gold-bangles', 'gold-rings', 'featured-collection', 'new-arrivals', ...allCategories.filter(c => !c.startsWith('gold') && c !== 'featured-collection' && c !== 'new-arrivals')];
+            return ['gold-necklace', 'gold-earrings', 'gold-bangles', 'gold-rings', ...allCategories.filter(c => !c.startsWith('gold'))];
         }
         if (productId.startsWith('SIL-')) {
             // Silver products - prioritize silver categories
-            return ['silver-necklace', 'silver-earrings', 'silver-bangles', 'silver-rings', 'featured-collection', 'new-arrivals', ...allCategories.filter(c => !c.startsWith('silver') && c !== 'featured-collection' && c !== 'new-arrivals')];
+            return ['silver-necklace', 'silver-earrings', 'silver-bangles', 'silver-rings', ...allCategories.filter(c => !c.startsWith('silver'))];
         }
         if (productId.startsWith('MEE-')) {
             // Meenakari products - prioritize meenakari categories
-            return ['meenakari-necklace', 'meenakari-earrings', 'meenakari-bangles', 'meenakari-rings', 'featured-collection', 'new-arrivals', ...allCategories.filter(c => !c.startsWith('meenakari') && c !== 'featured-collection' && c !== 'new-arrivals')];
+            return ['meenakari-necklace', 'meenakari-earrings', 'meenakari-bangles', 'meenakari-rings', ...allCategories.filter(c => !c.startsWith('meenakari'))];
         }
 
-        // If no prefix match, search all categories starting with featured and new-arrivals
+        // If no prefix match, search all categories
         return allCategories;
     }
 
@@ -80,11 +79,11 @@ const ProductDetailLoader = (function() {
         }
 
         const categoriesToSearch = getSearchCategories(productId);
-        console.log(`Searching for product ${productId} in ${categoriesToSearch.length} categories:`, categoriesToSearch);
+        console.log(`Searching for product ${productId} in categories:`, categoriesToSearch);
 
         for (const category of categoriesToSearch) {
             try {
-                console.log(`[${categoriesToSearch.indexOf(category) + 1}/${categoriesToSearch.length}] Searching in category: ${category}`);
+                console.log(`Searching in category: ${category}`);
 
                 // Use Netlify function to load products from the category
                 const endpoint = `/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`;
@@ -117,36 +116,26 @@ const ProductDetailLoader = (function() {
                 // Debug: Log all product IDs in this category
                 if (products.length > 0) {
                     console.log(`Product IDs in ${category}:`, products.map(p => p.id));
-                    
-                    // Check if any product ID matches (case-insensitive)
-                    const productIdLower = productId.toLowerCase();
-                    const matchingProduct = products.find(p => p.id && p.id.toLowerCase() === productIdLower);
-                    
-                    if (matchingProduct) {
-                        console.log(`✅ FOUND product ${productId} in category ${category}:`, matchingProduct);
-                        return matchingProduct;
-                    }
+                    console.log(`Sample product structure:`, products[0]);
                 }
 
-                // Exact match search
+                // Find the specific product
                 const product = products.find(p => p.id === productId);
 
                 if (product) {
-                    console.log(`✅ FOUND product ${productId} in category ${category}:`, product);
+                    console.log(`Found product ${productId} in category ${category}:`, product);
                     return product;
                 }
 
-                console.log(`❌ Product ${productId} not found in ${category}`);
+                console.log(`Product ${productId} not found in ${category}`);
 
             } catch (error) {
                 console.error(`Error loading from category ${category}:`, error);
-                console.error('Error details:', error.message, error.stack);
                 continue;
             }
         }
 
-        console.error(`❌ PRODUCT NOT FOUND: ${productId} not found in ANY of the ${categoriesToSearch.length} categories searched`);
-        console.error('Categories searched:', categoriesToSearch);
+        console.error(`Product with ID ${productId} not found in any category`);
         return null;
     }
 
