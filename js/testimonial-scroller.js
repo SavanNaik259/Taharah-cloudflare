@@ -63,22 +63,6 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
 
     const videoContainer = videoContainers[videoNumber - 1];
 
-    // Find or create the product link element
-    let productLink = videoContainer.querySelector('.video-product-link');
-
-    if (!productLink) {
-        // Create new product link element
-        productLink = document.createElement('a');
-        productLink.className = 'video-product-link';
-        productLink.href = `product-detail.html?id=${sku}`;
-
-        // Insert it at the bottom of the video container
-        const videoWrapper = videoContainer.querySelector('.video-container');
-        if (videoWrapper) {
-            videoWrapper.appendChild(productLink);
-        }
-    }
-
     // Fetch product details to get image and price
     try {
         // Search in all possible categories
@@ -102,23 +86,25 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
         let productDetails = null;
 
         for (const category of categories) {
-            const response = await fetch(`/.netlify/functions/load-products?category=${category}`);
-            if (response.ok) {
-                const data = await response.json();
+            try {
+                const response = await fetch(`/.netlify/functions/load-products?category=${category}`);
+                if (response.ok) {
+                    const data = await response.json();
 
-                if (data.success && data.products && data.products.length > 0) {
-                    // Find the product with matching SKU
-                    productDetails = data.products.find(p => p.id === sku);
+                    if (data.success && data.products && data.products.length > 0) {
+                        // Find the product with matching SKU
+                        productDetails = data.products.find(p => p.id === sku);
 
-                    if (productDetails) {
-                        console.log(`Found product ${sku} in category ${category}:`, productDetails);
-                        // Ensure the product has all necessary fields
-                        if (!productDetails.image && productDetails.mainImage) {
-                            productDetails.image = productDetails.mainImage;
-                        } else if (!productDetails.image && productDetails.images && productDetails.images.length > 0) {
-                            productDetails.image = productDetails.images[0].url;
+                        if (productDetails) {
+                            console.log(`Found product ${sku} in category ${category}:`, productDetails);
+                            // Ensure the product has all necessary fields
+                            if (!productDetails.image && productDetails.mainImage) {
+                                productDetails.image = productDetails.mainImage;
+                            } else if (!productDetails.image && productDetails.images && productDetails.images.length > 0) {
+                                productDetails.image = productDetails.images[0].url;
+                            }
+                            break;
                         }
-                        break;
                     }
                 }
             } catch (error) {
@@ -132,10 +118,17 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
             return;
         }
 
-        // Create product link box
-        const productLinkBox = document.createElement('div');
-        productLinkBox.className = 'video-product-link';
-        productLinkBox.style.cssText = `
+        // Remove any existing product link first
+        const existingProductLink = videoContainer.querySelector('.video-product-link');
+        if (existingProductLink) {
+            existingProductLink.remove();
+        }
+
+        // Create product link as a clickable anchor element
+        const productLinkAnchor = document.createElement('a');
+        productLinkAnchor.className = 'video-product-link';
+        productLinkAnchor.href = `product-detail.html?id=${encodeURIComponent(productDetails.id)}`;
+        productLinkAnchor.style.cssText = `
             position: absolute;
             bottom: 20px;
             left: 20px;
@@ -146,9 +139,12 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
             transition: all 0.3s ease;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             max-width: 250px;
+            text-decoration: none;
+            display: block;
+            z-index: 10;
         `;
 
-        productLinkBox.innerHTML = `
+        productLinkAnchor.innerHTML = `
             <div style="display: flex; align-items: center; gap: 10px;">
                 <img src="${productDetails.image || productDetails.mainImage}" alt="${productDetails.name}" 
                      style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
@@ -163,49 +159,36 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
             </div>
         `;
 
-        // Add click handler to navigate to product detail page using the product's actual ID
-        productLinkBox.addEventListener('click', (e) => {
+        // Add click handler that ensures navigation happens
+        productLinkAnchor.addEventListener('click', (e) => {
+            e.preventDefault();
             e.stopPropagation();
-            // Use the product ID from productDetails, not the SKU parameter
-            const productId = productDetails.id || sku;
-            console.log('Navigating to product detail page with ID:', productId);
-            window.location.href = `product-detail.html?id=${encodeURIComponent(productId)}`;
+            
+            const productId = productDetails.id;
+            const targetUrl = `product-detail.html?id=${encodeURIComponent(productId)}`;
+            
+            console.log('Product link clicked - Video:', videoNumber);
+            console.log('Product ID:', productId);
+            console.log('Navigating to:', targetUrl);
+            
+            // Use direct navigation with a small delay to ensure event is fully processed
+            setTimeout(() => {
+                window.location.href = targetUrl;
+            }, 50);
         });
 
-        // Replace the existing product link or append if it was just created
-        const existingProductLink = videoContainer.querySelector('.video-product-link');
-        if (existingProductLink) {
-            // If the link element already exists, replace its content and update its click handler
-            existingProductLink.innerHTML = productLinkBox.innerHTML;
-            // Remove old event listener to prevent duplicates
-            const oldListener = existingProductLink.onclick; // This is a simplified approach; a more robust solution would involve removing listeners properly.
-            if (oldListener) {
-                existingProductLink.removeEventListener('click', oldListener);
-            }
-            existingProductLink.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const productId = productDetails.id || sku;
-                console.log('Navigating to product detail page with ID:', productId);
-                window.location.href = `product-detail.html?id=${encodeURIComponent(productId)}`;
-            });
+        // Append to video container
+        const videoWrapper = videoContainer.querySelector('.video-container');
+        if (videoWrapper) {
+            videoWrapper.appendChild(productLinkAnchor);
+            console.log(`Product link added for video ${videoNumber}, product:`, productDetails.id);
         } else {
-            // If the link element was just created, append it
-            const videoWrapper = videoContainer.querySelector('.video-container');
-            if (videoWrapper) {
-                videoWrapper.appendChild(productLinkBox);
-            }
+            console.error(`Video wrapper not found for video ${videoNumber}`);
         }
-
 
     } catch (error) {
         console.error(`Error fetching product details for video ${videoNumber}:`, error);
-        // Fallback display
-        if (!productLink.innerHTML) { // Only set fallback if no content exists
-            productLink.innerHTML = `
-                <p class="video-product-link-text">${productName}</p>
-                <span class="video-product-link-arrow">→</span>
-            `;
-        }
+        console.error('Error stack:', error.stack);
     }
 }
 
