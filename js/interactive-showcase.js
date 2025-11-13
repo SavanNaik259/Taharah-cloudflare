@@ -3,14 +3,14 @@
  * Handles clickable product dots and popup functionality
  */
 
-const InteractiveShowcase = (function() {
+const InteractiveShowcase = (function () {
     let showcaseProducts = [];
 
     /**
      * Initialize the showcase
      */
     async function init() {
-        console.log('Initializing Interactive Product Showcase...');
+        console.log("Initializing Interactive Product Showcase...");
 
         // Set up sample products (now async)
         await setupSampleProducts();
@@ -18,30 +18,33 @@ const InteractiveShowcase = (function() {
         // Set up event listeners
         setupEventListeners();
 
-        console.log('Interactive Product Showcase initialized');
+        console.log("Interactive Product Showcase initialized");
     }
 
     /**
      * Load showcase products from Firebase by product IDs
      */
     async function setupSampleProducts() {
-        console.log('Loading showcase products from Firebase...');
+        console.log("Loading showcase products from Firebase...");
 
-        const showcaseProductIds = [
-            'FEA-002',
-            'NEW-003',                                     'FEA-005' 
-        ];
+        const showcaseProductIds = ["FEA-002", "NEW-003", "FEA-005"];
 
         // Dot classes for positioning on the image
-        const dotClasses = ['dot-necklace', 'dot-earrings', 'dot-bangle'];
+        const dotClasses = ["dot-necklace", "dot-earrings", "dot-bangle"];
 
         try {
             // Load all products from all categories
-            const categories = ['new-arrivals', 'featured-collection', 'saree-collection'];
+            const categories = [
+                "new-arrivals",
+                "featured-collection",
+                "saree-collection",
+            ];
             const allProducts = [];
 
             for (const category of categories) {
-                const response = await fetch(`/.netlify/functions/load-products?category=${category}`);
+                const response = await fetch(
+                    `/.netlify/functions/load-products?category=${category}`,
+                );
                 const data = await response.json();
 
                 if (data.success && data.products) {
@@ -49,35 +52,41 @@ const InteractiveShowcase = (function() {
                 }
             }
 
-            console.log('Loaded', allProducts.length, 'total products from Firebase');
+            console.log(
+                "Loaded",
+                allProducts.length,
+                "total products from Firebase",
+            );
 
             // Find the showcase products by ID
-            showcaseProducts = showcaseProductIds.map((productId, index) => {
-                const product = allProducts.find(p => p.id === productId);
+            showcaseProducts = showcaseProductIds
+                .map((productId, index) => {
+                    const product = allProducts.find((p) => p.id === productId);
 
-                if (product) {
-                    return {
-                        id: product.id,
-                        name: product.name,
-                        price: product.price,
-                        originalPrice: product.originalPrice || null,
-                        image: product.image || product.mainImage,
-                        description: product.description || product.name,
-                        dotClass: dotClasses[index],
-                        stock: product.stock
-                    };
-                } else {
-                    console.warn('Product not found:', productId);
-                    return null;
-                }
-            }).filter(p => p !== null);
+                    if (product) {
+                        return {
+                            id: product.id,
+                            name: product.name,
+                            price: product.price,
+                            originalPrice: product.originalPrice || null,
+                            image: product.image || product.mainImage,
+                            description: product.description || product.name,
+                            dotClass: dotClasses[index],
+                            stock: product.stock,
+                        };
+                    } else {
+                        console.warn("Product not found:", productId);
+                        return null;
+                    }
+                })
+                .filter((p) => p !== null);
 
-            console.log('Found', showcaseProducts.length, 'showcase products');
+            console.log("Found", showcaseProducts.length, "showcase products");
 
             // Render product list
             renderProductList();
         } catch (error) {
-            console.error('Error loading showcase products:', error);
+            console.error("Error loading showcase products:", error);
 
             // Fallback to empty array
             showcaseProducts = [];
@@ -89,24 +98,29 @@ const InteractiveShowcase = (function() {
      * Render the product list in the showcase
      */
     function renderProductList() {
-        const productList = document.querySelector('.showcase-product-list');
+        const productList = document.querySelector(".showcase-product-list");
         if (!productList) return;
 
-        const productsHTML = showcaseProducts.map(product => {
-            const formattedPrice = new Intl.NumberFormat('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-                minimumFractionDigits: 0
-            }).format(product.price);
+        const productsHTML = showcaseProducts
+            .map((product) => {
+                const formattedPrice = new Intl.NumberFormat("en-IN", {
+                    style: "currency",
+                    currency: "INR",
+                    minimumFractionDigits: 0,
+                }).format(product.price);
 
-            const originalPriceHTML = product.originalPrice ?
-                `<span class="showcase-product-original-price">${new Intl.NumberFormat('en-IN', {
-                    style: 'currency',
-                    currency: 'INR',
-                    minimumFractionDigits: 0
-                }).format(product.originalPrice)}</span>` : '';
+                const originalPriceHTML = product.originalPrice
+                    ? `<span class="showcase-product-original-price">${new Intl.NumberFormat(
+                          "en-IN",
+                          {
+                              style: "currency",
+                              currency: "INR",
+                              minimumFractionDigits: 0,
+                          },
+                      ).format(product.originalPrice)}</span>`
+                    : "";
 
-            return `
+                return `
                 <div class="showcase-product-item" data-product-id="${product.id}">
                     <img src="${product.image}" alt="${product.name}" class="showcase-product-thumb">
                     <div class="showcase-product-info">
@@ -115,7 +129,8 @@ const InteractiveShowcase = (function() {
                     </div>
                 </div>
             `;
-        }).join('');
+            })
+            .join("");
 
         productList.innerHTML = productsHTML;
     }
@@ -125,25 +140,25 @@ const InteractiveShowcase = (function() {
      */
     function setupEventListeners() {
         // Product dot clicks
-        document.querySelectorAll('.product-dot').forEach(dot => {
-            dot.addEventListener('click', handleDotClick);
+        document.querySelectorAll(".product-dot").forEach((dot) => {
+            dot.addEventListener("click", handleDotClick);
         });
 
         // Product item clicks
-        document.querySelectorAll('.showcase-product-item').forEach(item => {
-            item.addEventListener('click', handleProductItemClick);
+        document.querySelectorAll(".showcase-product-item").forEach((item) => {
+            item.addEventListener("click", handleProductItemClick);
         });
 
         // Close popup
-        const closeBtn = document.querySelector('.popup-close-btn');
+        const closeBtn = document.querySelector(".popup-close-btn");
         if (closeBtn) {
-            closeBtn.addEventListener('click', closePopup);
+            closeBtn.addEventListener("click", closePopup);
         }
 
         // Close popup on overlay click
-        const modal = document.querySelector('.product-popup-modal');
+        const modal = document.querySelector(".product-popup-modal");
         if (modal) {
-            modal.addEventListener('click', function(e) {
+            modal.addEventListener("click", function (e) {
                 if (e.target === modal) {
                     closePopup();
                 }
@@ -151,9 +166,9 @@ const InteractiveShowcase = (function() {
         }
 
         // Add to bag button
-        const addToBagBtn = document.querySelector('.add-set-to-bag-btn');
+        const addToBagBtn = document.querySelector(".add-set-to-bag-btn");
         if (addToBagBtn) {
-            addToBagBtn.addEventListener('click', handleAddSetToBag);
+            addToBagBtn.addEventListener("click", handleAddSetToBag);
         }
     }
 
@@ -161,8 +176,10 @@ const InteractiveShowcase = (function() {
      * Handle dot click
      */
     function handleDotClick(e) {
-        const dotClass = Array.from(e.currentTarget.classList).find(c => c.startsWith('dot-'));
-        const product = showcaseProducts.find(p => p.dotClass === dotClass);
+        const dotClass = Array.from(e.currentTarget.classList).find((c) =>
+            c.startsWith("dot-"),
+        );
+        const product = showcaseProducts.find((p) => p.dotClass === dotClass);
 
         if (product) {
             showProductPopup(product);
@@ -174,7 +191,7 @@ const InteractiveShowcase = (function() {
      */
     function handleProductItemClick(e) {
         const productId = e.currentTarget.dataset.productId;
-        const product = showcaseProducts.find(p => p.id === productId);
+        const product = showcaseProducts.find((p) => p.id === productId);
 
         if (product) {
             showProductPopup(product);
@@ -185,41 +202,44 @@ const InteractiveShowcase = (function() {
      * Show product popup
      */
     function showProductPopup(product) {
-        const modal = document.querySelector('.product-popup-modal');
+        const modal = document.querySelector(".product-popup-modal");
         if (!modal) return;
 
-        const formattedPrice = new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            minimumFractionDigits: 0
+        const formattedPrice = new Intl.NumberFormat("en-IN", {
+            style: "currency",
+            currency: "INR",
+            minimumFractionDigits: 0,
         }).format(product.price);
 
         // Update popup content
-        modal.querySelector('.popup-product-image').src = product.image;
-        modal.querySelector('.popup-product-name').textContent = product.name;
-        modal.querySelector('.popup-product-price').textContent = formattedPrice;
-        modal.querySelector('.popup-product-description').textContent = product.description;
+        modal.querySelector(".popup-product-image").src = product.image;
+        modal.querySelector(".popup-product-name").textContent = product.name;
+        modal.querySelector(".popup-product-price").textContent =
+            formattedPrice;
+        modal.querySelector(".popup-product-description").textContent =
+            product.description;
 
         // Set up popup buttons
-        const addToCartBtn = modal.querySelector('.popup-add-to-cart-btn');
-        const viewDetailsBtn = modal.querySelector('.popup-view-details-btn');
+        const addToCartBtn = modal.querySelector(".popup-add-to-cart-btn");
+        const viewDetailsBtn = modal.querySelector(".popup-view-details-btn");
 
         addToCartBtn.onclick = () => handleAddToCart(product);
-        viewDetailsBtn.onclick = () => window.location.href = `product-detail.html?id=${product.id}`;
+        viewDetailsBtn.onclick = () =>
+            (window.location.href = `product-detail.html?id=${product.id}`);
 
         // Show modal
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
+        modal.classList.add("active");
+        document.body.style.overflow = "hidden";
     }
 
     /**
      * Close popup
      */
     function closePopup() {
-        const modal = document.querySelector('.product-popup-modal');
+        const modal = document.querySelector(".product-popup-modal");
         if (modal) {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
+            modal.classList.remove("active");
+            document.body.style.overflow = "";
         }
     }
 
@@ -227,25 +247,28 @@ const InteractiveShowcase = (function() {
      * Handle add to cart
      */
     function handleAddToCart(product) {
-        if (typeof CartManager !== 'undefined') {
+        if (typeof CartManager !== "undefined") {
             // Add to cart
-            CartManager.addToCart({
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                image: product.image
-            }, 1);
+            CartManager.addToCart(
+                {
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image,
+                },
+                1,
+            );
 
             // Show success message
-            showToast('Product added to cart!', 'success');
+            showToast("Product added to cart!", "success");
 
             // Close popup first
             closePopup();
 
             // CartManager.addToCart already opens the cart automatically
         } else {
-            console.error('CartManager not available');
-            showToast('Unable to add to cart', 'error');
+            console.error("CartManager not available");
+            showToast("Unable to add to cart", "error");
         }
     }
 
@@ -253,43 +276,50 @@ const InteractiveShowcase = (function() {
      * Handle add set to bag
      */
     async function handleAddSetToBag() {
-        if (typeof CartManager !== 'undefined') {
+        if (typeof CartManager !== "undefined") {
             try {
                 // Add each product to the cart using CartManager.addToCart
                 for (const product of showcaseProducts) {
-                    await CartManager.addToCart({
-                        id: product.id,
-                        name: product.name,
-                        price: product.price,
-                        image: product.image
-                    }, 1);
+                    await CartManager.addToCart(
+                        {
+                            id: product.id,
+                            name: product.name,
+                            price: product.price,
+                            image: product.image,
+                        },
+                        1,
+                    );
                 }
-                
+
                 // Show toast notification
-                showToast(`Complete set (${showcaseProducts.length} items) added to cart!`, 'success');
+                showToast(
+                    `Complete set (${showcaseProducts.length} items) added to cart!`,
+                    "success",
+                );
             } catch (error) {
-                console.error('Error adding set to cart:', error);
-                showToast('Unable to add set to cart', 'error');
+                console.error("Error adding set to cart:", error);
+                showToast("Unable to add set to cart", "error");
             }
         } else {
-            console.error('CartManager not available');
-            showToast('Unable to add set to cart', 'error');
+            console.error("CartManager not available");
+            showToast("Unable to add set to cart", "error");
         }
     }
 
     /**
      * Show toast notification
      */
-    function showToast(message, type = 'success') {
-        let toastContainer = document.querySelector('.toast-container');
+    function showToast(message, type = "success") {
+        let toastContainer = document.querySelector(".toast-container");
         if (!toastContainer) {
-            toastContainer = document.createElement('div');
-            toastContainer.className = 'toast-container';
-            toastContainer.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999;';
+            toastContainer = document.createElement("div");
+            toastContainer.className = "toast-container";
+            toastContainer.style.cssText =
+                "position: fixed; bottom: 20px; right: 20px; z-index: 9999;";
             document.body.appendChild(toastContainer);
         }
 
-        const toast = document.createElement('div');
+        const toast = document.createElement("div");
         toast.className = `toast ${type}`;
         toast.style.cssText = `
             padding: 12px 20px;
@@ -298,7 +328,7 @@ const InteractiveShowcase = (function() {
             margin-bottom: 10px;
             min-width: 250px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            background-color: ${type === 'success' ? '#4CAF50' : '#F44336'};
+            background-color: ${type === "success" ? "#4CAF50" : "#F44336"};
         `;
         toast.textContent = message;
 
@@ -311,7 +341,7 @@ const InteractiveShowcase = (function() {
 
     // Public API
     return {
-        init
+        init,
     };
 })();
 
