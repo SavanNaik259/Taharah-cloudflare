@@ -29,7 +29,7 @@
 
 /* Brand/Logo */
 .brand {
-    font-size: 24px!important;
+    font-size: 28px!important;
     font-weight: 500;
     font-family: 'Playfair Display', serif;
     color: #8B7355;
@@ -37,7 +37,7 @@
     margin-right: 20px;
     margin-left: 15px;
     margin-bottom: 0; /* Removed bottom margin */
-    margin-top: 0; /* Removed top margin */
+    margin-top: -8px; /* Move logo up slightly */
     padding: 8px 0 3px 0; /* Reduced bottom padding for less height */
     min-width: 150px;
     order: 0;
@@ -539,9 +539,10 @@
     .brand {
         order: 0;
         flex: 0 0 auto;
-        font-size: 14px; /* Decreased font size for brand name */
+        font-size: 18px; /* Increased font size for brand name */
         padding: 12px 0; /* Increased padding to accommodate larger size */
         margin-left: 0; /* Remove left margin to help with centering */
+        margin-top: -8px; /* Move logo up slightly */
     }
 
     .brand-logo {
@@ -750,9 +751,9 @@
 
     .brand {
         order: 1; /* Comes after hamburger menu */
-        margin: 0 auto 0 12px; /* Slightly increased left margin */
+        margin: -6px auto 0 12px; /* Move logo up slightly */
         padding: 8px 0 3px 0; /* Reduced bottom padding for less height */
-        font-size: 32px; /* Increased font size */
+        font-size: 36px; /* Increased font size */
         font-weight: 600; /* Slightly reduced font weight */
         text-align: left;
     }
@@ -1139,10 +1140,11 @@
     }
 
     .brand {
-        font-size: 24px !important; /* Increased font size for mobile */
+        font-size: 28px !important; /* Increased font size for mobile */
         font-weight: 600; /* Reduced font weight */
         padding: 8px 5px 3px 5px; /* Reduced horizontal padding */
         letter-spacing: 0.5px;
+        margin-top: -6px; /* Move logo up slightly */
     }
 
     .brand-logo {
@@ -1185,10 +1187,11 @@
 /* Added media query for very small devices */
 @media (max-width: 480px) {
     .brand {
-        font-size: 18px !important; /* Increased font size for very small devices */
+        font-size: 22px !important; /* Increased font size for very small devices */
         min-width: auto;
         letter-spacing: 0.5px;
         padding: 8px 5px 3px 5px; /* Reduced horizontal padding */
+        margin-top: -6px; /* Move logo up slightly */
     }
 
     .brand-logo {
