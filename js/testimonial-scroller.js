@@ -72,9 +72,9 @@ async function loadWatchBuyProductLinks() {
  * Update a video's product link
  */
 async function updateVideoProductLink(videoNumber, sku, productName) {
-    // Find the video container using data attribute
-    const videoContainer = document.querySelector(`.testimonial-item[data-video-number="${videoNumber}"]`);
-    if (!videoContainer) {
+    // Find the video container
+    const videoContainers = document.querySelectorAll('.testimonial-item');
+    if (!videoContainers[videoNumber - 1]) {
         console.warn(`Video container ${videoNumber} not found`);
         return;
     }
