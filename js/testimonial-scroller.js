@@ -7,10 +7,15 @@
  * with custom play button controls and ensuring only one video plays at a time
  */
 
+console.log('🎬 testimonial-scroller.js loaded');
+
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎬 DOMContentLoaded fired in testimonial-scroller.js');
     initBuyAndWatchVideos();
     initCustomerTestimonialVideos();
+    console.log('🎬 About to call loadWatchBuyProductLinks()');
     loadWatchBuyProductLinks();
+    console.log('🎬 loadWatchBuyProductLinks() called');
 });
 
 /**
