@@ -39,9 +39,18 @@ async function loadWatchBuyProductLinks() {
         console.log('📥 Loading Watch & Buy product links from Firestore...');
 
         const videoLinksDoc = await db.collection('settings').doc('watchBuyVideos').get();
+        console.log('📄 Firestore document fetch completed');
 
         if (!videoLinksDoc.exists) {
             console.warn('⚠️ No Watch & Buy video links configured yet in Firestore');
+            // Remove all placeholders since no configuration exists
+            const videoContainers = document.querySelectorAll('.testimonial-item');
+            videoContainers.forEach(container => {
+                const placeholder = container.querySelector('.video-product-link-placeholder');
+                if (placeholder) {
+                    placeholder.remove();
+                }
+            });
             return;
         }
 
@@ -53,9 +62,22 @@ async function loadWatchBuyProductLinks() {
             const videoData = videoLinks[`video${i}`];
             if (videoData && videoData.productSKU) {
                 console.log(`🔄 Processing video ${i} with SKU: ${videoData.productSKU}`);
-                await updateVideoProductLink(i, videoData.productSKU, videoData.productName);
+                try {
+                    await updateVideoProductLink(i, videoData.productSKU, videoData.productName);
+                    console.log(`✅ Video ${i} product link updated`);
+                } catch (linkError) {
+                    console.error(`❌ Error updating video ${i}:`, linkError);
+                }
             } else {
-                console.log(`⏭️ Video ${i} has no product link configured`);
+                console.log(`⏭️ Video ${i} has no product link configured - removing placeholder`);
+                // Remove placeholder for videos without configured links
+                const videoContainers = document.querySelectorAll('.testimonial-item');
+                if (videoContainers[i - 1]) {
+                    const placeholder = videoContainers[i - 1].querySelector('.video-product-link-placeholder');
+                    if (placeholder) {
+                        placeholder.remove();
+                    }
+                }
             }
         }
 
@@ -231,28 +253,46 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
             }
         });
 
-        // Append to video container - remove any existing links and placeholders first
+        // Append to video container
         const videoWrapper = videoContainer.querySelector('.video-container');
         if (videoWrapper) {
-            // Remove any existing product links to avoid duplicates
-            const existingLinks = videoWrapper.querySelectorAll('.video-product-link');
-            existingLinks.forEach(link => link.remove());
+            console.log(`📍 Found video wrapper for video ${videoNumber}`);
             
-            // Remove placeholder
+            // First append the new link
+            videoWrapper.appendChild(productLinkAnchor);
+            console.log(`➕ New product link appended for video ${videoNumber}`);
+            
+            // Then remove any old links (but not the one we just added)
+            const existingLinks = videoWrapper.querySelectorAll('.video-product-link');
+            let removedCount = 0;
+            existingLinks.forEach(link => {
+                if (link !== productLinkAnchor) {
+                    link.remove();
+                    removedCount++;
+                }
+            });
+            if (removedCount > 0) {
+                console.log(`🗑️ Removed ${removedCount} old product link(s)`);
+            }
+            
+            // Remove placeholder after new link is added
             const placeholder = videoWrapper.querySelector('.video-product-link-placeholder');
             if (placeholder) {
                 placeholder.remove();
+                console.log(`🗑️ Placeholder removed for video ${videoNumber}`);
             }
             
-            videoWrapper.appendChild(productLinkAnchor);
             console.log(`✅ Product link added for video ${videoNumber}, SKU: ${sku}`);
             console.log(`🔗 Link href:`, productLinkAnchor.href);
+            console.log(`🎨 Link styles:`, productLinkAnchor.style.cssText);
         } else {
             console.error(`❌ Video wrapper not found for video ${videoNumber}`);
+            console.log(`❌ Video container structure:`, videoContainer.innerHTML.substring(0, 200));
         }
 
     } catch (error) {
-        console.error(`Error fetching product details for video ${videoNumber}:`, error);
+        console.error(`❌ Error fetching product details for video ${videoNumber}:`, error);
+        console.error('Error details:', error.message);
         console.error('Error stack:', error.stack);
     }
 }
