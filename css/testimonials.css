@@ -55,6 +55,12 @@
     padding: 0;
 }
 
+/* Video Product Link Placeholder - hidden by default */
+.video-product-link-placeholder {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
 /* Buy and Watch Navigation Buttons */
 .buy-watch-nav {
     position: absolute;
