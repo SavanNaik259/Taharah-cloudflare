@@ -203,12 +203,16 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
             
             const targetUrl = `product-detail.html?id=${encodeURIComponent(sku)}`;
             
-            console.log('🔗 Product link clicked - Video:', videoNumber);
+            console.log('🔗 VIDEO PRODUCT LINK CLICKED');
+            console.log('📹 Video Number:', videoNumber);
             console.log('📦 Product SKU:', sku);
-            console.log('🎯 Navigating to:', targetUrl);
+            console.log('📝 Product Name:', productName);
+            console.log('🎯 Target URL:', targetUrl);
+            console.log('🌐 Current Page:', window.location.href);
             
             // Use direct navigation with a small delay to ensure event is fully processed
             setTimeout(() => {
+                console.log('⏭️ Navigating now to:', targetUrl);
                 window.location.href = targetUrl;
             }, 50);
         });
