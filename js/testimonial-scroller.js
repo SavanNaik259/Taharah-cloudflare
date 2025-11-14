@@ -196,7 +196,7 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
             `;
         }
 
-        // Add click handler that ensures navigation happens
+        // Add click handler with multiple fallback methods for reliable navigation
         productLinkAnchor.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -206,22 +206,47 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
             console.log('🔗 VIDEO PRODUCT LINK CLICKED');
             console.log('📹 Video Number:', videoNumber);
             console.log('📦 Product SKU:', sku);
-            console.log('📝 Product Name:', productName);
+            console.log('📝 Product Name:', productName || 'Not found');
             console.log('🎯 Target URL:', targetUrl);
             console.log('🌐 Current Page:', window.location.href);
             
-            // Use direct navigation with a small delay to ensure event is fully processed
-            setTimeout(() => {
-                console.log('⏭️ Navigating now to:', targetUrl);
+            // Try immediate navigation first
+            try {
+                // Method 1: Direct assignment (most reliable)
                 window.location.href = targetUrl;
-            }, 50);
+                console.log('✅ Navigation initiated via location.href');
+            } catch (navError) {
+                console.error('❌ Navigation error:', navError);
+                // Method 2: Fallback with timeout
+                setTimeout(() => {
+                    try {
+                        window.location.assign(targetUrl);
+                        console.log('✅ Navigation initiated via location.assign (fallback)');
+                    } catch (fallbackError) {
+                        console.error('❌ Fallback navigation error:', fallbackError);
+                        // Method 3: Last resort - open in new tab
+                        window.open(targetUrl, '_self');
+                    }
+                }, 10);
+            }
         });
 
-        // Append to video container
+        // Append to video container - remove any existing links and placeholders first
         const videoWrapper = videoContainer.querySelector('.video-container');
         if (videoWrapper) {
+            // Remove any existing product links to avoid duplicates
+            const existingLinks = videoWrapper.querySelectorAll('.video-product-link');
+            existingLinks.forEach(link => link.remove());
+            
+            // Remove placeholder
+            const placeholder = videoWrapper.querySelector('.video-product-link-placeholder');
+            if (placeholder) {
+                placeholder.remove();
+            }
+            
             videoWrapper.appendChild(productLinkAnchor);
             console.log(`✅ Product link added for video ${videoNumber}, SKU: ${sku}`);
+            console.log(`🔗 Link href:`, productLinkAnchor.href);
         } else {
             console.error(`❌ Video wrapper not found for video ${videoNumber}`);
         }

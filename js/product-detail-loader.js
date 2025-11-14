@@ -16,24 +16,37 @@ const ProductDetailLoader = (function() {
     }
 
     /**
-     * Get product ID from URL parameters
+     * Get product ID from URL with comprehensive logging
      */
     function getProductIdFromURL() {
         const urlParams = new URLSearchParams(window.location.search);
         const productId = urlParams.get('id');
-        console.log('Product ID from URL:', productId);
+
+        console.log('=== PRODUCT DETAIL PAGE LOADING ===');
+        console.log('📍 Current URL:', window.location.href);
+        console.log('🔍 All URL params:', Array.from(urlParams.entries()));
+        console.log('📦 Product ID from URL:', productId);
+
+        if (!productId) {
+            console.error('❌ No product ID found in URL');
+            console.log('💡 URL should be: product-detail.html?id=YOUR_SKU');
+            updatePlaceholders();
+            return;
+        }
+
+        console.log('✅ Product ID detected:', productId);
+        console.log('🔄 Starting product search across all categories...');
         return productId;
     }
 
     /**
      * Determine all possible categories to search
      */
-    function getSearchCategories(productId) {
+    function getCategoriesForProduct(productId) {
         // Define all possible categories including subcategories
         const allCategories = [
             'featured-collection',
             'new-arrivals',
-            'saree-collection',
             'gold-necklace',
             'silver-necklace',
             'meenakari-necklace',
@@ -95,53 +108,45 @@ const ProductDetailLoader = (function() {
             return null;
         }
 
-        const categoriesToSearch = getSearchCategories(productId);
-        console.log(`Searching for product ${productId} in categories:`, categoriesToSearch);
+        const searchCategories = getCategoriesForProduct(productId);
+        console.log(`Searching for product ${productId} in categories:`, searchCategories);
 
-        for (const category of categoriesToSearch) {
+        for (const category of searchCategories) {
             try {
-                console.log(`Searching in category: ${category}`);
-
-                // Use Netlify function to load products from the category
-                const endpoint = `/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`;
-                console.log('Fetching from endpoint:', endpoint);
-
-                const response = await fetch(endpoint, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Cache-Control': 'no-cache'
-                    }
-                });
+                console.log(`🔍 Searching category: ${category} for SKU: ${productId}`);
+                const response = await fetch(`/.netlify/functions/load-products?category=${category}`);
 
                 if (!response.ok) {
-                    console.warn(`HTTP error for category ${category}! status: ${response.status}`);
+                    console.warn(`⚠️ Failed to load category ${category}:`, response.status);
                     continue;
                 }
 
                 const data = await response.json();
-                console.log(`Response for ${category}:`, data);
+                console.log(`📊 Category ${category} loaded:`, data.success ? `${data.products?.length || 0} products` : 'failed');
 
-                if (!data.success) {
-                    console.warn(`Failed to load products from ${category}:`, data.message);
-                    continue;
-                }
+                if (data.success && data.products && data.products.length > 0) {
+                    console.log(`🔎 Searching ${data.products.length} products in ${category} for SKU: ${productId}`);
 
-                const products = data.products || [];
-                console.log(`Found ${products.length} products in category ${category}`);
+                    const product = data.products.find(p => {
+                        const matches = p.id === productId;
+                        if (matches) {
+                            console.log(`✅ PRODUCT FOUND in ${category}!`);
+                            console.log('📦 Product details:', {
+                                id: p.id,
+                                name: p.name,
+                                price: p.price,
+                                category: category
+                            });
+                        }
+                        return matches;
+                    });
 
-                // Debug: Log all product IDs in this category
-                if (products.length > 0) {
-                    console.log(`Product IDs in ${category}:`, products.map(p => p.id));
-                    console.log(`Sample product structure:`, products[0]);
-                }
-
-                // Find the specific product
-                const product = products.find(p => p.id === productId);
-
-                if (product) {
-                    console.log(`Found product ${productId} in category ${category}:`, product);
-                    return product;
+                    if (product) {
+                        console.log(`🎉 Successfully found and loading product:`, product.name);
+                        return product;
+                    } else {
+                        console.log(`❌ Product ${productId} not found in ${category}`);
+                    }
                 }
 
                 console.log(`Product ${productId} not found in ${category}`);
@@ -300,7 +305,7 @@ const ProductDetailLoader = (function() {
                         categoryName = 'Saree Collection';
                     } else {
                         // Use the category that was searched to find this product
-                        const searchCategories = getSearchCategories(product.id);
+                        const searchCategories = getCategoriesForProduct(product.id);
                         if (searchCategories.length > 0) {
                             categoryName = searchCategories[0].replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
                         }
@@ -531,7 +536,7 @@ const ProductDetailLoader = (function() {
 
         const productId = getProductIdFromURL();
         if (!productId) {
-            console.error('No product ID found in URL');
+            // Error already logged in getProductIdFromURL
             showErrorState();
             return;
         }
