@@ -17,36 +17,49 @@ document.addEventListener('DOMContentLoaded', function() {
  * Load Watch & Buy video product links from Firestore
  */
 async function loadWatchBuyProductLinks() {
-    if (typeof firebase === 'undefined' || typeof db === 'undefined') {
-        console.log('Firebase not available, skipping Watch & Buy product links');
+    console.log('=== Watch & Buy Product Links Loading Started ===');
+    
+    if (typeof firebase === 'undefined') {
+        console.error('❌ Firebase is not available! Make sure Firebase SDK is loaded.');
+        return;
+    }
+    
+    if (typeof db === 'undefined') {
+        console.error('❌ Firestore db is not available! Make sure Firestore is initialized.');
         return;
     }
 
     try {
-        console.log('Loading Watch & Buy product links from Firestore...');
+        console.log('✓ Firebase and Firestore are available');
+        console.log('📥 Loading Watch & Buy product links from Firestore...');
 
         const videoLinksDoc = await db.collection('settings').doc('watchBuyVideos').get();
 
         if (!videoLinksDoc.exists) {
-            console.log('No Watch & Buy video links configured yet');
+            console.warn('⚠️ No Watch & Buy video links configured yet in Firestore');
             return;
         }
 
         const videoLinks = videoLinksDoc.data();
-        console.log('Loaded Watch & Buy video links:', videoLinks);
+        console.log('✓ Loaded Watch & Buy video links:', videoLinks);
 
         // Update each video's product link
         for (let i = 1; i <= 6; i++) {
             const videoData = videoLinks[`video${i}`];
             if (videoData && videoData.productSKU) {
+                console.log(`🔄 Processing video ${i} with SKU: ${videoData.productSKU}`);
                 await updateVideoProductLink(i, videoData.productSKU, videoData.productName);
+            } else {
+                console.log(`⏭️ Video ${i} has no product link configured`);
             }
         }
 
-        console.log('Watch & Buy product links updated successfully');
+        console.log('✅ Watch & Buy product links updated successfully');
 
     } catch (error) {
-        console.error('Error loading Watch & Buy product links:', error);
+        console.error('❌ Error loading Watch & Buy product links:', error);
+        console.error('Error details:', error.message);
+        console.error('Error stack:', error.stack);
     }
 }
 
@@ -113,21 +126,17 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
             }
         }
 
-        if (!productDetails) {
-            console.error(`Product with SKU ${sku} not found in any category`);
-            return;
-        }
-
         // Remove any existing product link first
         const existingProductLink = videoContainer.querySelector('.video-product-link');
         if (existingProductLink) {
             existingProductLink.remove();
         }
 
-        // Create product link as a clickable anchor element
+        // Create product link with SKU - even if full details aren't found
+        // This ensures the link always works and navigates to product detail page
         const productLinkAnchor = document.createElement('a');
         productLinkAnchor.className = 'video-product-link';
-        productLinkAnchor.href = `product-detail.html?id=${encodeURIComponent(productDetails.id)}`;
+        productLinkAnchor.href = `product-detail.html?id=${encodeURIComponent(sku)}`;
         productLinkAnchor.style.cssText = `
             position: absolute;
             bottom: 20px;
@@ -144,32 +153,54 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
             z-index: 10;
         `;
 
-        productLinkAnchor.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <img src="${productDetails.image || productDetails.mainImage}" alt="${productDetails.name}" 
-                     style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
-                <div style="flex: 1;">
-                    <div style="font-weight: 600; font-size: 14px; color: #333; margin-bottom: 4px;">
-                        ${productDetails.name}
-                    </div>
-                    <div style="font-size: 13px; color: #693208; font-weight: 500;">
-                        ₹${productDetails.price.toLocaleString()}
+        // If we have full product details, show them. Otherwise show fallback with product name from Firestore
+        if (productDetails) {
+            console.log(`✓ Found product details for ${sku}`);
+            productLinkAnchor.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <img src="${productDetails.image || productDetails.mainImage}" alt="${productDetails.name}" 
+                         style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; font-size: 14px; color: #333; margin-bottom: 4px;">
+                            ${productDetails.name}
+                        </div>
+                        <div style="font-size: 13px; color: #693208; font-weight: 500;">
+                            ₹${productDetails.price.toLocaleString()}
+                        </div>
                     </div>
                 </div>
-            </div>
-        `;
+            `;
+        } else {
+            console.warn(`⚠️ Product details not found for SKU ${sku}, using fallback display`);
+            // Use product name from Firestore or a generic message
+            const displayName = productName || 'View Product';
+            productLinkAnchor.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-gem" style="color: white; font-size: 20px;"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; font-size: 14px; color: #333; margin-bottom: 4px;">
+                            ${displayName}
+                        </div>
+                        <div style="font-size: 12px; color: #666;">
+                            SKU: ${sku}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
 
         // Add click handler that ensures navigation happens
         productLinkAnchor.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             
-            const productId = productDetails.id;
-            const targetUrl = `product-detail.html?id=${encodeURIComponent(productId)}`;
+            const targetUrl = `product-detail.html?id=${encodeURIComponent(sku)}`;
             
-            console.log('Product link clicked - Video:', videoNumber);
-            console.log('Product ID:', productId);
-            console.log('Navigating to:', targetUrl);
+            console.log('🔗 Product link clicked - Video:', videoNumber);
+            console.log('📦 Product SKU:', sku);
+            console.log('🎯 Navigating to:', targetUrl);
             
             // Use direct navigation with a small delay to ensure event is fully processed
             setTimeout(() => {
@@ -181,9 +212,9 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
         const videoWrapper = videoContainer.querySelector('.video-container');
         if (videoWrapper) {
             videoWrapper.appendChild(productLinkAnchor);
-            console.log(`Product link added for video ${videoNumber}, product:`, productDetails.id);
+            console.log(`✅ Product link added for video ${videoNumber}, SKU: ${sku}`);
         } else {
-            console.error(`Video wrapper not found for video ${videoNumber}`);
+            console.error(`❌ Video wrapper not found for video ${videoNumber}`);
         }
 
     } catch (error) {
