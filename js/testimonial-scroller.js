@@ -13,9 +13,30 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('🎬 DOMContentLoaded fired in testimonial-scroller.js');
     initBuyAndWatchVideos();
     initCustomerTestimonialVideos();
-    console.log('🎬 About to call loadWatchBuyProductLinks()');
-    loadWatchBuyProductLinks();
-    console.log('🎬 loadWatchBuyProductLinks() called');
+    
+    // Wait for Firebase to be ready with retry mechanism
+    let firebaseCheckAttempts = 0;
+    const maxFirebaseCheckAttempts = 20;
+    const firebaseCheckInterval = 200;
+    
+    function waitForFirebaseAndLoadProducts() {
+        firebaseCheckAttempts++;
+        
+        if (typeof firebase !== 'undefined' && typeof db !== 'undefined') {
+            console.log('🎬 Firebase and db are ready, loading Watch & Buy product links');
+            loadWatchBuyProductLinks();
+        } else if (firebaseCheckAttempts < maxFirebaseCheckAttempts) {
+            console.log(`🎬 Waiting for Firebase to initialize... (attempt ${firebaseCheckAttempts}/${maxFirebaseCheckAttempts})`);
+            setTimeout(waitForFirebaseAndLoadProducts, firebaseCheckInterval);
+        } else {
+            console.error('🎬 ❌ Firebase did not initialize after maximum attempts');
+            // Remove all placeholders since Firebase is not available
+            const placeholders = document.querySelectorAll('.video-product-link-placeholder');
+            placeholders.forEach(p => p.remove());
+        }
+    }
+    
+    waitForFirebaseAndLoadProducts();
 });
 
 /**
