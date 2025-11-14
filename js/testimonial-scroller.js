@@ -55,15 +55,7 @@ async function loadWatchBuyProductLinks() {
                 console.log(`🔄 Processing video ${i} with SKU: ${videoData.productSKU}`);
                 await updateVideoProductLink(i, videoData.productSKU, videoData.productName);
             } else {
-                console.log(`⏭️ Video ${i} has no product link configured - removing placeholder`);
-                // Remove placeholder for videos without configured links
-                const videoContainers = document.querySelectorAll('.testimonial-item');
-                if (videoContainers[i - 1]) {
-                    const placeholder = videoContainers[i - 1].querySelector('.video-product-link-placeholder');
-                    if (placeholder) {
-                        placeholder.remove();
-                    }
-                }
+                console.log(`⏭️ Video ${i} has no product link configured`);
             }
         }
 
@@ -137,6 +129,12 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
                 console.error(`Error loading from category ${category}:`, error);
                 continue;
             }
+        }
+
+        // Remove any existing product link first
+        const existingProductLink = videoContainer.querySelector('.video-product-link');
+        if (existingProductLink) {
+            existingProductLink.remove();
         }
 
         // Create product link with SKU - even if full details aren't found
@@ -236,23 +234,17 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
         // Append to video container - remove any existing links and placeholders first
         const videoWrapper = videoContainer.querySelector('.video-container');
         if (videoWrapper) {
-            // First append the new link
-            videoWrapper.appendChild(productLinkAnchor);
-            
-            // Then remove any old links and placeholders (but not the one we just added)
+            // Remove any existing product links to avoid duplicates
             const existingLinks = videoWrapper.querySelectorAll('.video-product-link');
-            existingLinks.forEach(link => {
-                if (link !== productLinkAnchor) {
-                    link.remove();
-                }
-            });
+            existingLinks.forEach(link => link.remove());
             
-            // Remove placeholder after new link is added
+            // Remove placeholder
             const placeholder = videoWrapper.querySelector('.video-product-link-placeholder');
             if (placeholder) {
                 placeholder.remove();
             }
             
+            videoWrapper.appendChild(productLinkAnchor);
             console.log(`✅ Product link added for video ${videoNumber}, SKU: ${sku}`);
             console.log(`🔗 Link href:`, productLinkAnchor.href);
         } else {
