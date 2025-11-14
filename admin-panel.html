@@ -4682,6 +4682,7 @@
             
             try {
                 // Search for product across ALL categories including subcategories
+                // Complete list of all possible product categories
                 const categories = [
                     'featured-collection', 
                     'new-arrivals', 
@@ -4697,7 +4698,9 @@
                     'meenakari-bangles',
                     'gold-rings',
                     'silver-rings',
-                    'meenakari-rings'
+                    'meenakari-rings',
+                    'bridal',
+                    'polki'
                 ];
                 let productFound = null;
                 
@@ -4734,7 +4737,7 @@
 
         async function saveVideoLink(videoNumber) {
             const skuInput = document.getElementById(`video${videoNumber}-sku`);
-            const sku = skuInput.value.trim().toUpperCase();
+            const sku = skuInput.value.trim();
             
             if (!sku) {
                 alert('Please enter a Product SKU ID');
@@ -4746,6 +4749,7 @@
             
             try {
                 // Validate that product exists - search ALL collections including subcategories
+                // Complete list of all possible product categories
                 const categories = [
                     'featured-collection', 
                     'new-arrivals', 
@@ -4761,7 +4765,9 @@
                     'meenakari-bangles',
                     'gold-rings',
                     'silver-rings',
-                    'meenakari-rings'
+                    'meenakari-rings',
+                    'bridal',
+                    'polki'
                 ];
                 let productFound = null;
                 
