@@ -4681,8 +4681,24 @@
             const productNameElement = document.getElementById(`video${videoNumber}-product-name`);
             
             try {
-                // Search for product across all categories
-                const categories = ['featured-collection', 'new-arrivals', 'saree-collection'];
+                // Search for product across ALL categories including subcategories
+                const categories = [
+                    'featured-collection', 
+                    'new-arrivals', 
+                    'saree-collection',
+                    'gold-necklace',
+                    'silver-necklace',
+                    'meenakari-necklace',
+                    'gold-earrings',
+                    'silver-earrings',
+                    'meenakari-earrings',
+                    'gold-bangles',
+                    'silver-bangles',
+                    'meenakari-bangles',
+                    'gold-rings',
+                    'silver-rings',
+                    'meenakari-rings'
+                ];
                 let productFound = null;
                 
                 for (const category of categories) {
@@ -4729,8 +4745,24 @@
             showGlobalLoader(`Saving link for Video ${videoNumber}...`);
             
             try {
-                // Validate that product exists
-                const categories = ['featured-collection', 'new-arrivals', 'saree-collection'];
+                // Validate that product exists - search ALL collections including subcategories
+                const categories = [
+                    'featured-collection', 
+                    'new-arrivals', 
+                    'saree-collection',
+                    'gold-necklace',
+                    'silver-necklace',
+                    'meenakari-necklace',
+                    'gold-earrings',
+                    'silver-earrings',
+                    'meenakari-earrings',
+                    'gold-bangles',
+                    'silver-bangles',
+                    'meenakari-bangles',
+                    'gold-rings',
+                    'silver-rings',
+                    'meenakari-rings'
+                ];
                 let productFound = null;
                 
                 for (const category of categories) {
