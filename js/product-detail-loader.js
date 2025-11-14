@@ -19,30 +19,9 @@ const ProductDetailLoader = (function() {
      * Get product ID from URL parameters
      */
     function getProductIdFromURL() {
-        // Get full URL for debugging
-        const fullUrl = window.location.href;
-        console.log('Full URL:', fullUrl);
-        
         const urlParams = new URLSearchParams(window.location.search);
         const productId = urlParams.get('id');
-        
-        console.log('URL Search Params:', window.location.search);
-        console.log('Extracted Product ID:', productId);
-        
-        // Log all URL parameters for debugging
-        console.log('All URL parameters:');
-        for (const [key, value] of urlParams.entries()) {
-            console.log(`  ${key}: ${value}`);
-        }
-        
-        if (!productId) {
-            console.error('❌ NO PRODUCT ID FOUND IN URL');
-            console.error('Expected URL format: product-detail.html?id=PRODUCT_ID');
-            console.error('Actual URL:', fullUrl);
-        } else {
-            console.log('✓ Product ID found:', productId);
-        }
-        
+        console.log('Product ID from URL:', productId);
         return productId;
     }
 
@@ -515,30 +494,13 @@ const ProductDetailLoader = (function() {
      */
     function showErrorState() {
         updatePlaceholders();
-        
-        const urlParams = new URLSearchParams(window.location.search);
-        const attemptedId = urlParams.get('id') || 'None';
-        const fullUrl = window.location.href;
-        
-        console.error('Showing error state for product:', attemptedId);
-        console.error('Full URL:', fullUrl);
-        
         const mainContainers = document.querySelectorAll('.product-detail-container, .product-container, main');
         if (mainContainers.length > 0) {
             mainContainers[0].innerHTML = `
-                <div class="error-state" style="text-align: center; padding: 50px 20px; max-width: 600px; margin: 0 auto;">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ff9800; margin-bottom: 20px;"></i>
-                    <h2 style="color: #333; margin-bottom: 15px;">Product Not Found</h2>
-                    <p style="color: #666; margin-bottom: 10px;">Sorry, we couldn't find the product you're looking for.</p>
-                    <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0; font-size: 14px; text-align: left;">
-                        <strong>Debug Information:</strong><br>
-                        Product ID: <code>${attemptedId}</code><br>
-                        Full URL: <code style="word-break: break-all;">${fullUrl}</code>
-                    </div>
-                    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                        <a href="index.html" class="btn btn-primary" style="display: inline-block; padding: 12px 24px; background: #5a3f2a; color: white; text-decoration: none; border-radius: 5px;">Return to Homepage</a>
-                        <a href="all-collection.html" class="btn btn-secondary" style="display: inline-block; padding: 12px 24px; background: #9c7c38; color: white; text-decoration: none; border-radius: 5px;">Browse All Products</a>
-                    </div>
+                <div class="error-state" style="text-align: center; padding: 50px 20px;">
+                    <h2>Product Not Found</h2>
+                    <p>Sorry, we couldn't find the product you're looking for.</p>
+                    <a href="/" class="btn btn-primary" style="display: inline-block; padding: 10px 20px; background: #5a3f2a; color: white; text-decoration: none; border-radius: 5px;">Return to Homepage</a>
                 </div>
             `;
         }

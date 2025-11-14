@@ -346,37 +346,28 @@ const BridalProductsLoader = (function() {
      * Generate HTML for a product item (horizontal scrolling layout)
      */
     function generateProductHTML(product) {
-        // Validate product has required data
-        if (!product || !product.id) {
-            console.error('Invalid product data - missing ID:', product);
-            return '';
-        }
-
         const formattedPrice = new Intl.NumberFormat('en-IN', {
             style: 'currency',
             currency: 'INR',
             minimumFractionDigits: 0
         }).format(product.price);
 
-        // Ensure product ID is properly encoded in URL
-        const productDetailUrl = `product-detail.html?id=${encodeURIComponent(product.id)}`;
-        console.log('Generated product link for', product.name, ':', productDetailUrl);
-
         return `
             <div class="product-item" data-product-id="${product.id}">
-                <div class="product-image">
-                    <img src="${product.image}" alt="${product.name}" loading="lazy">
-                    <button class="add-to-wishlist" data-product-id="${product.id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-image="${product.image}" onclick="event.preventDefault(); event.stopPropagation();">
-                        <i class="far fa-heart"></i>
-                    </button>
-                </div>
-                <div class="product-details" style="text-align: center;">
-                    <h3 class="product-name">${product.name}</h3>
-                    <div class="product-pricing">
-                        <span class="current-price">${formattedPrice}</span>
+                <a href="product-detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">
+                    <div class="product-image">
+                        <img src="${product.image}" alt="${product.name}" loading="lazy">
+                        <button class="add-to-wishlist" data-product-id="${product.id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-image="${product.image}" onclick="event.preventDefault(); event.stopPropagation();">
+                            <i class="far fa-heart"></i>
+                        </button>
                     </div>
-                </div>
-                <a href="${productDetailUrl}" class="product-link-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; cursor: pointer;" onclick="console.log('Product clicked:', '${product.id}'); window.location.href='${productDetailUrl}'; return false;"></a>
+                    <div class="product-details" style="text-align: center;">
+                        <h3 class="product-name">${product.name}</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">${formattedPrice}</span>
+                        </div>
+                    </div>
+                </a>
             </div>
         `;
     }
