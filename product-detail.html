@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+
     <!-- SEO Meta Tags -->
     <title>Product Details - Royal Meenakari | Handcrafted Jewelry</title>
     <meta name="description" content="View detailed information about this exquisite piece from Royal Meenakari's handcrafted jewelry collection." />
     <meta name="keywords" content="meenakari jewelry details, handcrafted jewelry, royal meenakari products" />
-    
+
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="images/logos/royalmeenakari.png" />
     <link rel="apple-touch-icon" href="images/logos/royalmeenakari.png" />
-    
+
     <!-- Open Graph -->
     <meta property="og:type" content="product" />
     <meta property="og:url" content="https://royalmeenkari.in/product-detail.html" />
@@ -544,7 +544,7 @@ background-color: #000 !important;
                     <a href="https://www.facebook.com" target="_blank" class="social-icon-link">
                         <i class="fab fa-facebook-f"></i>
                     </a>
-                    
+
                 </div>
             </div>
 
@@ -643,7 +643,7 @@ background-color: #000 !important;
         document.addEventListener('DOMContentLoaded', function() {
             const bottomNavCart = document.getElementById('bottomNavCart');
             const bottomNavAccount = document.getElementById('bottomNavAccount');
-            
+
             if (bottomNavCart) {
                 bottomNavCart.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -655,7 +655,7 @@ background-color: #000 !important;
                     }
                 });
             }
-            
+
             // Update account link based on login status
             if (bottomNavAccount) {
                 function updateBottomNavAccount() {
@@ -664,10 +664,10 @@ background-color: #000 !important;
                         bottomNavAccount.href = isLoggedIn ? 'profile.html' : 'login.html';
                     }
                 }
-                
+
                 // Initial check
                 setTimeout(updateBottomNavAccount, 500);
-                
+
                 // Listen for auth state changes
                 if (window.firebase && window.firebase.auth) {
                     firebase.auth().onAuthStateChanged(updateBottomNavAccount);
@@ -1122,7 +1122,7 @@ background-color: #000 !important;
     <!-- Product Detail Loader -->
     <script src="js/product-detail-loader.js"></script>
     <script src="js/product-gallery.js"></script>
-    
+
     <!-- Currency Converter -->
     <script src="js/currency-converter.js?v=1.0.1"></script>
 
@@ -1147,7 +1147,7 @@ background-color: #000 !important;
                 console.warn('No product ID found in URL');
                 return;
             }
-            
+
             try {
                 // Wait for FirebaseReviewsManager to be available
                 if (typeof FirebaseReviewsManager === 'undefined') {
@@ -1172,10 +1172,10 @@ background-color: #000 !important;
                             month: 'long',
                             day: 'numeric'
                         }) : 'Recently';
-                        
+
                         const verifiedBadge = review.verified ? '<span class="verified-purchase">✓ Verified Purchase</span>' : '';
 
-                        const imagesHTML = review.images && review.images.length > 0 
+                        const imagesHTML = review.images && review.images.length > 0
                             ? `<div class="review-images">
                                 ${review.images.map(imageUrl => `
                                     <img src="${imageUrl}" alt="Review image" class="review-image" onclick="openReviewImageModal('${imageUrl}')">
@@ -1225,15 +1225,15 @@ background-color: #000 !important;
             const modal = document.createElement('div');
             modal.className = 'review-image-modal';
             modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 99999; display: flex; align-items: center; justify-content: center; cursor: pointer;';
-            
+
             const img = document.createElement('img');
             img.src = imageUrl;
             img.style.cssText = 'max-width: 90%; max-height: 90%; border-radius: 8px;';
-            
+
             modal.appendChild(img);
             document.body.appendChild(modal);
             document.body.style.overflow = 'hidden';
-            
+
             modal.addEventListener('click', function() {
                 document.body.removeChild(modal);
                 document.body.style.overflow = 'auto';
