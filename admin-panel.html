@@ -1964,15 +1964,6 @@
             }
         }
 
-        /* Force single column for geographic charts on all screen sizes */
-        @media (max-width: 1200px) {
-            .analytics-section div[style*="grid-template-columns: 2fr 1fr"] {
-                display: flex !important;
-                flex-direction: column !important;
-                gap: 24px !important;
-            }
-        }
-
         /* Extra mobile responsive for very small screens */
         @media (max-width: 480px) {
             .analytics-section .stat-card {
@@ -2322,12 +2313,50 @@
                             <button class="section-tab" onclick="filterProducts('featured-collection')">Featured Collection</button>
                             <button class="section-tab" onclick="filterProducts('new-arrivals')">New Arrivals</button>
                             <button class="section-tab" onclick="filterProducts('saree-collection')">Saree Collection</button>
+                            <button class="section-tab" onclick="filterProducts('subcategories')">Subcategories</button>
                         </div>
+
                         <div id="products-loading" class="loading">
                             <i class="fas fa-spinner"></i>
                             Loading products...
                         </div>
+                        
+                        <!-- Regular Products Grid -->
                         <div id="products-grid" class="product-grid" style="display: none;">
+                        </div>
+
+                        <!-- Subcategory Products Section -->
+                        <div id="subcategory-products-section" class="content-section" style="display: none;">
+                            <div class="section-tabs">
+                                <button class="section-tab active" onclick="filterSubcategoryProducts('necklaces')">Necklaces (<span id="gold-necklace-count">0</span>)</button>
+                                <button class="section-tab" onclick="filterSubcategoryProducts('earrings')">Earrings (<span id="gold-earrings-count">0</span>)</button>
+                                <button class="section-tab" onclick="filterSubcategoryProducts('bangles')">Bangles (<span id="gold-bangles-count">0</span>)</button>
+                                <button class="section-tab" onclick="filterSubcategoryProducts('rings')">Rings (<span id="gold-rings-count">0</span>)</button>
+                            </div>
+
+                            <!-- Necklaces -->
+                            <div id="necklaces-section" class="subcategory-section" style="display: block;">
+                                <h3 class="card-title" style="margin-bottom: 16px;">Necklaces</h3>
+                                <div id="necklaces-products-grid" class="product-grid"></div>
+                            </div>
+
+                            <!-- Earrings -->
+                            <div id="earrings-section" class="subcategory-section" style="display: none;">
+                                <h3 class="card-title" style="margin-bottom: 16px;">Earrings</h3>
+                                <div id="earrings-products-grid" class="product-grid"></div>
+                            </div>
+
+                            <!-- Bangles -->
+                            <div id="bangles-section" class="subcategory-section" style="display: none;">
+                                <h3 class="card-title" style="margin-bottom: 16px;">Bangles</h3>
+                                <div id="bangles-products-grid" class="product-grid"></div>
+                            </div>
+
+                            <!-- Rings -->
+                            <div id="rings-section" class="subcategory-section" style="display: none;">
+                                <h3 class="card-title" style="margin-bottom: 16px;">Rings</h3>
+                                <div id="rings-products-grid" class="product-grid"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -4632,27 +4661,27 @@
         // Watch & Buy Video Management Functions
         async function loadWatchBuyVideos() {
             console.log('Loading Watch & Buy video configurations...');
-            
+
             const loadingElement = document.getElementById('watch-buy-loading');
             const contentElement = document.getElementById('watch-buy-content');
-            
+
             if (loadingElement) loadingElement.style.display = 'flex';
             if (contentElement) contentElement.style.display = 'none';
-            
+
             try {
                 // Load video links from Firestore
                 const videoLinksDoc = await db.collection('settings').doc('watchBuyVideos').get();
-                
+
                 if (videoLinksDoc.exists) {
                     const videoLinks = videoLinksDoc.data();
                     console.log('Loaded video links:', videoLinks);
-                    
+
                     // Populate each video's SKU and product name
                     for (let i = 1; i <= 6; i++) {
                         const videoData = videoLinks[`video${i}`];
                         if (videoData && videoData.productSKU) {
                             document.getElementById(`video${i}-sku`).value = videoData.productSKU;
-                            
+
                             // Fetch and display product name
                             await fetchAndDisplayProductName(i, videoData.productSKU);
                         }
@@ -4660,10 +4689,10 @@
                 } else {
                     console.log('No video links configured yet');
                 }
-                
+
                 if (loadingElement) loadingElement.style.display = 'none';
                 if (contentElement) contentElement.style.display = 'block';
-                
+
             } catch (error) {
                 console.error('Error loading Watch & Buy videos:', error);
                 if (loadingElement) {
@@ -4679,7 +4708,7 @@
 
         async function fetchAndDisplayProductName(videoNumber, sku) {
             const productNameElement = document.getElementById(`video${videoNumber}-product-name`);
-            
+
             try {
                 // Search for product across ALL categories including subcategories
                 const categories = [
@@ -4700,7 +4729,7 @@
                     'meenakari-rings'
                 ];
                 let productFound = null;
-                
+
                 for (const category of categories) {
                     const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
                     if (response.ok) {
@@ -4711,7 +4740,7 @@
                         }
                     }
                 }
-                
+
                 if (productFound) {
                     const price = parseFloat(productFound.price || 0).toLocaleString('en-IN');
                     const productUrl = `product-detail.html?id=${encodeURIComponent(sku)}`;
@@ -4735,15 +4764,15 @@
         async function saveVideoLink(videoNumber) {
             const skuInput = document.getElementById(`video${videoNumber}-sku`);
             const sku = skuInput.value.trim().toUpperCase();
-            
+
             if (!sku) {
                 alert('Please enter a Product SKU ID');
                 skuInput.focus();
                 return;
             }
-            
+
             showGlobalLoader(`Saving link for Video ${videoNumber}...`);
-            
+
             try {
                 // Validate that product exists - search ALL collections including subcategories
                 const categories = [
@@ -4764,7 +4793,7 @@
                     'meenakari-rings'
                 ];
                 let productFound = null;
-                
+
                 for (const category of categories) {
                     const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
                     if (response.ok) {
@@ -4775,13 +4804,13 @@
                         }
                     }
                 }
-                
+
                 if (!productFound) {
                     hideGlobalLoader();
                     alert(`Product with SKU "${sku}" not found in any collection. Please check the SKU and try again.`);
                     return;
                 }
-                
+
                 // Save to Firestore
                 await db.collection('settings').doc('watchBuyVideos').set({
                     [`video${videoNumber}`]: {
@@ -4790,20 +4819,20 @@
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     }
                 }, { merge: true });
-                
+
                 // Update display
                 await fetchAndDisplayProductName(videoNumber, sku);
-                
+
                 hideGlobalLoader();
-                
+
                 showSuccessModal({
                     icon: '<i class="fas fa-check-circle"></i>',
                     title: 'Video Link Saved!',
                     message: `Video ${videoNumber} has been successfully linked to "${productFound.name}"`
                 });
-                
+
                 console.log(`Video ${videoNumber} linked to product ${sku}`);
-                
+
             } catch (error) {
                 hideGlobalLoader();
                 console.error('Error saving video link:', error);
@@ -4876,7 +4905,7 @@
             } else if (sectionName === 'products') {
                 loadProducts();
             } else if (sectionName === 'inventory') {
-                loadInventorySummary();
+                loadInventorySummary(); // Load summary stats first
                 showInventoryTab('out-of-stock'); // Show default tab
             } else if (sectionName === 'customers') {
                 // Customers data is already loaded, just refresh display
@@ -4884,8 +4913,6 @@
             } else if (sectionName === 'analytics') {
                 loadAnalyticsData(currentAnalyticsPeriod); // Ensure analytics data is loaded
                 loadLocationAnalytics(currentAnalyticsPeriod); // Ensure location analytics are loaded
-                loadNotifications(); // Load notifications when the section is shown
-
                 // Fix chart rendering issues when section becomes visible
                 setTimeout(() => {
                     window.dispatchEvent(new Event('resize'));
@@ -5885,19 +5912,33 @@
         }
 
         // Display products in grid
-        function displayProducts(products) {
-            const productsGrid = document.getElementById('products-grid');
+        function displayProducts(products, gridId = 'products-grid') {
+            const productsGrid = document.getElementById(gridId);
+            const loadingDiv = document.getElementById('products-loading');
+
+            if (!productsGrid) {
+                console.error('Products grid not found:', gridId);
+                return;
+            }
+
+            if (loadingDiv && gridId === 'products-grid') {
+                loadingDiv.style.display = 'none';
+            }
+
+            if (gridId === 'products-grid') {
+                productsGrid.style.display = 'grid';
+            }
 
             if (products.length === 0) {
                 const isSearching = productSearchTerm.length > 0;
                 productsGrid.innerHTML = `
                     <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #64748b;">
+                        <i class="fas fa-inbox fa-3x" style="margin-bottom: 16px; opacity: 0.3;"></i>
                         <h3>${isSearching ? 'No Products Found' : 'No Products Available'}</h3>
                         <p>${isSearching ? `No products match your search for "${productSearchTerm}"` : 'No products available in the selected category.'}</p>
                         ${isSearching ? '<button class="btn btn-primary" onclick="clearProductSearch()">Clear Search</button>' : ''}
                     </div>
                 `;
-                productsGrid.style.display = 'grid';
                 return;
             }
 
@@ -6801,7 +6842,7 @@
                                     const itemTotal = itemPrice * itemQuantity;
 
                                     return `
-                                        <div style="padding: 16px; border-bottom: ${index < order.products.length - 1 ? '1px solid #e2e8f0' : 'none'};">
+                                        <div style="padding: 16px; ${index < order.products.length - 1 ? 'border-bottom: 1px solid #e2e8f0;' : ''}">
                                             <div style="display: flex; justify-content: space-between; align-items: start;">
                                                 <div style="flex: 1;">
                                                     <h5 style="margin: 0 0 4px 0; color: #1e293b;">${item.name || item.productName || 'Product'}</h5>
@@ -8239,7 +8280,7 @@
                                 '#8b5cf6',
                                 '#06b6d4',
                                 '#84cc16',
-                                '#f97316',
+                                '#f59e0b',
                                 '#ec4899',
                                 '#06b6d4',
                                 '#84cc16',
@@ -8682,7 +8723,7 @@
                 return `
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 8px; background: #f8fafc; border-radius: 4px;">
                         <span style="font-weight: 500;">${browser}</span>
-                        <span style="color: #64748b;">${percentage}%</span>
+                        <span style="color:#64748b;">${percentage}%</span>
                     </div>
                 `;
             }).join('');
@@ -9458,18 +9499,6 @@
             console.log(`✅ [LOCATION TABLE] Populated table with ${filterType} filter`);
         }
 
-        // Missing filterLocationData function - called by the dropdown - GLOBAL SCOPE
-        window.filterLocationData = function() {
-            const filterSelect = document.getElementById('geo-filter');
-            if (!filterSelect) return;
-
-            const selectedFilter = filterSelect.value;
-            console.log(`🔍 [LOCATION FILTER] Applying filter: ${selectedFilter}`);
-
-            // Apply the filter to current data
-            displayFilteredLocationData(selectedFilter);
-        };
-
         // Update City Chart with Real Data
         function updateCityChart(locationData) {
             console.log('🏙️ [CITY CHART] Updating city chart with location data:', locationData);
@@ -9508,7 +9537,9 @@
                             '#06b6d4', // Cyan
                             '#84cc16', // Lime
                             '#ec4899', // Pink
-                            '#6b7280'  // Gray
+                            '#06b6d4', // Cyan
+                            '#84cc16', // Lime
+                            '#f59e0b'  // Yellow
                         ];
 
                         // Update chart data
@@ -9545,170 +9576,6 @@
             } catch (error) {
                 console.error('❌ [CITY CHART] Error updating city chart:', error);
                 // Don't throw error to avoid breaking the analytics display
-            }
-        }
-
-        // Helper function to get country flag emoji
-        function getCountryFlag(countryName) {
-            const flagMap = {
-                'India': '🇮🇳', 'United States': '🇺🇸', 'United Kingdom': '🇬🇧', 'Canada': '🇨🇦',
-                'Australia': '🇦🇺', 'Germany': '🇩🇪', 'France': '🇫🇷', 'Japan': '🇯🇵',
-                'China': '🇨🇳', 'Brazil': '🇧🇷', 'Russia': '🇷🇺', 'South Korea': '🇰🇷',
-                'Mexico': '🇲🇽', 'Italy': '🇮🇹', 'Spain': '🇪🇸', 'Netherlands': '🇳🇱',
-                'Sweden': '🇸🇪', 'Norway': '🇳🇴', 'Denmark': '🇩🇰', 'Finland': '🇫🇮',
-                'Switzerland': '🇨🇭', 'Austria': '🇦🇹', 'Belgium': '🇧🇪', 'Poland': '🇵🇱',
-                'Turkey': '🇹🇷', 'Saudi Arabia': '🇸🇦', 'United Arab Emirates': '🇦🇪',
-                'Singapore': '🇸🇬', 'Thailand': '🇹🇭', 'Philippines': '🇵🇭', 'Indonesia': '🇮🇩',
-                'Malaysia': '🇲🇾', 'Vietnam': '🇻🇳', 'South Africa': '🇿🇦', 'Nigeria': '🇳🇬',
-                'Egypt': '🇪🇬', 'Israel': '🇮🇱', 'New Zealand': '🇳🇿', 'Ireland': '🇮🇪',
-                'Portugal': '🇵🇹', 'Greece': '🇬🇷', 'Czech Republic': '🇨🇿', 'Hungary': '🇭🇺',
-                'Romania': '🇷🇴', 'Bulgaria': '🇧🇬', 'Croatia': '🇭🇷', 'Slovenia': '🇸🇮',
-                'Slovakia': '🇸🇰', 'Lithuania': '🇱🇹', 'Latvia': '🇱🇻', 'Estonia': '🇪🇪',
-                'Ukraine': '🇺🇦', 'Belarus': '🇧🇾', 'Moldova': '🇲🇩', 'Georgia': '🇬🇪',
-                'Armenia': '🇦🇲', 'Azerbaijan': '🇦🇿', 'Kazakhstan': '🇰🇿', 'Uzbekistan': '🇺🇿'
-            };
-            return flagMap[countryName] || '🌍';
-        }
-
-        // Display location error with helpful information
-        function displayLocationError(errorMessage) {
-            const countryStatsElement = document.getElementById('country-stats');
-            if (countryStatsElement) {
-                countryStatsElement.innerHTML = `
-                    <div style="text-align: center; padding: 30px; color: #dc2626;">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #fca5a5; margin-bottom: 16px;"></i>
-                        <h3 style="margin: 0 0 8px 0; color: #dc2626;">Error Loading Location Data</h3>
-                        <p style="margin: 0 0 16px 0; font-size: 14px; color: #6b7280;">${escapeHtml(errorMessage)}</p>
-                        <button onclick="refreshLocationData()" class="btn btn-primary" style="padding: 8px 16px; font-size: 14px;">
-                            <i class="fas fa-retry"></i> Try Again
-                        </button>
-                    </div>
-                `;
-            }
-        }
-
-        // Helper function to escape HTML
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // Update Location Charts with Real Data
-        function updateLocationCharts(locationData) {
-            console.log('📊 [LOCATION CHARTS] Updating charts with location data:', locationData);
-
-            try {
-                // Validate input data
-                if (!locationData || typeof locationData !== 'object') {
-                    console.warn('⚠️ [LOCATION CHARTS] Invalid location data provided');
-                    return;
-                }
-
-                const { top_countries = [], total_visitors = 0 } = locationData;
-
-                // Update country chart if it exists and is properly initialized
-                if (window.countryChart) {
-                    // Validate chart structure
-                    if (!window.countryChart.data || !window.countryChart.data.datasets || !window.countryChart.data.datasets[0]) {
-                        console.error('❌ [LOCATION CHARTS] Country chart has invalid structure');
-                        return;
-                    }
-
-                    if (top_countries.length > 0) {
-                        // Use up to 5 countries for the chart
-                        const countries = top_countries.slice(0, 5);
-                        const labels = countries.map(c => c.country || 'Unknown');
-                        const data = countries.map(c => c.visitors || 0);
-
-                        // Generate colors dynamically based on data length
-                        const colors = [
-                            '#3b82f6', // Blue
-                            '#10b981', // Green  
-                            '#f59e0b', // Yellow
-                            '#ef4444', // Red
-                            '#8b5cf6', // Purple
-                            '#f97316', // Orange
-                            '#06b6d4', // Cyan
-                            '#84cc16', // Lime
-                            '#ec4899', // Pink
-                            '#6b7280'  // Gray
-                        ];
-
-                        // Update chart data
-                        window.countryChart.data.labels = labels;
-                        window.countryChart.data.datasets[0].data = data;
-                        window.countryChart.data.datasets[0].backgroundColor = colors.slice(0, labels.length);
-
-                        // Update chart with animation
-                        window.countryChart.update('active');
-
-                        console.log('✅ [LOCATION CHARTS] Country chart updated with real data:', {
-                            countries: labels,
-                            visitors: data,
-                            totalCountries: top_countries.length
-                        });
-
-                    } else {
-                        // No data - show empty state
-                        window.countryChart.data.labels = ['No Data'];
-                        window.countryChart.data.datasets[0].data = [1];
-                        window.countryChart.data.datasets[0].backgroundColor = ['#e5e7eb'];
-                        window.countryChart.update('none'); // No animation for empty state
-
-                        console.log('📊 [LOCATION CHARTS] Country chart updated with empty state');
-                    }
-                } else {
-                    console.log('⚠️ [LOCATION CHARTS] Country chart not initialized, attempting to initialize...');
-                    // Try to initialize the chart if it doesn't exist
-                    initializeLocationCharts();
-
-                    // Retry updating after initialization
-                    setTimeout(() => {
-                        if (window.countryChart && top_countries.length > 0) {
-                            updateLocationCharts(locationData);
-                        }
-                    }, 100);
-                }
-
-                // Update city chart with real data if available
-                if (window.cityChart) {
-                    const { top_cities = [] } = locationData;
-
-                    if (top_cities.length > 0) {
-                        // Use the existing updateCityChart function to display real data
-                        updateCityChart(locationData);
-                        console.log('📊 [LOCATION CHARTS] City chart updated with real data');
-                    } else {
-                        // Only show "not available" state if there's genuinely no city data
-                        window.cityChart.data.labels = ['City Data Not Available'];
-                        window.cityChart.data.datasets[0].data = [1];
-                        window.cityChart.data.datasets[0].backgroundColor = ['#e5e7eb'];
-                        window.cityChart.update('none');
-
-                        console.log('📊 [LOCATION CHARTS] City chart updated to show not available state (no city data found)');
-                    }
-                } else {
-                    console.log('⚠️ [LOCATION CHARTS] City chart not initialized');
-                }
-
-                console.log('✅ [LOCATION CHARTS] Charts update completed');
-
-            } catch (error) {
-                console.error('❌ [LOCATION CHARTS] Error updating charts:', error);
-                console.error('❌ [LOCATION CHARTS] Error details:', {
-                    message: error.message,
-                    stack: error.stack,
-                    locationData: locationData
-                });
-
-                // Try to reinitialize charts on error
-                try {
-                    console.log('🔄 [LOCATION CHARTS] Attempting to reinitialize charts after error...');
-                    initializeLocationCharts();
-                } catch (reinitError) {
-                    console.error('❌ [LOCATION CHARTS] Failed to reinitialize charts:', reinitError);
-                }
             }
         }
 
