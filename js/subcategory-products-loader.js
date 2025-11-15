@@ -1,8 +1,8 @@
 
 /**
  * Subcategory Products Loader
- * Dynamically loads products from Firebase Cloud Storage for subcategory pages
- * (gold-necklace, silver-earrings, etc.)
+ * Loads products for subcategory pages (gold-necklace, silver-earrings, etc.)
+ * Uses the EXACT same pattern as Featured Collection and New Arrivals
  */
 
 const SubcategoryProductsLoader = (function() {
@@ -10,7 +10,6 @@ const SubcategoryProductsLoader = (function() {
     let isInitialized = false;
     let cachedProducts = {};
     let lastFetchTime = {};
-    let cachedETags = {};
     const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
     const SHORT_CACHE_DURATION = 60 * 60 * 1000; // 1 hour
 
@@ -19,31 +18,34 @@ const SubcategoryProductsLoader = (function() {
      */
     function init() {
         try {
-            console.log('Initializing Subcategory Products Loader...');
+            console.log('🔧 Initializing Subcategory Products Loader...');
             
             if (typeof firebase !== 'undefined') {
                 storage = firebase.storage();
                 isInitialized = true;
-                console.log('Subcategory Products Loader initialized successfully');
+                console.log('✅ Subcategory Products Loader initialized successfully');
                 return true;
             } else {
-                console.error('Firebase not available - make sure Firebase scripts are loaded');
+                console.error('❌ Firebase not available - make sure Firebase scripts are loaded');
                 return false;
             }
         } catch (error) {
-            console.error('Error initializing Subcategory Products Loader:', error);
+            console.error('❌ Error initializing Subcategory Products Loader:', error);
             return false;
         }
     }
 
     /**
-     * Load products for a specific subcategory
+     * Load products for a specific subcategory using Netlify function
+     * EXACTLY like Featured Collection and New Arrivals
      */
     async function loadSubcategoryProducts(category, forceRefresh = false) {
         if (!isInitialized) {
-            console.error('Subcategory Products Loader not initialized');
+            console.error('❌ Subcategory Products Loader not initialized');
             return [];
         }
+
+        console.log(`📦 Loading ${category} products...`);
 
         // Check cache invalidation
         const lastProductUpdate = localStorage.getItem('lastProductUpdate');
@@ -54,7 +56,7 @@ const SubcategoryProductsLoader = (function() {
             const cacheTime = parseInt(localStorage.getItem(`${category}ProductsTime`) || '0');
 
             if (updateTime > cacheTime) {
-                console.log(`🚨 Cache invalidated for ${category}:`, new Date(updateTime));
+                console.log(`🔄 Cache invalidated for ${category} (update: ${new Date(updateTime).toLocaleString()})`);
                 cacheInvalidated = true;
                 forceRefresh = true;
                 localStorage.removeItem('lastProductUpdate');
@@ -64,7 +66,7 @@ const SubcategoryProductsLoader = (function() {
         // Check memory cache
         const now = Date.now();
         if (!forceRefresh && !cacheInvalidated && cachedProducts[category] && (now - (lastFetchTime[category] || 0)) < CACHE_DURATION) {
-            console.log(`Using memory cached ${category} products`);
+            console.log(`💾 Using memory cached ${category} products (${cachedProducts[category].length} items)`);
             return cachedProducts[category];
         }
 
@@ -75,19 +77,18 @@ const SubcategoryProductsLoader = (function() {
                 const storedTime = localStorage.getItem(`${category}ProductsTime`);
                 
                 if (stored && storedTime && (now - parseInt(storedTime)) < SHORT_CACHE_DURATION) {
-                    console.log(`Using localStorage cached ${category} products`);
+                    console.log(`💾 Using localStorage cached ${category} products`);
                     cachedProducts[category] = JSON.parse(stored);
                     lastFetchTime[category] = parseInt(storedTime);
                     return cachedProducts[category];
                 }
             } catch (e) {
-                console.warn('Error reading from localStorage cache:', e);
+                console.warn('⚠️ Error reading from localStorage cache:', e);
             }
         }
 
         try {
-            console.log(`Loading ${category} products from Cloud Storage...`);
-
+            // Use Netlify function to load products (EXACTLY like Featured/New Arrivals)
             let netlifyEndpoint = `/.netlify/functions/load-products?category=${category}`;
 
             if (forceRefresh || cacheInvalidated) {
@@ -105,6 +106,8 @@ const SubcategoryProductsLoader = (function() {
                 netlifyHeaders['Expires'] = '0';
             }
 
+            console.log(`🌐 Fetching from: ${netlifyEndpoint}`);
+
             const response = await fetch(netlifyEndpoint, {
                 method: 'GET',
                 headers: netlifyHeaders,
@@ -112,13 +115,15 @@ const SubcategoryProductsLoader = (function() {
             });
 
             if (!response.ok) {
-                throw new Error(`Failed to load ${category}: ${response.status}`);
+                console.warn(`⚠️ Failed to load ${category}: ${response.status}`);
+                // Return empty array instead of throwing error
+                return [];
             }
 
             const data = await response.json();
             
-            if (!data.success) {
-                console.warn(`No products found for ${category}`);
+            if (!data.success || !data.products) {
+                console.warn(`⚠️ No products found for ${category}`);
                 return [];
             }
 
@@ -129,10 +134,12 @@ const SubcategoryProductsLoader = (function() {
                 if (!product.image && product.mainImage) {
                     product.image = product.mainImage;
                 } else if (!product.image && product.images && product.images.length > 0) {
-                    product.image = product.images[0].url;
+                    product.image = product.images[0].url || product.images[0];
                 }
                 return product;
             }).filter(product => product.name && product.price && product.image);
+
+            console.log(`✅ Loaded ${products.length} ${category} products from Firebase Storage`);
 
             // Cache results
             cachedProducts[category] = products;
@@ -142,14 +149,13 @@ const SubcategoryProductsLoader = (function() {
                 localStorage.setItem(`${category}Products`, JSON.stringify(products));
                 localStorage.setItem(`${category}ProductsTime`, now.toString());
             } catch (e) {
-                console.warn('Error saving to localStorage:', e);
+                console.warn('⚠️ Error saving to localStorage:', e);
             }
 
-            console.log(`Loaded ${products.length} ${category} products`);
             return products;
 
         } catch (error) {
-            console.error(`Error loading ${category} products:`, error);
+            console.error(`❌ Error loading ${category} products:`, error);
             return [];
         }
     }
@@ -189,7 +195,7 @@ const SubcategoryProductsLoader = (function() {
         const productsGrid = document.getElementById('products-grid') || document.querySelector('.products-grid');
 
         if (!productsGrid) {
-            console.warn('Products grid not found');
+            console.warn('⚠️ Products grid not found on page');
             return;
         }
 
@@ -198,15 +204,17 @@ const SubcategoryProductsLoader = (function() {
             productsGrid.innerHTML = `
                 <div class="loading-products" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; padding: 60px 20px;">
                     <div class="loading-spinner" style="width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top: 3px solid #6D3E25; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px;"></div>
-                    <p style="margin: 0; font-size: 16px; font-weight: 500; color: #666;">Loading Products...</p>
+                    <p style="margin: 0; font-size: 16px; font-weight: 500; color: #666;">Loading ${category.replace('-', ' ')} products...</p>
                 </div>
             `;
 
-            const products = await loadSubcategoryProducts(category);
+            const products = await loadSubcategoryProducts(category, true); // Force refresh
 
             if (products.length > 0) {
                 const productsHTML = products.map(product => generateProductHTML(product)).join('');
                 productsGrid.innerHTML = productsHTML;
+
+                console.log(`✅ Displayed ${products.length} ${category} products`);
 
                 // Setup wishlist listeners
                 if (typeof window.WishlistManager !== 'undefined') {
@@ -219,18 +227,21 @@ const SubcategoryProductsLoader = (function() {
                     <div class="no-products-message" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
                         <i class="fas fa-gem" style="font-size: 48px; color: #6D3E25; margin-bottom: 20px;"></i>
                         <h3 style="color: #6D3E25; margin-bottom: 10px;">No Products Available</h3>
-                        <p style="color: #666;">Products will appear here once they are added through the admin panel.</p>
+                        <p style="color: #666;">No products have been added to this category yet. Please check back later or browse our other collections.</p>
+                        <a href="index.html" class="btn" style="margin-top: 20px; display: inline-block; padding: 12px 24px; background: #6D3E25; color: white; text-decoration: none; border-radius: 4px;">Return to Home</a>
                     </div>
                 `;
+                console.log(`ℹ️ No products available for ${category}`);
             }
 
-            console.log(`${category} section updated with ${products.length} products`);
         } catch (error) {
-            console.error(`Error updating ${category} section:`, error);
+            console.error(`❌ Error updating ${category} section:`, error);
             productsGrid.innerHTML = `
                 <div class="loading-error" style="grid-column: 1 / -1; color: red; padding: 20px; text-align: center;">
-                    <strong>Error loading products</strong><br>
-                    ${error.message}
+                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                    <h3>Error Loading Products</h3>
+                    <p>${error.message}</p>
+                    <button onclick="location.reload()" class="btn" style="margin-top: 16px; padding: 12px 24px; background: #6D3E25; color: white; border: none; border-radius: 4px; cursor: pointer;">Retry</button>
                 </div>
             `;
         }
@@ -242,7 +253,7 @@ const SubcategoryProductsLoader = (function() {
     function autoLoadForCurrentPage() {
         const pageName = window.location.pathname.split('/').pop().replace('.html', '');
         
-        // Map of page names to their Firebase Storage category names
+        // Map of page names to their category identifiers
         const categoryMap = {
             'gold-necklace': 'gold-necklace',
             'silver-necklace': 'silver-necklace',
@@ -261,10 +272,10 @@ const SubcategoryProductsLoader = (function() {
         const category = categoryMap[pageName];
         
         if (category) {
-            console.log(`Auto-loading products for category: ${category}`);
+            console.log(`🎯 Auto-loading products for category: ${category}`);
             updateProductsGrid(category);
         } else {
-            console.log(`No category mapping found for page: ${pageName}`);
+            console.log(`ℹ️ No category mapping found for page: ${pageName}`);
         }
     }
 
@@ -279,9 +290,13 @@ const SubcategoryProductsLoader = (function() {
 
 // Auto-initialize and load when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(() => {
-        if (SubcategoryProductsLoader.init()) {
+    console.log('🚀 DOM ready, initializing Subcategory Products Loader...');
+    
+    // Initialize immediately
+    if (SubcategoryProductsLoader.init()) {
+        // Load products after a short delay to ensure Firebase is ready
+        setTimeout(() => {
             SubcategoryProductsLoader.autoLoadForCurrentPage();
-        }
-    }, 1000);
+        }, 500);
+    }
 });

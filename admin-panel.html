@@ -4644,27 +4644,27 @@
         // Watch & Buy Video Management Functions
         async function loadWatchBuyVideos() {
             console.log('Loading Watch & Buy video configurations...');
-            
+
             const loadingElement = document.getElementById('watch-buy-loading');
             const contentElement = document.getElementById('watch-buy-content');
-            
+
             if (loadingElement) loadingElement.style.display = 'flex';
             if (contentElement) contentElement.style.display = 'none';
-            
+
             try {
                 // Load video links from Firestore
                 const videoLinksDoc = await db.collection('settings').doc('watchBuyVideos').get();
-                
+
                 if (videoLinksDoc.exists) {
                     const videoLinks = videoLinksDoc.data();
                     console.log('Loaded video links:', videoLinks);
-                    
+
                     // Populate each video's SKU and product name
                     for (let i = 1; i <= 6; i++) {
                         const videoData = videoLinks[`video${i}`];
                         if (videoData && videoData.productSKU) {
                             document.getElementById(`video${i}-sku`).value = videoData.productSKU;
-                            
+
                             // Fetch and display product name
                             await fetchAndDisplayProductName(i, videoData.productSKU);
                         }
@@ -4672,10 +4672,10 @@
                 } else {
                     console.log('No video links configured yet');
                 }
-                
+
                 if (loadingElement) loadingElement.style.display = 'none';
                 if (contentElement) contentElement.style.display = 'block';
-                
+
             } catch (error) {
                 console.error('Error loading Watch & Buy videos:', error);
                 if (loadingElement) {
@@ -4691,7 +4691,7 @@
 
         async function fetchAndDisplayProductName(videoNumber, sku) {
             const productNameElement = document.getElementById(`video${videoNumber}-product-name`);
-            
+
             try {
                 // Search for product across ALL categories including subcategories
                 const categories = [
@@ -4712,7 +4712,7 @@
                     'meenakari-rings'
                 ];
                 let productFound = null;
-                
+
                 for (const category of categories) {
                     const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
                     if (response.ok) {
@@ -4723,7 +4723,7 @@
                         }
                     }
                 }
-                
+
                 if (productFound) {
                     const price = parseFloat(productFound.price || 0).toLocaleString('en-IN');
                     const productUrl = `product-detail.html?id=${encodeURIComponent(sku)}`;
@@ -4747,15 +4747,15 @@
         async function saveVideoLink(videoNumber) {
             const skuInput = document.getElementById(`video${videoNumber}-sku`);
             const sku = skuInput.value.trim().toUpperCase();
-            
+
             if (!sku) {
                 alert('Please enter a Product SKU ID');
                 skuInput.focus();
                 return;
             }
-            
+
             showGlobalLoader(`Saving link for Video ${videoNumber}...`);
-            
+
             try {
                 // Validate that product exists - search ALL collections including subcategories
                 const categories = [
@@ -4776,7 +4776,7 @@
                     'meenakari-rings'
                 ];
                 let productFound = null;
-                
+
                 for (const category of categories) {
                     const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
                     if (response.ok) {
@@ -4787,13 +4787,13 @@
                         }
                     }
                 }
-                
+
                 if (!productFound) {
                     hideGlobalLoader();
                     alert(`Product with SKU "${sku}" not found in any collection. Please check the SKU and try again.`);
                     return;
                 }
-                
+
                 // Save to Firestore
                 await db.collection('settings').doc('watchBuyVideos').set({
                     [`video${videoNumber}`]: {
@@ -4802,20 +4802,20 @@
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     }
                 }, { merge: true });
-                
+
                 // Update display
                 await fetchAndDisplayProductName(videoNumber, sku);
-                
+
                 hideGlobalLoader();
-                
+
                 showSuccessModal({
                     icon: '<i class="fas fa-check-circle"></i>',
                     title: 'Video Link Saved!',
                     message: `Video ${videoNumber} has been successfully linked to "${productFound.name}"`
                 });
-                
+
                 console.log(`Video ${videoNumber} linked to product ${sku}`);
-                
+
             } catch (error) {
                 hideGlobalLoader();
                 console.error('Error saving video link:', error);
@@ -4888,8 +4888,8 @@
             } else if (sectionName === 'products') {
                 loadProducts();
             } else if (sectionName === 'inventory') {
-                loadInventorySummary();
-                showInventoryTab('out-of-stock'); // Show default tab
+                loadInventorySummary(); // Load summary stats first
+                showInventoryTab('out-of-stock'); // Then show default tab
             } else if (sectionName === 'customers') {
                 // Customers data is already loaded, just refresh display
                 updateCustomersDisplay();
@@ -6430,11 +6430,11 @@
                 return;
             }
 
-            // Clear existing list
-            notificationsContainer.innerHTML = '';
-
             // Display latest notifications (limit to 10)
             const recentNotifications = notifications.slice(0, 10);
+
+            // Clear existing list before rendering
+            notificationsContainer.innerHTML = '';
 
             recentNotifications.forEach(notification => {
                 const notificationElement = document.createElement('div');
@@ -7511,76 +7511,6 @@
         }
         */
 
-        /* TEMPORARILY COMMENTED OUT
-        async function trackShipment(awbNumber) {
-            try {
-                console.log('Tracking shipment:', awbNumber);
-
-                // Show loading state
-                const loadingModal = document.createElement('div');
-                loadingModal.style.cssText = `
-                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                    background: rgba(0,0,0,0.5); z-index: 10000;
-                    display: flex; align-items: center; justify-content: center;
-                `;
-                loadingModal.innerHTML = `
-                    <div style="background: white; padding: 30px; border-radius: 12px; text-align: center;">
-                        <i class="fas fa-spinner fa-spin" style="font-size: 24px; color: #2563eb; margin-bottom: 15px;"></i>
-                        <p style="margin: 0; color: #1e293b;">Tracking shipment...</p>
-                    </div>
-                `;
-                document.body.appendChild(loadingModal);
-
-                // Use the correct Netlify function endpoint
-                const response = await fetch(`/.netlify/functions/shiprocket-track-order/${awbNumber}`);
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: Failed to track shipment`);
-                }
-
-                const result = await response.json();
-                console.log('Tracking result:', result);
-
-                // Remove loading modal
-                loadingModal.remove();
-
-                if (result.success) {
-                    // Open tracking page in new tab
-                    window.open('/track-order.html?tracking=' + awbNumber, '_blank');
-                } else {
-                    throw new Error(result.error || 'Failed to track shipment');
-                }
-
-            } catch (error) {
-                console.error('Error tracking shipment:', error);
-
-                // Remove loading modal if it exists
-                const loadingModal = document.querySelector('[style*="position: fixed"]');
-                if (loadingModal) loadingModal.remove();
-
-                // Show user-friendly error
-                let errorMessage = error.message;
-                if (error.message.includes('HTTP 404')) {
-                    errorMessage = 'AWB number not found in tracking system.';
-                } else if (error.message.includes('Failed to fetch')) {
-                    errorMessage = 'Network error: Please check your internet connection.';
-                }
-
-                const errorModal = `
-                    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center;">
-                        <div style="background: white; padding: 30px; border-radius: 12px; max-width: 400px; text-align: center;">
-                            <h3 style="color: #dc2626; margin-bottom: 15px;">🚫 Tracking Failed</h3>
-                            <p style="color: #374151; margin-bottom: 20px;">${errorMessage}</p>
-                            <p style="font-size: 14px; color: #64748b; margin-bottom: 20px;">AWB: ${awbNumber}</p>
-                            <button onclick="this.closest('div').remove()" style="background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">OK</button>
-                        </div>
-                    </div>
-                `;
-                document.body.insertAdjacentHTML('beforeend', errorModal);
-            }
-        }
-        */
-
         /* BULK ORDER SELECTION FUNCTIONS - TEMPORARILY COMMENTED OUT
         function toggleAllOrderSelection() {
             const selectAllCheckbox = document.getElementById('selectAllOrders');
@@ -7676,6 +7606,76 @@
             selectedOrderIds.clear();
             document.getElementById('selectAllOrders').checked = false;
             updateOrdersSectionDisplay(); // Refresh display to show updated statuses
+        }
+        */
+
+        /* TEMPORARILY COMMENTED OUT
+        async function trackShipment(awbNumber) {
+            try {
+                console.log('Tracking shipment:', awbNumber);
+
+                // Show loading state
+                const loadingModal = document.createElement('div');
+                loadingModal.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.5); z-index: 10000;
+                    display: flex; align-items: center; justify-content: center;
+                `;
+                loadingModal.innerHTML = `
+                    <div style="background: white; padding: 30px; border-radius: 12px; text-align: center;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 24px; color: #2563eb; margin-bottom: 15px;"></i>
+                        <p style="margin: 0; color: #1e293b;">Tracking shipment...</p>
+                    </div>
+                `;
+                document.body.appendChild(loadingModal);
+
+                // Use the correct Netlify function endpoint
+                const response = await fetch(`/.netlify/functions/shiprocket-track-order/${awbNumber}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: Failed to track shipment`);
+                }
+
+                const result = await response.json();
+                console.log('Tracking result:', result);
+
+                // Remove loading modal
+                loadingModal.remove();
+
+                if (result.success) {
+                    // Open tracking page in new tab
+                    window.open('/track-order.html?tracking=' + awbNumber, '_blank');
+                } else {
+                    throw new Error(result.error || 'Failed to track shipment');
+                }
+
+            } catch (error) {
+                console.error('Error tracking shipment:', error);
+
+                // Remove loading modal if it exists
+                const loadingModal = document.querySelector('[style*="position: fixed"]');
+                if (loadingModal) loadingModal.remove();
+
+                // Show user-friendly error
+                let errorMessage = error.message;
+                if (error.message.includes('HTTP 404')) {
+                    errorMessage = 'AWB number not found in tracking system.';
+                } else if (error.message.includes('Failed to fetch')) {
+                    errorMessage = 'Network error: Please check your internet connection.';
+                }
+
+                const errorModal = `
+                    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+                        <div style="background: white; padding: 30px; border-radius: 12px; max-width: 400px; text-align: center;">
+                            <h3 style="color: #dc2626; margin-bottom: 15px;">🚫 Tracking Failed</h3>
+                            <p style="color: #374151; margin-bottom: 20px;">${errorMessage}</p>
+                            <p style="font-size: 14px; color: #64748b; margin-bottom: 20px;">AWB: ${awbNumber}</p>
+                            <button onclick="this.closest('div').remove()" style="background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">OK</button>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', errorModal);
+            }
         }
         */
 
@@ -8251,7 +8251,7 @@
                                 '#8b5cf6',
                                 '#06b6d4',
                                 '#84cc16',
-                                '#f97316',
+                                '#f59e0b',
                                 '#ec4899',
                                 '#06b6d4',
                                 '#84cc16',
@@ -8533,8 +8533,7 @@
 
                 default:
                     daysToShow = 7;
-                    startDate = new Date(today);
-                    startDate.setDate(today.getDate() - 6);
+                    startDate = new Date(today.getDate() - 6);
             }
 
             // Generate daily data for week/month periods
@@ -9470,118 +9469,6 @@
             console.log(`✅ [LOCATION TABLE] Populated table with ${filterType} filter`);
         }
 
-        // Missing filterLocationData function - called by the dropdown - GLOBAL SCOPE
-        window.filterLocationData = function() {
-            const filterSelect = document.getElementById('geo-filter');
-            if (!filterSelect) return;
-
-            const selectedFilter = filterSelect.value;
-            console.log(`🔍 [LOCATION FILTER] Applying filter: ${selectedFilter}`);
-
-            // Apply the filter to current data
-            displayFilteredLocationData(selectedFilter);
-        };
-
-        // Update City Chart with Real Data
-        function updateCityChart(locationData) {
-            console.log('🏙️ [CITY CHART] Updating city chart with location data:', locationData);
-
-            try {
-                // Validate input data
-                if (!locationData || typeof locationData !== 'object') {
-                    console.warn('⚠️ [CITY CHART] Invalid location data provided');
-                    return;
-                }
-
-                const { top_cities = [], total_city_visitors = 0 } = locationData;
-
-                // Update city chart if it exists and is properly initialized
-                if (window.cityChart) {
-                    // Validate chart structure
-                    if (!window.cityChart.data || !window.cityChart.data.datasets || !window.cityChart.data.datasets[0]) {
-                        console.error('❌ [CITY CHART] City chart has invalid structure');
-                        return;
-                    }
-
-                    if (top_cities.length > 0) {
-                        // Use up to 5 cities for the chart
-                        const cities = top_cities.slice(0, 5);
-                        const labels = cities.map(c => c.city || 'Unknown');
-                        const data = cities.map(c => c.visitors || 0);
-
-                        // Generate colors for city chart (different from country chart)
-                        const cityColors = [
-                            '#10b981', // Green
-                            '#3b82f6', // Blue  
-                            '#f59e0b', // Yellow
-                            '#ef4444', // Red
-                            '#8b5cf6', // Purple
-                            '#f97316', // Orange
-                            '#06b6d4', // Cyan
-                            '#84cc16', // Lime
-                            '#ec4899', // Pink
-                            '#6b7280'  // Gray
-                        ];
-
-                        // Update chart data
-                        window.cityChart.data.labels = labels;
-                        window.cityChart.data.datasets[0].data = data;
-                        window.cityChart.data.datasets[0].backgroundColor = cityColors.slice(0, labels.length);
-                        window.cityChart.data.datasets[0].borderColor = cityColors.slice(0, labels.length);
-                        window.cityChart.data.datasets[0].label = 'Visitors by City';
-
-                        // Update chart with animation
-                        window.cityChart.update('active');
-
-                        console.log('✅ [CITY CHART] City chart updated with real data:', {
-                            cities: labels,
-                            visitors: data,
-                            totalCities: top_cities.length
-                        });
-
-                    } else {
-                        // No city data - show empty state
-                        window.cityChart.data.labels = ['No City Data'];
-                        window.cityChart.data.datasets[0].data = [1];
-                        window.cityChart.data.datasets[0].backgroundColor = ['#e5e7eb'];
-                        window.cityChart.update('none'); // No animation for empty state
-
-                        console.log('📊 [CITY CHART] City chart updated to show empty state');
-                    }
-                } else {
-                    console.log('⚠️ [CITY CHART] City chart not initialized');
-                }
-
-                console.log('✅ [CITY CHART] City chart update completed');
-
-            } catch (error) {
-                console.error('❌ [CITY CHART] Error updating city chart:', error);
-                // Don't throw error to avoid breaking the analytics display
-            }
-        }
-
-        // Helper function to get country flag emoji
-        function getCountryFlag(countryName) {
-            const flagMap = {
-                'India': '🇮🇳', 'United States': '🇺🇸', 'United Kingdom': '🇬🇧', 'Canada': '🇨🇦',
-                'Australia': '🇦🇺', 'Germany': '🇩🇪', 'France': '🇫🇷', 'Japan': '🇯🇵',
-                'China': '🇨🇳', 'Brazil': '🇧🇷', 'Russia': '🇷🇺', 'South Korea': '🇰🇷',
-                'Mexico': '🇲🇽', 'Italy': '🇮🇹', 'Spain': '🇪🇸', 'Netherlands': '🇳🇱',
-                'Sweden': '🇸🇪', 'Norway': '🇳🇴', 'Denmark': '🇩🇰', 'Finland': '🇫🇮',
-                'Switzerland': '🇨🇭', 'Austria': '🇦🇹', 'Belgium': '🇧🇪', 'Poland': '🇵🇱',
-                'Turkey': '🇹🇷', 'Saudi Arabia': '🇸🇦', 'United Arab Emirates': '🇦🇪',
-                'Singapore': '🇸🇬', 'Thailand': '🇹🇭', 'Philippines': '🇵🇭', 'Indonesia': '🇮🇩',
-                'Malaysia': '🇲🇾', 'Vietnam': '🇻🇳', 'South Africa': '🇿🇦', 'Nigeria': '🇳🇬',
-                'Egypt': '🇪🇬', 'Israel': '🇮🇱', 'New Zealand': '🇳🇿', 'Ireland': '🇮🇪',
-                'Portugal': '🇵🇹', 'Greece': '🇬🇷', 'Czech Republic': '🇨🇿', 'Hungary': '🇭🇺',
-                'Romania': '🇷🇴', 'Bulgaria': '🇧🇬', 'Croatia': '🇭🇷', 'Slovenia': '🇸🇮',
-                'Slovakia': '🇸🇰', 'Lithuania': '🇱🇹', 'Latvia': '🇱🇻', 'Estonia': '🇪🇪',
-                'Ukraine': '🇺🇦', 'Belarus': '🇧🇾', 'Moldova': '🇲🇩', 'Georgia': '🇬🇪',
-                'Armenia': '🇦🇲', 'Azerbaijan': '🇦🇿', 'Kazakhstan': '🇰🇿', 'Uzbekistan': '🇺🇿'
-            };
-            return flagMap[countryName] || '🌍';
-        }
-
         // Display location error with helpful information
         function displayLocationError(errorMessage) {
             const countryStatsElement = document.getElementById('country-stats');
@@ -9696,7 +9583,7 @@
                         window.cityChart.data.labels = ['City Data Not Available'];
                         window.cityChart.data.datasets[0].data = [1];
                         window.cityChart.data.datasets[0].backgroundColor = ['#e5e7eb'];
-                        window.cityChart.update('none');
+                        window.cityChart.update('none'); // No animation for empty state
 
                         console.log('📊 [LOCATION CHARTS] City chart updated to show not available state (no city data found)');
                     }
