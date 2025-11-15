@@ -827,6 +827,26 @@
                         <option value="featured-collection">Featured Collection</option>
                         <option value="new-arrivals">New Arrivals</option>
                         <option value="saree-collection">Saree Collection</option>
+                        <optgroup label="Necklaces">
+                            <option value="gold-necklace">Gold Necklace</option>
+                            <option value="silver-necklace">Silver Necklace</option>
+                            <option value="meenakari-necklace">Meenakari Necklace</option>
+                        </optgroup>
+                        <optgroup label="Earrings">
+                            <option value="gold-earrings">Gold Earrings</option>
+                            <option value="silver-earrings">Silver Earrings</option>
+                            <option value="meenakari-earrings">Meenakari Earrings</option>
+                        </optgroup>
+                        <optgroup label="Bangles">
+                            <option value="gold-bangles">Gold Bangles</option>
+                            <option value="silver-bangles">Silver Bangles</option>
+                            <option value="meenakari-bangles">Meenakari Bangles</option>
+                        </optgroup>
+                        <optgroup label="Rings">
+                            <option value="gold-rings">Gold Rings</option>
+                            <option value="silver-rings">Silver Rings</option>
+                            <option value="meenakari-rings">Meenakari Rings</option>
+                        </optgroup>
                     </select>
                 </div>
                 <div style="display: flex; gap: 12px;">
@@ -941,7 +961,7 @@
         // Dashboard Functions
         async function loadDashboardData() {
             console.log('Loading dashboard data...');
-            
+
             try {
                 // Load all data in parallel
                 const [ordersData, customersData, productsData] = await Promise.all([
@@ -952,7 +972,7 @@
 
                 updateDashboardStats(ordersData, customersData, productsData);
                 displayRecentOrders(ordersData.slice(0, 5));
-                
+
                 console.log('✅ Dashboard data loaded successfully');
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
@@ -981,7 +1001,7 @@
 
         function displayRecentOrders(orders) {
             const container = document.getElementById('recentOrdersTable');
-            
+
             if (orders.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
@@ -1029,19 +1049,19 @@
                     </table>
                 </div>
             `;
-            
+
             container.innerHTML = tableHTML;
         }
 
         // Product Management Functions
         async function loadProductManagement() {
             console.log('Loading product management data...');
-            
+
             try {
                 allProducts = await loadAllProducts();
                 filteredProducts = [...allProducts];
                 displayProducts(filteredProducts);
-                
+
                 console.log(`✅ Loaded ${allProducts.length} products for management`);
             } catch (error) {
                 console.error('Error loading products:', error);
@@ -1056,7 +1076,7 @@
         }
 
         async function loadAllProducts() {
-            const categories = ['featured-collection', 'new-arrivals', 'saree-collection'];
+            const categories = ['featured-collection', 'new-arrivals', 'saree-collection', 'gold-necklace', 'silver-necklace', 'meenakari-necklace', 'gold-earrings', 'silver-earrings', 'meenakari-earrings', 'gold-bangles', 'silver-bangles', 'meenakari-bangles', 'gold-rings', 'silver-rings', 'meenakari-rings'];
             const allProducts = [];
 
             for (const category of categories) {
@@ -1084,70 +1104,108 @@
         }
 
         function displayProducts(products) {
+            displayProductsWithCategoryOptions(products);
+        }
+
+        function displayProductsWithCategoryOptions(products) {
             const container = document.getElementById('productsGrid');
-            
+
             if (products.length === 0) {
+                const categoryAddButton = currentCategory !== 'all'
+                    ? getCategoryAddButton(currentCategory)
+                    : '';
+
                 container.innerHTML = `
                     <div class="empty-state">
+                        ${categoryAddButton}
                         <i class="fas fa-box"></i>
                         <h3>No products found</h3>
                         <p>Try adjusting your filters or add new products.</p>
+                        ${currentCategory !== 'all' ? `
+                            <button class="btn btn-primary" onclick="addProductToCategory('${currentCategory}')">
+                                <i class="fas fa-plus"></i>
+                                Add ${formatCategory(currentCategory)} Product
+                            </button>
+                        ` : ''}
                     </div>
                 `;
                 return;
             }
 
-            const productsHTML = products.map(product => `
-                <div class="product-card">
-                    ${(product.images?.[0] || product.image) ? `<img src="${product.images?.[0] || product.image}" alt="${product.name}" class="product-image">` : ''}
-                    <div class="product-info">
-                        <div class="product-category">${formatCategory(product.category)}</div>
-                        <div class="product-name">${product.name}</div>
-                        <div class="product-price">₹${product.price?.toLocaleString() || '0'}</div>
-                        <div class="product-stock">Stock: ${product.stock || 0} units</div>
-                        <div class="product-actions">
-                            <button class="btn btn-secondary btn-sm" onclick="editProduct('${product.id}', '${product.category}')">
-                                <i class="fas fa-edit"></i>
-                                Edit
-                            </button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteProduct('${product.id}', '${product.category}')">
-                                <i class="fas fa-trash"></i>
-                                Delete
-                            </button>
+            // Group products by category if viewing all
+            const groupedProducts = currentCategory === 'all'
+                ? groupProductsByCategory(products)
+                : { [currentCategory]: products };
+
+            let gridHTML = '';
+
+            Object.entries(groupedProducts).forEach(([category, categoryProducts]) => {
+                if (currentCategory === 'all') {
+                    gridHTML += `
+                        <div style="grid-column: 1 / -1; margin: 24px 0 16px 0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">
+                                <h3 style="margin: 0; color: #1e293b; font-size: 20px;">${formatCategory(category)}</h3>
+                                <button class="btn btn-primary btn-sm" onclick="addProductToCategory('${category}')">
+                                    <i class="fas fa-plus"></i>
+                                    Add Product
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                gridHTML += categoryProducts.map(product => `
+                    <div class="product-card">
+                        ${(product.images?.[0] || product.image) ? `<img src="${product.images?.[0] || product.image}" alt="${product.name}" class="product-image">` : ''}
+                        <div class="product-info">
+                            <div class="product-category">${formatCategory(product.category)}</div>
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-price">₹${product.price?.toLocaleString() || '0'}</div>
+                            <div class="product-stock">Stock: ${product.stock || 0} units</div>
+                            <div class="product-actions">
+                                <button class="btn btn-secondary btn-sm" onclick="editProduct('${product.id}', '${product.category}')">
+                                    <i class="fas fa-edit"></i>
+                                    Edit
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteProduct('${product.id}', '${product.category}')">
+                                    <i class="fas fa-trash"></i>
+                                    Delete
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            });
 
-            container.innerHTML = productsHTML;
+            container.innerHTML = gridHTML;
         }
 
         function filterProducts() {
             const category = document.getElementById('categoryFilter').value;
             currentCategory = category;
-            
+
             if (category === 'all') {
                 filteredProducts = [...allProducts];
             } else {
                 filteredProducts = allProducts.filter(product => product.category === category);
             }
-            
+
             searchProducts(); // Apply search filter as well
         }
 
         function searchProducts() {
             const searchTerm = document.getElementById('productSearch').value.toLowerCase();
-            
-            let productsToShow = currentCategory === 'all' ? [...allProducts] : 
+
+            let productsToShow = currentCategory === 'all' ? [...allProducts] :
                                 allProducts.filter(product => product.category === currentCategory);
-            
+
             if (searchTerm) {
-                productsToShow = productsToShow.filter(product => 
+                productsToShow = productsToShow.filter(product =>
                     product.name?.toLowerCase().includes(searchTerm) ||
                     product.description?.toLowerCase().includes(searchTerm)
                 );
             }
-            
+
             displayProducts(productsToShow);
         }
 
@@ -1196,11 +1254,11 @@
                 console.log(`Found ${usersSnapshot.docs.length} users in Firestore`);
 
                 const allOrders = [];
-                
+
                 for (const userDoc of usersSnapshot.docs) {
                     const ordersSnapshot = await userDoc.ref.collection('orders').get();
                     const userData = userDoc.data();
-                    
+
                     ordersSnapshot.forEach(orderDoc => {
                         const orderData = orderDoc.data();
                         allOrders.push({
@@ -1226,7 +1284,7 @@
             try {
                 console.log('Loading customers from Firestore...');
                 const usersSnapshot = await db.collection('users').get();
-                
+
                 const customers = usersSnapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data()
@@ -1251,7 +1309,7 @@
         }
 
         function formatCategory(category) {
-            return category.split('-').map(word => 
+            return category.split('-').map(word =>
                 word.charAt(0).toUpperCase() + word.slice(1)
             ).join(' ');
         }
@@ -1267,7 +1325,7 @@
 
         function refreshData() {
             const currentTab = document.querySelector('.nav-item.active').getAttribute('data-tab');
-            
+
             switch(currentTab) {
                 case 'dashboard':
                     loadDashboardData();
@@ -1283,11 +1341,11 @@
         // Orders Tab Implementation
         async function loadOrdersData() {
             console.log('Loading orders data...');
-            
+
             try {
                 const orders = await loadOrdersFromFirestore();
                 displayOrdersTable(orders);
-                
+
                 console.log(`✅ Loaded ${orders.length} orders`);
             } catch (error) {
                 console.error('Error loading orders:', error);
@@ -1303,7 +1361,7 @@
 
         function displayOrdersTable(orders) {
             const container = document.getElementById('ordersTable');
-            
+
             if (orders.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
@@ -1344,7 +1402,7 @@
                                 const isPending = currentStatus === 'pending';
                                 const isConfirmed = currentStatus === 'confirmed';
                                 const isDelivered = currentStatus === 'delivered';
-                                
+
                                 return `
                                     <tr>
                                         <td>#${order.id}</td>
@@ -1388,27 +1446,27 @@
                     </table>
                 </div>
             `;
-            
+
             container.innerHTML = tableHTML;
         }
 
         function filterOrders(status) {
             console.log('Filtering orders by status:', status);
-            
+
             // Update active tab button
             document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-            
+
             // Filter and display orders
             loadOrdersFromFirestore().then(orders => {
                 let filteredOrders = orders;
-                
+
                 if (status !== 'all') {
-                    filteredOrders = orders.filter(order => 
+                    filteredOrders = orders.filter(order =>
                         (order.status || 'pending').toLowerCase() === status.toLowerCase()
                     );
                 }
-                
+
                 displayOrdersTable(filteredOrders);
             });
         }
@@ -1419,38 +1477,38 @@
                 console.log(`   Order ID: ${orderId}`);
                 console.log(`   User ID: ${userId}`);
                 console.log(`   New Status: ${newStatus}`);
-                
+
                 if (!userId) {
                     console.error('❌ ERROR: User ID is missing!');
                     alert('Error: User ID is missing. Cannot update order status.');
                     return;
                 }
-                
+
                 if (!db) {
                     console.error('❌ ERROR: Firebase database not initialized!');
                     alert('Error: Database connection not available.');
                     return;
                 }
-                
+
                 // Update the order's deliveryStatus in Firestore
                 const docRef = db.collection('users')
                     .doc(userId)
                     .collection('orders')
                     .doc(orderId);
-                
+
                 console.log(`📝 Firestore path: users/${userId}/orders/${orderId}`);
-                
+
                 await docRef.update({
                     deliveryStatus: newStatus,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                
+
                 console.log(`✅ Successfully updated order ${orderId} status to ${newStatus}`);
-                
+
                 // Reload the orders to reflect changes
                 console.log('🔄 Reloading orders...');
                 await loadOrdersData();
-                
+
                 alert(`Order ${orderId} status updated to ${newStatus}!`);
             } catch (error) {
                 console.error('❌ ERROR updating order status:', error);
@@ -1465,7 +1523,7 @@
 
         function viewOrderDetails(orderId) {
             console.log('Viewing order details for:', orderId);
-            
+
             // Create a modal to show order details
             const modal = document.createElement('div');
             modal.style.cssText = `
@@ -1480,7 +1538,7 @@
                 justify-content: center;
                 z-index: 10000;
             `;
-            
+
             modal.innerHTML = `
                 <div style="background: white; padding: 24px; border-radius: 8px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -1493,10 +1551,10 @@
                     </div>
                 </div>
             `;
-            
+
             modal.className = 'modal-overlay';
             document.body.appendChild(modal);
-            
+
             // Close modal when clicking outside
             modal.addEventListener('click', function(e) {
                 if (e.target === modal) {
@@ -1508,11 +1566,11 @@
         // Customers Tab Implementation
         async function loadCustomersData() {
             console.log('Loading customers data...');
-            
+
             try {
                 const customers = await loadCustomersFromFirestore();
                 displayCustomersTable(customers);
-                
+
                 console.log(`✅ Loaded ${customers.length} customers`);
             } catch (error) {
                 console.error('Error loading customers:', error);
@@ -1528,7 +1586,7 @@
 
         function displayCustomersTable(customers) {
             const container = document.getElementById('customersTable');
-            
+
             if (customers.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
@@ -1575,7 +1633,7 @@
                     </table>
                 </div>
             `;
-            
+
             container.innerHTML = tableHTML;
         }
 
@@ -1587,11 +1645,11 @@
         // Inventory Tab Implementation
         async function loadInventoryData() {
             console.log('Loading inventory data...');
-            
+
             try {
                 const products = await loadAllProducts();
                 displayInventoryTable(products);
-                
+
                 const totalValue = products.reduce((sum, product) => sum + (product.price * product.stock || 0), 0);
                 console.log(`✅ Loaded ${products.length} products, inventory value: ₹${totalValue.toLocaleString()}`);
             } catch (error) {
@@ -1608,7 +1666,7 @@
 
         function displayInventoryTable(products) {
             const container = document.getElementById('inventoryTable');
-            
+
             if (products.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
@@ -1658,7 +1716,7 @@
                                 const value = (product.price || 0) * stock;
                                 const stockStatus = stock < 5 ? 'Low Stock' : stock < 20 ? 'Medium Stock' : 'In Stock';
                                 const statusClass = stock < 5 ? 'status-danger' : stock < 20 ? 'status-warning' : 'status-success';
-                                
+
                                 return `
                                     <tr>
                                         <td>${product.name}</td>
@@ -1684,7 +1742,7 @@
                     </table>
                 </div>
             `;
-            
+
             container.innerHTML = tableHTML;
         }
 
@@ -1703,14 +1761,14 @@
 
         function openProductForm() {
             const category = document.getElementById('newProductCategory').value;
-            
+
             if (!category) {
                 alert('Please select a category first.');
                 return;
             }
-            
+
             closeAddProductModal();
-            
+
             // Open admin panel with category pre-selected
             const url = `admin-panel.html?category=${category}`;
             window.open(url, '_blank');
@@ -1730,96 +1788,6 @@
                     Add ${formatCategory(category)} Product
                 </button>
             `;
-        }
-
-        // Update displayProducts to show category-specific add buttons
-        function displayProductsWithCategoryOptions(products) {
-            const container = document.getElementById('productsGrid');
-            
-            if (products.length === 0) {
-                const categoryAddButton = currentCategory !== 'all' 
-                    ? getCategoryAddButton(currentCategory)
-                    : '';
-                
-                container.innerHTML = `
-                    <div class="empty-state">
-                        ${categoryAddButton}
-                        <i class="fas fa-box"></i>
-                        <h3>No products found</h3>
-                        <p>Try adjusting your filters or add new products.</p>
-                        ${currentCategory !== 'all' ? `
-                            <button class="btn btn-primary" onclick="addProductToCategory('${currentCategory}')">
-                                <i class="fas fa-plus"></i>
-                                Add ${formatCategory(currentCategory)} Product
-                            </button>
-                        ` : ''}
-                    </div>
-                `;
-                return;
-            }
-
-            // Group products by category if viewing all
-            const groupedProducts = currentCategory === 'all' 
-                ? groupProductsByCategory(products)
-                : { [currentCategory]: products };
-
-            let gridHTML = '';
-
-            Object.entries(groupedProducts).forEach(([category, categoryProducts]) => {
-                if (currentCategory === 'all') {
-                    gridHTML += `
-                        <div style="grid-column: 1 / -1; margin: 24px 0 16px 0;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">
-                                <h3 style="margin: 0; color: #1e293b; font-size: 20px;">${formatCategory(category)}</h3>
-                                <button class="btn btn-primary btn-sm" onclick="addProductToCategory('${category}')">
-                                    <i class="fas fa-plus"></i>
-                                    Add Product
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                gridHTML += categoryProducts.map(product => `
-                    <div class="product-card">
-                        ${(product.images?.[0] || product.image) ? `<img src="${product.images?.[0] || product.image}" alt="${product.name}" class="product-image">` : ''}
-                        <div class="product-info">
-                            <div class="product-category">${formatCategory(product.category)}</div>
-                            <div class="product-name">${product.name}</div>
-                            <div class="product-price">₹${product.price?.toLocaleString() || '0'}</div>
-                            <div class="product-stock">Stock: ${product.stock || 0} units</div>
-                            <div class="product-actions">
-                                <button class="btn btn-secondary btn-sm" onclick="editProduct('${product.id}', '${product.category}')">
-                                    <i class="fas fa-edit"></i>
-                                    Edit
-                                </button>
-                                <button class="btn btn-danger btn-sm" onclick="deleteProduct('${product.id}', '${product.category}')">
-                                    <i class="fas fa-trash"></i>
-                                    Delete
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            });
-
-            container.innerHTML = gridHTML;
-        }
-
-        function groupProductsByCategory(products) {
-            return products.reduce((grouped, product) => {
-                const category = product.category || 'uncategorized';
-                if (!grouped[category]) {
-                    grouped[category] = [];
-                }
-                grouped[category].push(product);
-                return grouped;
-            }, {});
-        }
-
-        // Update the main displayProducts function to use the enhanced version
-        function displayProducts(products) {
-            displayProductsWithCategoryOptions(products);
         }
 
         // Close modals when clicking outside
