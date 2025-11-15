@@ -126,7 +126,7 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
 
     // Fetch product details to get image and price
     try {
-        // Search in all possible categories including bridal and polki
+        // Search in all possible categories
         const categories = [
             'featured-collection', 
             'new-arrivals', 
@@ -142,9 +142,7 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
             'meenakari-bangles',
             'gold-rings',
             'silver-rings',
-            'meenakari-rings',
-            'bridal',
-            'polki'
+            'meenakari-rings'
         ];
         let productDetails = null;
 
