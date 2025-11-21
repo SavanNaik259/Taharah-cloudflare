@@ -841,22 +841,22 @@ window.CartManager = (function() {
                 cartOverlay.classList.add('closing');
             }
 
-            // Clean up after animation completes
+            // Wait for transition to complete before cleanup
             setTimeout(() => {
                 // Only cleanup if panel is still closed (not reopened)
                 if (!cartPanel.classList.contains('active')) {
-                    // Restore body scrolling
-                    document.body.style.overflow = '';
-                    
                     // Clean up closing classes
                     cartPanel.classList.remove('closing');
                     if (cartOverlay) {
                         cartOverlay.classList.remove('closing');
                     }
+                    
+                    // Restore body scrolling after animation completes
+                    document.body.style.overflow = '';
                 }
-            }, 350); // Match CSS transition duration (0.35s = 350ms)
+            }, 400); // Slightly longer than CSS transition (0.35s) to ensure smooth completion
 
-            console.log('Cart panel closed with smooth transition');
+            console.log('Cart panel closing with smooth transition');
         }
 
         // Ensure global function exists
