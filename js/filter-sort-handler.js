@@ -21,15 +21,33 @@ const FilterSortHandler = (function() {
         if (sortOption && sortDropdown) {
             sortOption.addEventListener('click', function(e) {
                 e.stopPropagation();
-                sortDropdown.classList.toggle('active');
-                sortOption.classList.toggle('active');
+                
+                if (sortDropdown.classList.contains('active')) {
+                    // Closing - add closing class for animation
+                    sortDropdown.classList.add('closing');
+                    sortOption.classList.remove('active');
+                    
+                    setTimeout(() => {
+                        sortDropdown.classList.remove('active', 'closing');
+                    }, 300); // Match animation duration
+                } else {
+                    // Opening
+                    sortDropdown.classList.add('active');
+                    sortOption.classList.add('active');
+                }
             });
 
             // Close dropdown when clicking outside
             document.addEventListener('click', function(e) {
                 if (!sortOption.contains(e.target) && !sortDropdown.contains(e.target)) {
-                    sortDropdown.classList.remove('active');
-                    sortOption.classList.remove('active');
+                    if (sortDropdown.classList.contains('active')) {
+                        sortDropdown.classList.add('closing');
+                        sortOption.classList.remove('active');
+                        
+                        setTimeout(() => {
+                            sortDropdown.classList.remove('active', 'closing');
+                        }, 300);
+                    }
                 }
             });
 
@@ -46,9 +64,15 @@ const FilterSortHandler = (function() {
                     // Get sort value
                     currentSort = this.dataset.sort;
                     
-                    // Close dropdown
-                    sortDropdown.classList.remove('active');
-                    sortOption.classList.remove('active');
+                    // Close dropdown with animation
+                    if (sortDropdown.classList.contains('active')) {
+                        sortDropdown.classList.add('closing');
+                        sortOption.classList.remove('active');
+                        
+                        setTimeout(() => {
+                            sortDropdown.classList.remove('active', 'closing');
+                        }, 300);
+                    }
                     
                     // Apply sort
                     applySort(currentSort);
@@ -71,14 +95,26 @@ const FilterSortHandler = (function() {
 
         if (closeFilterModal && filterModal) {
             closeFilterModal.addEventListener('click', function() {
-                filterModal.classList.remove('active');
+                if (filterModal.classList.contains('active')) {
+                    filterModal.classList.add('closing');
+                    
+                    setTimeout(() => {
+                        filterModal.classList.remove('active', 'closing');
+                    }, 300); // Match animation duration
+                }
             });
         }
 
         if (filterModal) {
             filterModal.addEventListener('click', function(e) {
                 if (e.target === filterModal) {
-                    filterModal.classList.remove('active');
+                    if (filterModal.classList.contains('active')) {
+                        filterModal.classList.add('closing');
+                        
+                        setTimeout(() => {
+                            filterModal.classList.remove('active', 'closing');
+                        }, 300);
+                    }
                 }
             });
         }
@@ -90,8 +126,12 @@ const FilterSortHandler = (function() {
                     currentFilter = selectedFilter.value;
                     applySort(currentFilter);
                 }
-                if (filterModal) {
-                    filterModal.classList.remove('active');
+                if (filterModal && filterModal.classList.contains('active')) {
+                    filterModal.classList.add('closing');
+                    
+                    setTimeout(() => {
+                        filterModal.classList.remove('active', 'closing');
+                    }, 300);
                 }
             });
         }
@@ -104,8 +144,12 @@ const FilterSortHandler = (function() {
                 }
                 currentFilter = 'featured';
                 applySort('featured');
-                if (filterModal) {
-                    filterModal.classList.remove('active');
+                if (filterModal && filterModal.classList.contains('active')) {
+                    filterModal.classList.add('closing');
+                    
+                    setTimeout(() => {
+                        filterModal.classList.remove('active', 'closing');
+                    }, 300);
                 }
             });
         }
