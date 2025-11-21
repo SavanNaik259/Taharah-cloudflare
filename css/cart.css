@@ -25,10 +25,10 @@
   visibility: hidden;
   pointer-events: none;
   backface-visibility: hidden;
-  /* Smooth transition for both opening and closing */
-  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              opacity 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              visibility 0s linear 0.35s;
+  /* Single smooth transition for all states - no separate closing transition */
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              visibility 0s linear 0.4s;
 }
 
 /* ================ WISHLIST PANEL CONTAINER ================ */
@@ -65,8 +65,10 @@
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  /* Remove delay for opening */
-  transition-delay: 0s;
+  /* Immediate visibility for opening, no delay */
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              visibility 0s linear 0s;
 }
 
 .wishlist-panel.active {
@@ -101,8 +103,10 @@
 .wishlist-overlay.active {
   opacity: 1;
   visibility: visible;
-  /* Remove delay for opening */
-  transition-delay: 0s;
+  /* Immediate fade in */
+  transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              visibility 0s linear 0s,
+              backdrop-filter 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* ================ CART PANEL HEADER ================ */
@@ -598,18 +602,7 @@
   opacity: 1;
 }
 
-/* Closing states - smooth transitions matching opening */
-.cart-panel.closing {
-  transform: translateX(100%) translateZ(0);
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  /* Same smooth transition as opening for consistency */
-  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              opacity 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              visibility 0s linear 0.35s;
-}
-
+/* Wishlist closing state */
 .wishlist-panel.closing {
   transform: translateX(100%) translateZ(0);
   opacity: 0;
@@ -625,9 +618,9 @@
 .wishlist-overlay.closing {
   opacity: 0;
   visibility: hidden;
-  /* Smooth overlay fade out matching opening */
-  transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              visibility 0s linear 0.3s;
+  /* Match cart panel timing exactly */
+  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              visibility 0s linear 0.4s;
 }
 
 /* ================ PANEL ITEM ANIMATIONS ================ */

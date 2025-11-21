@@ -783,24 +783,23 @@ window.CartManager = (function() {
                 return;
             }
 
-            // Clean state - remove closing classes
-            cartPanel.classList.remove('closing');
+            // Clean state - remove any closing classes
             cartOverlay.classList.remove('closing');
 
-            // Prevent body scrolling
+            // Prevent body scrolling immediately
             document.body.style.overflow = 'hidden';
 
-            // Use requestAnimationFrame for smooth CSS transitions
+            // Update cart display first (before opening)
+            updateCartItemsDisplay();
+
+            // Use double requestAnimationFrame for smoother transition
             requestAnimationFrame(() => {
-                // Show overlay and panel with CSS classes (no inline styles)
-                cartOverlay.classList.add('active');
-                cartPanel.classList.add('active');
+                requestAnimationFrame(() => {
+                    // Show overlay and panel with CSS classes
+                    cartOverlay.classList.add('active');
+                    cartPanel.classList.add('active');
+                });
             });
-            
-            // Update cart display after a brief delay to let animation start
-            setTimeout(() => {
-                updateCartItemsDisplay();
-            }, 50);
 
             console.log('Cart panel opened with smooth transition');
         } else {
@@ -831,30 +830,28 @@ window.CartManager = (function() {
         console.log('Closing cart panel:', cartPanel ? 'Panel found' : 'Panel NOT found');
 
         if (cartPanel) {
-            // Remove active class and add closing class for smooth transition
+            // Simply remove active class - CSS will handle smooth transition
             cartPanel.classList.remove('active');
-            cartPanel.classList.add('closing');
 
-            // Hide overlay with smooth transition
+            // Hide overlay
             if (cartOverlay) {
                 cartOverlay.classList.remove('active');
                 cartOverlay.classList.add('closing');
             }
 
-            // Wait for transition to complete before cleanup
+            // Wait for CSS transition to complete (400ms)
             setTimeout(() => {
                 // Only cleanup if panel is still closed (not reopened)
                 if (!cartPanel.classList.contains('active')) {
-                    // Clean up closing classes
-                    cartPanel.classList.remove('closing');
+                    // Restore body scrolling
+                    document.body.style.overflow = '';
+                    
+                    // Clean up overlay closing class
                     if (cartOverlay) {
                         cartOverlay.classList.remove('closing');
                     }
-                    
-                    // Restore body scrolling after animation completes
-                    document.body.style.overflow = '';
                 }
-            }, 400); // Slightly longer than CSS transition (0.35s) to ensure smooth completion
+            }, 450); // Match CSS transition duration (0.4s) + small buffer
 
             console.log('Cart panel closing with smooth transition');
         }
