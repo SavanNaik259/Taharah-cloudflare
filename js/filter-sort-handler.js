@@ -31,7 +31,8 @@ const FilterSortHandler = (function() {
                         sortDropdown.classList.remove('active', 'closing');
                     }, 300); // Match animation duration
                 } else {
-                    // Opening
+                    // Opening - remove closing class if present
+                    sortDropdown.classList.remove('closing');
                     sortDropdown.classList.add('active');
                     sortOption.classList.add('active');
                 }
@@ -51,10 +52,17 @@ const FilterSortHandler = (function() {
                 }
             });
 
+            // Prevent dropdown from closing when clicking inside it
+            sortDropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+
             // Sort option clicks
             const sortOptions = sortDropdown.querySelectorAll('.sort-dropdown-option');
             sortOptions.forEach(option => {
-                option.addEventListener('click', function() {
+                option.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
                     // Remove active class from all options
                     sortOptions.forEach(opt => opt.classList.remove('active'));
                     

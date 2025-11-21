@@ -218,6 +218,26 @@
     }
 }
 
+/* Sort dropdown animations */
+.sort-dropdown {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+}
+
+.sort-dropdown.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    animation: slideDown 0.3s ease forwards;
+}
+
+.sort-dropdown.closing {
+    animation: slideUp 0.3s ease forwards;
+    pointer-events: none;
+}
+
 .sort-dropdown-option {
     padding: 12px 15px;
     cursor: pointer;
