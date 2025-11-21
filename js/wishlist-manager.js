@@ -75,6 +75,9 @@ const WishlistManager = (function() {
             return;
         }
 
+        // Clear existing content first
+        wishlistItemsContainer.innerHTML = '';
+
         // Use DocumentFragment for efficient DOM updates
         const fragment = document.createDocumentFragment();
 
@@ -98,8 +101,7 @@ const WishlistManager = (function() {
             fragment.appendChild(wishlistItemDiv);
         });
 
-        // Single DOM update without animation triggers
-        wishlistItemsContainer.innerHTML = '';
+        // Add all items to the container
         wishlistItemsContainer.appendChild(fragment);
     }
 
