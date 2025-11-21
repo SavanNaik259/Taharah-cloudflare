@@ -629,51 +629,14 @@
 }
 
 /* ================ PANEL ITEM ANIMATIONS ================ */
-/* Staggered fade-in animation for panel items when opening */
-.cart-panel:not(.active) .cart-item,
-.cart-panel:not(.active) .empty-cart-message,
-.wishlist-panel:not(.active) .wishlist-item,
-.wishlist-panel:not(.active) .empty-wishlist-message {
-  opacity: 0;
-  transform: translateY(10px);
-}
-
-.cart-panel.active .cart-item,
-.cart-panel.active .empty-cart-message,
-.wishlist-panel.active .wishlist-item,
-.wishlist-panel.active .empty-wishlist-message {
-  animation: fadeInUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-/* Staggered delay for each item */
-.cart-panel.active .cart-item:nth-child(1),
-.wishlist-panel.active .wishlist-item:nth-child(1) {
-  animation-delay: 0.1s;
-}
-
-.cart-panel.active .cart-item:nth-child(2),
-.wishlist-panel.active .wishlist-item:nth-child(2) {
-  animation-delay: 0.15s;
-}
-
-.cart-panel.active .cart-item:nth-child(3),
-.wishlist-panel.active .wishlist-item:nth-child(3) {
-  animation-delay: 0.2s;
-}
-
-.cart-panel.active .cart-item:nth-child(4),
-.wishlist-panel.active .wishlist-item:nth-child(4) {
-  animation-delay: 0.25s;
-}
-
-.cart-panel.active .cart-item:nth-child(5),
-.wishlist-panel.active .wishlist-item:nth-child(5) {
-  animation-delay: 0.3s;
-}
-
-.cart-panel.active .cart-item:nth-child(n+6),
-.wishlist-panel.active .wishlist-item:nth-child(n+6) {
-  animation-delay: 0.35s;
+/* Simple fade-in for panel items - no transform to avoid double animations */
+.cart-panel .cart-item,
+.cart-panel .empty-cart-message,
+.wishlist-panel .wishlist-item,
+.wishlist-panel .empty-wishlist-message {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.3s ease;
 }
 
 /* Fade out animation for closing */
