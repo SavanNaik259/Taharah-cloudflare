@@ -602,6 +602,18 @@
   opacity: 1;
 }
 
+/* Cart closing state */
+.cart-panel.closing {
+  transform: translateX(100%) translateZ(0);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  /* Smooth closing animation */
+  transition: transform 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53),
+              opacity 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53),
+              visibility 0s linear 0.3s;
+}
+
 /* Wishlist closing state */
 .wishlist-panel.closing {
   transform: translateX(100%) translateZ(0);
