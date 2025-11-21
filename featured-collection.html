@@ -233,6 +233,14 @@
     <!-- Product Grid Section -->
     <section class="shop-products-section">
         <div class="shop-products">
+            <div class="sort-container" style="display: flex; justify-content: flex-end; padding: 20px; margin-bottom: 10px;">
+                <select id="sortSelect" style="padding: 10px 15px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; cursor: pointer;">
+                    <option value="featured">Sort By: Featured</option>
+                    <option value="price-low-high">Price: Low to High</option>
+                    <option value="price-high-low">Price: High to Low</option>
+                    <option value="newest">Newest First</option>
+                </select>
+            </div>
             <div class="products-grid" id="featured-collection-products-grid">
                 <!-- Products will be loaded here dynamically -->
             </div>

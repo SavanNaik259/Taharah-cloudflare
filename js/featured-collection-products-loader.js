@@ -306,7 +306,7 @@ const BridalProductsLoader = (function() {
             // Cache the results in memory and localStorage
             cachedProducts = products;
             lastFetchTime = now;
-            
+
             // Set global variables for OutOfStockHandler
             window.bridalProducts = products;
             window.featuredCollectionProducts = products;
@@ -494,7 +494,7 @@ const BridalProductsLoader = (function() {
     /**
      * Update the Bridal Collection section with loaded products
      */
-    async function updateBridalSection() {
+    async function updateProductsGrid(forceRefresh = false) {
         const featuredCollectionContainer = document.getElementById('featuredCollectionProductContainer');
 
         if (!featuredCollectionContainer) {
@@ -541,7 +541,7 @@ const BridalProductsLoader = (function() {
             }
 
             // Load products from Firebase
-            const products = await loadBridalProducts();
+            const products = await loadBridalProducts(forceRefresh);
 
             // Remove loading indicator
             const loadingElements = featuredCollectionContainer.querySelectorAll('.loading-products');
@@ -638,6 +638,94 @@ const BridalProductsLoader = (function() {
     }
 
     /**
+     * Sort products by selected criteria
+     */
+    function sortProducts(products, sortBy) {
+        console.log('Sorting products by:', sortBy);
+
+        const productsCopy = [...products];
+
+        switch (sortBy) {
+            case 'price-low-high':
+                return productsCopy.sort((a, b) => {
+                    const priceA = parseFloat(a.price);
+                    const priceB = parseFloat(b.price);
+                    return priceA - priceB;
+                });
+
+            case 'price-high-low':
+                return productsCopy.sort((a, b) => {
+                    const priceA = parseFloat(a.price);
+                    const priceB = parseFloat(b.price);
+                    return priceB - priceA;
+                });
+
+            case 'newest':
+                return productsCopy.sort((a, b) => {
+                    const dateA = new Date(a.date || 0);
+                    const dateB = new Date(b.date || 0);
+                    return dateB - dateA;
+                });
+
+            case 'featured':
+            default:
+                return productsCopy;
+        }
+    }
+
+    /**
+     * Setup sort UI for featured collection page
+     */
+    function setupSortUI() {
+        const sortSelect = document.getElementById('sortSelect');
+
+        if (!sortSelect) {
+            console.log('Sort select not found');
+            return;
+        }
+
+        sortSelect.addEventListener('change', async function() {
+            const sortBy = this.value;
+            console.log('Sort changed to:', sortBy);
+
+            // Reload products to ensure we're sorting the most up-to-date list
+            // If cache is still valid, this will return cached data quickly.
+            const products = await loadBridalProducts(false); // Use cache if available
+            const sortedProducts = sortProducts(products, sortBy);
+            displaySortedProducts(sortedProducts);
+        });
+    }
+
+    /**
+     * Display sorted products
+     */
+    async function displaySortedProducts(products) {
+        const productsGrid = document.getElementById('featured-collection-products-grid');
+
+        if (!productsGrid) {
+            console.warn('Featured collection products grid not found');
+            return;
+        }
+
+        if (products.length > 0) {
+            const productsHTML = products.map(product => generateProductHTML(product)).join('');
+            productsGrid.innerHTML = productsHTML;
+
+            // Setup wishlist event listeners
+            setupWishlistEventListeners();
+
+            // Update wishlist button states
+            if (typeof window.WishlistManager !== 'undefined') {
+                setTimeout(() => {
+                    window.WishlistManager.updateWishlistButtonsState();
+                }, 100);
+            }
+        } else {
+            productsGrid.innerHTML = '<p>No products found for this category.</p>';
+        }
+    }
+
+    /**
      * Clear cached products (useful after adding/editing products)
      */
     function clearCache() {
@@ -660,24 +748,17 @@ const BridalProductsLoader = (function() {
     return {
         init,
         loadBridalProducts,
-        updateBridalSection,
-        clearCache
+        updateProductsGrid,
+        setupSortUI
     };
 })();
 
-// Initialize when DOM is ready
+// Auto-initialize and load when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    // Wait a bit for Firebase to initialize
     setTimeout(() => {
         if (BridalProductsLoader.init()) {
-            // Force refresh to bypass any cache issues
-            BridalProductsLoader.loadBridalProducts(true).then(products => {
-                console.log('Initial load completed with', products.length, 'products');
-                BridalProductsLoader.updateBridalSection();
-            }).catch(error => {
-                console.error('Initial load failed:', error);
-                BridalProductsLoader.updateBridalSection();
-            });
+            BridalProductsLoader.updateProductsGrid();
+            BridalProductsLoader.setupSortUI();
         }
     }, 1000);
 });

@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (products && products.length > 0) {
             console.log(`Loaded ${products.length} new arrivals products for page`);
             displayAllProducts(products);
+            setupSortUI(products);
         } else {
             console.log('No new arrivals products found - showing empty state');
             console.log('Products value:', products);
@@ -41,6 +42,62 @@ document.addEventListener('DOMContentLoaded', async function() {
         showEmptyState();
     }
 });
+
+/**
+ * Setup sort UI for new arrivals page
+ */
+function setupSortUI(products) {
+    const sortSelect = document.getElementById('sortSelect');
+    
+    if (!sortSelect) {
+        console.log('Sort select not found');
+        return;
+    }
+
+    sortSelect.addEventListener('change', function() {
+        const sortBy = this.value;
+        console.log('Sort changed to:', sortBy);
+        
+        const sortedProducts = sortProducts(products, sortBy);
+        displayAllProducts(sortedProducts);
+    });
+}
+
+/**
+ * Sort products by selected criteria
+ */
+function sortProducts(products, sortBy) {
+    console.log('Sorting products by:', sortBy);
+    
+    const productsCopy = [...products];
+    
+    switch (sortBy) {
+        case 'price-low-high':
+            return productsCopy.sort((a, b) => {
+                const priceA = parseFloat(a.price);
+                const priceB = parseFloat(b.price);
+                return priceA - priceB;
+            });
+            
+        case 'price-high-low':
+            return productsCopy.sort((a, b) => {
+                const priceA = parseFloat(a.price);
+                const priceB = parseFloat(b.price);
+                return priceB - priceA;
+            });
+            
+        case 'newest':
+            return productsCopy.sort((a, b) => {
+                const dateA = new Date(a.date || 0);
+                const dateB = new Date(b.date || 0);
+                return dateB - dateA;
+            });
+            
+        case 'featured':
+        default:
+            return productsCopy;
+    }
+}
 
 /**
  * Load new arrivals products directly from Firebase (without external dependencies)

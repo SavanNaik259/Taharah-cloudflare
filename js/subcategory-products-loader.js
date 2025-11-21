@@ -319,6 +319,90 @@ const SubcategoryProductsLoader = (function() {
     }
 
     /**
+     * Sort products by selected criteria
+     */
+    function sortProducts(products, sortBy) {
+        console.log('Sorting products by:', sortBy);
+        
+        const productsCopy = [...products];
+        
+        switch (sortBy) {
+            case 'price-low-high':
+                return productsCopy.sort((a, b) => {
+                    const priceA = parseFloat(a.price);
+                    const priceB = parseFloat(b.price);
+                    return priceA - priceB;
+                });
+                
+            case 'price-high-low':
+                return productsCopy.sort((a, b) => {
+                    const priceA = parseFloat(a.price);
+                    const priceB = parseFloat(b.price);
+                    return priceB - priceA;
+                });
+                
+            case 'newest':
+                return productsCopy.sort((a, b) => {
+                    const dateA = new Date(a.date || 0);
+                    const dateB = new Date(b.date || 0);
+                    return dateB - dateA;
+                });
+                
+            case 'featured':
+            default:
+                return productsCopy;
+        }
+    }
+
+    /**
+     * Setup sort UI for subcategory pages
+     */
+    function setupSortUI(category) {
+        const sortSelect = document.getElementById('sortSelect');
+        
+        if (!sortSelect) {
+            console.log('Sort select not found');
+            return;
+        }
+
+        sortSelect.addEventListener('change', async function() {
+            const sortBy = this.value;
+            console.log('Sort changed to:', sortBy);
+            
+            const products = await loadSubcategoryProducts(category);
+            const sortedProducts = sortProducts(products, sortBy);
+            displaySortedProducts(sortedProducts);
+        });
+    }
+
+    /**
+     * Display sorted products
+     */
+    function displaySortedProducts(products) {
+        const productsGrid = document.getElementById('products-grid') || document.querySelector('.products-grid');
+        
+        if (!productsGrid) {
+            console.warn('Products grid not found');
+            return;
+        }
+
+        if (products.length > 0) {
+            const productsHTML = products.map(product => generateProductHTML(product)).join('');
+            productsGrid.innerHTML = productsHTML;
+
+            // Setup wishlist event listeners
+            setupWishlistEventListeners();
+
+            // Update wishlist button states
+            if (typeof window.WishlistManager !== 'undefined') {
+                setTimeout(() => {
+                    window.WishlistManager.updateWishlistButtonsState();
+                }, 100);
+            }
+        }
+    }
+
+    /**
      * Auto-detect category from page URL and load products
      */
     function autoLoadForCurrentPage() {
@@ -345,6 +429,7 @@ const SubcategoryProductsLoader = (function() {
         if (category) {
             console.log(`Auto-loading products for category: ${category}`);
             updateProductsGrid(category);
+            setupSortUI(category);
         } else {
             console.log(`No category mapping found for page: ${pageName}`);
         }

@@ -307,7 +307,7 @@ const NewArrivalsProductsLoader = (function() {
             // Cache the results in memory and localStorage
             cachedProducts = products;
             lastFetchTime = now;
-            
+
             // Set global variables for OutOfStockHandler
             window.newArrivalsProducts = products;
 
@@ -319,7 +319,7 @@ const NewArrivalsProductsLoader = (function() {
                 }
                 console.log('Cached', products.length, 'products with ETag:', cachedETag?.substring(0, 8) + '...');
 
-                // Clear the product update flag since we've successfully loaded fresh data
+                // Clear the invalidation flag since we've successfully loaded fresh data
                 if (cacheInvalidated) {
                     localStorage.removeItem('lastProductUpdate');
                     console.log('✅ Cleared cache invalidation flag after successful fresh load');
@@ -339,6 +339,169 @@ const NewArrivalsProductsLoader = (function() {
                 stack: error.stack
             });
             return [];
+        }
+    }
+
+    /**
+     * Sort products by selected criteria
+     */
+    function sortProducts(products, sortBy) {
+        console.log('Sorting products by:', sortBy);
+
+        const productsCopy = [...products];
+
+        switch (sortBy) {
+            case 'price-low-high':
+                return productsCopy.sort((a, b) => {
+                    const priceA = parseFloat(a.price);
+                    const priceB = parseFloat(b.price);
+                    return priceA - priceB;
+                });
+
+            case 'price-high-low':
+                return productsCopy.sort((a, b) => {
+                    const priceA = parseFloat(a.price);
+                    const priceB = parseFloat(b.price);
+                    return priceB - priceA;
+                });
+
+            case 'newest':
+                return productsCopy.sort((a, b) => {
+                    const dateA = new Date(a.date || 0);
+                    const dateB = new Date(b.date || 0);
+                    return dateB - dateA;
+                });
+
+            case 'featured':
+            default:
+                return productsCopy;
+        }
+    }
+
+    /**
+     * Setup sort UI
+     */
+    function setupSortUI() {
+        const sortSelect = document.getElementById('sortSelect');
+
+        if (!sortSelect) {
+            console.log('Sort select not found');
+            return;
+        }
+
+        sortSelect.addEventListener('change', async function() {
+            const sortBy = this.value;
+            console.log('Sort changed to:', sortBy);
+
+            // Directly load products for sorting
+            const products = await loadNewArrivalsProducts(true); // Use forceRefresh to get latest data
+            const sortedProducts = sortProducts(products, sortBy);
+            displayAllProducts(sortedProducts); // Use a generic display function
+        });
+    }
+
+    /**
+     * Load products directly without cache checks (for sorting)
+     */
+    async function loadNewArrivalsProductsDirect(forceRefresh = false) {
+        // This function essentially re-implements the core loading logic
+        // to ensure sorting works on the latest data fetched.
+        // It might be redundant if loadNewArrivalsProducts is always called with forceRefresh=true during sorting.
+        // For clarity, we'll call the main loading function with forceRefresh.
+        console.log('Loading new arrivals products directly for sorting...');
+        return await loadNewArrivalsProducts(true);
+    }
+
+    /**
+     * Display products in the grid
+     */
+    function displayAllProducts(products) {
+        const productsGrid = document.getElementById('products-grid') || document.querySelector('.products-grid');
+
+        if (!productsGrid) {
+            console.warn('Products grid not found for display');
+            return;
+        }
+
+        if (products.length > 0) {
+            const productsHTML = products.map(product => generateProductHTML(product)).join('');
+            productsGrid.innerHTML = productsHTML;
+
+            // Setup wishlist event listeners
+            setupWishlistEventListeners();
+
+            // Update wishlist button states
+            if (typeof window.WishlistManager !== 'undefined') {
+                setTimeout(() => {
+                    window.WishlistManager.updateWishlistButtonsState();
+                }, 100);
+            }
+        } else {
+            productsGrid.innerHTML = `
+                <div class="no-products-message" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                    <i class="fas fa-gem" style="font-size: 48px; color: #6D3E25; margin-bottom: 20px;"></i>
+                    <h3 style="color: #6D3E25; margin-bottom: 10px;">No Products Available</h3>
+                    <p style="color: #666;">Products will appear here once they are added through the admin panel.</p>
+                </div>
+            `;
+        }
+    }
+
+
+    /**
+     * Update products grid for current page
+     */
+    async function updateProductsGrid(category) {
+        const productsGrid = document.getElementById('products-grid') || document.querySelector('.products-grid');
+
+        if (!productsGrid) {
+            console.warn('Products grid not found');
+            return;
+        }
+
+        try {
+            // Show loading
+            productsGrid.innerHTML = `
+                <div class="loading-products" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; padding: 60px 20px;">
+                    <div class="loading-spinner" style="width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top: 3px solid #6D3E25; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px;"></div>
+                    <p style="margin: 0; font-size: 16px; font-weight: 500; color: #666;">Loading Products...</p>
+                </div>
+            `;
+
+            const products = await loadSubcategoryProducts(category);
+
+            if (products.length > 0) {
+                const productsHTML = products.map(product => generateProductHTML(product)).join('');
+                productsGrid.innerHTML = productsHTML;
+
+                // Setup wishlist event listeners
+                setupWishlistEventListeners();
+
+                // Update wishlist button states
+                if (typeof window.WishlistManager !== 'undefined') {
+                    setTimeout(() => {
+                        window.WishlistManager.updateWishlistButtonsState();
+                    }, 100);
+                }
+            } else {
+                productsGrid.innerHTML = `
+                    <div class="no-products-message" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                        <i class="fas fa-gem" style="font-size: 48px; color: #6D3E25; margin-bottom: 20px;"></i>
+                        <h3 style="color: #6D3E25; margin-bottom: 10px;">No Products Available</h3>
+                        <p style="color: #666;">Products will appear here once they are added through the admin panel.</p>
+                    </div>
+                `;
+            }
+
+            console.log(`${category} section updated with ${products.length} products`);
+        } catch (error) {
+            console.error(`Error updating ${category} section:`, error);
+            productsGrid.innerHTML = `
+                <div class="loading-error" style="grid-column: 1 / -1; color: red; padding: 20px; text-align: center;">
+                    <strong>Error loading products</strong><br>
+                    ${error.message}
+                </div>
+            `;
         }
     }
 
@@ -624,7 +787,7 @@ const NewArrivalsProductsLoader = (function() {
                 }
             }, 1200);
 
-            // Refresh out-of-stock handler for newly loaded products 
+            // Refresh out-of-stock handler for newly loaded products
             if (window.OutOfStockHandler) {
                 setTimeout(() => {
                     console.log('Refreshing OutOfStockHandler for new arrivals...');
@@ -693,7 +856,10 @@ const NewArrivalsProductsLoader = (function() {
         init,
         loadNewArrivalsProducts,
         updateNewArrivalsSection,
-        clearCache
+        clearCache,
+        setupSortUI,
+        displayAllProducts,
+        sortProducts
     };
 })();
 
@@ -706,9 +872,11 @@ document.addEventListener('DOMContentLoaded', function() {
             NewArrivalsProductsLoader.loadNewArrivalsProducts(true).then(products => {
                 console.log('Initial load completed with', products.length, 'products');
                 NewArrivalsProductsLoader.updateNewArrivalsSection();
+                NewArrivalsProductsLoader.setupSortUI(); // Setup sort UI after products are loaded
             }).catch(error => {
                 console.error('Initial load failed:', error);
-                NewArrivalsProductsLoader.updateNewArrivalsSection();
+                NewArrivalsProductsLoader.updateNewArrivalsSection(); // Still update section even if initial load fails
+                NewArrivalsProductsLoader.setupSortUI(); // Setup sort UI even if initial load fails
             });
         }
     }, 1000);
