@@ -598,16 +598,16 @@
   opacity: 1;
 }
 
-/* Closing states - smooth transitions */
+/* Closing states - smooth transitions matching opening */
 .cart-panel.closing {
   transform: translateX(100%) translateZ(0);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  /* Slightly faster closing animation */
-  transition: transform 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53),
-              opacity 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53),
-              visibility 0s linear 0.3s;
+  /* Same smooth transition as opening for consistency */
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              opacity 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              visibility 0s linear 0.35s;
 }
 
 .wishlist-panel.closing {
@@ -615,17 +615,19 @@
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
-  /* Slightly faster closing animation */
-  transition: transform 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53),
-              opacity 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53),
-              visibility 0s linear 0.3s;
+  /* Same smooth transition as opening for consistency */
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              opacity 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              visibility 0s linear 0.35s;
 }
 
 .cart-panel-overlay.closing,
 .wishlist-overlay.closing {
   opacity: 0;
   visibility: hidden;
-  transition-delay: 0s;
+  /* Smooth overlay fade out */
+  transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              visibility 0s linear 0.3s;
 }
 
 /* ================ PANEL ITEM ANIMATIONS ================ */
