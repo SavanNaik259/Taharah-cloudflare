@@ -20,8 +20,12 @@ document.addEventListener('DOMContentLoaded', function() {
  */
 function initShop() {
     // Get DOM elements
+    // Support both generic and category-specific product grid IDs
+    const productsGrid = document.getElementById('products-grid') || 
+                        document.querySelector('[id$="-products-grid"]');
+    
     const elements = {
-        productsGrid: document.getElementById('products-grid'),
+        productsGrid: productsGrid,
         filterOption: document.querySelector('.filter-option'),
         sortOption: document.getElementById('sortOption'),
         sortDropdown: document.getElementById('sortDropdown'),
