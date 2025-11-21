@@ -30,7 +30,7 @@
   // Safe element references
   let elements = {
     get cartPanel() { return getElement('.cart-panel'); },
-    get cartOverlay() { return getElement('.cart-overlay'); },
+    get cartOverlay() { return getElement('.cart-panel-overlay'); },
     get navMenu() { return getElement('#navMenu'); },
     get menuOverlay() { return getElement('#menuOverlay'); },
     get mobileMenu() { return getElement('#mobileMenu'); },
@@ -73,7 +73,7 @@
     return false;
   };
 
-  // Close cart reliably
+  // Close cart reliably with smooth transition
   window.closeCartDirectly = function() {
     console.log('Navigation coordinator: Closing cart');
     
@@ -89,13 +89,23 @@
       cartOverlay.classList.add('closing');
     }
     
-    // Restore scrolling if no other panels are open
-    if (!navState.menuOpen && !navState.wishlistOpen && !navState.modalOpen) {
-      document.body.style.overflow = '';
-    }
-    
     // Update state
     navState.cartOpen = false;
+    
+    // Clean up after animation completes
+    setTimeout(() => {
+      // Only cleanup if panel is still closed (not reopened)
+      if (cartPanel && !cartPanel.classList.contains('active')) {
+        // Restore scrolling if no other panels are open
+        if (!navState.menuOpen && !navState.wishlistOpen && !navState.modalOpen) {
+          document.body.style.overflow = '';
+        }
+        
+        // Remove closing classes
+        cartPanel.classList.remove('closing');
+        if (cartOverlay) cartOverlay.classList.remove('closing');
+      }
+    }, 350); // Match CSS transition duration (0.35s)
     
     console.log('Cart closed via coordinator');
     return false;
@@ -194,7 +204,7 @@
     return false;
   }
 
-  // Close wishlist reliably
+  // Close wishlist reliably with smooth transition
   function closeWishlist() {
     console.log('Navigation coordinator: Closing wishlist');
     
@@ -210,13 +220,23 @@
       wishlistOverlay.classList.add('closing');
     }
     
-    // Restore scrolling if no other panels are open
-    if (!navState.cartOpen && !navState.menuOpen && !navState.modalOpen) {
-      document.body.style.overflow = '';
-    }
-    
     // Update state
     navState.wishlistOpen = false;
+    
+    // Clean up after animation completes
+    setTimeout(() => {
+      // Only cleanup if panel is still closed (not reopened)
+      if (wishlistPanel && !wishlistPanel.classList.contains('active')) {
+        // Restore scrolling if no other panels are open
+        if (!navState.cartOpen && !navState.menuOpen && !navState.modalOpen) {
+          document.body.style.overflow = '';
+        }
+        
+        // Remove closing classes
+        wishlistPanel.classList.remove('closing');
+        if (wishlistOverlay) wishlistOverlay.classList.remove('closing');
+      }
+    }, 350); // Match CSS transition duration (0.35s)
     
     console.log('Wishlist closed via coordinator');
     return false;
@@ -319,7 +339,7 @@
     });
     
     // Cart overlays
-    document.querySelectorAll('.cart-overlay').forEach(el => {
+    document.querySelectorAll('.cart-panel-overlay').forEach(el => {
       if (el) {
         // Remove any existing handlers and replace with our own
         const newEl = el.cloneNode(true);
