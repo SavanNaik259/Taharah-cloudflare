@@ -184,16 +184,15 @@
     margin-top: 5px; /* Small gap from the button */
     opacity: 0;
     transform: translateY(-10px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .sort-dropdown.active {
-    display: block;
+    display: block !important;
     animation: slideDown 0.3s ease forwards;
 }
 
 .sort-dropdown.closing {
-    display: block;
+    display: block !important;
     animation: slideUp 0.3s ease forwards;
 }
 
@@ -259,16 +258,15 @@
     justify-content: center;
     align-items: center;
     overflow-y: auto;
-    transition: background-color 0.3s ease;
 }
 
 .filter-modal.active {
-    display: flex;
+    display: flex !important;
     animation: fadeInModal 0.3s ease forwards;
 }
 
 .filter-modal.closing {
-    display: flex;
+    display: flex !important;
     animation: fadeOutModal 0.3s ease forwards;
 }
 
