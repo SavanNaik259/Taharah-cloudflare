@@ -32,35 +32,21 @@ function initShop() {
         clearFilterBtn: document.getElementById('clearFilterBtn') || document.querySelector('.clear-filter-btn')
     };
 
-    // Dynamic product grid element selector
-    let currentGrid; // This will hold the specific product grid for the current page
-
-    // Attempt to find the most specific product grid ID first
-    const specificGridId = document.querySelector('.products-grid-container')?.id;
-    if (specificGridId) {
-        currentGrid = document.getElementById(specificGridId);
-        console.log(`Found specific product grid: #${specificGridId}`);
-    } else {
-        // Fallback to generic ID if specific one isn't found
-        currentGrid = document.getElementById('products-grid');
-        console.log('Using generic product grid: #products-grid');
-    }
-
-    // Check if we're on a page with a product grid
-    if (!currentGrid) {
-        console.log('No product grid found on this page, exiting shop.js initialization');
+    // Check if we're on the shop page
+    if (!elements.productsGrid) {
+        console.log('Not on shop page, exiting shop.js initialization');
         return;
     }
 
     console.log('Shop page detected, initializing shop functionality');
-
+    
     // Check if the dropdown exists, create it if it doesn't
     if (!elements.sortDropdown) {
         console.log('Sort dropdown not found, creating one');
         elements.sortDropdown = document.createElement('div');
         elements.sortDropdown.className = 'sort-dropdown';
         elements.sortDropdown.id = 'sortDropdown';
-
+        
         // Add options to the dropdown
         elements.sortDropdown.innerHTML = `
             <div class="sort-dropdown-option" data-sort="featured">Featured</div>
@@ -68,7 +54,7 @@ function initShop() {
             <div class="sort-dropdown-option" data-sort="price-high-low">Price: High to Low</div>
             <div class="sort-dropdown-option" data-sort="newest">Newest</div>
         `;
-
+        
         // Append to the shop filter header
         const shopFilterHeader = document.querySelector('.shop-filter-header');
         if (shopFilterHeader) {
@@ -78,7 +64,7 @@ function initShop() {
     }
 
     // Store original product elements
-    const originalProducts = Array.from(currentGrid.querySelectorAll('.product-item'));
+    const originalProducts = Array.from(document.querySelectorAll('.product-item'));
     console.log('Found product items:', originalProducts.length);
 
     // Current filter and sort settings
@@ -107,29 +93,29 @@ function initShop() {
     // Setup sort dropdown toggle
     if (elements.sortOption && elements.sortDropdown) {
         console.log('Found sort option and dropdown:', elements.sortOption, elements.sortDropdown);
-
+        
         // Direct toggle function for the sort dropdown
         function toggleSortDropdown(event) {
             if (event) {
                 event.stopPropagation();
                 event.preventDefault();
             }
-
+            
             console.log('Toggle sort dropdown called');
             elements.sortOption.classList.toggle('active');
             elements.sortDropdown.classList.toggle('active');
-
+            
             // Position the dropdown properly
             if (elements.sortDropdown.classList.contains('active')) {
                 const sortRect = elements.sortOption.getBoundingClientRect();
                 console.log('Sort option position:', sortRect);
-
+                
                 // Set position relative to the shop filter header
                 const shopFilterHeader = document.querySelector('.shop-filter-header');
                 if (shopFilterHeader) {
                     // First reset any existing styles
                     elements.sortDropdown.style.cssText = '';
-
+                    
                     // Apply correct positioning and styling
                     elements.sortDropdown.style.position = 'absolute';
                     elements.sortDropdown.style.top = '100%';
@@ -138,12 +124,12 @@ function initShop() {
                     elements.sortDropdown.style.width = '200px';
                     elements.sortDropdown.style.marginTop = '5px';
                     elements.sortDropdown.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-
+                    
                     console.log('Dropdown positioned correctly');
                 }
             }
         }
-
+        
         // Toggle dropdown when clicking sort option
         elements.sortOption.addEventListener('click', toggleSortDropdown);
 
@@ -164,40 +150,40 @@ function initShop() {
     // Setup sort dropdown options
     // Re-query for dropdowns as we might have added them dynamically
     elements.sortDropdownOptions = document.querySelectorAll('.sort-dropdown-option');
-
+    
     if (elements.sortDropdownOptions && elements.sortDropdownOptions.length > 0) {
         console.log('Setting up sort dropdown options:', elements.sortDropdownOptions.length);
-
+        
         elements.sortDropdownOptions.forEach(option => {
             // Remove any existing click listeners first to avoid duplicates
             const oldOption = option.cloneNode(true);
             option.parentNode.replaceChild(oldOption, option);
-
+            
             // Add click listener to the fresh option element
             oldOption.addEventListener('click', function(e) {
                 e.stopPropagation(); // Prevent event bubbling
-
+                
                 const sortValue = this.getAttribute('data-sort');
                 console.log('Sort option selected:', sortValue);
-
+                
                 // Update settings
                 settings.sortBy = sortValue;
-
+                
                 // Update active class
                 document.querySelectorAll('.sort-dropdown-option').forEach(opt => opt.classList.remove('active'));
                 this.classList.add('active');
-
+                
                 // Update sort option text
                 const sortText = this.textContent;
                 const sortSpan = elements.sortOption.querySelector('span');
                 if (sortSpan) {
                     sortSpan.textContent = sortText;
                 }
-
+                
                 // Close dropdown
                 elements.sortDropdown.classList.remove('active');
                 elements.sortOption.classList.remove('active');
-
+                
                 // Apply filters and sort
                 applyFiltersAndSort();
             });
@@ -210,36 +196,36 @@ function initShop() {
     if (elements.applyFilterBtn && elements.filterModal) {
         elements.applyFilterBtn.addEventListener('click', function() {
             console.log('Apply filter button clicked');
-
+            
             // Get selected category
             const categoryRadios = document.querySelectorAll('input[name="category"]');
             let selectedCategory = 'all';
-
+            
             categoryRadios.forEach(radio => {
                 if (radio.checked) {
                     selectedCategory = radio.value;
                 }
             });
-
+            
             // Get selected availability options
             const availabilityCheckboxes = document.querySelectorAll('input[name="availability"]');
             const selectedAvailability = [];
-
+            
             availabilityCheckboxes.forEach(checkbox => {
                 if (checkbox.checked) {
                     selectedAvailability.push(checkbox.value);
                 }
             });
-
+            
             // Update settings
             settings.category = selectedCategory;
             settings.availability = selectedAvailability;
-
+            
             console.log('Updated filter settings:', settings);
-
+            
             // Close filter modal
             elements.filterModal.classList.remove('active');
-
+            
             // Apply filters and sort
             applyFiltersAndSort();
         });
@@ -249,27 +235,27 @@ function initShop() {
     if (elements.clearFilterBtn) {
         elements.clearFilterBtn.addEventListener('click', function() {
             console.log('Clear filter button clicked');
-
+            
             // Reset all filter inputs
             const categoryRadios = document.querySelectorAll('input[name="category"]');
             const availabilityCheckboxes = document.querySelectorAll('input[name="availability"]');
-
+            
             // Reset category to 'all'
             categoryRadios.forEach(radio => {
                 radio.checked = radio.value === 'all';
             });
-
+            
             // Uncheck all availability options
             availabilityCheckboxes.forEach(checkbox => {
                 checkbox.checked = false;
             });
-
+            
             // Update settings
             settings.category = 'all';
             settings.availability = [];
-
+            
             console.log('Filter settings cleared:', settings);
-
+            
             // No need to close the modal, user will do that manually
             // by clicking Apply or the X button
         });
@@ -287,15 +273,15 @@ function initShop() {
      */
     function applyFiltersAndSort() {
         console.log('Applying filters and sort with settings:', settings);
-
+        
         // Filter products
         let filteredProducts = filterProducts(originalProducts, settings.category, settings.availability);
         console.log('Filtered products count:', filteredProducts.length);
-
+        
         // Sort filtered products
         const sortedProducts = sortProducts(filteredProducts, settings.sortBy);
         console.log('Sorted products count:', sortedProducts.length);
-
+        
         // Display products
         displayProducts(sortedProducts);
     }
@@ -306,23 +292,23 @@ function initShop() {
     function filterProducts(products, category, availability) {
         // First filter by category
         let filteredByCategory = products;
-
+        
         if (category !== 'all') {
             console.log('Filtering by category:', category);
             filteredByCategory = products.filter(product => {
                 return product.dataset.category === category;
             });
         }
-
+        
         // Then filter by availability if any are selected
         if (availability && availability.length > 0) {
             console.log('Filtering by availability:', availability);
             return filteredByCategory.filter(product => {
                 const badge = product.querySelector('.product-badge');
                 if (!badge) return false;
-
+                
                 const badgeText = badge.textContent.trim().toLowerCase();
-
+                
                 return availability.some(option => {
                     if (option === 'ready-to-ship') {
                         return badgeText.includes('ready to ship');
@@ -333,7 +319,7 @@ function initShop() {
                 });
             });
         }
-
+        
         return filteredByCategory;
     }
 
@@ -342,9 +328,9 @@ function initShop() {
      */
     function sortProducts(products, sortBy) {
         console.log('Sorting products by:', sortBy);
-
+        
         const productsCopy = [...products]; // Create a copy to avoid modifying original
-
+        
         switch (sortBy) {
             case 'price-low-high':
                 return productsCopy.sort((a, b) => {
@@ -352,21 +338,21 @@ function initShop() {
                     const priceB = parseFloat(b.dataset.price);
                     return priceA - priceB;
                 });
-
+                
             case 'price-high-low':
                 return productsCopy.sort((a, b) => {
                     const priceA = parseFloat(a.dataset.price);
                     const priceB = parseFloat(b.dataset.price);
                     return priceB - priceA;
                 });
-
+                
             case 'newest':
                 return productsCopy.sort((a, b) => {
                     const dateA = new Date(a.dataset.date);
                     const dateB = new Date(b.dataset.date);
                     return dateB - dateA; // Newest first
                 });
-
+                
             case 'featured':
             default:
                 // For featured, keep original order
@@ -380,42 +366,42 @@ function initShop() {
      */
     function displayAllProducts(products) {
         console.log('Displaying all products in grid without filtering');
-
+        
         // Clear grid first
-        currentGrid.innerHTML = '';
-
+        elements.productsGrid.innerHTML = '';
+        
         if (products.length === 0) {
             // Show no products message
             const noProducts = document.createElement('div');
             noProducts.className = 'no-results';
             noProducts.innerHTML = '<p>No products available in shop.</p>';
-            currentGrid.appendChild(noProducts);
+            elements.productsGrid.appendChild(noProducts);
             return;
         }
-
+        
         // Add all products with animation
         products.forEach(product => {
             // Clone the node to remove any existing animation classes
             const productClone = product.cloneNode(true);
             productClone.classList.add('visible');
-
+            
             // Re-attach event listener to wishlist button
             const wishlistBtn = productClone.querySelector('.add-to-wishlist');
             if (wishlistBtn) {
                 wishlistBtn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-
+                    
                     // If WishlistManager exists, toggle product in wishlist
                     if (typeof WishlistManager !== 'undefined' && WishlistManager.toggleWishlistItem) {
                         WishlistManager.toggleWishlistItem(productClone.dataset.productId);
                     }
                 });
             }
-
-            currentGrid.appendChild(productClone);
+            
+            elements.productsGrid.appendChild(productClone);
         });
-
+        
         // Re-initialize wishlist buttons for newly added elements
         if (typeof WishlistManager !== 'undefined' && WishlistManager.updateWishlistUI) {
             setTimeout(() => {
@@ -430,46 +416,46 @@ function initShop() {
      */
     function displayProducts(products) {
         console.log('Displaying filtered/sorted products in grid');
-
+        
         // Clear grid first
-        currentGrid.innerHTML = '';
-
+        elements.productsGrid.innerHTML = '';
+        
         if (products.length === 0) {
             // Show no results message
             const noResults = document.createElement('div');
             noResults.className = 'no-results';
             noResults.innerHTML = '<p>No products match your filters. Please try different criteria.</p>';
-            currentGrid.appendChild(noResults);
+            elements.productsGrid.appendChild(noResults);
             return;
         }
-
+        
         // Only display a subset of products (limited to first 4 items)
         const limitedProducts = products.slice(0, 4);
         console.log(`Showing ${limitedProducts.length} products out of ${products.length} total matches`);
-
+        
         // Add products with animation
         limitedProducts.forEach(product => {
             // Clone the node to remove any existing animation classes
             const productClone = product.cloneNode(true);
             productClone.classList.add('visible');
-
+            
             // Re-attach event listener to wishlist button
             const wishlistBtn = productClone.querySelector('.add-to-wishlist');
             if (wishlistBtn) {
                 wishlistBtn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-
+                    
                     // If WishlistManager exists, toggle product in wishlist
                     if (typeof WishlistManager !== 'undefined' && WishlistManager.toggleWishlistItem) {
                         WishlistManager.toggleWishlistItem(productClone.dataset.productId);
                     }
                 });
             }
-
-            currentGrid.appendChild(productClone);
+            
+            elements.productsGrid.appendChild(productClone);
         });
-
+        
         // If there are more products than shown, add a message
         if (products.length > limitedProducts.length) {
             const moreProductsMessage = document.createElement('div');
@@ -478,8 +464,8 @@ function initShop() {
                 <p>Showing ${limitedProducts.length} out of ${products.length} matching products</p>
                 <button id="showAllProductsBtn" class="show-all-btn">Show All Matching Products</button>
             `;
-            currentGrid.appendChild(moreProductsMessage);
-
+            elements.productsGrid.appendChild(moreProductsMessage);
+            
             // Add event listener to show all button
             const showAllBtn = document.getElementById('showAllProductsBtn');
             if (showAllBtn) {
@@ -489,7 +475,7 @@ function initShop() {
                 });
             }
         }
-
+        
         // Re-initialize wishlist buttons for newly added elements
         if (typeof WishlistManager !== 'undefined' && WishlistManager.updateWishlistUI) {
             setTimeout(() => {
@@ -497,40 +483,40 @@ function initShop() {
             }, 100);
         }
     }
-
+    
     /**
      * Display all matching products without limitation
      * Used when user clicks "Show All" button
      */
     function displayAllMatchingProducts(products) {
         console.log('Displaying all matching products without limitation');
-
+        
         // Clear grid first
-        currentGrid.innerHTML = '';
-
+        elements.productsGrid.innerHTML = '';
+        
         // Add all matching products with animation
         products.forEach(product => {
             // Clone the node to remove any existing animation classes
             const productClone = product.cloneNode(true);
             productClone.classList.add('visible');
-
+            
             // Re-attach event listener to wishlist button
             const wishlistBtn = productClone.querySelector('.add-to-wishlist');
             if (wishlistBtn) {
                 wishlistBtn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-
+                    
                     // If WishlistManager exists, toggle product in wishlist
                     if (typeof WishlistManager !== 'undefined' && WishlistManager.toggleWishlistItem) {
                         WishlistManager.toggleWishlistItem(productClone.dataset.productId);
                     }
                 });
             }
-
-            currentGrid.appendChild(productClone);
+            
+            elements.productsGrid.appendChild(productClone);
         });
-
+        
         // Re-initialize wishlist buttons for newly added elements
         if (typeof WishlistManager !== 'undefined' && WishlistManager.updateWishlistUI) {
             setTimeout(() => {
