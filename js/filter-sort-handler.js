@@ -116,7 +116,8 @@ const FilterSortHandler = (function() {
         if (filterModal) {
             // Close when clicking on the overlay (background)
             filterModal.addEventListener('click', function(e) {
-                if (e.target === filterModal) {
+                // Only close if clicking directly on the modal overlay (not on modal content)
+                if (e.target === filterModal || e.target.classList.contains('filter-modal')) {
                     if (filterModal.classList.contains('active')) {
                         filterModal.classList.add('closing');
                         
@@ -127,31 +128,31 @@ const FilterSortHandler = (function() {
                 }
             });
 
-            // Prevent modal content clicks from bubbling to overlay
+            // Prevent modal content clicks from closing the modal
             const filterModalContent = filterModal.querySelector('.filter-modal-content');
             if (filterModalContent) {
                 filterModalContent.addEventListener('click', function(e) {
                     e.stopPropagation();
                 });
             }
-        }
 
-        // Close filter modal when clicking outside (on document)
-        document.addEventListener('click', function(e) {
-            if (filterModal && filterModal.classList.contains('active')) {
-                // Check if click is outside both the filter button and modal
-                const isClickInsideModal = filterModal.contains(e.target);
-                const isClickOnFilterButton = filterOption && filterOption.contains(e.target);
-                
-                if (!isClickInsideModal && !isClickOnFilterButton) {
-                    filterModal.classList.add('closing');
+            // Close filter modal when clicking outside
+            document.addEventListener('click', function(e) {
+                if (filterModal.classList.contains('active')) {
+                    // Check if click is outside both the filter button and modal
+                    const isClickInsideModal = filterModal.contains(e.target) && !e.target.classList.contains('filter-modal');
+                    const isClickOnFilterButton = filterOption && filterOption.contains(e.target);
                     
-                    setTimeout(() => {
-                        filterModal.classList.remove('active', 'closing');
-                    }, 300);
+                    if (!isClickInsideModal && !isClickOnFilterButton) {
+                        filterModal.classList.add('closing');
+                        
+                        setTimeout(() => {
+                            filterModal.classList.remove('active', 'closing');
+                        }, 300);
+                    }
                 }
-            }
-        });
+            });
+        }
 
         if (applyFilterBtn) {
             applyFilterBtn.addEventListener('click', function() {
