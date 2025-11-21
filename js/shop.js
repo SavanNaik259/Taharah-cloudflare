@@ -90,8 +90,18 @@ function initShop() {
     if (elements.closeFilterModalBtn && elements.filterModal) {
         elements.closeFilterModalBtn.addEventListener('click', function() {
             console.log('Close filter modal button clicked');
-            elements.filterModal.classList.remove('active');
+            closeFilterModal();
         });
+    }
+    
+    // Function to close filter modal with animation
+    function closeFilterModal() {
+        elements.filterModal.classList.add('closing');
+        elements.filterModal.classList.remove('active');
+        
+        setTimeout(() => {
+            elements.filterModal.classList.remove('closing');
+        }, 300); // Match the animation duration
     }
 
     // Setup sort dropdown toggle
@@ -140,10 +150,20 @@ function initShop() {
         // Close dropdown when clicking outside
         document.addEventListener('click', function() {
             if (elements.sortDropdown.classList.contains('active')) {
-                elements.sortOption.classList.remove('active');
-                elements.sortDropdown.classList.remove('active');
+                closeSortDropdown();
             }
         });
+        
+        // Function to close sort dropdown with animation
+        function closeSortDropdown() {
+            elements.sortOption.classList.remove('active');
+            elements.sortDropdown.classList.add('closing');
+            elements.sortDropdown.classList.remove('active');
+            
+            setTimeout(() => {
+                elements.sortDropdown.classList.remove('closing');
+            }, 300); // Match the animation duration
+        }
 
         // Prevent dropdown from closing when clicking inside
         elements.sortDropdown.addEventListener('click', function(e) {
@@ -184,9 +204,8 @@ function initShop() {
                     sortSpan.textContent = sortText;
                 }
                 
-                // Close dropdown
-                elements.sortDropdown.classList.remove('active');
-                elements.sortOption.classList.remove('active');
+                // Close dropdown with animation
+                closeSortDropdown();
                 
                 // Apply filters and sort
                 applyFiltersAndSort();
@@ -227,8 +246,8 @@ function initShop() {
             
             console.log('Updated filter settings:', settings);
             
-            // Close filter modal
-            elements.filterModal.classList.remove('active');
+            // Close filter modal with animation
+            closeFilterModal();
             
             // Apply filters and sort
             applyFiltersAndSort();
