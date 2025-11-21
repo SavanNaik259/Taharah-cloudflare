@@ -767,7 +767,7 @@ window.CartManager = (function() {
     }
 
     /**
-     * Open the cart panel with smooth transitions
+     * Open the cart panel instantly
      */
     function openCartPanel() {
         const cartPanel = document.querySelector('.cart-panel');
@@ -790,19 +790,20 @@ window.CartManager = (function() {
             // Prevent body scrolling
             document.body.style.overflow = 'hidden';
 
-            // Use requestAnimationFrame for smooth CSS transitions
-            requestAnimationFrame(() => {
-                // Show overlay and panel with CSS classes (no inline styles)
-                cartOverlay.classList.add('active');
-                cartPanel.classList.add('active');
-            });
+            // Show overlay with CSS class
+            cartOverlay.classList.add('active');
+            cartOverlay.style.display = 'block';
+            cartOverlay.style.visibility = 'visible';
             
-            // Update cart display after a brief delay to let animation start
-            setTimeout(() => {
-                updateCartItemsDisplay();
-            }, 50);
+            // Show panel by directly setting right position to override inline styles
+            cartPanel.classList.add('active');
+            cartPanel.style.right = '0 !important';
+            cartPanel.style.setProperty('right', '0', 'important');
+            
+            // Update cart display immediately
+            updateCartItemsDisplay();
 
-            console.log('Cart panel opened with smooth transition');
+            console.log('Cart panel opened instantly');
         } else {
             console.error('Cart panel or overlay not found');
 
@@ -822,7 +823,7 @@ window.CartManager = (function() {
     }
 
     /**
-     * Close the cart panel with smooth transitions
+     * Close the cart panel instantly
      */
     function closeCartPanel() {
         const cartPanel = document.querySelector('.cart-panel');
@@ -831,32 +832,31 @@ window.CartManager = (function() {
         console.log('Closing cart panel:', cartPanel ? 'Panel found' : 'Panel NOT found');
 
         if (cartPanel) {
-            // Remove active class and add closing class for smooth transition
+            // Remove active class and add closing class
             cartPanel.classList.remove('active');
             cartPanel.classList.add('closing');
+            
+            // Hide panel by directly setting right position to override inline styles
+            cartPanel.style.setProperty('right', '-400px', 'important');
 
-            // Hide overlay with smooth transition
+            // Hide overlay
             if (cartOverlay) {
                 cartOverlay.classList.remove('active');
                 cartOverlay.classList.add('closing');
+                cartOverlay.style.display = 'none';
+                cartOverlay.style.visibility = 'hidden';
             }
 
-            // Clean up after animation completes
-            setTimeout(() => {
-                // Only cleanup if panel is still closed (not reopened)
-                if (!cartPanel.classList.contains('active')) {
-                    // Restore body scrolling
-                    document.body.style.overflow = '';
-                    
-                    // Clean up closing classes
-                    cartPanel.classList.remove('closing');
-                    if (cartOverlay) {
-                        cartOverlay.classList.remove('closing');
-                    }
-                }
-            }, 350); // Match CSS transition duration (0.35s = 350ms)
+            // Restore body scrolling
+            document.body.style.overflow = '';
 
-            console.log('Cart panel closed with smooth transition');
+            // Clean up closing classes immediately
+            cartPanel.classList.remove('closing');
+            if (cartOverlay) {
+                cartOverlay.classList.remove('closing');
+            }
+
+            console.log('Cart panel closed instantly');
         }
 
         // Ensure global function exists

@@ -4,7 +4,7 @@
  */
 
 /* ================ CART PANEL CONTAINER ================ */
-/* Cart panel with smooth transitions */
+/* Cart panel with no transitions - instant display */
 .cart-panel {
   position: fixed;
   top: 0;
@@ -18,17 +18,9 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  /* Performance optimizations */
-  will-change: transform, opacity;
-  transform: translateX(100%) translateZ(0);
-  opacity: 0;
+  transform: translateX(100%);
   visibility: hidden;
   pointer-events: none;
-  backface-visibility: hidden;
-  /* Smooth transition for both opening and closing */
-  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              opacity 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              visibility 0s linear 0.35s;
 }
 
 /* ================ WISHLIST PANEL CONTAINER ================ */
@@ -59,14 +51,11 @@
               visibility 0s linear 0.35s;
 }
 
-/* Active states - smooth display */
+/* Active states - instant display */
 .cart-panel.active {
-  transform: translateX(0) translateZ(0);
-  opacity: 1;
+  transform: translateX(0);
   visibility: visible;
   pointer-events: auto;
-  /* Remove delay for opening */
-  transition-delay: 0s;
 }
 
 .wishlist-panel.active {
@@ -78,7 +67,7 @@
   transition-delay: 0s;
 }
 
-/* Overlay styles with smooth transitions */
+/* Overlay styles */
 .cart-panel-overlay,
 .wishlist-overlay {
   position: fixed;
@@ -91,18 +80,12 @@
   opacity: 0;
   visibility: hidden;
   backdrop-filter: blur(2px);
-  /* Smooth fade transition */
-  transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              visibility 0s linear 0.3s,
-              backdrop-filter 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .cart-panel-overlay.active,
 .wishlist-overlay.active {
   opacity: 1;
   visibility: visible;
-  /* Remove delay for opening */
-  transition-delay: 0s;
 }
 
 /* ================ CART PANEL HEADER ================ */
@@ -598,16 +581,11 @@
   opacity: 1;
 }
 
-/* Closing states - smooth transitions */
+/* Closing states - instant hide */
 .cart-panel.closing {
-  transform: translateX(100%) translateZ(0);
-  opacity: 0;
+  transform: translateX(100%);
   visibility: hidden;
   pointer-events: none;
-  /* Slightly faster closing animation */
-  transition: transform 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53),
-              opacity 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53),
-              visibility 0s linear 0.3s;
 }
 
 .wishlist-panel.closing {
@@ -615,95 +593,12 @@
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
-  /* Slightly faster closing animation */
-  transition: transform 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53),
-              opacity 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53),
-              visibility 0s linear 0.3s;
 }
 
 .cart-panel-overlay.closing,
 .wishlist-overlay.closing {
   opacity: 0;
   visibility: hidden;
-  transition-delay: 0s;
-}
-
-/* ================ PANEL ITEM ANIMATIONS ================ */
-/* Staggered fade-in animation for panel items when opening */
-.cart-panel:not(.active) .cart-item,
-.cart-panel:not(.active) .empty-cart-message,
-.wishlist-panel:not(.active) .wishlist-item,
-.wishlist-panel:not(.active) .empty-wishlist-message {
-  opacity: 0;
-  transform: translateY(10px);
-}
-
-.cart-panel.active .cart-item,
-.cart-panel.active .empty-cart-message,
-.wishlist-panel.active .wishlist-item,
-.wishlist-panel.active .empty-wishlist-message {
-  animation: fadeInUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-/* Staggered delay for each item */
-.cart-panel.active .cart-item:nth-child(1),
-.wishlist-panel.active .wishlist-item:nth-child(1) {
-  animation-delay: 0.1s;
-}
-
-.cart-panel.active .cart-item:nth-child(2),
-.wishlist-panel.active .wishlist-item:nth-child(2) {
-  animation-delay: 0.15s;
-}
-
-.cart-panel.active .cart-item:nth-child(3),
-.wishlist-panel.active .wishlist-item:nth-child(3) {
-  animation-delay: 0.2s;
-}
-
-.cart-panel.active .cart-item:nth-child(4),
-.wishlist-panel.active .wishlist-item:nth-child(4) {
-  animation-delay: 0.25s;
-}
-
-.cart-panel.active .cart-item:nth-child(5),
-.wishlist-panel.active .wishlist-item:nth-child(5) {
-  animation-delay: 0.3s;
-}
-
-.cart-panel.active .cart-item:nth-child(n+6),
-.wishlist-panel.active .wishlist-item:nth-child(n+6) {
-  animation-delay: 0.35s;
-}
-
-/* Fade out animation for closing */
-.cart-panel.closing .cart-item,
-.cart-panel.closing .empty-cart-message,
-.wishlist-panel.closing .wishlist-item,
-.wishlist-panel.closing .empty-wishlist-message {
-  animation: fadeOutDown 0.25s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeOutDown {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(10px);
-  }
 }
 
 
