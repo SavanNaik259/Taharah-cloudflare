@@ -266,20 +266,54 @@
 
     <!-- Product Grid Section -->
     <section class="shop-products-section">
-        <div class="shop-products">
-            <div class="sort-container" style="display: flex; justify-content: flex-end; padding: 20px; margin-bottom: 10px;">
-                <select id="sortSelect" style="padding: 10px 15px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; cursor: pointer;">
-                    <option value="featured">Sort By: Featured</option>
-                    <option value="price-low-high">Price: Low to High</option>
-                    <option value="price-high-low">Price: High to Low</option>
-                    <option value="newest">Newest First</option>
-                </select>
+        <!-- Filter and Sort Header -->
+        <div class="shop-filter-header">
+            <div class="filter-option" id="filterOption">FILTER</div>
+            <div class="sort-option" id="sortOption">
+                <span>SORT BY</span>
+                <i class="fas fa-chevron-down"></i>
             </div>
+            <div class="sort-dropdown" id="sortDropdown">
+                <div class="sort-dropdown-option active" data-sort="featured">Featured</div>
+                <div class="sort-dropdown-option" data-sort="price-low-high">Price: Low to High</div>
+                <div class="sort-dropdown-option" data-sort="price-high-low">Price: High to Low</div>
+                <div class="sort-dropdown-option" data-sort="newest">Newest</div>
+            </div>
+        </div>
+
+        <div class="shop-products">
             <div class="products-grid" id="new-arrivals-products-grid">
                 <!-- Products will be loaded here dynamically -->
             </div>
         </div>
     </section>
+
+    <!-- Filter Modal -->
+    <div class="filter-modal" id="filterModal">
+        <div class="filter-modal-content">
+            <div class="filter-modal-header">
+                <h2>Filter Products</h2>
+                <button class="close-filter-modal" id="closeFilterModal">×</button>
+            </div>
+            <div class="filter-modal-body">
+                <div class="filter-section">
+                    <h3>Sort By</h3>
+                    <div class="filter-options">
+                        <label class="filter-option-label">
+                            <input type="radio" name="filter-sort" value="featured" checked> Featured
+                        </label>
+                        <label class="filter-option-label">
+                            <input type="radio" name="filter-sort" value="newest"> Newest
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="filter-modal-footer">
+                <button class="apply-filter-btn" id="applyFilterBtn">Apply Filters</button>
+                <button class="clear-filter-btn" id="clearFilterBtn">Clear All</button>
+            </div>
+        </div>
+    </div>
 
 
 
@@ -384,6 +418,9 @@
 
 
 
+
+    <!-- Filter and Sort Handler -->
+    <script src="js/filter-sort-handler.js?v=1.0.0"></script>
 
     <!-- New Arrivals Page Loader (Grid Layout) -->
     <script src="js/new-arrivals-page-loader.js?v=1.0.1"></script>
