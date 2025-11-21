@@ -114,7 +114,7 @@ const FilterSortHandler = (function() {
     }
 
     /**
-     * Apply sort to products
+     * Apply sort to products (only for price sorting from dropdown)
      */
     async function applySort(sortBy) {
         console.log('Applying sort:', sortBy);
@@ -165,7 +165,7 @@ const FilterSortHandler = (function() {
             return;
         }
 
-        // Sort products
+        // Sort products (only price sorting, featured/newest handled by filter modal)
         const sortedProducts = sortProducts(products, sortBy);
         
         // Display sorted products
