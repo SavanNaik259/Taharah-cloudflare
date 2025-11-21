@@ -138,30 +138,25 @@ const FilterSortHandler = (function() {
                 products = await NewArrivalsPageLoader.loadNewArrivalsProducts();
             }
         } else {
-            // Subcategory pages - check for specific loaders first
-            if (pageName === 'gold-earrings' && typeof GoldEarringsLoader !== 'undefined') {
-                products = await GoldEarringsLoader.loadFeaturedProducts();
-            } else {
-                // Generic subcategory loader
-                const categoryMap = {
-                    'gold-necklace': 'gold-necklace',
-                    'silver-necklace': 'silver-necklace',
-                    'meenakari-necklace': 'meenakari-necklace',
-                    'gold-earrings': 'gold-earrings',
-                    'silver-earrings': 'silver-earrings',
-                    'meenakari-earrings': 'meenakari-earrings',
-                    'gold-bangles': 'gold-bangles',
-                    'silver-bangles': 'silver-bangles',
-                    'meenakari-bangles': 'meenakari-bangles',
-                    'gold-rings': 'gold-rings',
-                    'silver-rings': 'silver-rings',
-                    'meenakari-rings': 'meenakari-rings'
-                };
-                
-                const category = categoryMap[pageName];
-                if (category && typeof SubcategoryProductsLoader !== 'undefined') {
-                    products = await SubcategoryProductsLoader.loadSubcategoryProducts(category);
-                }
+            // Subcategory pages
+            const categoryMap = {
+                'gold-necklace': 'gold-necklace',
+                'silver-necklace': 'silver-necklace',
+                'meenakari-necklace': 'meenakari-necklace',
+                'gold-earrings': 'gold-earrings',
+                'silver-earrings': 'silver-earrings',
+                'meenakari-earrings': 'meenakari-earrings',
+                'gold-bangles': 'gold-bangles',
+                'silver-bangles': 'silver-bangles',
+                'meenakari-bangles': 'meenakari-bangles',
+                'gold-rings': 'gold-rings',
+                'silver-rings': 'silver-rings',
+                'meenakari-rings': 'meenakari-rings'
+            };
+            
+            const category = categoryMap[pageName];
+            if (category && typeof SubcategoryProductsLoader !== 'undefined') {
+                products = await SubcategoryProductsLoader.loadSubcategoryProducts(category);
             }
         }
 
@@ -223,7 +218,6 @@ const FilterSortHandler = (function() {
             'featured-collection-products-grid',
             'new-arrivals-products-grid',
             'gold-necklace-products-grid',
-            'gold-earrings-products-grid',
             'products-grid'
         ];
 
