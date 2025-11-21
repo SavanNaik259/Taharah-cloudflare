@@ -75,8 +75,9 @@ const WishlistManager = (function() {
             return;
         }
 
-        // Clear existing content first
+        // Clear existing content and force reflow to reset animations
         wishlistItemsContainer.innerHTML = '';
+        void wishlistItemsContainer.offsetWidth; // Force reflow
 
         // Use DocumentFragment for efficient DOM updates
         const fragment = document.createDocumentFragment();
@@ -101,7 +102,7 @@ const WishlistManager = (function() {
             fragment.appendChild(wishlistItemDiv);
         });
 
-        // Add all items to the container
+        // Add all items to the container in one operation
         wishlistItemsContainer.appendChild(fragment);
     }
 
