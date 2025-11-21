@@ -96,19 +96,65 @@ function initShop() {
     
     // Function to close filter modal with animation
     function closeFilterModal() {
+        console.log('Closing filter modal');
         elements.filterModal.classList.add('closing');
         elements.filterModal.classList.remove('active');
         
-        setTimeout(() => {
+        // Listen for animation end to clean up
+        elements.filterModal.addEventListener('animationend', function onAnimationEnd() {
             elements.filterModal.classList.remove('closing');
-        }, 300); // Match the animation duration
+            elements.filterModal.removeEventListener('animationend', onAnimationEnd);
+        });
     }
 
     // Setup sort dropdown toggle
     if (elements.sortOption && elements.sortDropdown) {
         console.log('Found sort option and dropdown:', elements.sortOption, elements.sortDropdown);
         
-        // Direct toggle function for the sort dropdown
+        // Function to open sort dropdown with animation
+        function openSortDropdown() {
+            console.log('Opening sort dropdown');
+            elements.sortOption.classList.add('active');
+            elements.sortDropdown.classList.add('active');
+            
+            // Position the dropdown properly
+            const sortRect = elements.sortOption.getBoundingClientRect();
+            console.log('Sort option position:', sortRect);
+            
+            // Set position relative to the shop filter header
+            const shopFilterHeader = document.querySelector('.shop-filter-header');
+            if (shopFilterHeader) {
+                // First reset any existing styles
+                elements.sortDropdown.style.cssText = '';
+                
+                // Apply correct positioning and styling
+                elements.sortDropdown.style.position = 'absolute';
+                elements.sortDropdown.style.top = '100%';
+                elements.sortDropdown.style.right = '25px';
+                elements.sortDropdown.style.zIndex = '1000';
+                elements.sortDropdown.style.width = '200px';
+                elements.sortDropdown.style.marginTop = '5px';
+                elements.sortDropdown.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                
+                console.log('Dropdown positioned correctly');
+            }
+        }
+        
+        // Function to close sort dropdown with animation
+        function closeSortDropdown() {
+            console.log('Closing sort dropdown');
+            elements.sortOption.classList.remove('active');
+            elements.sortDropdown.classList.add('closing');
+            elements.sortDropdown.classList.remove('active');
+            
+            // Listen for animation end to clean up
+            elements.sortDropdown.addEventListener('animationend', function onAnimationEnd() {
+                elements.sortDropdown.classList.remove('closing');
+                elements.sortDropdown.removeEventListener('animationend', onAnimationEnd);
+            });
+        }
+        
+        // Toggle function that properly branches
         function toggleSortDropdown(event) {
             if (event) {
                 event.stopPropagation();
@@ -116,31 +162,12 @@ function initShop() {
             }
             
             console.log('Toggle sort dropdown called');
-            elements.sortOption.classList.toggle('active');
-            elements.sortDropdown.classList.toggle('active');
             
-            // Position the dropdown properly
+            // Check if dropdown is currently active
             if (elements.sortDropdown.classList.contains('active')) {
-                const sortRect = elements.sortOption.getBoundingClientRect();
-                console.log('Sort option position:', sortRect);
-                
-                // Set position relative to the shop filter header
-                const shopFilterHeader = document.querySelector('.shop-filter-header');
-                if (shopFilterHeader) {
-                    // First reset any existing styles
-                    elements.sortDropdown.style.cssText = '';
-                    
-                    // Apply correct positioning and styling
-                    elements.sortDropdown.style.position = 'absolute';
-                    elements.sortDropdown.style.top = '100%';
-                    elements.sortDropdown.style.right = '25px';
-                    elements.sortDropdown.style.zIndex = '1000';
-                    elements.sortDropdown.style.width = '200px';
-                    elements.sortDropdown.style.marginTop = '5px';
-                    elements.sortDropdown.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-                    
-                    console.log('Dropdown positioned correctly');
-                }
+                closeSortDropdown();
+            } else {
+                openSortDropdown();
             }
         }
         
@@ -153,17 +180,6 @@ function initShop() {
                 closeSortDropdown();
             }
         });
-        
-        // Function to close sort dropdown with animation
-        function closeSortDropdown() {
-            elements.sortOption.classList.remove('active');
-            elements.sortDropdown.classList.add('closing');
-            elements.sortDropdown.classList.remove('active');
-            
-            setTimeout(() => {
-                elements.sortDropdown.classList.remove('closing');
-            }, 300); // Match the animation duration
-        }
 
         // Prevent dropdown from closing when clicking inside
         elements.sortDropdown.addEventListener('click', function(e) {
