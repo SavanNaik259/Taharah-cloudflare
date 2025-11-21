@@ -273,12 +273,54 @@
 
     <!-- Product Grid Section -->
     <section class="shop-products-section">
+        <!-- Filter and Sort Header -->
+        <div class="shop-filter-header">
+            <div class="filter-option" id="filterOption">FILTER</div>
+            <div class="sort-option" id="sortOption">
+                <span>SORT BY</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="sort-dropdown" id="sortDropdown">
+                <div class="sort-dropdown-option active" data-sort="featured">Featured</div>
+                <div class="sort-dropdown-option" data-sort="price-low-high">Price: Low to High</div>
+                <div class="sort-dropdown-option" data-sort="price-high-low">Price: High to Low</div>
+                <div class="sort-dropdown-option" data-sort="newest">Newest</div>
+            </div>
+        </div>
+
         <div class="shop-products">
             <div class="products-grid" id="silver-rings-products-grid">
                 <!-- Products will be loaded here dynamically -->
             </div>
         </div>
     </section>
+
+    <!-- Filter Modal -->
+    <div class="filter-modal" id="filterModal">
+        <div class="filter-modal-content">
+            <div class="filter-modal-header">
+                <h2>Filter Products</h2>
+                <button class="close-filter-modal" id="closeFilterModal">×</button>
+            </div>
+            <div class="filter-modal-body">
+                <div class="filter-section">
+                    <h3>Sort By</h3>
+                    <div class="filter-options">
+                        <label class="filter-option-label">
+                            <input type="radio" name="filter-sort" value="featured" checked> Featured
+                        </label>
+                        <label class="filter-option-label">
+                            <input type="radio" name="filter-sort" value="newest"> Newest
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="filter-modal-footer">
+                <button class="apply-filter-btn" id="applyFilterBtn">Apply Filters</button>
+                <button class="clear-filter-btn" id="clearFilterBtn">Clear All</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Cart Panel - Standard implementation -->
     <div class="cart-panel">
