@@ -257,6 +257,17 @@
             </div>
             <div class="filter-modal-body">
                 <div class="filter-section">
+                    <h3>Sort By</h3>
+                    <div class="filter-options">
+                        <label class="filter-option-label">
+                            <input type="radio" name="filter-sort" value="featured" checked> Featured
+                        </label>
+                        <label class="filter-option-label">
+                            <input type="radio" name="filter-sort" value="newest"> Newest
+                        </label>
+                    </div>
+                </div>
+                <div class="filter-section">
                     <h3>Category</h3>
                     <div class="filter-options">
                         <label class="filter-option-label">
@@ -359,51 +370,7 @@
         <div class="whatsapp-tooltip" data-translate="how_can_help">How can I help you?</div>
     </a>
 
-    <!-- Filter Modal (Hidden Initially) -->
-    <div class="filter-modal">
-        <div class="filter-modal-content">
-            <div class="filter-modal-header">
-                <h2>Filter Products</h2>
-                <button class="close-filter-modal" id="closeFilterModal">×</button>
-            </div>
-            <div class="filter-modal-body">
-                <div class="filter-section">
-                    <h3>Category</h3>
-                    <div class="filter-options">
-                        <label class="filter-option-label">
-                            <input type="radio" name="category" value="all" checked> All Products
-                        </label>
-                        <label class="filter-option-label">
-                            <input type="radio" name="category" value="new-arrivals"> New Arrivals
-                        </label>
-                        <label class="filter-option-label">
-                            <input type="radio" name="category" value="featured-collection"> Featured Collection
-                        </label>
-                        <label class="filter-option-label">
-                            <input type="radio" name="category" value="saree-collection"> Saree Collection
-                        </label>
-                    </div>
-                </div>
-                <div class="filter-section">
-                    <h3>Availability</h3>
-                    <div class="filter-options">
-                        <label class="filter-option-label">
-                            <input type="checkbox" name="availability" value="ready-to-ship"> Ready to Ship
-                        </label>
-                        <label class="filter-option-label">
-                            <input type="checkbox" name="availability" value="made-to-order"> Made to Order
-                        </label>
-                    </div>
-                </div>
-            </div>
-            <div class="filter-modal-footer">
-                <button class="apply-filter-btn" id="applyFilterBtn">Apply Filters</button>
-                <button class="clear-filter-btn" id="clearFilterBtn">Clear All</button>
-            </div>
-        </div>
-    </div>
-
-      <div class="whatsapp-btn">
+    <div class="whatsapp-btn">
           <i class="fab fa-whatsapp"></i>
       </div>
       
