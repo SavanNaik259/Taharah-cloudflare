@@ -2007,7 +2007,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             method: 'POST',
                             body: JSON.stringify({
                                 amount: orderData.orderTotal,
-                                currency: 'INR', // Ensure currency is INR for Razorpay
+                                currency: 'INR',
                                 receipt: orderData.orderReference,
                                 notes: {
                                     orderReference: orderData.orderReference
@@ -2029,7 +2029,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             },
                             body: JSON.stringify({
                                 amount: orderData.orderTotal,
-                                currency: 'INR', // Ensure currency is INR for Razorpay
+                                currency: 'INR',
                                 receipt: orderData.orderReference,
                                 notes: {
                                     orderReference: orderData.orderReference
@@ -2078,14 +2078,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Save order to Firebase first with pending status
             if (orderData.paymentMethod !== 'Cash on Delivery') { // Only save pending if not COD
-                if (window.firebaseOrdersModule) { // Check if firebaseOrdersModule is globally available
+                if (firebaseOrdersModule) {
                     console.log('Saving order to Firebase with pending payment status...');
                     orderData.paymentStatus = 'pending';
                     orderData.razorpayOrderId = result.order.id;
                     orderData.paymentMethod = 'razorpay';
                     orderData.deliveryStatus = 'pending'; // Initialize delivery status
 
-                    const saveResult = await window.firebaseOrdersModule.saveOrderToFirebase(orderData);
+                    const saveResult = await firebaseOrdersModule.saveOrderToFirebase(orderData);
 
                     if (!saveResult.success) {
                         if (saveResult.requiresAuth) {
@@ -2115,22 +2115,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 // This section is for Razorpay payments.
             }
 
-            const razorpayKeyId = result.key_id; // Ensure this is correctly obtained
-            const razorpayOrder = result.order; // Ensure this is correctly obtained
 
-            // Get display amount in current currency
-            const displayCurrency = window.CurrencyConverter ? window.CurrencyConverter.getCurrentCurrency() : 'INR';
-            const displayAmount = orderData.orderTotal;
-
-            // Razorpay options
+            // Configure Razorpay options
             const options = {
-                key: razorpayKeyId,
-                amount: razorpayOrder.amount,
-                currency: razorpayOrder.currency,
-                name: 'Royal Meenakari',
-                description: `Order ${orderData.orderReference} (${displayCurrency} ${displayAmount.toFixed(2)})`,
-                order_id: razorpayOrder.id,
-                handler: async function (response) {
+                key: result.key_id,
+                amount: result.order.amount,
+                currency: result.order.currency,
+                name: 'Nazakat',
+                description: 'Purchase Order: ' + orderData.orderReference,
+                order_id: result.order.id,
+                handler: async function(response) {
                     await handleRazorpaySuccess(response, orderData);
                 },
                 prefill: {

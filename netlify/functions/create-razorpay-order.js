@@ -90,24 +90,10 @@ exports.handler = async (event, context) => {
       };
     }
     
-    // Validate amount is a valid number
-    const numericAmount = parseFloat(amount);
-    if (isNaN(numericAmount) || numericAmount <= 0) {
-      return {
-        statusCode: 400,
-        headers,
-        body: JSON.stringify({
-          success: false,
-          message: 'Invalid amount provided'
-        })
-      };
-    }
-    
-    console.log('Creating Razorpay order for amount:', numericAmount, 'currency:', currency);
+    console.log('Creating Razorpay order for amount:', amount, 'currency:', currency);
     
     // Convert amount to paise (Razorpay uses smallest currency unit)
-    // Use Math.floor to avoid rounding issues with large amounts
-    const amountInPaise = Math.floor(numericAmount * 100);
+    const amountInPaise = Math.round(amount * 100);
     
     // Create order
     const order = await razorpay.orders.create({
