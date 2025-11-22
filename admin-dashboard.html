@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-    
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -548,13 +548,13 @@
             statusText.textContent = message;
         }
 
-        // Load dashboard data
+        // Load Dashboard Data with optimized parallel loading
         async function loadDashboardData() {
             try {
                 updateStatus('loading', 'Loading dashboard data...');
                 console.log('Loading dashboard data...');
 
-                // Test Firestore connection
+                // Test Firestore connection first
                 try {
                     await db.collection('test').limit(1).get();
                     console.log('✅ Firestore connection successful');
@@ -564,14 +564,34 @@
                     return;
                 }
 
-                // Load orders
-                await loadOrders();
+                // Load all data in TRUE parallel with timeout protection
+                console.log('📊 Starting parallel data loading...');
 
-                // Load customers
-                await loadCustomers();
+                const loadWithTimeout = (promise, name, timeoutMs = 10000) => {
+                    return Promise.race([
+                        promise,
+                        new Promise((_, reject) => 
+                            setTimeout(() => reject(new Error(`${name} timeout`)), timeoutMs)
+                        )
+                    ]).catch(error => {
+                        console.warn(`⚠️ ${name} failed:`, error.message);
+                        return null; // Return null on failure to allow other loads to continue
+                    });
+                };
 
-                // Load inventory data
-                await loadInventoryData();
+                // Execute all loads in parallel with 10-second timeout each
+                const [ordersResult, customersResult, inventoryResult] = await Promise.allSettled([
+                    loadWithTimeout(loadOrders(), 'Orders', 10000),
+                    loadWithTimeout(loadCustomers(), 'Customers', 10000),
+                    loadWithTimeout(loadInventoryData(), 'Inventory', 10000)
+                ]);
+
+                // Log results
+                console.log('📊 Parallel loading completed:', {
+                    orders: ordersResult.status,
+                    customers: customersResult.status,
+                    inventory: inventoryResult.status
+                });
 
                 updateStatus('connected', 'Connected to Firebase');
                 console.log('✅ Dashboard data loaded successfully');
@@ -641,7 +661,7 @@
                                 userId: userDoc.id,
                                 customerName: userData.displayName || userData.email?.split('@')[0] || 'Unknown',
                                 customerEmail: userData.email || 'Unknown',
-                                customerPhone: userData.phoneNumber || orderData.customer?.phone || 'Not provided',
+                                customerPhone: orderData.customer?.phone || userData.phoneNumber || 'Not provided',
                                 customerAddress: orderData.customer?.address || orderData.shippingAddress || 'Not provided',
                                 customerCity: orderData.customer?.city || orderData.shippingAddress?.split(',')[1]?.trim() || '',
                                 customerState: orderData.customer?.state || orderData.shippingAddress?.split(',').slice(-2)[0]?.trim() || '',
@@ -1138,8 +1158,8 @@
                     // Get user's confirmed orders only
                     const userOrders = confirmedOrders.filter(order => order.userId === userDoc.id);
                     const totalSpent = userOrders.reduce((sum, order) => sum + order.amount, 0);
-                    const lastOrder = userOrders.length > 0 ? 
-                        Math.max(...userOrders.map(order => order.date)) : null;
+                    const lastOrderTimestamp = userOrders.length > 0 ? 
+                        Math.max(...userOrders.map(order => order.date.getTime())) : null;
 
                     allCustomers.push({
                         name: userData.displayName || userData.email?.split('@')[0] || 'Unknown User',
@@ -1147,7 +1167,7 @@
                         phone: userData.phoneNumber || 'Not provided',
                         orders: userOrders.length,
                         totalSpent: Math.round(totalSpent),
-                        lastOrder: lastOrder ? new Date(lastOrder).toLocaleDateString('en-IN') : 'Never'
+                        lastOrder: lastOrderTimestamp ? new Date(lastOrderTimestamp).toLocaleDateString('en-IN') : 'Never'
                     });
                 }
 
