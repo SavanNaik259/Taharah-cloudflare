@@ -226,7 +226,7 @@
         </div>
     </section>
     <script>
-        // Randomly select one of the 8 hero images
+        // Randomly select one of the 8 hero images and store in session
         const heroImages = [
             'images/IMG_20251013_072026.jpg',
             'images/b0bb682fbc453cd01cde00d00869232f.jpg',
@@ -237,8 +237,17 @@
             'images/a67d4ba4650005d6ba851df72176204d.jpg',
             'images/ff1acb3dab12cf3a8d4092cb7172c36e.jpg'
         ];
-        const randomImage = heroImages[Math.floor(Math.random() * heroImages.length)];
-        document.getElementById('heroBackgroundImage').src = randomImage;
+        
+        // Check if we already have a selected image in session
+        let selectedImage = sessionStorage.getItem('collectionHeroImage');
+        
+        // If not, select a random one and store it
+        if (!selectedImage) {
+            selectedImage = heroImages[Math.floor(Math.random() * heroImages.length)];
+            sessionStorage.setItem('collectionHeroImage', selectedImage);
+        }
+        
+        document.getElementById('heroBackgroundImage').src = selectedImage;
     </script>
 
     <!-- Product Grid Section -->
