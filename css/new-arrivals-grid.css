@@ -66,7 +66,7 @@
 
 /* Navigation styling to match home page exactly */
 .navbar {
-    position: absolute !important;
+    position: fixed !important;
     top: 40px !important;
     width: 100% !important;
     background: transparent !important;
