@@ -1,4 +1,4 @@
-// Banner rotator script - displays content without scrolling
+// Banner rotator script with continuous auto-scroll animation (marquee style)
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Banner rotator script loaded');
 
@@ -16,8 +16,6 @@ document.addEventListener('DOMContentLoaded', function() {
         'Free shipping on orders over ₹50,000',
         'New arrivals for the festive season - <a href="new-arrivals.html">View Collection</a>'
     ];
-
-    let currentIndex = 0;
 
     // Function to get banner content with translation support
     function getBannerContent(index) {
@@ -44,22 +42,32 @@ document.addEventListener('DOMContentLoaded', function() {
         return bannerContents[index];
     }
 
-    // Update banner content
-    function updateBanner() {
-        bannerText.innerHTML = getBannerContent(currentIndex);
-        currentIndex = (currentIndex + 1) % bannerContents.length;
+    // Create continuous scrolling content
+    function createScrollingBanner() {
+        // Combine both banner messages with separator
+        const combinedContent = bannerContents.map((content, index) => getBannerContent(index)).join(' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ');
+        
+        // Duplicate the content multiple times to ensure continuous visibility
+        const scrollContent = combinedContent + ' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ' + 
+                             combinedContent + ' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ' + 
+                             combinedContent + ' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ' + 
+                             combinedContent;
+        
+        bannerText.innerHTML = scrollContent;
     }
 
-    // Initialize banner
-    updateBanner();
+    // Initialize scrolling banner
+    createScrollingBanner();
 
-    // Rotate banner content every 5 seconds
-    setInterval(updateBanner, 5000);
+    // Apply CSS animation for continuous scroll
+    bannerText.style.display = 'inline-block';
+    bannerText.style.whiteSpace = 'nowrap';
+    bannerText.style.animation = 'scroll-left 20s linear infinite';
 
     // Listen for language change events
     document.addEventListener('languageChanged', function() {
-        updateBanner();
+        createScrollingBanner();
     });
 
-    console.log('Banner content rotation initialized');
+    console.log('Banner continuous auto-scroll animation set up');
 });
