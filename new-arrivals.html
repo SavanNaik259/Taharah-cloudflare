@@ -3,23 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    
+
     <!-- SEO Meta Tags -->
     <title>New Arrivals - Royal Meenakari | Latest Jewelry Collection</title>
     <meta name="description" content="Explore the latest additions to Royal Meenakari's exquisite jewelry collection. New handcrafted Meenakari necklaces, earrings, bangles, and rings." />
     <meta name="keywords" content="new meenakari jewelry, latest jewelry collection, new arrival jewelry, royal meenakari new designs" />
-    
+
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="images/logos/royalmeenakari.png" />
     <link rel="apple-touch-icon" href="images/logos/royalmeenakari.png" />
-    
+
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://royalmeenkari.in/new-arrivals.html" />
     <meta property="og:title" content="New Arrivals - Royal Meenakari" />
     <meta property="og:description" content="Explore the latest additions to Royal Meenakari's exquisite jewelry collection." />
     <meta property="og:image" content="https://royalmeenkari.in/images/logos/royalmeenakari.png" />
-    
+
     <!-- Canonical URL -->
     <link rel="canonical" href="https://royalmeenkari.in/new-arrivals.html" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpLGCJKypKP/lX+/Pvw2DNA" crossorigin="anonymous">
@@ -249,14 +249,25 @@
     <!-- Hero Section with Background Image -->
     <section class="new-arrivals-hero">
         <div class="hero-background">
-            <img src="images/hero-slides/1000824644.jpg" alt="New Arrivals Collection" class="hero-bg-image">
+            <img id="heroBackgroundImage" src="" alt="New Arrivals" class="hero-bg-image">
             <div class="hero-overlay"></div>
         </div>
         <div class="hero-content">
             <h1 class="hero-title">New Arrivals</h1>
-            <p class="hero-subtitle">Discover our latest exquisite jewelry collections</p>
+            <p class="hero-subtitle">Discover our latest exquisite new arrivals jewelry collections</p>
         </div>
     </section>
+    <script>
+        // Randomly select one of the 4 hero images
+        const heroImages = [
+            'images/hero-slides/1000818717.jpg',
+            'images/hero-slides/1000824595.jpg',
+            'images/hero-slides/1000824618.jpg',
+            'images/hero-slides/1000824644.jpg'
+        ];
+        const randomImage = heroImages[Math.floor(Math.random() * heroImages.length)];
+        document.getElementById('heroBackgroundImage').src = randomImage;
+    </script>
 
     <!-- WhatsApp Button -->
     <a href="https://wa.me/918963815289?text=Hi! I would like to know more about your services. Can you help me?" class="whatsapp-btn">

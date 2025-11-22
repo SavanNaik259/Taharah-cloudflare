@@ -262,14 +262,25 @@
     <!-- Hero Section with Background Image -->
     <section class="new-arrivals-hero">
         <div class="hero-background">
-            <img src="images/hero-slides/1000824644.jpg" alt="Silver Necklace" class="hero-bg-image">
+            <img id="heroBackgroundImage" src="" alt="Silver Necklace" class="hero-bg-image">
             <div class="hero-overlay"></div>
         </div>
         <div class="hero-content">
             <h1 class="hero-title">Silver Necklace</h1>
-            <p class="hero-subtitle">Discover our elegant silver necklace collection</p>
+            <p class="hero-subtitle">Discover our elegant handcrafted silver necklace collection</p>
         </div>
     </section>
+    <script>
+        // Randomly select one of the 4 hero images
+        const heroImages = [
+            'images/hero-slides/1000818717.jpg',
+            'images/hero-slides/1000824595.jpg',
+            'images/hero-slides/1000824618.jpg',
+            'images/hero-slides/1000824644.jpg'
+        ];
+        const randomImage = heroImages[Math.floor(Math.random() * heroImages.length)];
+        document.getElementById('heroBackgroundImage').src = randomImage;
+    </script>
 
     <!-- Product Grid Section -->
     <section class="shop-products-section">

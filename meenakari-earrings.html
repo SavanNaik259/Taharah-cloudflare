@@ -3,23 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    
+
     <!-- SEO Meta Tags -->
     <title>Meenakari Earrings - Royal Meenakari | Traditional Handcrafted Jewelry</title>
     <meta name="description" content="Discover Royal Meenakari's stunning Meenakari earrings collection. Authentic traditional designs with intricate handcrafted artistry." />
     <meta name="keywords" content="meenakari earrings, traditional meenakari jewelry, handcrafted earrings, royal meenakari collection" />
-    
+
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="images/logos/royalmeenakari.png" />
     <link rel="apple-touch-icon" href="images/logos/royalmeenakari.png" />
-    
+
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://royalmeenkari.in/meenakari-earrings.html" />
     <meta property="og:title" content="Meenakari Earrings - Royal Meenakari" />
     <meta property="og:description" content="Discover Royal Meenakari's stunning Meenakari earrings collection." />
     <meta property="og:image" content="https://royalmeenkari.in/images/logos/royalmeenakari.png" />
-    
+
     <!-- Canonical URL -->
     <link rel="canonical" href="https://royalmeenkari.in/meenakari-earrings.html" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpLGCJKypKP/lX+/Pvw2DNA" crossorigin="anonymous">
@@ -262,14 +262,25 @@
     <!-- Hero Section with Background Image -->
     <section class="new-arrivals-hero">
         <div class="hero-background">
-            <img src="images/hero-slides/1000824644.jpg" alt="Meenakari Earrings" class="hero-bg-image">
+            <img id="heroBackgroundImage" src="" alt="Meenakari Earrings" class="hero-bg-image">
             <div class="hero-overlay"></div>
         </div>
         <div class="hero-content">
             <h1 class="hero-title">Meenakari Earrings</h1>
-            <p class="hero-subtitle">Discover our vibrant meenakari earrings collection</p>
+            <p class="hero-subtitle">Discover our stunning traditional Meenakari earrings collection</p>
         </div>
     </section>
+    <script>
+        // Randomly select one of the 4 hero images
+        const heroImages = [
+            'images/hero-slides/1000818717.jpg',
+            'images/hero-slides/1000824595.jpg',
+            'images/hero-slides/1000824618.jpg',
+            'images/hero-slides/1000824644.jpg'
+        ];
+        const randomImage = heroImages[Math.floor(Math.random() * heroImages.length)];
+        document.getElementById('heroBackgroundImage').src = randomImage;
+    </script>
 
     <!-- Product Grid Section -->
     <section class="shop-products-section">
