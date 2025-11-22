@@ -3899,7 +3899,7 @@
                 const fetchPromises = categories.map(async (category) => {
                     try {
                         const response = await fetch(`/.netlify/functions/load-products?category=${category}`, {
-                            signal: AbortSignal.timeout(5000) // 5 second timeout
+                            signal: AbortSignal.timeout(3000) // 3 second timeout
                         });
                         
                         if (response.ok) {
