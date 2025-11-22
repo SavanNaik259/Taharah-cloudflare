@@ -107,6 +107,40 @@ function initShop() {
         });
     }
 
+    // Close filter modal when clicking outside
+    if (elements.filterModal) {
+        // Close when clicking on the overlay (background)
+        elements.filterModal.addEventListener('click', function(e) {
+            if (e.target === elements.filterModal || e.target.classList.contains('filter-modal')) {
+                if (elements.filterModal.classList.contains('active')) {
+                    closeFilterModal();
+                }
+            }
+        });
+
+        // Prevent modal content clicks from closing the modal
+        const filterModalContent = elements.filterModal.querySelector('.filter-modal-content');
+        if (filterModalContent) {
+            filterModalContent.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
+
+        // Close filter modal when clicking outside (on document)
+        document.addEventListener('click', function(e) {
+            if (elements.filterModal.classList.contains('active')) {
+                // Check if click is outside both the filter button and modal content
+                const filterModalContent = elements.filterModal.querySelector('.filter-modal-content');
+                const isClickInsideModalContent = filterModalContent && filterModalContent.contains(e.target);
+                const isClickOnFilterButton = elements.filterOption && elements.filterOption.contains(e.target);
+                
+                if (!isClickInsideModalContent && !isClickOnFilterButton) {
+                    closeFilterModal();
+                }
+            }
+        });
+    }
+
     // Setup sort dropdown toggle
     if (elements.sortOption && elements.sortDropdown) {
         console.log('Found sort option and dropdown:', elements.sortOption, elements.sortDropdown);
