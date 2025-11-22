@@ -1999,14 +1999,27 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Is Netlify environment:', !!window.netlifyHelpers);
 
             try {
+                // IMPORTANT: orderData.orderTotal is ALWAYS in INR
+                // Cart items are stored with INR prices (base currency)
+                // CurrencyConverter only changes display formatting, NOT stored values
+                // DO NOT convert this amount - Razorpay must receive the raw INR total
+                const amountInINR = orderData.orderTotal;
+                
+                // Validation: Ensure we're sending a valid positive amount
+                if (!amountInINR || amountInINR <= 0) {
+                    throw new Error('Invalid order amount: ' + amountInINR);
+                }
+                
+                console.log('Creating Razorpay order for amount (INR):', amountInINR);
+
                 // Use Netlify Functions if helper is available
                 if (window.netlifyHelpers) {
-                    console.log('Creating Razorpay order via Netlify Functions');
+                    console.log('Using Netlify Functions to create order');
                     result = await Promise.race([
                         window.netlifyHelpers.callNetlifyFunction('create-razorpay-order', {
                             method: 'POST',
                             body: JSON.stringify({
-                                amount: orderData.orderTotal,
+                                amount: amountInINR,
                                 currency: 'INR',
                                 receipt: orderData.orderReference,
                                 notes: {
@@ -2018,7 +2031,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     ]);
                 } else {
                     // Fallback to direct API call to Express server
-                    console.log('Creating Razorpay order via local server');
+                    console.log('Using local server to create order');
                     apiEndpoint = `${window.location.origin}/api/create-razorpay-order`;
 
                     const response = await Promise.race([
@@ -2028,7 +2041,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({
-                                amount: orderData.orderTotal,
+                                amount: amountInINR,
                                 currency: 'INR',
                                 receipt: orderData.orderReference,
                                 notes: {

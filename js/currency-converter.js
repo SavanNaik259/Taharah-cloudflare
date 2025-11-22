@@ -408,6 +408,33 @@ const CurrencyConverter = (function() {
     }
 
     /**
+     * Convert price from selected currency back to INR
+     * 
+     * WARNING: This function should ONLY be used for converting actual display
+     * currency amounts (like user input in USD) back to INR.
+     * 
+     * DO NOT use this for cart totals or stored prices - those are already in INR!
+     * 
+     * @param {number} priceInCurrentCurrency - Amount in the currently selected display currency
+     * @returns {number} - Equivalent amount in INR
+     */
+    function convertToINR(priceInCurrentCurrency) {
+        if (currentCurrency === BASE_CURRENCY) {
+            return priceInCurrentCurrency;
+        }
+
+        const rate = exchangeRates[currentCurrency];
+        if (!rate) {
+            console.error('Exchange rate not found for', currentCurrency);
+            return priceInCurrentCurrency;
+        }
+
+        // Divide by rate to convert back to INR
+        // Example: $100 USD at rate 0.012 = 100 / 0.012 = ₹8,333
+        return priceInCurrentCurrency / rate;
+    }
+
+    /**
      * Get current currency
      */
     function getCurrentCurrency() {
@@ -451,13 +478,15 @@ const CurrencyConverter = (function() {
         init,
         changeCurrency,
         convertPrice,
+        convertToINR,
         formatPrice,
         getCurrentCurrency,
         getCurrencySymbol,
         getSupportedCurrencies,
         refreshRates,
         getCountryFlag,
-        CURRENCIES
+        CURRENCIES,
+        BASE_CURRENCY
     };
 })();
 

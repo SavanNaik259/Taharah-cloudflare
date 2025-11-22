@@ -20,7 +20,7 @@ Preferred communication style: Simple, everyday language.
 - **Serverless Functions**: Netlify Functions are utilized for API endpoints and server-side logic.
 - **Local Server**: An Express.js server facilitates local development.
 - **Email Service**: Nodemailer handles transactional emails.
-- **Payment Processing**: Razorpay is integrated for secure payment transactions.
+- **Payment Processing**: Razorpay is integrated for secure payment transactions. All product prices and cart totals are stored in INR (base currency), ensuring compatibility with Razorpay's requirements.
 - **Shipping Integration**: Shiprocket API manages order fulfillment, tracking, and logistics.
 
 ### Authentication & Data Storage
@@ -31,7 +31,8 @@ Preferred communication style: Simple, everyday language.
 
 ### Key Features
 - **User Management**: Includes authentication, profile management, and order history.
-- **Payment Gateway**: Secure Razorpay integration with server-side validation.
+- **Payment Gateway**: Secure Razorpay integration with server-side validation and enhanced error handling for amount limits.
+- **Currency Converter**: Real-time multi-currency display (INR, USD, EUR, GBP, AED, CAD, AUD) for user convenience. All prices are stored in INR; the converter only affects display formatting.
 - **Email Notifications**: Automated order confirmations and status updates.
 - **Product Management**: Supports multiple categories (e.g., featured-collection, new-arrivals, plus 12 jewelry subcategories: gold/silver/meenakari variants of necklaces, earrings, bangles, rings) with an admin panel for product upload, editing, and deletion. Products are loaded from Firebase Cloud Storage via a CDN proxy using Netlify functions.
 - **Wishlist**: Users can save products to a wishlist, persisted across sessions and login states via Firebase.

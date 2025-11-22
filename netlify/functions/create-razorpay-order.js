@@ -92,10 +92,22 @@ exports.handler = async (event, context) => {
     
     console.log('Creating Razorpay order for amount:', amount, 'currency:', currency);
     
+    // Validate amount
+    if (amount <= 0) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({
+          success: false,
+          message: 'Amount must be greater than zero'
+        })
+      };
+    }
+    
     // Convert amount to paise (Razorpay uses smallest currency unit)
     const amountInPaise = Math.round(amount * 100);
     
-    // Create order
+    // Create order with enhanced error handling
     const order = await razorpay.orders.create({
       amount: amountInPaise,
       currency,
@@ -117,13 +129,28 @@ exports.handler = async (event, context) => {
     };
   } catch (error) {
     console.error('Error creating Razorpay order:', error);
+    
+    // Enhanced error messages based on common Razorpay errors
+    let userMessage = 'Failed to create Razorpay order';
+    
+    if (error.message && error.message.includes('Amount exceeds maximum')) {
+      userMessage = 'Payment amount exceeds your account limit. Please contact support to increase your limit or split the payment.';
+    } else if (error.message && error.message.includes('Currency')) {
+      userMessage = 'Currency not supported. Please ensure your Razorpay account supports the selected currency.';
+    } else if (error.statusCode === 400) {
+      userMessage = 'Invalid payment request. Please verify your order details.';
+    } else if (error.statusCode === 401) {
+      userMessage = 'Payment gateway authentication failed. Please contact support.';
+    }
+    
     return {
-      statusCode: 500,
+      statusCode: error.statusCode || 500,
       headers,
       body: JSON.stringify({
         success: false,
-        message: 'Failed to create Razorpay order',
-        error: error.message
+        message: userMessage,
+        error: error.message,
+        errorDetails: error.description || error.message
       })
     };
   }
