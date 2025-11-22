@@ -20,6 +20,7 @@ const FilterSortHandler = (function() {
 
         if (sortOption && sortDropdown) {
             sortOption.addEventListener('click', function(e) {
+                e.preventDefault();
                 e.stopPropagation();
                 
                 if (sortDropdown.classList.contains('active')) {
@@ -38,8 +39,14 @@ const FilterSortHandler = (function() {
                 }
             });
 
-            // Close dropdown when clicking outside
+            // Prevent dropdown from closing when clicking inside it
+            sortDropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+
+            // Close dropdown when clicking outside (use setTimeout to avoid immediate closure)
             document.addEventListener('click', function(e) {
+                // Check if click is outside both sort option and dropdown
                 if (!sortOption.contains(e.target) && !sortDropdown.contains(e.target)) {
                     if (sortDropdown.classList.contains('active')) {
                         sortDropdown.classList.add('closing');
@@ -50,11 +57,6 @@ const FilterSortHandler = (function() {
                         }, 300);
                     }
                 }
-            });
-
-            // Prevent dropdown from closing when clicking inside it
-            sortDropdown.addEventListener('click', function(e) {
-                e.stopPropagation();
             });
 
             // Sort option clicks
