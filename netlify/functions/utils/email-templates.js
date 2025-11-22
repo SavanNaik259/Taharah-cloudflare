@@ -45,7 +45,7 @@ function customerOrderTemplate(data) {
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${status === 'cancelled' ? 'Order Cancelled' : status === 'confirmed' ? 'Order Confirmed' : 'Order Confirmation'} - Nazakat</title>
+    <title>${status === 'cancelled' ? 'Order Cancelled' : status === 'confirmed' ? 'Order Confirmed' : 'Order Confirmation'} - Royal Meenakari</title>
     <style>
       body { 
         font-family: Arial, sans-serif; 
@@ -102,7 +102,7 @@ function customerOrderTemplate(data) {
   <body>
     <div class="container">
       <div class="header">
-        <div class="logo">Nazakat</div>
+        <div class="logo">Royal Meenakari</div>
       </div>
 
       <h2>Order Confirmation</h2>
@@ -142,10 +142,10 @@ function customerOrderTemplate(data) {
 
       <p>If you have any questions about your order, please contact our customer service team at <a href="mailto:nazakat2407@gmail.com">nazakat2407@gmail.com</a> or call us at +91 93102 50047.</p>
 
-      <p>Thank you for shopping with Nazakat!</p>
+      <p>Thank you for shopping with Royal Meenakari!</p>
 
       <div class="footer">
-        <p>&copy; 2025 Nazakat. All Rights Reserved.</p>
+        <p>&copy; 2025 Royal Meenakari. All Rights Reserved.</p>
         <p>This email was sent to ${customer.email || 'customer'}</p>
         <p>Contact us: nazakat2407@gmail.com | +91 93102 50047</p>
       </div>
@@ -195,7 +195,7 @@ function ownerOrderTemplate(data) {
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Order Notification - Nazakat</title>
+    <title>New Order Notification - Royal Meenakari</title>
     <style>
       body { 
         font-family: Arial, sans-serif; 
@@ -265,7 +265,7 @@ function ownerOrderTemplate(data) {
   <body>
     <div class="container">
       <div class="header">
-        <div class="logo">Nazakat</div>
+        <div class="logo">Royal Meenakari</div>
       </div>
 
       <h2>New Order Received</h2>
@@ -316,8 +316,8 @@ function ownerOrderTemplate(data) {
       <p>Please process this order as soon as possible.</p>
 
       <div class="footer">
-        <p>&copy; 2025 Nazakat. All Rights Reserved.</p>
-        <p>This is an automated email from your Nazakat website.</p>
+        <p>&copy; 2025 Royal Meenakari. All Rights Reserved.</p>
+        <p>This is an automated email from your Royal Meenakari website.</p>
       </div>
     </div>
   </body>

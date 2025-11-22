@@ -592,7 +592,7 @@ function ownerCancellationTemplate(data) {
   <body>
     <div class="container">
       <div class="header">
-        <h1 class="logo">Nazakat</h1>
+        <h1 class="logo">Royal Meenakari</h1>
         <h2 style="color: #dc2626; margin: 10px 0;">Order Cancellation</h2>
       </div>
 
