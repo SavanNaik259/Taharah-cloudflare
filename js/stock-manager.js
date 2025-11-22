@@ -7,7 +7,7 @@ window.StockManager = (function() {
     'use strict';
 
     // Stock threshold for low stock alerts
-    const LOW_STOCK_THRESHOLD = 5;
+    const LOW_STOCK_THRESHOLD = 3;
     const OUT_OF_STOCK_THRESHOLD = 0;
 
     /**
@@ -323,7 +323,7 @@ window.StockManager = (function() {
                     
                     const categoryLowStock = products.filter(product => {
                         const stock = product.stock || 0;
-                        return stock > OUT_OF_STOCK_THRESHOLD && stock <= LOW_STOCK_THRESHOLD;
+                        return stock > 0 && stock <= 3;
                     }).map(product => ({
                         ...product,
                         category,
