@@ -2134,7 +2134,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 key: result.key_id,
                 amount: result.order.amount,
                 currency: result.order.currency,
-                name: 'Nazakat',
+                name: 'Royal Meenakari',
                 description: 'Purchase Order: ' + orderData.orderReference,
                 order_id: result.order.id,
                 handler: async function(response) {
