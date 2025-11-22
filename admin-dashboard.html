@@ -352,11 +352,11 @@
             </div>
 
             <div class="stat-card">
-                <div class="stat-number inventory" id="inventory-value">
-                    <div class="loading">Loading...</div>
+                <div class="stat-number inventory" id="inventory-value" style="font-size: 1.5em; cursor: pointer;" onclick="loadInventoryData()">
+                    Click to Load
                 </div>
                 <div class="stat-label">Inventory Value</div>
-                <div id="inventory-change" style="font-size: 0.8em; margin-top: 5px; color: #718096;"></div>
+                <div id="inventory-change" style="font-size: 0.8em; margin-top: 5px; color: #718096;">Click above to load inventory</div>
             </div>
         </div>
 
@@ -1223,83 +1223,65 @@
             customersTable.style.display = 'block';
         }
 
-        // Inventory cache with 5 minute TTL
+        // Inventory cache with 15 minute TTL
         let inventoryCache = {
             data: null,
             timestamp: null,
-            CACHE_TTL: 5 * 60 * 1000 // 5 minutes
+            CACHE_TTL: 15 * 60 * 1000 // 15 minutes
         };
 
-        // Load inventory data with parallel loading and caching
+        // Load inventory data with optimized single request
         async function loadInventoryData(forceRefresh = false) {
             try {
                 // Return cached data if available and fresh
                 if (!forceRefresh && inventoryCache.data && inventoryCache.timestamp) {
                     const cacheAge = Date.now() - inventoryCache.timestamp;
                     if (cacheAge < inventoryCache.CACHE_TTL) {
-                        console.log('✅ Using cached inventory data');
+                        console.log('✅ Using cached inventory data (age: ' + Math.round(cacheAge/1000) + 's)');
                         updateInventoryDisplay(inventoryCache.data);
                         return inventoryCache.data;
                     }
                 }
 
-                console.log('🔄 Loading inventory data in parallel...');
+                console.log('🔄 Loading inventory data...');
+                updateInventoryDisplay({ totalProducts: '...', totalValue: '...' });
 
-                const categories = ['featured-collection', 'new-arrivals', 'saree-collection'];
+                // Load all categories in a SINGLE request using the categories parameter
+                const categories = 'featured-collection,new-arrivals,saree-collection';
+                const cacheBustParam = forceRefresh ? `&cacheBust=${Date.now()}` : '';
                 
-                // Load all categories in PARALLEL with 3-second timeout
-                const loadPromises = categories.map(async (category) => {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 3000);
-                    
-                    try {
-                        const response = await fetch(
-                            `/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`,
-                            { signal: controller.signal }
-                        );
-                        clearTimeout(timeoutId);
-                        
-                        if (response.ok) {
-                            const data = await response.json();
-                            if (data.success && data.products) {
-                                return {
-                                    category,
-                                    count: data.products.length,
-                                    value: data.products.reduce((sum, p) => sum + (parseFloat(p.price) || 0), 0)
-                                };
-                            }
-                        }
-                        return { category, count: 0, value: 0 };
-                    } catch (error) {
-                        clearTimeout(timeoutId);
-                        console.warn(`⚠️ ${category} timeout/error:`, error.message);
-                        return { category, count: 0, value: 0 };
+                const response = await fetch(
+                    `/.netlify/functions/load-products?categories=${categories}${cacheBustParam}`,
+                    { 
+                        signal: AbortSignal.timeout(5000) // 5 second timeout for single request
                     }
-                });
-
-                // Wait for all to complete (even if some fail)
-                const results = await Promise.allSettled(loadPromises);
+                );
                 
-                let totalProducts = 0;
-                let totalValue = 0;
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (!data.success || !data.products) {
+                    throw new Error('Invalid response format');
+                }
 
-                results.forEach(result => {
-                    if (result.status === 'fulfilled' && result.value) {
-                        totalProducts += result.value.count;
-                        totalValue += result.value.value;
-                    }
-                });
+                const totalProducts = data.products.length;
+                const totalValue = Math.round(
+                    data.products.reduce((sum, p) => sum + (parseFloat(p.price) || 0), 0)
+                );
 
                 const inventoryData = {
                     totalProducts,
-                    totalValue: Math.round(totalValue)
+                    totalValue
                 };
 
                 // Cache the results
                 inventoryCache.data = inventoryData;
                 inventoryCache.timestamp = Date.now();
 
-                console.log(`✅ Loaded ${totalProducts} products in parallel (₹${inventoryData.totalValue.toLocaleString('en-IN')})`);
+                console.log(`✅ Loaded ${totalProducts} products (₹${inventoryData.totalValue.toLocaleString('en-IN')})`);
                 
                 updateInventoryDisplay(inventoryData);
                 return inventoryData;
@@ -1312,9 +1294,15 @@
 
         // Update inventory display elements
         function updateInventoryDisplay(data) {
-            document.getElementById('inventory-value').textContent = `₹${data.totalValue.toLocaleString('en-IN')}`;
+            const valueStr = typeof data.totalValue === 'number' 
+                ? `₹${data.totalValue.toLocaleString('en-IN')}` 
+                : data.totalValue;
+            
+            document.getElementById('inventory-value').textContent = valueStr;
             document.getElementById('inventory-change').textContent = 
-                data.totalProducts > 0 ? `${data.totalProducts} products in inventory` : 'No products loaded';
+                typeof data.totalProducts === 'number' 
+                    ? (data.totalProducts > 0 ? `${data.totalProducts} products in inventory` : 'No products loaded')
+                    : 'Click "View Inventory" to load';
         }
 
         // Helper functions
@@ -1616,10 +1604,8 @@
             console.log('Royal Meenakari Professional Admin Dashboard initialized');
             loadDashboardData();
             
-            // Load inventory after short delay to prioritize orders/customers
-            setTimeout(() => {
-                loadInventoryData();
-            }, 500);
+            // Don't auto-load inventory - load only when user clicks "View Inventory"
+            // This significantly speeds up initial page load
             
             loadProductManagement();
         });
