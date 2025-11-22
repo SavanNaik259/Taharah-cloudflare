@@ -935,51 +935,17 @@
             align-items: center;
             justify-content: center;
             padding: 40px;
-            color: #718096;
-            font-size: 1.1em;
-            flex-direction: column;
-            gap: 12px;
+            color: #64748b;
         }
 
-        .loading::before {
-            content: '';
-            width: 20px;
-            height: 20px;
-            border: 2px solid #e2e8f0;
-            border-top: 2px solid #667eea;
-            border-radius: 50%;
+        .loading i {
             animation: spin 1s linear infinite;
-        }
-
-        .loading-progress {
-            font-size: 0.85em;
-            color: #94a3b8;
-            margin-top: 8px;
+            margin-right: 8px;
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .error-state {
-            text-align: center;
-            padding: 40px;
-            color: #dc2626;
-        }
-
-        .retry-btn {
-            margin-top: 16px;
-            padding: 8px 16px;
-            background: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        .retry-btn:hover {
-            background: #1d4ed8;
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         /* Status Indicators */
@@ -1742,6 +1708,11 @@
             animation: spin 1s linear infinite;
         }
 
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
         @keyframes slideIn {
             from {
                 opacity: 0;
@@ -1993,6 +1964,15 @@
             }
         }
 
+        /* Force single column for geographic charts on all screen sizes */
+        @media (max-width: 1200px) {
+            .analytics-section div[style*="grid-template-columns: 2fr 1fr"] {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 24px !important;
+            }
+        }
+
         /* Extra mobile responsive for very small screens */
         @media (max-width: 480px) {
             .analytics-section .stat-card {
@@ -2162,9 +2142,6 @@
                     <i class="fas fa-plus"></i>
                     Add Product
                 </button>
-                <button id="refresh-data" class="btn btn-secondary" onclick="refreshDashboardData()">
-                    <i class="fas fa-sync-alt"></i> Refresh Data
-                </button>
             </div>
         </header>
 
@@ -2250,14 +2227,7 @@
                     <div class="card-content">
                         <div id="new-orders-loading" class="loading">
                             <i class="fas fa-spinner"></i>
-                            <div>Loading new orders...</div>
-                            <div class="loading-progress">Connecting to database...</div>
-                        </div>
-                        <div id="new-orders-error" class="error-state" style="display: none;">
-                            <i class="fas fa-exclamation-triangle" style="font-size: 48px; opacity: 0.3; margin-bottom: 16px;"></i>
-                            <h3>Failed to Load Orders</h3>
-                            <p>Please check your internet connection and try again.</p>
-                            <button class="retry-btn" onclick="loadOrders()">Retry</button>
+                            Loading new orders...
                         </div>
                         <div class="table-container" style="display: none;" id="new-orders-table-container">
                             <table id="new-orders-table">
@@ -2275,9 +2245,9 @@
                             </table>
                         </div>
                         <div id="new-orders-empty" style="display: none; text-align: center; padding: 40px; color: #64748b;">
-                            <i class="fas fa-check-circle fa-3x" style="margin-bottom: 16px; opacity: 0.3; color: #10b981;"></i>
-                            <h3>All Caught Up!</h3>
-                            <p>No new pending orders to process.</p>
+                            <i class="fas fa-inbox fa-3x" style="margin-bottom: 16px; opacity: 0.3;"></i>
+                            <h3>No New Orders</h3>
+                            <p>All caught up! No pending orders to process.</p>
                         </div>
                     </div>
                 </div>
@@ -2294,8 +2264,7 @@
                     <div class="card-content">
                         <div id="recent-orders-loading" class="loading">
                             <i class="fas fa-spinner"></i>
-                            <div>Loading confirmed orders...</div>
-                            <div class="loading-progress">Connecting to database...</div>
+                            Loading confirmed orders...
                         </div>
                         <div id="orders-table" style="display: none;">
                             <div class="table-container">
@@ -2368,8 +2337,7 @@
                         </div>
                         <div id="products-loading" class="loading">
                             <i class="fas fa-spinner"></i>
-                            <div>Loading products...</div>
-                            <div class="loading-progress">Fetching from server...</div>
+                            Loading products...
                         </div>
                         <div id="products-grid" class="product-grid" style="display: none;">
                         </div>
@@ -2465,8 +2433,7 @@
                         <div id="out-of-stock-products" class="inventory-tab-content">
                             <div id="out-of-stock-loading" class="loading">
                                 <i class="fas fa-spinner"></i>
-                                <div>Loading out-of-stock products...</div>
-                                <div class="loading-progress">Fetching data...</div>
+                                Loading out-of-stock products...
                             </div>
                             <div id="out-of-stock-list" style="display: none;">
                                 <div class="product-grid" id="out-of-stock-grid">
@@ -2484,8 +2451,7 @@
                         <div id="low-stock-products" class="inventory-tab-content" style="display: none;">
                             <div id="low-stock-loading" class="loading">
                                 <i class="fas fa-spinner"></i>
-                                <div>Loading low-stock products...</div>
-                                <div class="loading-progress">Fetching data...</div>
+                                Loading low-stock products...
                             </div>
                             <div id="low-stock-list" style="display: none;">
                                 <div class="product-grid" id="low-stock-grid">
@@ -2503,8 +2469,7 @@
                         <div id="all-products-inventory" class="inventory-tab-content" style="display: none;">
                             <div id="all-inventory-loading" class="loading">
                                 <i class="fas fa-spinner"></i>
-                                <div>Loading all products inventory...</div>
-                                <div class="loading-progress">Fetching data...</div>
+                                Loading all products inventory...
                             </div>
                             <div id="all-inventory-list" style="display: none;">
                                 <div class="table-container">
@@ -2573,8 +2538,7 @@
                         </div>
                         <div id="orders-section-loading" class="loading">
                             <i class="fas fa-spinner"></i>
-                            <div>Loading orders...</div>
-                            <div class="loading-progress">Fetching data...</div>
+                            Loading orders...
                         </div>
                         <div id="orders-section-table" style="display: none;">
                             <div class="table-container">
@@ -2630,8 +2594,7 @@
 
                         <div id="customers-loading" class="loading">
                             <i class="fas fa-spinner"></i>
-                            <div>Loading customers...</div>
-                            <div class="loading-progress">Fetching data...</div>
+                            Loading customers...
                         </div>
                         <div id="customers-table" style="display: none;">
                             <div class="table-container">
@@ -2656,10 +2619,7 @@
                 </div>
             </div>
 
-            <!-- Inventory Section (Duplicate ID - Assuming this is a content placeholder, handled by showSection) -->
-            <!-- It's important to note that having two elements with the same ID 'inventory' can cause issues. -->
-            <!-- However, based on context, this might be a placeholder or intended to be hidden/shown by JS logic. -->
-            <!-- The CSS and JS logic should manage which one is visible. -->
+            <!-- Inventory Section -->
             <div id="inventory" class="content-section">
                 <div class="card">
                     <div class="card-header">
@@ -2676,8 +2636,7 @@
                     <div class="card-content">
                         <div id="inventory-loading" class="loading">
                             <i class="fas fa-spinner"></i>
-                            <div>Loading inventory data...</div>
-                            <div class="loading-progress">Fetching data...</div>
+                            Loading inventory data...
                         </div>
                         <div id="inventory-content">
                             <p>Inventory management features will be displayed here.</p>
@@ -2780,8 +2739,7 @@
                     <div class="card-content">
                         <div id="realtime-visitors-loading" class="loading">
                             <i class="fas fa-spinner"></i>
-                            <div>Loading real-time data...</div>
-                            <div class="loading-progress">Fetching data...</div>
+                            Loading real-time data...
                         </div>
                         <div id="realtime-visitors-content" style="display: none;">
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
@@ -2846,8 +2804,7 @@
                         <div class="card-content">
                             <div id="top-pages-loading" class="loading">
                                 <i class="fas fa-spinner"></i>
-                                <div>Loading page data...</div>
-                                <div class="loading-progress">Fetching data...</div>
+                                Loading page data...
                             </div>
                             <div id="top-pages-content" style="display: none;">
                                 <div class="table-container">
@@ -2876,8 +2833,7 @@
                         <div class="card-content">
                             <div id="device-browser-loading" class="loading">
                                 <i class="fas fa-spinner"></i>
-                                <div>Loading device data...</div>
-                                <div class="loading-progress">Fetching data...</div>
+                                Loading device data...
                             </div>
                             <div id="device-browser-content" style="display: none;">
                                 <div style="margin-bottom: 20px;">
@@ -2956,8 +2912,7 @@
                             <div class="card-content">
                                 <div id="geo-country-loading" class="loading">
                                     <i class="fas fa-spinner"></i>
-                                    <div>Loading country data...</div>
-                                    <div class="loading-progress">Fetching data...</div>
+                                    Loading country data...
                                 </div>
                                 <div id="geo-country-content" style="display: none;">
                                     <div class="chart-container" style="height: 350px;">
@@ -2967,7 +2922,7 @@
                                     <div style="margin-top: 20px;">
                                         <h4 style="margin: 0 0 12px 0; font-size: 14px; color: #374151;">Country Breakdown</h4>
                                         <div id="country-stats">
-                                            <!-- Country statistics will be loaded here -->
+                                            <!-- Country statistics will be displayed here -->
                                         </div>
                                     </div>
                                 </div>
@@ -2982,8 +2937,7 @@
                             <div class="card-content">
                                 <div id="geo-city-loading" class="loading">
                                     <i class="fas fa-spinner"></i>
-                                    <div>Loading city data...</div>
-                                    <div class="loading-progress">Fetching data...</div>
+                                    Loading city data...
                                 </div>
                                 <div id="geo-city-content" style="display: none;">
                                     <div class="chart-container" style="height: 350px;">
@@ -3009,8 +2963,7 @@
                         <div class="card-content">
                             <div id="geo-table-loading" class="loading">
                                 <i class="fas fa-spinner"></i>
-                                <div>Loading location breakdown...</div>
-                                <div class="loading-progress">Fetching data...</div>
+                                Loading location breakdown...
                             </div>
                             <div id="geo-table-content" style="display: none;">
                                 <div class="table-container">
@@ -3047,8 +3000,7 @@
                     <div class="card-content">
                         <div id="notifications-loading" class="loading">
                             <i class="fas fa-spinner"></i>
-                            <div>Loading notifications...</div>
-                            <div class="loading-progress">Fetching data...</div>
+                            Loading notifications...
                         </div>
                         <div id="notifications-list" style="display: none;">
                             <!-- Notification items will be loaded here -->
@@ -3082,8 +3034,7 @@
 
                         <div id="watch-buy-loading" class="loading">
                             <i class="fas fa-spinner"></i>
-                            <div>Loading video configurations...</div>
-                            <div class="loading-progress">Fetching data...</div>
+                            Loading video configurations...
                         </div>
 
                         <div id="watch-buy-content" style="display: none;">
@@ -3411,134 +3362,31 @@
             console.log(`✅ Created demo data: ${allOrders.length} orders, ${allCustomers.length} customers`);
         }
 
-        // Dashboard data cache
-        const dashboardCache = {
-            orders: null,
-            customers: null,
-            inventory: null,
-            lastLoaded: null,
-            cacheTimeout: 5 * 60 * 1000 // 5 minutes
-        };
-
-        // Check if cache is valid
-        function isCacheValid() {
-            if (!dashboardCache.lastLoaded) return false;
-            return (Date.now() - dashboardCache.lastLoaded) < dashboardCache.cacheTimeout;
-        }
-
-        // Load dashboard data with parallel execution and caching
-        async function loadDashboardData(forceRefresh = false) {
-            try {
-                // Check cache first
-                if (!forceRefresh && isCacheValid()) {
-                    console.log('📦 Using cached dashboard data');
-                    updateDashboardFromCache();
-                    return;
-                }
-
-                updateStatus('loading', 'Loading dashboard data...');
-                console.log('🔄 Loading fresh dashboard data...');
-
-                // Test Firestore connection with timeout
-                try {
-                    const testPromise = db.collection('test').limit(1).get();
-                    const timeoutPromise = new Promise((_, reject) => 
-                        setTimeout(() => reject(new Error('Connection timeout')), 10000)
-                    );
-                    await Promise.race([testPromise, timeoutPromise]);
-                    console.log('✅ Firestore connection successful');
-                } catch (connError) {
-                    console.error('❌ Firestore connection failed:', connError);
-                    updateStatus('error', 'Firestore connection failed. Please check your internet connection.');
-                    showFallbackData();
-                    return;
-                }
-
-                // Load all data in parallel for faster performance
-                const startTime = Date.now();
-                const [ordersResult, customersResult, inventoryResult] = await Promise.allSettled([
-                    loadOrders(),
-                    loadCustomers(),
-                    loadInventoryData()
-                ]);
-
-                const loadTime = Date.now() - startTime;
-                console.log(`✅ Dashboard data loaded in ${loadTime}ms`);
-
-                // Check for failures
-                const failures = [];
-                if (ordersResult.status === 'rejected') failures.push('Orders');
-                if (customersResult.status === 'rejected') failures.push('Customers');
-                if (inventoryResult.status === 'rejected') failures.push('Inventory');
-
-                if (failures.length > 0) {
-                    console.warn('⚠️ Some data failed to load:', failures.join(', '));
-                    updateStatus('warning', `Loaded with some errors: ${failures.join(', ')}`);
-                } else {
-                    updateStatus('connected', 'Dashboard ready');
-                    dashboardCache.lastLoaded = Date.now();
-                }
-
-            } catch (error) {
-                console.error('❌ Error loading dashboard data:', error);
-                updateStatus('error', `Error: ${error.message}`);
-                showFallbackData();
-            }
-        }
-
-        // Update dashboard from cache
-        function updateDashboardFromCache() {
-            if (dashboardCache.orders) {
-                updateNewOrdersDisplay();
-                updateOrdersDisplay();
-                updateOrdersStats();
-            }
-            if (dashboardCache.customers) {
-                updateCustomersDisplay();
-            }
-            if (dashboardCache.inventory) {
-                // Inventory values already updated
-            }
-            updateStatus('connected', 'Dashboard ready (cached)');
-        }
-
-        // Show fallback data when Firebase fails
-        function showFallbackData() {
-            // Show empty state with proper messaging
-            document.getElementById('total-orders').textContent = '-';
-            document.getElementById('total-revenue').textContent = '₹-';
-            document.getElementById('total-customers').textContent = '-';
-            document.getElementById('inventory-value').textContent = '₹-';
-
-            document.getElementById('orders-change').textContent = 'Unable to load data';
-            document.getElementById('revenue-change').textContent = 'Please check connection';
-            document.getElementById('customers-change').textContent = 'and try again';
-            document.getElementById('inventory-change').textContent = '';
-        }
-
-        // Refresh data function
-        function refreshDashboardData() {
-            console.log('🔄 Manual refresh triggered');
-            dashboardCache.lastLoaded = null; // Clear cache
-            loadDashboardData(true);
-        }
-
-        // Load orders from Firestore with timeout
+        // Load orders from Firebase - EXACT copy from working admin-dashboard.html
         async function loadOrders() {
             try {
                 console.log('Loading orders from Firestore...');
 
-                document.getElementById('orders-loading').style.display = 'flex';
-                document.getElementById('new-orders-loading').style.display = 'flex';
-                document.getElementById('orders-table').style.display = 'none';
-                document.getElementById('new-orders-table').style.display = 'none';
+                // Show loading for dashboard orders
+                const ordersLoading = document.getElementById('orders-loading');
+                const ordersTable = document.getElementById('orders-table');
+                if (ordersLoading) ordersLoading.style.display = 'flex';
+                if (ordersTable) ordersTable.style.display = 'none';
 
-                // Add timeout to prevent hanging
-                const usersPromise = db.collection('users').get();
-                const timeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('Orders loading timeout')), 15000)
-                );
-                const usersSnapshot = await Promise.race([usersPromise, timeoutPromise]);
+                // Show loading for new orders section
+                const newOrdersLoading = document.getElementById('new-orders-loading');
+                if (newOrdersLoading) newOrdersLoading.style.display = 'flex';
+
+                // Show loading for orders section page
+                if (document.getElementById('orders-section-loading')) {
+                    document.getElementById('orders-section-loading').style.display = 'flex';
+                }
+                if (document.getElementById('orders-section-table')) {
+                    document.getElementById('orders-section-table').style.display = 'none';
+                }
+
+                const usersSnapshot = await db.collection('users').get();
+                console.log(`Found ${usersSnapshot.size} users in Firestore`);
 
                 allOrders = [];
                 newOrders = [];
@@ -3637,21 +3485,268 @@
             }
         }
 
-        // Load customers with timeout
+        // Helper functions for order processing - EXACT copy from working admin-dashboard.html
+        function calculateOrderAmount(orderData) {
+            if (orderData.totalAmount) return parseFloat(orderData.totalAmount);
+            if (orderData.total) return parseFloat(orderData.total);
+            if (orderData.orderTotal) return parseFloat(orderData.orderTotal);
+
+            if (orderData.products && orderData.products.length > 0) {
+                return orderData.products.reduce((total, item) => {
+                    const price = parseFloat(item.price || 0);
+                    const quantity = parseInt(item.quantity || 1);
+                    return total + (price * quantity);
+                }, 0);
+            }
+
+            return 0;
+        }
+
+        function extractCustomerName(orderData) {
+            if (orderData.customer?.name) return orderData.customer.name;
+            if (orderData.customer?.firstName && orderData.customer?.lastName) {
+                return `${orderData.customer.firstName} ${orderData.customer.lastName}`;
+            }
+            if (orderData.firstName && orderData.lastName) {
+                return `${orderData.firstName} ${orderData.lastName}`;
+            }
+            if (orderData.customer?.firstName) return orderData.customer.firstName;
+            if (orderData.firstName) return orderData.firstName;
+            if (orderData.customer?.email) return orderData.customer.email.split('@')[0];
+            if (orderData.email) return orderData.email.split('@')[0];
+            return 'Unknown Customer';
+        }
+
+        function extractCustomerEmail(orderData) {
+            return orderData.customer?.email || orderData.email || 'No email provided';
+        }
+
+        function extractCustomerPhone(orderData) {
+            return orderData.customer?.phone || orderData.phone || orderData.customer?.phoneNumber || 'Not provided';
+        }
+
+        function extractCustomerAddress(orderData) {
+            if (orderData.customer?.address) {
+                const addr = orderData.customer;
+                return `${addr.address || ''}, ${addr.city || ''}, ${addr.state || ''} - ${addr.postalCode || ''}`.replace(/,\s*,/g, ',').trim();
+            }
+            if (orderData.address) {
+                return `${orderData.address}, ${orderData.city || ''}, ${orderData.state || ''} - ${orderData.postalCode || ''}`.replace(/,\s*,/g, ',').trim();
+            }
+            return 'Address not provided';
+        }
+
+        // Update orders display - Show only confirmed and cancelled orders in Recent Orders
+        function updateOrdersDisplay() {
+            try {
+                const ordersLoading = document.getElementById('recent-orders-loading');
+                const ordersTable = document.getElementById('orders-table');
+                const ordersTbody = document.getElementById('orders-tbody');
+
+                if (ordersLoading) ordersLoading.style.display = 'none';
+
+                // Combine confirmed and cancelled orders for Recent Orders section
+                const recentOrdersList = [...confirmedOrders, ...cancelledOrders];
+
+                if (recentOrdersList.length === 0) {
+                    if (ordersTable) ordersTable.style.display = 'block';
+                    if (ordersTbody) {
+                        ordersTbody.innerHTML = `
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px; color: #64748b;">
+                                    <h3>No processed orders found</h3>
+                                    <p>Confirmed and cancelled orders will appear here.</p>
+                                </td>
+                            </tr>
+                        `;
+                    }
+                    return;
+                }
+
+                // Sort orders by date (newest first) and show recent 10
+                const recentOrders = recentOrdersList.sort((a, b) => b.date - a.date).slice(0, 10);
+
+                if (ordersTbody) {
+                    ordersTbody.innerHTML = recentOrders.map(order => {
+                        const formattedDate = order.date.toLocaleDateString('en-IN');
+                        const formattedTime = order.date.toLocaleTimeString('en-IN');
+                        const formattedAmount = `₹${order.amount.toLocaleString('en-IN')}`;
+                        let statusClass, statusText;
+                        if (order.status === 'confirmed') {
+                            statusClass = 'status-confirmed';
+                            statusText = 'CONFIRMED';
+                        } else if (order.status === 'cancelled') {
+                            statusClass = 'status-cancelled';
+                            statusText = 'CANCELLED';
+                        } else {
+                            statusClass = 'status-pending';
+                            statusText = 'PENDING';
+                        }
+
+                        return `
+                            <tr>
+                                <td><strong>${(order.orderReference || order.orderId).substring(0, 15)}...</strong></td>
+                                <td>
+                                    <div><strong>${order.customerName}</strong></div>
+                                    <small style="color: #64748b;">${order.customerEmail}</small>
+                                </td>
+                                <td>
+                                    <div>${formattedDate}</div>
+                                    <small style="color: #64748b;">${formattedTime}</small>
+                                </td>
+                                <td><strong>${formattedAmount}</strong></td>
+                                <td>
+                                    <span class="status-badge ${statusClass}">
+                                        ${statusText}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm" onclick="viewOrderDetails('${order.orderId}', '${order.userId}')" style="margin-right: 8px;">
+                                        <i class="fas fa-eye"></i> View Details
+                                    </button>
+                                    ${order.status === 'confirmed' ?
+                                        '<span class="btn btn-sm" style="background: #d1fae5; color: #065f46; cursor: default;">Processed</span>' :
+                                        '<span class="btn btn-sm" style="background: #fee2e2; color: #991b1b; cursor: default;">Cancelled</span>'
+                                    }
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+
+                if (ordersTable) ordersTable.style.display = 'block';
+            } catch (error) {
+                console.error('Error in updateOrdersDisplay:', error);
+            }
+        }
+
+        // Period change function
+        function changePeriod(period) {
+            currentPeriod = period;
+
+            // Update active button
+            document.querySelectorAll('.period-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`period-${period}`).classList.add('active');
+
+            // Update statistics
+            updateOrdersStats();
+            updateCustomersStats();
+        }
+
+        // Get date range for current period
+        function getCurrentPeriodRange() {
+            const now = new Date();
+            let startDate = new Date();
+            let periodLabel = '';
+
+            switch (currentPeriod) {
+                case 'today':
+                    startDate.setHours(0, 0, 0, 0);
+                    periodLabel = 'today';
+                    break;
+                case 'week':
+                    const dayOfWeek = now.getDay();
+                    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                    startDate.setDate(now.getDate() - daysToMonday);
+                    startDate.setHours(0, 0, 0, 0);
+                    periodLabel = 'this week';
+                    break;
+                case 'month':
+                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                    periodLabel = 'this month';
+                    break;
+                case 'year':
+                    startDate = new Date(now.getFullYear(), 0, 1);
+                    periodLabel = 'this year';
+                    break;
+                case 'overall':
+                    startDate = new Date(0); // Beginning of time
+                    periodLabel = 'overall';
+                    break;
+                default:
+                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                    periodLabel = 'this month';
+            }
+
+            return { startDate, periodLabel };
+        }
+
+        // Update orders statistics with period filtering
+        function updateOrdersStats() {
+            try {
+                const totalOrdersElement = document.getElementById('total-orders');
+                const totalRevenueElement = document.getElementById('total-revenue');
+                const ordersChangeElement = document.getElementById('orders-change');
+                const revenueChangeElement = document.getElementById('revenue-change');
+
+                const { startDate, periodLabel } = getCurrentPeriodRange();
+
+                // Filter confirmed orders by current period
+                const periodOrders = confirmedOrders.filter(order => order.date >= startDate);
+                const periodRevenue = periodOrders.reduce((sum, order) => sum + order.amount, 0);
+
+                // Update display
+                if (totalOrdersElement) {
+                    totalOrdersElement.textContent = periodOrders.length.toLocaleString('en-IN');
+                }
+                if (totalRevenueElement) {
+                    totalRevenueElement.textContent = `₹${periodRevenue.toLocaleString('en-IN')}`;
+                }
+
+                if (ordersChangeElement) {
+                    ordersChangeElement.textContent = `${periodOrders.length} confirmed ${periodLabel}`;
+                }
+                if (revenueChangeElement) {
+                    revenueChangeElement.textContent = `₹${periodRevenue.toLocaleString('en-IN')} ${periodLabel}`;
+                }
+            } catch (error) {
+                console.error('Error in updateOrdersStats:', error);
+            }
+        }
+
+        // Update customers statistics with period filtering
+        function updateCustomersStats() {
+            try {
+                const totalCustomersElement = document.getElementById('total-customers');
+                const customersChangeElement = document.getElementById('customers-change');
+
+                const { startDate, periodLabel } = getCurrentPeriodRange();
+
+                // Filter customers who placed orders in current period
+                const periodCustomers = allCustomers.filter(customer => {
+                    const customerOrders = confirmedOrders.filter(order =>
+                        order.userId === customer.uid && order.date >= startDate
+                    );
+                    return customerOrders.length > 0;
+                });
+
+                // Update display - show total customers, not period customers
+                if (totalCustomersElement) {
+                    totalCustomersElement.textContent = allCustomers.length.toLocaleString('en-IN');
+                }
+                if (customersChangeElement) {
+                    if (periodLabel === 'overall') {
+                        customersChangeElement.textContent = `${allCustomers.filter(c => c.orders > 0).length} customers with orders`;
+                    } else {
+                        customersChangeElement.textContent = `${periodCustomers.length} active customers ${periodLabel}`;
+                    }
+                }
+            } catch (error) {
+                console.error('Error in updateCustomersStats:', error);
+            }
+        }
+
+        // Load customers with UID and search functionality
         async function loadCustomers() {
             try {
                 console.log('Loading customers from Firestore...');
 
-                document.getElementById('customers-loading').style.display = 'flex';
-                document.getElementById('customers-table').style.display = 'none';
+                const customersLoading = document.getElementById('customers-loading');
+                const customersTable = document.getElementById('customers-table');
+                if (customersLoading) customersLoading.style.display = 'flex';
+                if (customersTable) customersTable.style.display = 'none';
 
-                // Add timeout to prevent hanging
-                const usersPromise = db.collection('users').get();
-                const timeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('Customers loading timeout')), 15000)
-                );
-                const usersSnapshot = await Promise.race([usersPromise, timeoutPromise]);
-
+                const usersSnapshot = await db.collection('users').get();
                 allCustomers = [];
 
                 console.log(`Found ${usersSnapshot.size} registered customers in Firestore`);
@@ -3687,112 +3782,198 @@
             }
         }
 
-        // Load inventory data
+        // Update customers display with UID and search support
+        function updateCustomersDisplay(customersToShow = null) {
+            const customersLoading = document.getElementById('customers-loading');
+            const customersTable = document.getElementById('customers-table');
+            const customersTbody = document.getElementById('customers-tbody');
+            const totalCustomersElement = document.getElementById('total-customers');
+            const customersChangeElement = document.getElementById('customers-change');
+
+            if (customersLoading) customersLoading.style.display = 'none';
+
+            // Use filtered customers if provided, otherwise use all customers
+            const displayCustomers = customersToShow || allCustomers;
+
+            // Customer count is now handled by updateCustomersStats function
+
+            if (displayCustomers.length === 0) {
+                if (customersTable) customersTable.style.display = 'block';
+                if (customersTbody) {
+                    const isSearching = customersToShow !== null && customersToShow !== allCustomers;
+                    customersTbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 40px; color: #64748b;">
+                                <h3>${isSearching ? 'No customers found' : 'No customers found in database'}</h3>
+                                <p>${isSearching ? 'No customers match your search criteria.' : 'Customer data will appear here when users sign up.'}</p>
+                                ${isSearching ? '<button class="btn btn-primary" onclick="clearCustomerSearch()">Clear Search</button>' : ''}
+                            </td>
+                        </tr>
+                    `;
+                }
+                return;
+            }
+
+            // Sort customers by total spent
+            const sortedCustomers = [...displayCustomers].sort((a, b) => b.totalSpent - a.totalSpent);
+
+            if (customersTbody) {
+                customersTbody.innerHTML = sortedCustomers.map(customer => {
+                    // Highlight search terms if search is active
+                    const customerSearchTerm = document.getElementById('customerSearchInput')?.value.toLowerCase().trim() || '';
+
+                    let displayUID = customer.uid || 'N/A';
+                    let displayName = customer.name;
+                    let displayEmail = customer.email;
+
+                    if (customerSearchTerm) {
+                        const highlightText = (text, term) => {
+                            if (!text) return text;
+                            const regex = new RegExp(`(${term})`, 'gi');
+                            return text.replace(regex, '<mark style="background: #fef3c7; padding: 1px 2px;">$1</mark>');
+                        };
+
+                        displayUID = highlightText(customer.uid, customerSearchTerm);
+                        displayName = highlightText(customer.name, customerSearchTerm);
+                        displayEmail = highlightText(customer.email, customerSearchTerm);
+                    }
+
+                    return `
+                        <tr>
+                            <td><small style="font-family: monospace; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">${displayUID}</small></td>
+                            <td><strong>${displayName}</strong></td>
+                            <td>${displayEmail}</td>
+                            <td>${customer.phone}</td>
+                            <td><span style="background: #e0f2fe; color: #0277bd; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">${customer.orders}</span></td>
+                            <td><strong>₹${customer.totalSpent.toLocaleString('en-IN')}</strong></td>
+                            <td>${customer.lastOrder}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            if (customersTable) customersTable.style.display = 'block';
+        }
+
+        // Inventory data cache
+        let inventoryDataCache = {
+            data: null,
+            timestamp: null,
+            loading: false,
+            CACHE_TTL: 10 * 60 * 1000 // 10 minutes
+        };
+
+        // Load inventory data with parallel fetching and caching
         async function loadInventoryData(forceRefresh = false) {
             try {
-                console.log('Loading inventory data...');
-
-                // Display loading indicators for inventory stats
-                showInventoryStatsLoading();
-
-                const inventoryStatsGrid = document.getElementById('inventory-stats-grid');
-                if (!inventoryStatsGrid) {
-                    console.warn('Inventory stats grid not found, skipping inventory loading');
-                    return;
-                }
-
-                // Check cache first if not forcing refresh
+                // Return cached data if available and not expired
                 if (!forceRefresh && inventoryDataCache.data && inventoryDataCache.timestamp) {
                     const cacheAge = Date.now() - inventoryDataCache.timestamp;
                     if (cacheAge < inventoryDataCache.CACHE_TTL) {
                         console.log('✅ Using cached inventory data');
                         updateInventoryUI(inventoryDataCache.data);
-                        return;
+                        return inventoryDataCache.data;
                     }
                 }
 
-                // Indicate loading state
-                inventoryDataCache.loading = true;
+                // Prevent duplicate concurrent requests
+                if (inventoryDataCache.loading) {
+                    console.log('⏳ Inventory data already loading...');
+                    return;
+                }
 
-                // Fetch data in parallel
-                const fetchPromises = [
-                    db.collection('products').where('stock', '==', 0).get().then(snapshot => snapshot.size),
-                    db.collection('products').where('stock', '>', 0).where('stock', '<=', 5).get().then(snapshot => snapshot.size),
-                    loadAllProductsData() // This already fetches all products
+                inventoryDataCache.loading = true;
+                console.log('🔄 Loading inventory data in parallel...');
+
+                // Load products from each category in PARALLEL
+                const categories = [
+                    'featured-collection', 
+                    'new-arrivals', 
+                    'saree-collection',
+                    'gold-necklace',
+                    'silver-necklace',
+                    'gold-earrings'
                 ];
 
-                const [outOfStockCount, lowStockCount, allProducts] = await Promise.all(fetchPromises);
-                const totalProductsCount = allProducts.length;
-                const inStockCount = totalProductsCount - outOfStockCount - lowStockCount;
+                // Fetch all categories in parallel
+                const fetchPromises = categories.map(async (category) => {
+                    try {
+                        const response = await fetch(`/.netlify/functions/load-products?category=${category}`, {
+                            signal: AbortSignal.timeout(5000) // 5 second timeout
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data.success && data.products && Array.isArray(data.products)) {
+                                return {
+                                    category,
+                                    products: data.products,
+                                    count: data.products.length,
+                                    value: data.products.reduce((sum, p) => sum + (parseFloat(p.price) || 0), 0)
+                                };
+                            }
+                        }
+                        return { category, products: [], count: 0, value: 0 };
+                    } catch (error) {
+                        console.warn(`⚠️ ${category}: ${error.message}`);
+                        return { category, products: [], count: 0, value: 0 };
+                    }
+                });
 
-                // Calculate inventory value (assuming price is available)
-                const totalInventoryValue = allProducts.reduce((sum, product) => sum + (parseFloat(product.price) || 0), 0);
+                // Wait for all categories to load (even if some fail)
+                const results = await Promise.allSettled(fetchPromises);
+                
+                let totalProducts = 0;
+                let totalValue = 0;
+                const categoryDetails = [];
+
+                results.forEach(result => {
+                    if (result.status === 'fulfilled' && result.value) {
+                        const { category, count, value } = result.value;
+                        totalProducts += count;
+                        totalValue += value;
+                        if (count > 0) {
+                            categoryDetails.push(`${category}: ${count} products`);
+                        }
+                    }
+                });
 
                 const inventoryData = {
-                    outOfStockCount,
-                    lowStockCount,
-                    inStockCount,
-                    totalProductsCount,
-                    totalInventoryValue
+                    totalProducts,
+                    totalValue: Math.round(totalValue),
+                    categoryDetails
                 };
 
-                // Cache the data
+                // Cache the results
                 inventoryDataCache.data = inventoryData;
                 inventoryDataCache.timestamp = Date.now();
                 inventoryDataCache.loading = false;
 
-                console.log('✅ Inventory data loaded:', inventoryData);
+                console.log(`✅ Loaded ${totalProducts} products in parallel (₹${inventoryData.totalValue.toLocaleString('en-IN')})`);
+                
                 updateInventoryUI(inventoryData);
+                return inventoryData;
 
             } catch (error) {
-                console.error('❌ Error loading inventory data:', error);
+                console.error('❌ Error loading inventory:', error);
                 inventoryDataCache.loading = false;
-                // Display error state in the UI
-                showInventoryError('Failed to load inventory data. Please try refreshing.');
+                
+                updateInventoryUI({ totalProducts: 0, totalValue: 0, categoryDetails: [] });
             }
         }
 
         // Update inventory UI elements
         function updateInventoryUI(data) {
-            // Update summary cards
-            document.getElementById('out-of-stock-count').textContent = data.outOfStockCount;
-            document.getElementById('low-stock-count').textContent = data.lowStockCount;
-            document.getElementById('in-stock-count').textContent = data.inStockCount;
-            document.getElementById('total-products-count').textContent = data.totalProductsCount;
-            document.getElementById('inventory-value').textContent = `₹${data.totalInventoryValue.toLocaleString('en-IN')}`;
+            const inventoryValueElement = document.getElementById('inventory-value');
+            const inventoryChangeElement = document.getElementById('inventory-change');
 
-            // Update description text for stats
-            document.getElementById('inventory-change').textContent = data.outOfStockCount > 0 ? 'Requires immediate attention' : 'All items in stock';
-            document.getElementById('inventory-change').className = `stat-change ${data.outOfStockCount > 0 ? 'negative' : ''}`;
-
-            // Update tab badges
-            document.getElementById('out-of-stock-tab-count').textContent = data.outOfStockCount;
-            document.getElementById('low-stock-tab-count').textContent = data.lowStockCount;
-
-            // Update navigation badge
-            const inventoryNavBadge = document.getElementById('inventory-alert-badge');
-            if (inventoryNavBadge) {
-                if (data.outOfStockCount > 0) {
-                    inventoryNavBadge.textContent = data.outOfStockCount;
-                    inventoryNavBadge.style.display = 'flex';
-                } else {
-                    inventoryNavBadge.style.display = 'none';
-                }
+            if (inventoryValueElement) {
+                inventoryValueElement.textContent = `₹${data.totalValue.toLocaleString('en-IN')}`;
             }
-        }
-
-        // Show inventory error state
-        function showInventoryError(message) {
-            const inventoryStatsGrid = document.getElementById('inventory-stats-grid');
-            if (inventoryStatsGrid) {
-                inventoryStatsGrid.innerHTML = `
-                    <div class="error-state" style="grid-column: 1 / -1;">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; opacity: 0.3; margin-bottom: 16px;"></i>
-                        <h3>Error</h3>
-                        <p>${message}</p>
-                        <button class="retry-btn" onclick="loadInventoryData(true)">Retry</button>
-                    </div>
-                `;
+            if (inventoryChangeElement) {
+                inventoryChangeElement.textContent = data.totalProducts > 0 
+                    ? `${data.totalProducts} products in inventory`
+                    : 'Loading...';
             }
         }
 
@@ -4515,27 +4696,27 @@
         // Watch & Buy Video Management Functions
         async function loadWatchBuyVideos() {
             console.log('Loading Watch & Buy video configurations...');
-
+            
             const loadingElement = document.getElementById('watch-buy-loading');
             const contentElement = document.getElementById('watch-buy-content');
-
+            
             if (loadingElement) loadingElement.style.display = 'flex';
             if (contentElement) contentElement.style.display = 'none';
-
+            
             try {
                 // Load video links from Firestore
                 const videoLinksDoc = await db.collection('settings').doc('watchBuyVideos').get();
-
+                
                 if (videoLinksDoc.exists) {
                     const videoLinks = videoLinksDoc.data();
                     console.log('Loaded video links:', videoLinks);
-
+                    
                     // Populate each video's SKU and product name
                     for (let i = 1; i <= 6; i++) {
                         const videoData = videoLinks[`video${i}`];
                         if (videoData && videoData.productSKU) {
                             document.getElementById(`video${i}-sku`).value = videoData.productSKU;
-
+                            
                             // Fetch and display product name
                             await fetchAndDisplayProductName(i, videoData.productSKU);
                         }
@@ -4543,10 +4724,10 @@
                 } else {
                     console.log('No video links configured yet');
                 }
-
+                
                 if (loadingElement) loadingElement.style.display = 'none';
                 if (contentElement) contentElement.style.display = 'block';
-
+                
             } catch (error) {
                 console.error('Error loading Watch & Buy videos:', error);
                 if (loadingElement) {
@@ -4562,7 +4743,7 @@
 
         async function fetchAndDisplayProductName(videoNumber, sku) {
             const productNameElement = document.getElementById(`video${videoNumber}-product-name`);
-
+            
             try {
                 // Search for product across ALL categories including subcategories
                 const categories = [
@@ -4583,7 +4764,7 @@
                     'meenakari-rings'
                 ];
                 let productFound = null;
-
+                
                 for (const category of categories) {
                     const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
                     if (response.ok) {
@@ -4594,7 +4775,7 @@
                         }
                     }
                 }
-
+                
                 if (productFound) {
                     const price = parseFloat(productFound.price || 0).toLocaleString('en-IN');
                     const productUrl = `product-detail.html?id=${encodeURIComponent(sku)}`;
@@ -4618,15 +4799,15 @@
         async function saveVideoLink(videoNumber) {
             const skuInput = document.getElementById(`video${videoNumber}-sku`);
             const sku = skuInput.value.trim().toUpperCase();
-
+            
             if (!sku) {
                 alert('Please enter a Product SKU ID');
                 skuInput.focus();
                 return;
             }
-
+            
             showGlobalLoader(`Saving link for Video ${videoNumber}...`);
-
+            
             try {
                 // Validate that product exists - search ALL collections including subcategories
                 const categories = [
@@ -4647,7 +4828,7 @@
                     'meenakari-rings'
                 ];
                 let productFound = null;
-
+                
                 for (const category of categories) {
                     const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
                     if (response.ok) {
@@ -4658,13 +4839,13 @@
                         }
                     }
                 }
-
+                
                 if (!productFound) {
                     hideGlobalLoader();
                     alert(`Product with SKU "${sku}" not found in any collection. Please check the SKU and try again.`);
                     return;
                 }
-
+                
                 // Save to Firestore
                 await db.collection('settings').doc('watchBuyVideos').set({
                     [`video${videoNumber}`]: {
@@ -4673,20 +4854,20 @@
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     }
                 }, { merge: true });
-
+                
                 // Update display
                 await fetchAndDisplayProductName(videoNumber, sku);
-
+                
                 hideGlobalLoader();
-
+                
                 showSuccessModal({
                     icon: '<i class="fas fa-check-circle"></i>',
                     title: 'Video Link Saved!',
                     message: `Video ${videoNumber} has been successfully linked to "${productFound.name}"`
                 });
-
+                
                 console.log(`Video ${videoNumber} linked to product ${sku}`);
-
+                
             } catch (error) {
                 hideGlobalLoader();
                 console.error('Error saving video link:', error);
@@ -5003,15 +5184,15 @@
         // Refresh inventory data
         async function refreshInventoryData() {
             console.log('Refreshing inventory data...');
-
+            
             const refreshBtn = event.target.closest('button');
             const refreshIcon = refreshBtn.querySelector('i');
-
+            
             try {
                 // Disable button and show loading state
                 refreshBtn.disabled = true;
                 refreshIcon.classList.add('fa-spin');
-
+                
                 // Show loading spinners in stat cards
                 showInventoryStatsLoading();
 
@@ -5038,7 +5219,7 @@
                 refreshIcon.classList.remove('fa-spin');
             }
         }
-
+        
         // Show loading spinners in inventory stats cards
         function showInventoryStatsLoading() {
             const loadingSpinner = '<i class="fas fa-spinner fa-spin" style="font-size: 24px; color: #94a3b8;"></i>';
@@ -5149,11 +5330,9 @@
             } catch (error) {
                 console.error('Error loading out-of-stock products:', error);
                 loadingElement.innerHTML = `
-                    <div class="error-state">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; opacity: 0.3; margin-bottom: 16px;"></i>
-                        <h3>Failed to Load Products</h3>
-                        <p>An error occurred while fetching out-of-stock products.</p>
-                        <button class="retry-btn" onclick="loadOutOfStockProducts()">Retry</button>
+                    <div style="text-align: center; color: #dc2626;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Error loading out-of-stock products
                     </div>
                 `;
             }
@@ -5196,11 +5375,9 @@
             } catch (error) {
                 console.error('Error loading low-stock products:', error);
                 loadingElement.innerHTML = `
-                    <div class="error-state">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; opacity: 0.3; margin-bottom: 16px;"></i>
-                        <h3>Failed to Load Products</h3>
-                        <p>An error occurred while fetching low-stock products.</p>
-                        <button class="retry-btn" onclick="loadLowStockProducts()">Retry</button>
+                    <div style="text-align: center; color: #f59e0b;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Error loading low-stock products
                     </div>
                 `;
             }
@@ -5240,11 +5417,9 @@
             } catch (error) {
                 console.error('Error loading all products inventory:', error);
                 loadingElement.innerHTML = `
-                    <div class="error-state">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; opacity: 0.3; margin-bottom: 16px;"></i>
-                        <h3>Failed to Load Inventory</h3>
-                        <p>An error occurred while fetching inventory data.</p>
-                        <button class="retry-btn" onclick="loadAllProductsInventory()">Retry</button>
+                    <div style="text-align: center; color: #dc2626;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Error loading inventory data
                     </div>
                 `;
             }
@@ -5358,53 +5533,24 @@
             ];
             let allProducts = [];
 
-            // Use Promise.allSettled for robust parallel fetching
-            const results = await Promise.allSettled(categories.map(async (category) => {
+            for (const category of categories) {
                 try {
                     const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
                     if (response.ok) {
                         const data = await response.json();
-                        if (data.success && data.products) {
-                            const categoryProducts = data.products.map(product => ({
-                                ...product,
-                                category: category,
-                                categoryDisplay: category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())
-                            }));
-                            return categoryProducts;
-                        } else {
-                            console.warn(`API returned error for ${category}:`, data.error || 'Unknown error');
-                            return []; // Return empty array on API error
-                        }
-                    } else {
-                        console.warn(`HTTP error fetching ${category} products: ${response.status}`);
-                        return []; // Return empty array on HTTP error
+                        const products = data.products || [];
+                        products.forEach(product => {
+                            product.category = category;
+                        });
+                        allProducts.push(...products);
                     }
                 } catch (error) {
-                    console.error(`Error fetching ${category} products:`, error);
-                    return []; // Return empty array on network or parsing error
+                    console.error(`Error loading ${category} products:`, error);
                 }
-            }));
-
-            // Flatten the results and handle any rejections
-            results.forEach(result => {
-                if (result.status === 'fulfilled' && Array.isArray(result.value)) {
-                    allProducts.push(...result.value);
-                } else if (result.status === 'rejected') {
-                    console.warn('A category fetch was rejected:', result.reason);
-                }
-            });
-
-            // Sort products by category and name for consistent display
-            allProducts.sort((a, b) => {
-                if (a.category !== b.category) {
-                    return a.category.localeCompare(b.category);
-                }
-                return a.name.localeCompare(b.name);
-            });
+            }
 
             return allProducts;
         }
-
 
         function applySearchAndFilter() {
             // First apply the status filter
@@ -5419,7 +5565,7 @@
 
             // Then apply search if there's a search term
             if (searchTerm) {
-                filteredOrders = ordersToShow.filter(order=> {
+                filteredOrders = ordersToShow.filter(order => {
                     // Search in order ID
                     const orderIdMatch = (order.orderId || '').toLowerCase().includes(searchTerm);
                     const orderRefMatch = (order.orderReference || '').toLowerCase().includes(searchTerm);
@@ -7053,9 +7199,9 @@
             }, 10);
         }
 
-        // Initialize dashboard with authentication
+        // Initialize dashboard
         document.addEventListener('DOMContentLoaded', async function() {
-            console.log('Royal Meenakari Professional Admin Dashboard initialized');
+            console.log('Professional Admin Dashboard initialized');
 
             // Check admin verification first
             if (!checkAdminSession()) {
@@ -7682,7 +7828,7 @@
                     console.warn('⚠️ [ANALYTICS DEBUG] initializeLocationCharts function not available');
                 }
 
-                // Start real-time tracking with error handling
+                // Start real-time visitor tracking with error handling
                 if (typeof startRealtimeTracking === 'function') {
                     console.log('🔍 [ANALYTICS DEBUG] Starting real-time tracking...');
                     startRealtimeTracking();
@@ -8214,7 +8360,7 @@
                                 '#8b5cf6',
                                 '#06b6d4',
                                 '#84cc16',
-                                '#f59e0b',
+                                '#f97316',
                                 '#ec4899',
                                 '#06b6d4',
                                 '#84cc16',
@@ -8410,7 +8556,6 @@
             setTimeout(() => {
                 if (trafficSourcesChart) {
                     trafficSourcesChart.resize();
-                    trafficSourcesChart.update();
                 }
             }, 10);
         }
@@ -8921,7 +9066,7 @@
                 // Count unique visitors from unknown cities
                 const unknownCityVisitors = new Set();
                 Object.entries(visitorCities).forEach(([visitorId, city]) => {
-                    if (city === '=== 'Unknown' || !city) {
+                    if (city === 'Unknown' || !city) {
                         unknownCityVisitors.add(visitorId);
                     }
                 });
@@ -9030,7 +9175,7 @@
                 populateLocationTable(locationData);
             }
 
-            const { top_countries, total_visitors, unknown_visitors, total_records } = locationData;
+            const { top_countries, total_visitors, unknown_visitors, total_records, period } = locationData;
 
             // UPDATE GEOGRAPHIC ANALYTICS STAT CARDS
             updateGeographicStatCards(locationData);
@@ -9283,7 +9428,7 @@
 
                 case 'city':
                     // Display city data
-                    const { top_cities = [], total_city_visitors = 0 } = currentLocationData;
+                    const { top_cities, total_city_visitors, unknown_city_visitors } = currentLocationData;
 
                     if (top_cities && top_cities.length > 0) {
                         top_cities.forEach((city, index) => {
@@ -9615,7 +9760,6 @@
                         window.countryChart.data.labels = labels;
                         window.countryChart.data.datasets[0].data = data;
                         window.countryChart.data.datasets[0].backgroundColor = colors.slice(0, labels.length);
-                        window.countryChart.data.datasets[0].borderColor = colors.slice(0, labels.length);
 
                         // Update chart with animation
                         window.countryChart.update('active');
