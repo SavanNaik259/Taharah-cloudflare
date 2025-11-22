@@ -273,7 +273,23 @@ window.StockManager = (function() {
      */
     async function getOutOfStockProducts() {
         try {
-            const categories = ['featured-collection', 'new-arrivals', 'saree-collection'];
+            const categories = [
+                'featured-collection', 
+                'new-arrivals', 
+                'saree-collection',
+                'gold-necklace',
+                'silver-necklace',
+                'meenakari-necklace',
+                'gold-earrings',
+                'silver-earrings',
+                'meenakari-earrings',
+                'gold-bangles',
+                'silver-bangles',
+                'meenakari-bangles',
+                'gold-rings',
+                'silver-rings',
+                'meenakari-rings'
+            ];
             const outOfStockProducts = [];
 
             for (const category of categories) {
@@ -311,7 +327,23 @@ window.StockManager = (function() {
      */
     async function getLowStockProducts() {
         try {
-            const categories = ['featured-collection', 'new-arrivals', 'saree-collection'];
+            const categories = [
+                'featured-collection', 
+                'new-arrivals', 
+                'saree-collection',
+                'gold-necklace',
+                'silver-necklace',
+                'meenakari-necklace',
+                'gold-earrings',
+                'silver-earrings',
+                'meenakari-earrings',
+                'gold-bangles',
+                'silver-bangles',
+                'meenakari-bangles',
+                'gold-rings',
+                'silver-rings',
+                'meenakari-rings'
+            ];
             const lowStockProducts = [];
 
             for (const category of categories) {
