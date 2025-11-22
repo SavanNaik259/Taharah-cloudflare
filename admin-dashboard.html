@@ -1223,41 +1223,98 @@
             customersTable.style.display = 'block';
         }
 
-        // Load inventory data (existing function)
-        async function loadInventoryData() {
+        // Inventory cache with 5 minute TTL
+        let inventoryCache = {
+            data: null,
+            timestamp: null,
+            CACHE_TTL: 5 * 60 * 1000 // 5 minutes
+        };
+
+        // Load inventory data with parallel loading and caching
+        async function loadInventoryData(forceRefresh = false) {
             try {
-                console.log('Loading inventory data...');
-
-                const categories = ['featured-collection', 'new-arrivals', 'saree-collection'];
-                let totalProducts = 0;
-                let totalValue = 0;
-
-                for (const category of categories) {
-                    try {
-                        const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
-                        const data = await response.json();
-
-                        if (data.success && data.products) {
-                            totalProducts += data.products.length;
-                            totalValue += data.products.reduce((sum, product) => {
-                                return sum + (parseFloat(product.price) || 0);
-                            }, 0);
-                        }
-                    } catch (error) {
-                        console.warn(`Could not load ${category} products:`, error);
+                // Return cached data if available and fresh
+                if (!forceRefresh && inventoryCache.data && inventoryCache.timestamp) {
+                    const cacheAge = Date.now() - inventoryCache.timestamp;
+                    if (cacheAge < inventoryCache.CACHE_TTL) {
+                        console.log('✅ Using cached inventory data');
+                        updateInventoryDisplay(inventoryCache.data);
+                        return inventoryCache.data;
                     }
                 }
 
-                console.log(`✅ Loaded ${totalProducts} products, inventory value: ₹${totalValue.toLocaleString('en-IN')}`);
+                console.log('🔄 Loading inventory data in parallel...');
 
-                document.getElementById('inventory-value').textContent = `₹${Math.round(totalValue).toLocaleString('en-IN')}`;
-                document.getElementById('inventory-change').textContent = `${totalProducts} products in inventory`;
+                const categories = ['featured-collection', 'new-arrivals', 'saree-collection'];
+                
+                // Load all categories in PARALLEL with 3-second timeout
+                const loadPromises = categories.map(async (category) => {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 3000);
+                    
+                    try {
+                        const response = await fetch(
+                            `/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`,
+                            { signal: controller.signal }
+                        );
+                        clearTimeout(timeoutId);
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data.success && data.products) {
+                                return {
+                                    category,
+                                    count: data.products.length,
+                                    value: data.products.reduce((sum, p) => sum + (parseFloat(p.price) || 0), 0)
+                                };
+                            }
+                        }
+                        return { category, count: 0, value: 0 };
+                    } catch (error) {
+                        clearTimeout(timeoutId);
+                        console.warn(`⚠️ ${category} timeout/error:`, error.message);
+                        return { category, count: 0, value: 0 };
+                    }
+                });
+
+                // Wait for all to complete (even if some fail)
+                const results = await Promise.allSettled(loadPromises);
+                
+                let totalProducts = 0;
+                let totalValue = 0;
+
+                results.forEach(result => {
+                    if (result.status === 'fulfilled' && result.value) {
+                        totalProducts += result.value.count;
+                        totalValue += result.value.value;
+                    }
+                });
+
+                const inventoryData = {
+                    totalProducts,
+                    totalValue: Math.round(totalValue)
+                };
+
+                // Cache the results
+                inventoryCache.data = inventoryData;
+                inventoryCache.timestamp = Date.now();
+
+                console.log(`✅ Loaded ${totalProducts} products in parallel (₹${inventoryData.totalValue.toLocaleString('en-IN')})`);
+                
+                updateInventoryDisplay(inventoryData);
+                return inventoryData;
 
             } catch (error) {
                 console.error('❌ Error loading inventory:', error);
-                document.getElementById('inventory-value').textContent = '₹0';
-                document.getElementById('inventory-change').textContent = 'Error loading inventory';
+                updateInventoryDisplay({ totalProducts: 0, totalValue: 0 });
             }
+        }
+
+        // Update inventory display elements
+        function updateInventoryDisplay(data) {
+            document.getElementById('inventory-value').textContent = `₹${data.totalValue.toLocaleString('en-IN')}`;
+            document.getElementById('inventory-change').textContent = 
+                data.totalProducts > 0 ? `${data.totalProducts} products in inventory` : 'No products loaded';
         }
 
         // Helper functions
@@ -1558,6 +1615,12 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Royal Meenakari Professional Admin Dashboard initialized');
             loadDashboardData();
+            
+            // Load inventory after short delay to prioritize orders/customers
+            setTimeout(() => {
+                loadInventoryData();
+            }, 500);
+            
             loadProductManagement();
         });
     </script>
