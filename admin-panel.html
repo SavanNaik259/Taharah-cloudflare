@@ -4912,6 +4912,7 @@
             } else if (sectionName === 'products') {
                 loadProducts();
             } else if (sectionName === 'inventory') {
+                showInventoryStatsLoading(); // Show loading indicators first
                 loadInventorySummary();
                 showInventoryTab('out-of-stock'); // Show default tab
             } else if (sectionName === 'customers') {
