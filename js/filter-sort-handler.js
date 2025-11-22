@@ -114,12 +114,9 @@ const FilterSortHandler = (function() {
         }
 
         if (filterModal) {
-            const filterModalContent = filterModal.querySelector('.filter-modal-content');
-            
-            // Single unified click handler for the entire modal overlay
+            // Close when clicking on the overlay (background)
             filterModal.addEventListener('click', function(e) {
-                // Only close if clicking directly on the overlay (not on modal content)
-                if (e.target === filterModal) {
+                if (e.target === filterModal || e.target.classList.contains('filter-modal')) {
                     if (filterModal.classList.contains('active')) {
                         filterModal.classList.add('closing');
                         
@@ -130,12 +127,31 @@ const FilterSortHandler = (function() {
                 }
             });
 
-            // Prevent clicks inside modal content from bubbling to overlay
+            // Prevent modal content clicks from closing the modal
+            const filterModalContent = filterModal.querySelector('.filter-modal-content');
             if (filterModalContent) {
                 filterModalContent.addEventListener('click', function(e) {
                     e.stopPropagation();
                 });
             }
+
+            // Close filter modal when clicking outside (on document)
+            document.addEventListener('click', function(e) {
+                if (filterModal.classList.contains('active')) {
+                    // Check if click is outside both the filter button and modal content
+                    const filterModalContent = filterModal.querySelector('.filter-modal-content');
+                    const isClickInsideModalContent = filterModalContent && filterModalContent.contains(e.target);
+                    const isClickOnFilterButton = filterOption && filterOption.contains(e.target);
+                    
+                    if (!isClickInsideModalContent && !isClickOnFilterButton) {
+                        filterModal.classList.add('closing');
+                        
+                        setTimeout(() => {
+                            filterModal.classList.remove('active', 'closing');
+                        }, 300);
+                    }
+                }
+            });
         }
 
         if (applyFilterBtn) {
