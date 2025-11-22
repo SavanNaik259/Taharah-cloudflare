@@ -230,7 +230,7 @@
         </div>
     </section>
     <script>
-        // Randomly select one of the 8 hero images and store in session
+        // Randomly select one of the 8 hero images for Featured Collection page
         const heroImages = [
             'images/IMG_20251013_072026.jpg',
             'images/b0bb682fbc453cd01cde00d00869232f.jpg',
@@ -242,13 +242,13 @@
             'images/ff1acb3dab12cf3a8d4092cb7172c36e.jpg'
         ];
         
-        // Check if we already have a selected image in session
-        let selectedImage = sessionStorage.getItem('collectionHeroImage');
+        // Check if we already have a selected image for this specific page
+        let selectedImage = sessionStorage.getItem('featuredCollectionHeroImage');
         
-        // If not, select a random one and store it
+        // If not, select a random one and store it for this page only
         if (!selectedImage) {
             selectedImage = heroImages[Math.floor(Math.random() * heroImages.length)];
-            sessionStorage.setItem('collectionHeroImage', selectedImage);
+            sessionStorage.setItem('featuredCollectionHeroImage', selectedImage);
         }
         
         document.getElementById('heroBackgroundImage').src = selectedImage;
