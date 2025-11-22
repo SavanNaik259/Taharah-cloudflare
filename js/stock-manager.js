@@ -323,7 +323,7 @@ window.StockManager = (function() {
                     
                     const categoryLowStock = products.filter(product => {
                         const stock = product.stock || 0;
-                        return stock > 0 && stock <= 3;
+                        return stock === 3;
                     }).map(product => ({
                         ...product,
                         category,
