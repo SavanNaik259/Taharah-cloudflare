@@ -1927,23 +1927,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     // Add shipment info to order confirmation
                     if (result.data.awb_code) {
-                        showConfirmation(`Order placed successfully! 🎉\n\nOrder ID: AURIC-${orderData.orderId}\nShipment created with AWB: ${result.data.awb_code}\nYou can track your order at: track-order.html`);
+                        showConfirmation(`Order placed successfully! 🎉\n\nOrder ID: ROYALMEENAKARI-${orderData.orderId}\nShipment created with AWB: ${result.data.awb_code}\nYou can track your order at: track-order.html`);
                     } else {
-                        showConfirmation(`Order placed successfully! 🎉\n\nOrder ID: AURIC-${orderData.orderId}\nShipment created (AWB pending)\nYou can track your order at: track-order.html`);
+                        showConfirmation(`Order placed successfully! 🎉\n\nOrder ID: ROYALMEENAKARI-${orderData.orderId}\nShipment created (AWB pending)\nYou can track your order at: track-order.html`);
                     }
                 } else {
                     console.warn('Shipment creation failed but order was placed:', result);
-                    showConfirmation(`Order placed successfully! 🎉\n\nOrder ID: AURIC-${orderData.orderId}\nNote: Shipment will be created manually by admin.`);
+                    showConfirmation(`Order placed successfully! 🎉\n\nOrder ID: ROYALMEENAKARI-${orderData.orderId}\nNote: Shipment will be created manually by admin.`);
                 }
 
             } catch (shipmentError) {
                 console.error('Failed to create shipment (order still placed):', shipmentError);
-                showConfirmation(`Order placed successfully! 🎉\n\nOrder ID: AURIC-${orderData.orderId}\nNote: Shipment will be created manually by admin.`);
+                showConfirmation(`Order placed successfully! 🎉\n\nOrder ID: ROYALMEENAKARI-${orderData.orderId}\nNote: Shipment will be created manually by admin.`);
             }
             */
 
             // Show order confirmation without shipment creation
-            showConfirmation(`Order placed successfully! 🎉\n\nOrder ID: NAZAKAT-${orderData.orderId}`);
+            showConfirmation(`Order placed successfully! 🎉\n\nOrder ID: ROYALMEENAKARI-${orderData.orderId}`);
         } catch (shipmentError) {
             console.error('❌ Critical shipment error:', shipmentError);
 
