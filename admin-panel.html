@@ -5234,6 +5234,23 @@
             try {
                 console.log('Loading inventory summary...');
 
+                // First, try to use cached data from OutOfStockHandler for instant display
+                if (window.OutOfStockHandler && window.OutOfStockHandler.initialized) {
+                    const cachedOutOfStockIds = window.OutOfStockHandler.getOutOfStockProductIds();
+                    const cachedLowStockIds = window.OutOfStockHandler.getLowStockProductIds();
+                    
+                    if (cachedOutOfStockIds.length > 0 || cachedLowStockIds.length > 0) {
+                        console.log('✅ Using cached stock data from OutOfStockHandler for instant display');
+                        
+                        // Update navigation badge immediately with cached data
+                        const inventoryBadge = document.getElementById('inventory-alert-badge');
+                        if (cachedOutOfStockIds.length > 0) {
+                            inventoryBadge.textContent = cachedOutOfStockIds.length;
+                            inventoryBadge.style.display = 'flex';
+                        }
+                    }
+                }
+
                 if (typeof StockManager === 'undefined') {
                     console.warn('StockManager not available');
                     return;
@@ -5262,7 +5279,7 @@
                 document.getElementById('out-of-stock-tab-count').textContent = outOfStockCount;
                 document.getElementById('low-stock-tab-count').textContent = lowStockCount;
 
-                // Update navigation badge
+                // Update navigation badge with fresh data
                 const inventoryBadge = document.getElementById('inventory-alert-badge');
                 if (outOfStockCount > 0) {
                     inventoryBadge.textContent = outOfStockCount;
@@ -7274,13 +7291,18 @@
                     console.log('⚠️ Authentication failed - proceeding with unauthenticated access (rules allow this)');
                 }
 
-                // Load critical dashboard data in parallel INCLUDING inventory summary for badge
+                // Start inventory summary load immediately (non-blocking) for badge update
+                console.log('📦 Starting inventory summary load (non-blocking)...');
+                loadInventorySummary().catch(err => {
+                    console.warn('⚠️ Inventory summary load failed:', err);
+                });
+
+                // Load critical dashboard data in parallel
                 console.log('📋 Loading critical dashboard data in parallel...');
                 await Promise.all([
                     loadOrders(),
                     loadCustomers(),
-                    loadNotifications(),
-                    loadInventorySummary() // Load inventory summary immediately to update badge
+                    loadNotifications()
                 ]);
 
                 console.log('✅ Dashboard initialization complete');
