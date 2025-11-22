@@ -4,7 +4,7 @@
 .navbar {
     background: transparent;
     border-bottom: none;
-    position: absolute;
+    position: fixed;
     width: 100%;
     top: 40px;
     z-index: 1000;
@@ -423,7 +423,7 @@
     .navbar {
         top: 40px;
         width: 100%;
-        position: absolute;
+        position: fixed;
         z-index: 1000;
         background: transparent;
     }
