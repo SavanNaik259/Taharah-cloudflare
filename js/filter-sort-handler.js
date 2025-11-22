@@ -19,14 +19,7 @@ const FilterSortHandler = (function() {
         const sortDropdown = document.getElementById('sortDropdown');
 
         if (sortOption && sortDropdown) {
-            // Prevent dropdown from closing when clicking inside it (set this FIRST)
-            sortDropdown.addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-
-            // Toggle dropdown when clicking sort option
             sortOption.addEventListener('click', function(e) {
-                e.preventDefault();
                 e.stopPropagation();
                 
                 if (sortDropdown.classList.contains('active')) {
@@ -45,21 +38,24 @@ const FilterSortHandler = (function() {
                 }
             });
 
-            // Close dropdown when clicking outside (use setTimeout to avoid race condition)
-            setTimeout(() => {
-                document.addEventListener('click', function(e) {
-                    if (!sortOption.contains(e.target) && !sortDropdown.contains(e.target)) {
-                        if (sortDropdown.classList.contains('active')) {
-                            sortDropdown.classList.add('closing');
-                            sortOption.classList.remove('active');
-                            
-                            setTimeout(() => {
-                                sortDropdown.classList.remove('active', 'closing');
-                            }, 300);
-                        }
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!sortOption.contains(e.target) && !sortDropdown.contains(e.target)) {
+                    if (sortDropdown.classList.contains('active')) {
+                        sortDropdown.classList.add('closing');
+                        sortOption.classList.remove('active');
+                        
+                        setTimeout(() => {
+                            sortDropdown.classList.remove('active', 'closing');
+                        }, 300);
                     }
-                });
-            }, 100);
+                }
+            });
+
+            // Prevent dropdown from closing when clicking inside it
+            sortDropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
 
             // Sort option clicks
             const sortOptions = sortDropdown.querySelectorAll('.sort-dropdown-option');
