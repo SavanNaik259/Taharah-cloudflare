@@ -186,6 +186,7 @@ background-color: #000 !important;
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-solid-straight/css/uicons-solid-straight.css'>
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-straight/css/uicons-regular-straight.css'>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/first-visit-banner.css?v=1.0.0">
     <link href="https://fonts.cdnfonts.com/css/futura-pt" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css?v=2.0.0">
     <link rel="stylesheet" href="css/responsive.css?v=1.0.4">
@@ -275,6 +276,19 @@ background-color: #000 !important;
         }
     </style>
   <body>
+
+    <!-- First Visit Modal -->
+    <div id="firstVisitModal" class="first-visit-modal">
+        <div class="first-visit-modal-content">
+            <button class="first-visit-modal-close" onclick="closeFirstVisitModal()">&times;</button>
+            <img src="images/7ee0b1b1ef79410cac60d42a3ff800c7.jpg" alt="Welcome to Royal Meenakari" class="first-visit-banner-image">
+            <div class="first-visit-banner-text">
+                <h2>Welcome to Royal Meenakari!</h2>
+                <p>Discover our exquisite collection of handcrafted Meenakari jewelry. Sign up today to receive exclusive offers and updates.</p>
+                <a href="signup.html" class="first-visit-cta-button">Sign Up Now</a>
+            </div>
+        </div>
+    </div>
 
     <!-- Header -->
     <header class="header">
@@ -2281,5 +2295,8 @@ background-color: #000 !important;
 
     <!-- Language Translator -->
     <script src="js/language-translator.js?v=1.0.0"></script>
+
+    <!-- First Visit Banner Modal -->
+    <script src="js/first-visit-banner.js?v=1.0.0"></script>
   </body>
 </html>
