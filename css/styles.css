@@ -204,7 +204,6 @@ a {
 }
 /* Header Styles */
  .header {
-     position: relative;
      background-color: #f8f8f5!important;
      z-index: 1000;
 }
