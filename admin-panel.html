@@ -7274,12 +7274,13 @@
                     console.log('⚠️ Authentication failed - proceeding with unauthenticated access (rules allow this)');
                 }
 
-                // Load critical dashboard data in parallel (NOT inventory - that's lazy loaded)
+                // Load critical dashboard data in parallel INCLUDING inventory summary for badge
                 console.log('📋 Loading critical dashboard data in parallel...');
                 await Promise.all([
                     loadOrders(),
                     loadCustomers(),
-                    loadNotifications()
+                    loadNotifications(),
+                    loadInventorySummary() // Load inventory summary immediately to update badge
                 ]);
 
                 console.log('✅ Dashboard initialization complete');
@@ -7290,9 +7291,9 @@
                 updateCustomersDisplay();
                 updateNotificationDisplay();
 
-                // Lazy load inventory in the background (non-blocking)
+                // Lazy load full inventory data in the background (non-blocking)
                 setTimeout(() => {
-                    console.log('📦 Background loading inventory data...');
+                    console.log('📦 Background loading full inventory data...');
                     loadInventoryData().catch(err => {
                         console.warn('⚠️ Background inventory load failed:', err);
                     });
