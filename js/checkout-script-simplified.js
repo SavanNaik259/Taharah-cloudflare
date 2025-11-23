@@ -802,13 +802,25 @@ document.addEventListener('DOMContentLoaded', function() {
             products: cartItems.map(item => {
                 // Make sure image property exists and is properly structured
                 console.log(`Product ${item.name} - image:`, item.image);
+                
+                const itemTotal = item.price * item.quantity;
+                // Pre-convert prices for email display
+                let itemPriceDisplay = item.price;
+                let itemTotalDisplay = itemTotal;
+                if (typeof window.CurrencyConverter !== 'undefined' && window.CurrencyConverter.convertPrice) {
+                    itemPriceDisplay = window.CurrencyConverter.convertPrice(item.price);
+                    itemTotalDisplay = window.CurrencyConverter.convertPrice(itemTotal);
+                }
 
                 return {
                     id: item.id,
                     name: item.name,
                     price: item.price,
                     quantity: item.quantity,
-                    total: item.price * item.quantity,
+                    total: itemTotal,
+                    // Include converted prices for email display
+                    priceDisplay: itemPriceDisplay,
+                    totalDisplay: itemTotalDisplay,
                     // Only include image if it exists
                     image: item.image || ''
                 };
@@ -818,7 +830,15 @@ document.addEventListener('DOMContentLoaded', function() {
             orderDate: new Date().toISOString(),
             notes: formData.get('notes') || '',
             // Include user's selected currency for email formatting
-            userSelectedCurrency: window.CurrencyConverter ? window.CurrencyConverter.getCurrentCurrency() : 'INR'
+            userSelectedCurrency: window.CurrencyConverter ? window.CurrencyConverter.getCurrentCurrency() : 'INR',
+            // Pre-convert total for email display
+            orderTotalDisplay: (function() {
+                let total = calculateTotal(cartItems);
+                if (typeof window.CurrencyConverter !== 'undefined' && window.CurrencyConverter.convertPrice) {
+                    return window.CurrencyConverter.convertPrice(total);
+                }
+                return total;
+            })()
         };
 
         // Disable submit button and show loading state
@@ -1375,19 +1395,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
             orderData.products.forEach(item => {
                 const itemTotal = item.price * item.quantity;
+                // Convert prices for display in confirmation modal
+                let itemTotalDisplay = itemTotal;
+                if (typeof window.CurrencyConverter !== 'undefined' && window.CurrencyConverter.convertPrice) {
+                    itemTotalDisplay = window.CurrencyConverter.convertPrice(itemTotal);
+                }
                 detailsHTML += `
                     <div class="d-flex justify-content-between mb-2">
                         <span>${item.name} × ${item.quantity}</span>
-                        <span>${currencySymbol}${itemTotal.toFixed(2)}</span>
+                        <span>${currencySymbol}${itemTotalDisplay.toFixed(2)}</span>
                     </div>
                 `;
             });
+
+            // Convert total for display
+            let totalDisplay = orderData.orderTotal;
+            if (typeof window.CurrencyConverter !== 'undefined' && window.CurrencyConverter.convertPrice) {
+                totalDisplay = window.CurrencyConverter.convertPrice(orderData.orderTotal);
+            }
 
             detailsHTML += `
                             <hr>
                             <div class="d-flex justify-content-between">
                                 <strong>Total</strong>
-                                <strong>${currencySymbol}${orderData.orderTotal.toFixed(2)}</strong>
+                                <strong>${currencySymbol}${totalDisplay.toFixed(2)}</strong>
                             </div>
                         </div>
                     </div>
