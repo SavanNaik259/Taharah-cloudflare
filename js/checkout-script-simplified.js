@@ -271,26 +271,32 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             // Use LocalStorageCart if available, otherwise fall back to direct localStorage access
             if (typeof LocalStorageCart !== 'undefined') {
-                console.log('Using LocalStorageCart module for checkout');
+                console.log('📥 Using LocalStorageCart module for checkout');
                 const cartItems = LocalStorageCart.getItems();
-                console.log('LocalStorageCart returned', cartItems.length, 'items');
+                console.log('📥 LocalStorageCart returned', cartItems.length, 'items');
+                cartItems.forEach(item => {
+                    console.log(`   📍 Item: ${item.name} - Quantity: ${item.quantity}`);
+                });
                 return cartItems;
             } else {
                 // Fallback to direct localStorage access
-                console.log('LocalStorageCart not available, using direct access');
+                console.log('📥 LocalStorageCart not available, using direct access');
                 const savedCart = localStorage.getItem(STORAGE_KEY);
 
                 if (savedCart) {
                     const cartItems = JSON.parse(savedCart);
-                    console.log('Direct localStorage returned', cartItems.length, 'items');
+                    console.log('📥 Direct localStorage returned', cartItems.length, 'items');
+                    cartItems.forEach(item => {
+                        console.log(`   📍 Item: ${item.name} - Quantity: ${item.quantity}`);
+                    });
                     return cartItems;
                 } else {
-                    console.log('No cart found in localStorage');
+                    console.log('📥 No cart found in localStorage');
                     return [];
                 }
             }
         } catch (error) {
-            console.error('Error loading cart from storage:', error);
+            console.error('❌ Error loading cart from storage:', error);
             return [];
         }
     }
@@ -554,11 +560,21 @@ document.addEventListener('DOMContentLoaded', function() {
         if (itemIndex !== -1) {
             items[itemIndex].quantity += 1;
 
+            console.log('📦 Quantity incremented for item:', itemId, 'New quantity:', items[itemIndex].quantity);
+
             // Update the display
             updateQuantityDisplay(itemId, items[itemIndex]);
 
-            // Update the localStorage
+            // Update the localStorage - CRITICAL: Must persist before user navigates away
             updateLocalStorage(items);
+            
+            // Verify save was successful
+            const savedCart = localStorage.getItem(STORAGE_KEY);
+            if (savedCart) {
+                const savedItems = JSON.parse(savedCart);
+                const savedItem = savedItems.find(i => i.id === itemId);
+                console.log('✅ Cart saved to localStorage. Item quantity in storage:', savedItem?.quantity);
+            }
 
             // Update order total
             updateOrderTotal(items);
@@ -572,11 +588,21 @@ document.addEventListener('DOMContentLoaded', function() {
         if (itemIndex !== -1 && items[itemIndex].quantity > 1) {
             items[itemIndex].quantity -= 1;
 
+            console.log('📦 Quantity decremented for item:', itemId, 'New quantity:', items[itemIndex].quantity);
+
             // Update the display
             updateQuantityDisplay(itemId, items[itemIndex]);
 
-            // Update the localStorage
+            // Update the localStorage - CRITICAL: Must persist before user navigates away
             updateLocalStorage(items);
+            
+            // Verify save was successful
+            const savedCart = localStorage.getItem(STORAGE_KEY);
+            if (savedCart) {
+                const savedItems = JSON.parse(savedCart);
+                const savedItem = savedItems.find(i => i.id === itemId);
+                console.log('✅ Cart saved to localStorage. Item quantity in storage:', savedItem?.quantity);
+            }
 
             // Update order total
             updateOrderTotal(items);
@@ -657,15 +683,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Also syncs with Firebase if user is logged in
     function updateLocalStorage(items) {
         try {
-            // First try to use our new cart modules if available
+            // ALWAYS use direct localStorage for immediate persistence
+            // This ensures the cart is saved before any navigation
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+            console.log('💾 Cart persisted to localStorage:', items.length, 'items');
+            
+            // Also try to use our new cart modules if available
             if (typeof LocalStorageCart !== 'undefined' && LocalStorageCart.saveItems) {
-                // Use new LocalStorageCart module
+                // Use new LocalStorageCart module as secondary save
                 LocalStorageCart.saveItems(items);
-                console.log('Cart updated using LocalStorageCart module');
-            } else {
-                // Fallback to direct localStorage
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-                console.log('Cart updated using direct localStorage access');
+                console.log('📦 Cart also updated using LocalStorageCart module');
             }
 
             // If Firebase cart module is loaded and user is logged in, also save to Firebase
@@ -673,23 +700,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 firebaseCartModule.saveCartToFirebase(items)
                     .then(result => {
                         if (result.success) {
-                            console.log('Cart updated in Firebase from checkout page');
+                            console.log('☁️ Cart updated in Firebase from checkout page');
                         } else {
-                            console.warn('Failed to update cart in Firebase:', result.error);
+                            console.warn('⚠️ Failed to update cart in Firebase:', result.error);
                         }
                     })
                     .catch(err => {
-                        console.error('Error updating Firebase cart:', err);
+                        console.error('❌ Error updating Firebase cart:', err);
                     });
             }
         } catch (error) {
-            console.error('Error saving cart to storage:', error);
+            console.error('❌ Error saving cart to storage:', error);
 
             // Always try the most basic fallback method on error
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+                console.log('💾 Cart saved via fallback direct localStorage');
             } catch (fallbackError) {
-                console.error('Critical error: Failed to save cart with fallback method', fallbackError);
+                console.error('🔴 CRITICAL ERROR: Failed to save cart with fallback method', fallbackError);
             }
         }
     }
