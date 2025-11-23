@@ -8,6 +8,13 @@ Auric is a premium e-commerce platform offering an online shopping experience fo
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (Nov 23, 2025)
+
+### Inventory Management Improvements
+- **Fixed Image Display**: Product images in inventory section (out-of-stock and low-stock) now display properly with correct opacity and aspect ratio
+- **CSS Styling**: Added comprehensive styling for inventory product cards with visual differentiation for stock status
+- **Video Management Caching**: Fixed "Watch & Buy Video Management" section loading with two-stage caching and parallel product fetching
+
 ## System Architecture
 
 ### Frontend

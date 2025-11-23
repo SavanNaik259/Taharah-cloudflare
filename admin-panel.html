@@ -786,8 +786,9 @@
         .product-image {
             width: 100%;
             height: 100%;
+            object-fit: cover;
             transition: transform 0.3s ease, opacity 0.3s ease;
-            opacity: 0; /* Start hidden, show on load */
+            opacity: 1;
         }
 
         .product-card:hover .product-image {
