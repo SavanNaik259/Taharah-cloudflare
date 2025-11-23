@@ -552,6 +552,11 @@ const BridalProductsLoader = (function() {
                 console.log('Firebase products found, showing only Firebase products');
                 const firebaseProductsHTML = products.map(product => generateProductHTML(product)).join('');
                 featuredCollectionContainer.innerHTML = firebaseProductsHTML;
+                
+                // Convert prices to user's selected currency
+                if (typeof window.CurrencyConverter !== 'undefined') {
+                    window.CurrencyConverter.convertAllPrices();
+                }
             } else {
                 // No Firebase products found - show message
                 console.log('No products found in Firebase');

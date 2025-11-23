@@ -427,6 +427,11 @@ const NewArrivalsProductsLoader = (function() {
             const productsHTML = products.map(product => generateProductHTML(product)).join('');
             productsGrid.innerHTML = productsHTML;
 
+            // Convert prices to user's selected currency
+            if (typeof window.CurrencyConverter !== 'undefined') {
+                window.CurrencyConverter.convertAllPrices();
+            }
+
             // Setup wishlist event listeners
             setupWishlistEventListeners();
 
@@ -473,6 +478,11 @@ const NewArrivalsProductsLoader = (function() {
             if (products.length > 0) {
                 const productsHTML = products.map(product => generateProductHTML(product)).join('');
                 productsGrid.innerHTML = productsHTML;
+
+                // Convert prices to user's selected currency
+                if (typeof window.CurrencyConverter !== 'undefined') {
+                    window.CurrencyConverter.convertAllPrices();
+                }
 
                 // Setup wishlist event listeners
                 setupWishlistEventListeners();

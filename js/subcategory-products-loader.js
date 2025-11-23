@@ -208,6 +208,11 @@ const SubcategoryProductsLoader = (function() {
                 const productsHTML = products.map(product => generateProductHTML(product)).join('');
                 productsGrid.innerHTML = productsHTML;
 
+                // Convert prices to user's selected currency
+                if (typeof window.CurrencyConverter !== 'undefined') {
+                    window.CurrencyConverter.convertAllPrices();
+                }
+
                 // Setup wishlist event listeners
                 setupWishlistEventListeners();
 

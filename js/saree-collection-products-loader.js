@@ -558,6 +558,11 @@ const JewelrySubcategoriesLoader = (function() {
                 console.log('Jewelry products loaded, displaying', products.length, 'random items');
                 const productsHTML = products.map(product => generateProductHTML(product)).join('');
                 jewelryGrid.innerHTML = productsHTML;
+                
+                // Convert prices to user's selected currency
+                if (typeof window.CurrencyConverter !== 'undefined') {
+                    window.CurrencyConverter.convertAllPrices();
+                }
             } else {
                 console.log('No products found in subcategories');
 

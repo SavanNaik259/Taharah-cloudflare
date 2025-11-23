@@ -10,8 +10,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Nov 23, 2025)
 
-### Currency Conversion System Enhancement
-- **Order Confirmation Emails**: Users now receive order confirmation emails with prices displayed in their selected currency
+### Currency Persistence Fix
+- **Saved Currency Preference**: Selected currency now persists across page refreshes using localStorage
+- **Automatic Conversion on Load**: When page loads, saved currency preference is restored and all prices automatically convert
+- **Dynamic Product Loading**: Added currency conversion calls after all dynamically loaded products are inserted into the DOM
+- **All Product Loaders Updated**: Fixed new-arrivals, featured-collection, saree-collection, and subcategory product loaders
+- **Collection Pages Fixed**: Updated featured-collection.html, all-collection.html, and saree-collection.html to convert prices after loading
+- **Checkout Totals Fixed**: Added .order-total class and data-original-price attribute to all order total elements across 3 checkout steps
+- **Result**: Users can now select a currency once, and it will persist and apply automatically to all prices even after page refresh
+
+### Previous Currency Implementation (Nov 23, 2025)
+- **Order Confirmation Emails**: Users receive order confirmation emails with prices displayed in their selected currency
 - **Email Template Updates**: Modified email-templates.js to support currency conversion with formatCurrencyPrice function
 - **Checkout Integration**: Added currency-converter script to checkout.html and updated order data to include userSelectedCurrency
 - **Currency Support**: All 7 supported currencies (INR, USD, EUR, GBP, AED, CAD, AUD) now work in order emails
