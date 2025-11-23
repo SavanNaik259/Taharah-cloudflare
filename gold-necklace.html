@@ -871,6 +871,20 @@
     <script src="js/whatsapp-tooltip.js"></script>
 
     <!-- Currency Converter -->
+    <script src="js/currency-converter.js?v=3.0.0"></script>
+
+    <!-- Initialize Currency Converter -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        if (typeof window.CurrencyConverter !== 'undefined') {
+          window.CurrencyConverter.init();
+          // Convert prices after a brief delay to ensure products are loaded
+          setTimeout(() => {
+            window.CurrencyConverter.convertAllPrices();
+          }, 500);
+        }
+      });
+    </script>
 
 
     <!-- Language Translator -->
