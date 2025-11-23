@@ -2,143 +2,50 @@
 
 ## Overview
 
-Auric is a premium e-commerce platform offering an online shopping experience for jewelry. It includes user authentication, cart management, order processing, and email notifications. The platform aims to provide a modern and seamless interface for customers to browse and purchase jewelry, with a focus on comprehensive features like advanced stock management, multi-language support, and integrated shipping.
+Auric is a premium e-commerce platform designed to provide a seamless online shopping experience for jewelry. It offers comprehensive features including user authentication, cart management, order processing, and email notifications. The platform aims to deliver a modern interface for customers to browse and purchase jewelry, with advanced stock management, multi-language support, and integrated shipping.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
 
-## Recent Changes (Nov 23, 2025)
-
-### COMPLETE FIX: Currency Symbol Display Across ALL Interfaces (v3.0.2)
-
-**Issues Resolved**:
-1. ✅ Wishlist was showing RUPEE symbol (₹) with converted prices in other currencies
-2. ✅ Cart panel was showing hardcoded ₹ instead of selected currency
-3. ✅ Checkout page prices were showing hardcoded ₹ instead of selected currency
-4. ✅ Order confirmation modal was showing hardcoded ₹
-
-**Solution Implemented**:
-- ✅ Updated wishlist-manager.js to use CurrencyConverter.getCurrencySymbol()
-- ✅ Updated cart-manager.js to fetch and use current currency symbol dynamically for all price displays
-- ✅ Updated checkout-script-simplified.js to fetch and use current currency symbol for:
-  - Order summary item prices
-  - Order total displays
-  - Order confirmation modal
-- ✅ Verified EmailCurrencyFormatter.js is properly structured with all 7 currencies
-- ✅ Verified userSelectedCurrency is passed to email sending functions for correct email display
-
-**Files Modified**:
-- js/wishlist-manager.js: updateWishlistItemsDisplay() uses CurrencyConverter.getCurrencySymbol()
-- js/cart-manager.js: setupCartPanel() and updateCartItemsDisplay() use dynamic currency symbols
-- js/checkout-script-simplified.js: displayCartItems() and showOrderConfirmation() use dynamic currency symbols
-- js/currency-email-formatter.js: Already properly configured with all currencies
-
-**Result**:
-- ✅ Cart panel displays prices with correct currency symbol ($, €, £, د.إ, C$, A$, or ₹)
-- ✅ Checkout page shows all prices with correct currency symbol
-- ✅ Order confirmation modal shows prices with correct symbol
-- ✅ Wishlist shows prices with correct symbol
-- ✅ Order confirmation emails use EmailCurrencyFormatter with userSelectedCurrency
-- ✅ Complete currency consistency across all user-facing interfaces
-
-### FINAL SOLUTION: Complete Currency Persistence Across ALL Pages (v3.0.0)
-
-**TOTAL FIX: Implemented on all 17 pages + all product loaders**
-
-#### Pages Updated (All 17 pages now support currency persistence):
-1. **Home Page** (index.html) - ✅ Fixed
-2. **Collection Pages** (4 pages):
-   - new-arrivals.html - ✅ Fixed
-   - all-collection.html - ✅ Fixed  
-   - featured-collection.html - ✅ Fixed
-   - saree-collection.html - ✅ Fixed
-3. **Subcategory Pages** (12 pages): All necklace/earring/bangle/ring variants
-   - Gold, Silver, Meenakari variants of each category - ✅ All Fixed
-
-#### Technical Implementation:
-
-**Core Module Rewrite (currency-converter.js v3.0.0)**:
-- ✅ Added CRITICAL restore check in convertAllPrices() that ALWAYS checks localStorage
-- ✅ Proper initialization with DOMContentLoaded handling
-- ✅ Robust exchange rate loading with 3-tier fallback (API → cache → defaults)
-- ✅ Location detection with timeout
-- ✅ Global window.CurrencyConverter registration
-- ✅ All 7 currencies fully supported (INR, USD, EUR, GBP, AED, CAD, AUD)
-
-**All Product Loaders Fixed**:
-- ✅ new-arrivals-page-loader.js: Added convertAllPrices() after displayAllProducts()
-- ✅ featured-collection-products-loader.js: Already had convertAllPrices()
-- ✅ new-arrivals-products-loader.js: Already had convertAllPrices() calls
-- ✅ saree-collection-products-loader.js: Inherits from parent
-- ✅ shop.js: Added convertAllPrices() to ALL display functions
-- ✅ subcategory-products-loader.js: Already had convertAllPrices()
-
-**HTML Page Updates**:
-- ✅ All 17 pages: Updated currency-converter script version to v=3.0.0
-- ✅ All 17 pages: Added CurrencyConverter.init() call in DOMContentLoaded listener
-
-#### Result:
-- ✅ Users select a currency ONCE on ANY page
-- ✅ Currency PERSISTS across ALL page navigations
-- ✅ Currency PERSISTS across page refreshes
-- ✅ Prices AUTOMATICALLY convert on page load using saved preference
-- ✅ Works reliably across all 7 currencies
-- ✅ Works across 17+ pages and all collection/category pages
-- ✅ NO manual reselection required
-- ✅ ALL timing and network conditions handled gracefully
-
-### Previous Currency Implementation (Nov 23, 2025)
-- **Order Confirmation Emails**: Users receive order confirmation emails with prices displayed in their selected currency
-- **Email Template Updates**: Modified email-templates.js to support currency conversion with formatCurrencyPrice function
-- **Checkout Integration**: Added currency-converter script to checkout.html and updated order data to include userSelectedCurrency
-- **Currency Support**: All 7 supported currencies (INR, USD, EUR, GBP, AED, CAD, AUD) now work in order emails
-- **Collection Pages**: Currency conversion fully functional on new-arrivals, featured-collection, all-collection, and saree-collection pages
-- **Cart & Wishlist Support**: Currency display supported across cart and checkout interfaces
-
-### Previous Updates
-- **Fixed Image Display**: Product images in inventory section (out-of-stock and low-stock) now display properly with correct opacity and aspect ratio
-- **CSS Styling**: Added comprehensive styling for inventory product cards with visual differentiation for stock status
-- **Video Management Caching**: Fixed "Watch & Buy Video Management" section loading with two-stage caching and parallel product fetching
-
 ## System Architecture
 
 ### Frontend
-- **HTML5/CSS3**: Responsive design principles are applied using modern CSS.
-- **JavaScript Modules**: Client-side code is organized into modular JavaScript for maintainability.
-- **UI Components**: Reusable UI components are used for consistent product display, cart, and general user interface elements.
-- **UI/UX Design**: The platform features a clean, professional aesthetic, particularly in the admin dashboard, using a specific color palette (Primary: #2563eb, Secondary: #64748b, Success: #059669, Danger: #dc2626, Background: #f8fafc) and responsive grid layouts.
+- **HTML5/CSS3**: Utilizes responsive design principles with modern CSS.
+- **JavaScript Modules**: Client-side logic is organized into modular JavaScript.
+- **UI Components**: Employs reusable UI components for consistency across product display, cart, and other interface elements.
+- **UI/UX Design**: Features a clean, professional aesthetic with a specific color palette (Primary: #2563eb, Secondary: #64748b, Success: #059669, Danger: #dc2626, Background: #f8fafc) and responsive grid layouts.
 
 ### Backend
-- **Serverless Functions**: Netlify Functions are utilized for API endpoints and server-side logic.
-- **Local Server**: An Express.js server facilitates local development.
-- **Email Service**: Nodemailer handles transactional emails.
-- **Payment Processing**: Razorpay is integrated for secure payment transactions. All product prices and cart totals are stored in INR (base currency), ensuring compatibility with Razorpay's requirements.
+- **Serverless Functions**: Netlify Functions handle API endpoints and server-side logic.
+- **Local Server**: Express.js is used for local development.
+- **Email Service**: Nodemailer manages transactional emails.
+- **Payment Processing**: Razorpay is integrated for secure transactions, storing all prices in INR as the base currency.
 - **Shipping Integration**: Shiprocket API manages order fulfillment, tracking, and logistics.
 
 ### Authentication & Data Storage
 - **Authentication**: Firebase Authentication manages user logins and profiles.
 - **Database**: Firebase Firestore stores user data, orders, and persistent cart information.
-- **Product Data**: Product information, including images, is stored in Firebase Cloud Storage (project "auric-a0c92").
-- **Cart Management**: A dual storage approach uses `localStorage` for guest users and Firebase for authenticated users, ensuring real-time sync and persistence.
+- **Product Data**: Product information, including images, is stored in Firebase Cloud Storage.
+- **Cart Management**: A dual storage approach uses `localStorage` for guest users and Firebase for authenticated users.
 
 ### Key Features
 - **User Management**: Includes authentication, profile management, and order history.
-- **Payment Gateway**: Secure Razorpay integration with server-side validation and enhanced error handling for amount limits.
-- **Currency Converter**: Real-time multi-currency display (INR, USD, EUR, GBP, AED, CAD, AUD) for user convenience. All prices are stored in INR; the converter only affects display formatting.
+- **Payment Gateway**: Secure Razorpay integration with server-side validation.
+- **Currency Converter**: Real-time multi-currency display (INR, USD, EUR, GBP, AED, CAD, AUD) for user convenience, with all base prices stored in INR.
 - **Email Notifications**: Automated order confirmations and status updates.
-- **Product Management**: Supports multiple categories (e.g., featured-collection, new-arrivals, plus 12 jewelry subcategories: gold/silver/meenakari variants of necklaces, earrings, bangles, rings) with an admin panel for product upload, editing, and deletion. Products are loaded from Firebase Cloud Storage via a CDN proxy using Netlify functions.
-- **Wishlist**: Users can save products to a wishlist, persisted across sessions and login states via Firebase.
-- **Checkout System**: A robust checkout process handles both authenticated and guest users, with comprehensive error handling.
-- **Bandwidth Optimization**: Advanced CDN caching, `stale-while-revalidate`, ETag validation, and extended client-side cache durations (24 hours memory, 1 hour `localStorage`) significantly reduce bandwidth usage.
-- **Order Tracking & Fulfillment**: Full Shiprocket integration for order creation, AWB generation, pickup scheduling, and real-time tracking with a dedicated customer portal.
-- **Stock Management**: Comprehensive system with `stock-manager.js` for Firebase operations, server-side updates via Netlify functions, automatic stock updates during checkout, an admin inventory dashboard with real-time alerts, and visual indicators for out-of-stock products.
-- **Multi-Language Support**: A dynamic translation system uses MyMemory Translation API to support 6 languages (English, Hindi, Spanish, French, Arabic, German). It employs a hybrid approach with static UI translations and API-powered dynamic content, including automatic translation of new products, browser language detection, RTL support, and translation caching.
-- **Category Pages**: Dedicated submenu category pages for various jewelry types (e.g., gold/silver/meenakari variants of necklaces, earrings, bangles, rings) with specific hero sections and dynamic product loading.
-- **Admin Dashboard Caching**: Implemented localStorage-based data caching for instant dashboard display. The system loads cached orders, customers, and notifications immediately, while fresh data from Firebase loads in the background and updates the display automatically. No cache expiration—cached data is always shown instantly and fresh data always fetches in parallel.
-- **Inventory Data Caching**: localStorage caching for inventory summary (out-of-stock, low stock, in-stock counts) enabling instant stat card and badge display on page load. Fresh data always fetches in the background and updates automatically. No cache expiration—always shows cached data while fetching fresh.
-- **Products Management Caching**: localStorage caching for admin panel products section enables instant display of all products from all categories. Cached product data shows immediately on page load, while fresh product data fetches in the background and updates the grid automatically. No cache expiration—always shows cached data while fetching fresh.
-- **Watch & Buy Video Management Caching**: Implemented two-stage loading with localStorage caching for the video management section. Cached video configurations display instantly on page load, while fresh video data loads in the background with parallel product fetching across all categories. Product searches in video features now use parallel fetching instead of sequential, significantly improving load times and eliminating the infinite "Loading..." state.
+- **Product Management**: Supports multiple categories and subcategories (e.g., necklaces, earrings, bangles, rings in gold, silver, meenakari variants) with an admin panel for product management. Products are loaded from Firebase Cloud Storage via a CDN proxy.
+- **Wishlist**: Allows users to save products to a wishlist, persisted via Firebase.
+- **Checkout System**: Robust checkout process for both authenticated and guest users.
+- **Bandwidth Optimization**: Advanced CDN caching, `stale-while-revalidate`, ETag validation, and extended client-side cache durations.
+- **Order Tracking & Fulfillment**: Full Shiprocket integration for order creation, AWB generation, pickup scheduling, and real-time tracking.
+- **Stock Management**: Comprehensive system for Firebase operations, server-side updates, automatic stock updates during checkout, and an admin inventory dashboard with real-time alerts.
+- **Multi-Language Support**: Dynamic translation system using MyMemory Translation API for 6 languages (English, Hindi, Spanish, French, Arabic, German), including automatic translation of new products, browser language detection, RTL support, and caching.
+- **Category Pages**: Dedicated submenu category pages with specific hero sections and dynamic product loading.
+- **Admin Dashboard Caching**: Uses `localStorage` for instant display of cached orders, customers, and notifications, with fresh data loading in the background.
+- **Inventory Data Caching**: `localStorage` caching for inventory summary (out-of-stock, low stock, in-stock counts) for instant display, with fresh data fetching in the background.
+- **Products Management Caching**: `localStorage` caching for admin panel products section for instant display of all products, with fresh data fetching in the background.
+- **Watch & Buy Video Management Caching**: Two-stage loading with `localStorage` caching for video configurations and parallel product fetching.
 
 ## External Dependencies
 
@@ -149,7 +56,7 @@ Preferred communication style: Simple, everyday language.
 - **Firebase Services**:
     - Firebase Authentication
     - Firebase Firestore
-    - Firebase Cloud Storage (project "auric-a0c92")
+    - Firebase Cloud Storage
 - **Third-party Libraries**:
     - Font Awesome
     - Google Fonts (Playfair Display, Lato)

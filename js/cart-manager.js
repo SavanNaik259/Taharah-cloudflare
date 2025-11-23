@@ -545,25 +545,41 @@ window.CartManager = (function() {
                         return;
                     }
 
-                    // Get price - enhanced selectors for product detail pages
-                    let priceElem = null;
+                    // Get price - check data attribute FIRST, then DOM
                     let price = 0;
 
-                    if (isProductDetailPage) {
-                        // For product detail pages, check multiple selectors
-                        priceElem = document.querySelector('.price-value') || 
-                                   document.querySelector('.current-price') ||
-                                   document.querySelector('.product-price') ||
-                                   productContainer.querySelector('.price-value') ||
-                                   productContainer.querySelector('.current-price');
+                    // First check for data-product-price attribute on the product container
+                    if (productContainer.dataset.productPrice) {
+                        price = parseFloat(productContainer.dataset.productPrice);
+                        console.log('Got price from data-product-price attribute:', price);
                     } else {
-                        // For other pages (shop, collections)
-                        priceElem = productContainer.querySelector('.price-value') || 
-                                   productContainer.querySelector('.current-price');
-                    }
+                        // Fallback: Check for data-original-price on current-price element
+                        let priceElem = null;
 
-                    if (priceElem) {
-                        price = parseFloat(priceElem.textContent.replace(/[^0-9.]/g, ''));
+                        if (isProductDetailPage) {
+                            // For product detail pages, check multiple selectors
+                            priceElem = document.querySelector('.price-value') || 
+                                       document.querySelector('.current-price') ||
+                                       document.querySelector('.product-price') ||
+                                       productContainer.querySelector('.price-value') ||
+                                       productContainer.querySelector('.current-price');
+                        } else {
+                            // For other pages (shop, collections)
+                            priceElem = productContainer.querySelector('.current-price') || 
+                                       productContainer.querySelector('.price-value');
+                        }
+
+                        if (priceElem) {
+                            // Check for data-original-price attribute first (stores original INR)
+                            if (priceElem.dataset.originalPrice) {
+                                price = parseFloat(priceElem.dataset.originalPrice);
+                                console.log('Got price from data-original-price attribute:', price);
+                            } else {
+                                // Fallback to parsing text content
+                                price = parseFloat(priceElem.textContent.replace(/[^0-9.]/g, ''));
+                                console.log('Got price from text content:', price);
+                            }
+                        }
                     }
 
                     // Use global product data if available (for product detail pages)

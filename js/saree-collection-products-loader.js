@@ -363,7 +363,7 @@ const JewelrySubcategoriesLoader = (function() {
         }).format(product.price);
 
         return `
-            <div class="arrival-item polki-card" data-product-id="${product.id}">
+            <div class="arrival-item polki-card" data-product-id="${product.id}" data-product-price="${product.price}" data-product-name="${product.name}" data-product-image="${product.image}">
                 <a href="product-detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">
                     <div class="arrival-image">
                         <img src="${product.image}" alt="${product.name}" loading="lazy">
