@@ -446,7 +446,7 @@ window.CartManager = (function() {
                     <div class="cart-panel-footer">
                         <div class="cart-panel-subtotal">
                             <span>Subtotal:</span>
-                            <span class="subtotal-amount">₹0.00</span>
+                            <span class="subtotal-amount">$0.00</span>
                         </div>
                         <div class="cart-panel-buttons">
                             <a href="#" class="view-cart-btn">Continue Shopping</a>
@@ -690,7 +690,12 @@ window.CartManager = (function() {
             // Update subtotal immediately (it's always visible)
             const subtotalElement = document.querySelector('.subtotal-amount');
             if (subtotalElement) {
-                const total = `₹${calculateTotal().toFixed(2)}`;
+                // Get current currency symbol from CurrencyConverter
+                let currencySymbol = '₹';
+                if (typeof window.CurrencyConverter !== 'undefined' && window.CurrencyConverter.getCurrencySymbol) {
+                    currencySymbol = window.CurrencyConverter.getCurrencySymbol();
+                }
+                const total = `${currencySymbol}${calculateTotal().toFixed(2)}`;
                 if (subtotalElement.textContent !== total) {
                     subtotalElement.textContent = total;
                 }
@@ -737,6 +742,12 @@ window.CartManager = (function() {
         cartItems.forEach(item => {
             const itemTotal = (item.price * item.quantity).toFixed(2);
 
+            // Get current currency symbol from CurrencyConverter
+            let currencySymbol = '₹';
+            if (typeof window.CurrencyConverter !== 'undefined' && window.CurrencyConverter.getCurrencySymbol) {
+                currencySymbol = window.CurrencyConverter.getCurrencySymbol();
+            }
+
             const cartItemDiv = document.createElement('div');
             cartItemDiv.className = 'cart-item';
             cartItemDiv.setAttribute('data-product-id', item.id);
@@ -747,13 +758,13 @@ window.CartManager = (function() {
                 </div>
                 <div class="cart-item-details">
                     <div class="cart-item-name">${item.name}</div>
-                    <div class="cart-item-price">₹${item.price.toFixed(2)}</div>
+                    <div class="cart-item-price">${currencySymbol}${item.price.toFixed(2)}</div>
                     <div class="cart-item-quantity">
                         <button class="quantity-btn decrement">-</button>
                         <input type="text" class="quantity-input" value="${item.quantity}" readonly>
                         <button class="quantity-btn increment">+</button>
                     </div>
-                    <div class="cart-item-total">₹${itemTotal}</div>
+                    <div class="cart-item-total">${currencySymbol}${itemTotal}</div>
                 </div>
                 <button class="remove-item-btn">&times;</button>
             `;

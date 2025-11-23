@@ -400,6 +400,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Display cart items in the order summary
     function displayCartItems(items) {
+        // Get current currency symbol
+        let currencySymbol = '₹';
+        if (typeof window.CurrencyConverter !== 'undefined' && window.CurrencyConverter.getCurrencySymbol) {
+            currencySymbol = window.CurrencyConverter.getCurrencySymbol();
+        }
         let summaryHTML = '';
         // No longer need detailsHTML since we removed the 'Your Items' section
         let total = 0;
@@ -425,14 +430,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <h6 class="mb-0">${item.name}</h6>
                                 <div class="d-flex justify-content-between align-items-center mt-2">
                                     <div class="d-flex align-items-center">
-                                        <span class="me-2">₹${item.price.toFixed(2)}</span>
+                                        <span class="me-2">${currencySymbol}${item.price.toFixed(2)}</span>
                                         <div class="quantity-controls d-flex align-items-center border rounded">
                                             <button type="button" class="btn btn-sm btn-quantity-minus" data-item-id="${item.id}">-</button>
                                             <span class="px-2 quantity-value" data-item-id="${item.id}">${item.quantity}</span>
                                             <button type="button" class="btn btn-sm btn-quantity-plus" data-item-id="${item.id}">+</button>
                                         </div>
                                     </div>
-                                    <span class="fw-bold item-subtotal" data-item-id="${item.id}">₹${itemTotal.toFixed(2)}</span>
+                                    <span class="fw-bold item-subtotal" data-item-id="${item.id}">${currencySymbol}${itemTotal.toFixed(2)}</span>
                                 </div>
                             </div>
                         </div>
@@ -477,7 +482,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Update all total price displays
         if (orderTotalElement) {
-            orderTotalElement.textContent = `₹${total.toFixed(2)}`;
+            orderTotalElement.textContent = `${currencySymbol}${total.toFixed(2)}`;
             orderTotalElement.dataset.originalPrice = total; // Store original price for currency conversion
         }
 
@@ -578,7 +583,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const itemTotal = item.price * item.quantity;
         const subtotalElements = document.querySelectorAll(`.item-subtotal[data-item-id="${itemId}"]`);
         subtotalElements.forEach(element => {
-            element.textContent = `₹${itemTotal.toFixed(2)}`;
+            element.textContent = `${currencySymbol}${itemTotal.toFixed(2)}`;
         });
 
         // Update hidden input field
@@ -597,15 +602,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Update total in all steps
         if (orderTotalElement) {
-            orderTotalElement.textContent = `₹${total.toFixed(2)}`;
+            orderTotalElement.textContent = `${currencySymbol}${total.toFixed(2)}`;
             orderTotalElement.dataset.originalPrice = total; // Store original price for currency conversion
         }
         if (orderTotalStep2) {
-            orderTotalStep2.textContent = `₹${total.toFixed(2)}`;
+            orderTotalStep2.textContent = `${currencySymbol}${total.toFixed(2)}`;
             orderTotalStep2.dataset.originalPrice = total; // Store original price for currency conversion
         }
         if (orderTotalStep3) {
-            orderTotalStep3.textContent = `₹${total.toFixed(2)}`;
+            orderTotalStep3.textContent = `${currencySymbol}${total.toFixed(2)}`;
             orderTotalStep3.dataset.originalPrice = total; // Store original price for currency conversion
         }
     }
@@ -697,7 +702,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (orderTotalElement) {
-            orderTotalElement.textContent = '₹0.00';
+            orderTotalElement.textContent = currencySymbol + '0.00';
         }
 
         // Disable the submit button
@@ -913,7 +918,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         orderSummaryContainer.innerHTML = '<p>No products added yet.</p>';
                     }
                     if (orderTotalElement) {
-                        orderTotalElement.textContent = '₹0.00';
+                        orderTotalElement.textContent = currencySymbol + '0.00';
                     }
                     if (productListContainer) {
                         productListContainer.innerHTML = '';
@@ -951,7 +956,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         orderSummaryContainer.innerHTML = '<p>No products added yet.</p>';
                     }
                     if (orderTotalElement) {
-                        orderTotalElement.textContent = '₹0.00';
+                        orderTotalElement.textContent = currencySymbol + '0.00';
                     }
                     if (productListContainer) {
                         productListContainer.innerHTML = '';
@@ -994,7 +999,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Update the order total
             if (orderTotalElement) {
-                orderTotalElement.textContent = '₹0.00';
+                orderTotalElement.textContent = currencySymbol + '0.00';
                 console.log('Order total reset to zero');
             }
 
@@ -1080,7 +1085,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     orderSummaryContainer.innerHTML = '<p>No products added yet.</p>';
                 }
                 if (orderTotalElement) {
-                    orderTotalElement.textContent = '₹0.00';
+                    orderTotalElement.textContent = currencySymbol + '0.00';
                 }
             } catch (fallbackError) {
                 console.error('Critical error: Failed to clear cart with fallback method', fallbackError);
@@ -1271,6 +1276,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Show order confirmation modal
     function showOrderConfirmation(orderData) {
+        // Get current currency symbol
+        let currencySymbol = '₹';
+        if (typeof window.CurrencyConverter !== 'undefined' && window.CurrencyConverter.getCurrencySymbol) {
+            currencySymbol = window.CurrencyConverter.getCurrencySymbol();
+        }
         // Create confirmation modal if it doesn't exist
         if (!document.getElementById('confirmationModal')) {
             const modalHTML = `
@@ -1330,7 +1340,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 detailsHTML += `
                     <div class="d-flex justify-content-between mb-2">
                         <span>${item.name} × ${item.quantity}</span>
-                        <span>₹${itemTotal.toFixed(2)}</span>
+                        <span>${currencySymbol}${itemTotal.toFixed(2)}</span>
                     </div>
                 `;
             });
@@ -1339,7 +1349,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <hr>
                             <div class="d-flex justify-content-between">
                                 <strong>Total</strong>
-                                <strong>₹${orderData.orderTotal.toFixed(2)}</strong>
+                                <strong>${currencySymbol}${orderData.orderTotal.toFixed(2)}</strong>
                             </div>
                         </div>
                     </div>
@@ -2462,7 +2472,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     orderSummaryContainer.innerHTML = '<p>No products added yet.</p>';
                 }
                 if (orderTotalElement) {
-                    orderTotalElement.textContent = '₹0.00';
+                    orderTotalElement.textContent = currencySymbol + '0.00';
                 }
                 if (productListContainer) {
                     productListContainer.innerHTML = '';
