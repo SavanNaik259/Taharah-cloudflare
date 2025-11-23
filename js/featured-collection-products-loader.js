@@ -258,7 +258,7 @@ const BridalProductsLoader = (function() {
                     // Check if this is a Firebase configuration error on Netlify
                     if (data.error && data.error.includes('Firebase Admin not configured')) {
                         console.error('NETLIFY DEPLOYMENT ISSUE: Firebase Admin credentials not set up');
-                        console.error('Please check NETLIFY_DEPLOYMENT_FIX.md for setup instructions');
+                        console.error('Please check NETLIFY DEPLOYMENT FIX.md for setup instructions');
                     }
 
                     products = data.products || [];
@@ -282,11 +282,30 @@ const BridalProductsLoader = (function() {
                     product.image = product.images[0].url;
                 }
 
+                // Ensure price is a number and handle potential 0 values from faulty extraction
+                if (product.id && typeof product.price === 'undefined') {
+                    console.warn('Product missing price:', product.id, product.name);
+                    product.price = 0; // Default to 0 if missing
+                } else if (product.id && typeof product.price !== 'undefined') {
+                    product.price = parseFloat(product.price);
+                    if (isNaN(product.price) || product.price < 0) {
+                        console.warn('Invalid price for product:', product.id, product.name, ':', product.price);
+                        product.price = 0; // Default to 0 if invalid
+                    }
+                } else {
+                    // If product has no ID, it's likely not a valid product from the backend, skip it
+                    console.warn('Product missing ID, skipping:', product);
+                    return null;
+                }
+
                 return product;
             }).filter(product => {
-                const isValid = product.name && product.price && product.image;
+                // Filter out any null products (those missing IDs)
+                if (!product) return false;
+
+                const isValid = product.name && typeof product.price === 'number' && product.image;
                 if (!isValid) {
-                    console.warn('Skipping invalid bridal product from Storage:', {
+                    console.warn('Skipping invalid bridal product after validation:', {
                         id: product.id,
                         name: product.name,
                         price: product.price,
@@ -352,24 +371,59 @@ const BridalProductsLoader = (function() {
             minimumFractionDigits: 0
         }).format(product.price);
 
-        return `
-            <div class="product-item" data-product-id="${product.id}" data-product-price="${product.price}" data-product-name="${product.name}" data-product-image="${product.image}">
+        // Extract image URL carefully
+        const imageUrl = product.image || 'images/product-placeholder.jpg';
+
+        // Determine discount badge HTML
+        let discountBadgeHTML = '';
+        if (product.discountPercentage && product.discountPercentage > 0) {
+            discountBadgeHTML = `<div class="discount-badge">${product.discountPercentage}% OFF</div>`;
+        }
+
+        // CRITICAL: Cache the price in global cache BEFORE rendering
+        if (window.PRODUCT_PRICES_CACHE && product.id && product.price !== undefined && product.price !== null) {
+            // Ensure price is a float before caching
+            const priceFloat = parseFloat(product.price);
+            if (!isNaN(priceFloat)) {
+                window.PRODUCT_PRICES_CACHE.set(product.id, priceFloat);
+                console.log('🎯 Cached price for', product.id, ':', priceFloat, 'INR (featured collection)');
+            } else {
+                console.warn('Skipping cache for invalid price for product:', product.id, product.name, ':', product.price);
+            }
+        }
+
+        // Create product HTML with proper data attributes
+        const productHTML = `
+            <div class="product-item arrival-item" data-product-id="${product.id}" data-product-price="${product.price}">
                 <a href="product-detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">
-                    <div class="product-image">
-                        <img src="${product.image}" alt="${product.name}" loading="lazy">
-                        <button class="add-to-wishlist" data-product-id="${product.id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-image="${product.image}" onclick="event.preventDefault(); event.stopPropagation();">
+                    <div class="product-image arrival-image">
+                        <img src="${imageUrl}" 
+                             alt="${product.name}" 
+                             loading="lazy" 
+                             decoding="async"
+                             onerror="this.src='images/product-placeholder.jpg'">
+                        ${product.isOutOfStock ? '<div class="sold-out-badge">SOLD OUT</div>' : ''}
+                        ${discountBadgeHTML}
+                        <button class="add-to-wishlist" 
+                                data-product-id="${product.id}" 
+                                data-product-name="${product.name}" 
+                                data-product-price="${product.price}"
+                                data-product-image="${imageUrl}">
                             <i class="far fa-heart"></i>
                         </button>
                     </div>
-                    <div class="product-details" style="text-align: center;">
-                        <h3 class="product-name">${product.name}</h3>
-                        <div class="product-pricing">
-                            <span class="current-price" data-original-price="${product.price}">${formattedPrice}</span>
+                    <div class="product-details arrival-details">
+                        <h3 class="product-name arrival-title">${product.name}</h3>
+                        <div class="product-pricing arrival-pricing">
+                            <span class="current-price arrival-price" data-price="${product.price}" data-original-price="${product.price}">₹${formattedPrice}</span>
+                            ${product.originalPrice ? `<span class="original-price">₹${product.originalPrice.toLocaleString('en-IN')}</span>` : ''}
                         </div>
                     </div>
                 </a>
             </div>
         `;
+
+        return productHTML;
     }
 
     /**
@@ -552,8 +606,8 @@ const BridalProductsLoader = (function() {
                 console.log('Firebase products found, showing only Firebase products');
                 const firebaseProductsHTML = products.map(product => generateProductHTML(product)).join('');
                 featuredCollectionContainer.innerHTML = firebaseProductsHTML;
-                
-                // Convert prices to user's selected currency
+
+                // Convert prices to user's selected currency AFTER product HTML is generated and prices are cached
                 if (typeof window.CurrencyConverter !== 'undefined') {
                     window.CurrencyConverter.convertAllPrices();
                 }
@@ -718,9 +772,14 @@ const BridalProductsLoader = (function() {
 
             // CRITICAL: Populate global price cache BEFORE currency conversion
             products.forEach(product => {
-                if (window.PRODUCT_PRICES_CACHE) {
-                    window.PRODUCT_PRICES_CACHE.set(product.id, product.price);
-                    console.log('📦 Cached price for', product.id, ':', product.price, 'INR');
+                if (window.PRODUCT_PRICES_CACHE && product.id && product.price !== undefined && product.price !== null) {
+                    const priceFloat = parseFloat(product.price);
+                    if (!isNaN(priceFloat)) {
+                        window.PRODUCT_PRICES_CACHE.set(product.id, priceFloat);
+                        console.log('📦 Cached price for', product.id, ':', priceFloat, 'INR');
+                    } else {
+                        console.warn('Skipping cache for invalid price for product:', product.id, product.name, ':', product.price);
+                    }
                 }
             });
 
