@@ -87,11 +87,17 @@ const WishlistManager = (function() {
             wishlistItemDiv.className = 'wishlist-item';
             wishlistItemDiv.setAttribute('data-product-id', item.id);
 
+            // Get current currency symbol from CurrencyConverter
+            let currencySymbol = '₹'; // Default to rupee
+            if (typeof window.CurrencyConverter !== 'undefined' && window.CurrencyConverter.getCurrencySymbol) {
+                currencySymbol = window.CurrencyConverter.getCurrencySymbol();
+            }
+
             wishlistItemDiv.innerHTML = `
                 <img src="${item.image}" alt="${item.name}" class="wishlist-item-image" loading="lazy" decoding="async">
                 <div class="wishlist-item-details">
                     <div class="wishlist-item-name" data-translate-dynamic>${item.name}</div>
-                    <div class="wishlist-item-price" data-translate-dynamic>₹${item.price.toFixed(2)}</div>
+                    <div class="wishlist-item-price" data-translate-dynamic>${currencySymbol}${item.price.toFixed(2)}</div>
                     <div class="wishlist-item-actions">
                         <button class="remove-from-wishlist" data-translate-dynamic>Remove</button>
                         <button class="move-to-cart" data-translate-dynamic>Move to Cart</button>

@@ -10,6 +10,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Nov 23, 2025)
 
+### CRITICAL FIX: Wishlist Currency Symbol Display (v3.0.1)
+
+**Issue Resolved**: Wishlist was showing RUPEE symbol (₹) with converted prices in other currencies (e.g., ₹$280.00 when USD was selected)
+
+**Solution Implemented**:
+- ✅ Updated wishlist-manager.js to use CurrencyConverter.getCurrencySymbol()
+- ✅ Wishlist items now display correct currency symbol matching the user's selected currency
+- ✅ Prices in wishlist ($280.00, €300.00, £200.00, etc.) now show with correct symbol
+
+**Files Modified**:
+- js/wishlist-manager.js: Updated updateWishlistItemsDisplay() to fetch current currency symbol
+
 ### FINAL SOLUTION: Complete Currency Persistence Across ALL Pages (v3.0.0)
 
 **TOTAL FIX: Implemented on all 17 pages + all product loaders**
