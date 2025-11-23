@@ -97,20 +97,19 @@ const BridalProductsLoader = (function() {
             return cachedProducts;
         }
 
-        // Check localStorage cache and ALWAYS show instantly (no expiration check)
-        // Fresh data will be fetched in background and update automatically
+        // Check localStorage cache with ETag validation
         if (!forceRefresh && !cacheInvalidated) {
             try {
                 const stored = localStorage.getItem('featuredCollectionProducts');
+                const storedTime = localStorage.getItem('featuredCollectionProductsTime');
                 const storedETag = localStorage.getItem('featuredCollectionProductsETag');
 
-                if (stored) {
-                    console.log('✅ Using cached featured collection products (instant display)');
+                if (stored && storedTime && (now - parseInt(storedTime)) < SHORT_CACHE_DURATION) {
+                    console.log('Using localStorage cached bridal products (ETag:', storedETag?.substring(0, 8) + ')');
                     cachedProducts = JSON.parse(stored);
                     cachedETag = storedETag;
-                    lastFetchTime = now;
-                    
-                    // Continue below to fetch fresh data in background
+                    lastFetchTime = parseInt(storedTime);
+                    return cachedProducts;
                 }
             } catch (e) {
                 console.warn('Error reading from localStorage cache:', e);
