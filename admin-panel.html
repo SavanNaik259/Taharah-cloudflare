@@ -5959,6 +5959,49 @@
             applySearchAndFilter();
         }
 
+        // Load cached products for instant display (no expiration check)
+        function loadProductsCachedData() {
+            try {
+                console.log('📦 Loading cached products data...');
+                const cachedProducts = localStorage.getItem('admin_dashboard_products');
+                if (cachedProducts) {
+                    const { data } = JSON.parse(cachedProducts);
+                    console.log(`✅ Using cached products (instant display) - ${data.length} products`);
+                    productsCache = {
+                        products: data,
+                        timestamp: Date.now()
+                    };
+                    // Display cached products
+                    const productsGrid = document.getElementById('products-grid');
+                    const productsLoading = document.getElementById('products-loading');
+                    if (productsLoading) productsLoading.style.display = 'none';
+                    if (productsGrid) productsGrid.style.display = 'grid';
+                    displayProducts(filterProductsByCategory(data));
+                }
+            } catch (err) {
+                console.warn('Failed to load cached products:', err);
+            }
+        }
+
+        // Load fresh products from Firebase in background
+        async function loadProductsFreshData() {
+            try {
+                console.log('📡 Loading fresh products data from Firebase...');
+                await loadProducts();
+                
+                // Save to cache
+                if (productsCache && productsCache.products) {
+                    localStorage.setItem('admin_dashboard_products', JSON.stringify({
+                        timestamp: Date.now(),
+                        data: productsCache.products
+                    }));
+                    console.log('💾 Cached fresh products data');
+                }
+            } catch (err) {
+                console.warn('Failed to load fresh products:', err);
+            }
+        }
+
         // Products functionality - Load products from existing cached data
         async function loadProducts() {
             if (isLoadingProducts) return;
@@ -5969,19 +6012,15 @@
             const productsLoading = document.getElementById('products-loading');
             const productsGrid = document.getElementById('products-grid');
 
-            productsLoading.style.display = 'flex';
-            productsGrid.style.display = 'none';
+            // Don't show loading if we already have cached data displayed
+            if (!productsCache) {
+                productsLoading.style.display = 'flex';
+                productsGrid.style.display = 'none';
+            }
 
             try {
-                // Use cached data if available and still fresh
-                if (productsCache && (Date.now() - productsCache.timestamp) < 30000) {
-                    console.log('Using cached product data');
-                    displayProducts(filterProductsByCategory(productsCache.products));
-                    productsLoading.style.display = 'none';
-                    productsGrid.style.display = 'grid';
-                    isLoadingProducts = false;
-                    return;
-                }
+                // Skip cache check - always fetch fresh data
+                // (cached display already shown, this updates in background)
 
                 let allProducts = [];
                 const categories = [
@@ -7466,10 +7505,18 @@
                 // Load cached dashboard data for instant display
                 console.log('💾 Loading cached dashboard data for instant display...');
                 loadDashboardCachedData();
+                
+                // Load cached products for instant display
+                console.log('💾 Loading cached products data for instant display...');
+                loadProductsCachedData();
 
                 // Load fresh dashboard data in parallel (updates will happen automatically)
                 console.log('📋 Loading fresh dashboard data in parallel...');
                 loadDashboardFreshData();
+                
+                // Load fresh products data in parallel (updates will happen automatically)
+                console.log('📡 Loading fresh products data in parallel...');
+                loadProductsFreshData();
 
                 console.log('✅ Dashboard initialization complete (using cached data, fresh data loading in background)');
 
