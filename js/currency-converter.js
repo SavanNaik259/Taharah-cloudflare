@@ -68,11 +68,6 @@ const CurrencyConverter = (function() {
             // Set up UI to show restored currency
             updateCurrencySelector();
             
-            // Force a second update on next frame to ensure DOM is ready
-            requestAnimationFrame(() => {
-                updateCurrencySelector();
-            });
-            
             // Mark as initialized
             isInitialized = true;
             console.log('✅ Currency Converter initialized with currency:', currentCurrency);
@@ -305,12 +300,7 @@ const CurrencyConverter = (function() {
      * Change currency
      */
     async function changeCurrency(newCurrency) {
-        console.log('💱 changeCurrency called with:', newCurrency, 'current:', currentCurrency);
-        
-        if (newCurrency === currentCurrency) {
-            console.log('ℹ️ Currency already selected');
-            return;
-        }
+        if (newCurrency === currentCurrency) return;
         
         if (!CURRENCIES[newCurrency]) {
             console.error('Invalid currency:', newCurrency);
@@ -319,7 +309,6 @@ const CurrencyConverter = (function() {
 
         currentCurrency = newCurrency;
         localStorage.setItem(SELECTED_CURRENCY_KEY, currentCurrency);
-        console.log('✅ Saved to localStorage:', currentCurrency);
 
         updateCurrencySelector();
         convertAllPrices();
@@ -331,46 +320,37 @@ const CurrencyConverter = (function() {
      * Update currency selector UI
      */
     function updateCurrencySelector() {
-        // Use requestAnimationFrame to ensure DOM is ready
-        requestAnimationFrame(() => {
-            const selector = document.getElementById('currency-selector');
-            if (selector) {
-                selector.value = currentCurrency;
-                
-                Array.from(selector.options).forEach(option => {
-                    const currCode = option.value;
-                    const currInfo = CURRENCIES[currCode];
-                    if (currInfo) {
-                        option.textContent = `${currInfo.flag} ${currCode} - ${currInfo.name}`;
-                    }
-                });
-            }
+        const selector = document.getElementById('currency-selector');
+        if (selector) {
+            selector.value = currentCurrency;
+            
+            Array.from(selector.options).forEach(option => {
+                const currCode = option.value;
+                const currInfo = CURRENCIES[currCode];
+                if (currInfo) {
+                    option.textContent = `${currInfo.flag} ${currCode} - ${currInfo.name}`;
+                }
+            });
+        }
 
-            const flagDisplay = document.getElementById('selected-currency-flag');
-            if (flagDisplay) {
-                const currencyInfo = CURRENCIES[currentCurrency];
-                flagDisplay.textContent = currencyInfo.flag;
-                console.log('🚩 Updated flag display to:', currencyInfo.flag);
-            } else {
-                console.warn('⚠️ selected-currency-flag element not found');
-            }
+        const flagDisplay = document.getElementById('selected-currency-flag');
+        if (flagDisplay) {
+            const currencyInfo = CURRENCIES[currentCurrency];
+            flagDisplay.textContent = currencyInfo.flag;
+        }
 
-            const codeDisplay = document.getElementById('selected-currency-code');
-            if (codeDisplay) {
-                codeDisplay.textContent = currentCurrency;
-                console.log('🔤 Updated code display to:', currentCurrency);
-            } else {
-                console.warn('⚠️ selected-currency-code element not found');
-            }
+        const codeDisplay = document.getElementById('selected-currency-code');
+        if (codeDisplay) {
+            codeDisplay.textContent = currentCurrency;
+        }
 
-            const selectedDisplay = document.getElementById('selected-currency-display');
-            if (selectedDisplay) {
-                const currencyInfo = CURRENCIES[currentCurrency];
-                selectedDisplay.textContent = `${currencyInfo.flag} ${currentCurrency}`;
-            }
+        const selectedDisplay = document.getElementById('selected-currency-display');
+        if (selectedDisplay) {
+            const currencyInfo = CURRENCIES[currentCurrency];
+            selectedDisplay.textContent = `${currencyInfo.flag} ${currentCurrency}`;
+        }
 
-            showUserLocation();
-        });
+        showUserLocation();
     }
 
     /**
