@@ -34,29 +34,51 @@ const CurrencyConverter = (function() {
      * Initialize the currency converter
      */
     async function init() {
-        console.log('Initializing Currency Converter...');
+        try {
+            console.log('Initializing Currency Converter...');
 
-        // Detect user location
-        await detectUserLocation();
+            // Detect user location (with timeout)
+            console.log('🌍 Detecting user location...');
+            try {
+                await Promise.race([
+                    detectUserLocation(),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('Location detection timeout')), 2000))
+                ]);
+            } catch (e) {
+                console.warn('⚠️ Location detection failed:', e.message);
+                // Continue even if location detection fails
+            }
 
-        // Load selected currency from localStorage
-        const savedCurrency = localStorage.getItem(SELECTED_CURRENCY_KEY);
-        if (savedCurrency && CURRENCIES[savedCurrency]) {
-            currentCurrency = savedCurrency;
+            // Load selected currency from localStorage
+            const savedCurrency = localStorage.getItem(SELECTED_CURRENCY_KEY);
+            if (savedCurrency && CURRENCIES[savedCurrency]) {
+                currentCurrency = savedCurrency;
+                console.log('💾 Loaded saved currency:', currentCurrency);
+            }
+
+            // Load exchange rates with fallback
+            console.log('💱 Loading exchange rates...');
+            await loadExchangeRatesWithFallback();
+
+            // Set up UI
+            console.log('🎨 Setting up currency selector UI...');
+            updateCurrencySelector();
+            
+            // Convert prices on page if not base currency
+            if (currentCurrency !== BASE_CURRENCY) {
+                // Give a small delay to ensure DOM is ready
+                console.log('💰 Converting prices to', currentCurrency);
+                setTimeout(() => {
+                    convertAllPrices();
+                }, 100);
+            }
+
+            console.log('✅ Currency Converter initialized with currency:', currentCurrency);
+        } catch (error) {
+            console.error('❌ Currency Converter initialization failed:', error);
+            // Ensure default state even on failure
+            console.log('✅ Using default currency: INR');
         }
-
-        // Load exchange rates
-        await loadExchangeRates();
-
-        // Set up UI
-        updateCurrencySelector();
-        
-        // Convert prices on page if not base currency
-        if (currentCurrency !== BASE_CURRENCY) {
-            convertAllPrices();
-        }
-
-        console.log('Currency Converter initialized with currency:', currentCurrency);
     }
 
     /**
@@ -90,23 +112,23 @@ const CurrencyConverter = (function() {
      * Load exchange rates from API or cache
      */
     async function loadExchangeRates() {
-        try {
-            // Check cache first
-            const cachedRates = localStorage.getItem(CACHE_KEY);
-            const cacheTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
-            const now = Date.now();
+        // Check cache first
+        const cachedRates = localStorage.getItem(CACHE_KEY);
+        const cacheTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+        const now = Date.now();
 
-            if (cachedRates && cacheTimestamp) {
-                const age = now - parseInt(cacheTimestamp);
-                if (age < CACHE_DURATION) {
-                    exchangeRates = JSON.parse(cachedRates);
-                    console.log('Using cached exchange rates');
-                    return;
-                }
+        if (cachedRates && cacheTimestamp) {
+            const age = now - parseInt(cacheTimestamp);
+            if (age < CACHE_DURATION) {
+                exchangeRates = JSON.parse(cachedRates);
+                console.log('✅ Using cached exchange rates');
+                return;
             }
+        }
 
-            // Fetch new rates
-            console.log('Fetching fresh exchange rates...');
+        // Fetch new rates
+        console.log('📡 Fetching fresh exchange rates...');
+        try {
             const response = await fetch(API_URL);
             const data = await response.json();
 
@@ -117,29 +139,61 @@ const CurrencyConverter = (function() {
                 localStorage.setItem(CACHE_KEY, JSON.stringify(exchangeRates));
                 localStorage.setItem(CACHE_TIMESTAMP_KEY, now.toString());
                 
-                console.log('Exchange rates updated successfully');
+                console.log('✅ Exchange rates updated successfully');
+            } else {
+                throw new Error('Invalid rates data');
             }
         } catch (error) {
-            console.error('Error loading exchange rates:', error);
+            console.error('❌ Error fetching fresh rates:', error);
+            throw error;
+        }
+    }
+    
+    /**
+     * Load exchange rates with fallback and timeout
+     */
+    async function loadExchangeRatesWithFallback() {
+        try {
+            console.log('🔄 Starting exchange rate load...');
+            
+            // Set a timeout for exchange rate loading (3 seconds)
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Exchange rate loading timeout')), 3000);
+            });
+            
+            // Race against timeout
+            try {
+                await Promise.race([loadExchangeRates(), timeoutPromise]);
+                console.log('✅ Exchange rates loaded successfully');
+            } catch (timeoutError) {
+                throw timeoutError;
+            }
+        } catch (error) {
+            console.warn('⚠️ Exchange rate loading failed:', error.message);
             
             // Try to use cached rates as fallback
             const cachedRates = localStorage.getItem(CACHE_KEY);
             if (cachedRates) {
-                exchangeRates = JSON.parse(cachedRates);
-                console.log('Using cached rates as fallback');
-            } else {
-                // Set default rates if no cache available
-                exchangeRates = {
-                    'INR': 1,
-                    'USD': 0.012,
-                    'EUR': 0.011,
-                    'GBP': 0.0095,
-                    'AED': 0.044,
-                    'CAD': 0.016,
-                    'AUD': 0.018
-                };
-                console.log('Using default exchange rates');
+                try {
+                    exchangeRates = JSON.parse(cachedRates);
+                    console.log('✅ Using cached exchange rates as fallback');
+                    return; // Success - cached rates loaded
+                } catch (e) {
+                    console.warn('⚠️ Cached rates are invalid, using defaults');
+                }
             }
+            
+            // Set default rates if no cache available
+            exchangeRates = {
+                'INR': 1,
+                'USD': 0.012,
+                'EUR': 0.011,
+                'GBP': 0.0095,
+                'AED': 0.044,
+                'CAD': 0.016,
+                'AUD': 0.018
+            };
+            console.log('✅ Using default exchange rates');
         }
     }
 
@@ -490,14 +544,16 @@ const CurrencyConverter = (function() {
     };
 })();
 
+// Make globally available FIRST
+window.CurrencyConverter = CurrencyConverter;
+
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
+        console.log('📱 DOM loaded, initializing Currency Converter...');
         CurrencyConverter.init();
     });
 } else {
+    console.log('📱 DOM already loaded, initializing Currency Converter...');
     CurrencyConverter.init();
 }
-
-// Make globally available
-window.CurrencyConverter = CurrencyConverter;

@@ -10,14 +10,21 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Nov 23, 2025)
 
-### Currency Persistence Fix
+### Currency Persistence Fix (Completed)
 - **Saved Currency Preference**: Selected currency now persists across page refreshes using localStorage
 - **Automatic Conversion on Load**: When page loads, saved currency preference is restored and all prices automatically convert
 - **Dynamic Product Loading**: Added currency conversion calls after all dynamically loaded products are inserted into the DOM
 - **All Product Loaders Updated**: Fixed new-arrivals, featured-collection, saree-collection, and subcategory product loaders
 - **Collection Pages Fixed**: Updated featured-collection.html, all-collection.html, and saree-collection.html to convert prices after loading
 - **Checkout Totals Fixed**: Added .order-total class and data-original-price attribute to all order total elements across 3 checkout steps
-- **Result**: Users can now select a currency once, and it will persist and apply automatically to all prices even after page refresh
+- **Fixed Currency Converter Initialization**: Resolved race condition where currency converter wasn't initializing properly on page reload
+  - Made currency converter use proper async/await patterns for exchange rate loading
+  - Added 3-second timeout for exchange rate API with graceful fallback to cached/default rates
+  - Implemented comprehensive logging to track initialization steps
+  - Fixed window.CurrencyConverter assignment order to prevent undefined reference errors
+  - Added location detection timeout to prevent initialization hang
+  - Ensured exchange rates always load (from API, cache, or defaults) before price conversion
+- **Result**: Users can now select a currency once, and it will persist and apply automatically to all prices even after page refresh. Currency conversion is now reliable and handles all failure scenarios gracefully.
 
 ### Previous Currency Implementation (Nov 23, 2025)
 - **Order Confirmation Emails**: Users receive order confirmation emails with prices displayed in their selected currency
