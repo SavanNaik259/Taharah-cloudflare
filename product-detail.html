@@ -906,19 +906,35 @@ background-color: #000 !important;
                     const name = titleEl ? titleEl.textContent.trim() : '';
                     const priceText = priceEl ? priceEl.textContent.trim() : '';
 
-                    // Use global product details if available (most reliable)
+                    // Use global product details if available (most reliable - has original INR price)
                     if (window.productDetails && window.productDetails.id) {
-                        console.log('Using global product details for buy now');
+                        console.log('✅ Using global product details with original INR price:', window.productDetails.price);
                         return {
                             id: window.productDetails.id,
                             name: window.productDetails.name || name,
-                            price: window.productDetails.price || parseFloat(priceText.replace(/[^0-9.]/g, '')),
+                            price: window.productDetails.price,
                             image: window.productDetails.image || (imageEl ? imageEl.src : '')
                         };
                     }
 
-                    // Fallback to DOM parsing
-                    const price = parseFloat(priceText.replace(/[^0-9.]/g, ''));
+                    // CRITICAL FIX: Check for data-original-price attribute FIRST (has original INR)
+                    let price = 0;
+                    if (priceEl && priceEl.dataset.originalPrice) {
+                        price = parseFloat(priceEl.dataset.originalPrice);
+                        console.log('✅ Using original INR price from data-original-price:', price);
+                    } else {
+                        // Fallback to global price cache
+                        const productId = containerEl ? containerEl.dataset.productId : '';
+                        if (window.PRODUCT_PRICES_CACHE && window.PRODUCT_PRICES_CACHE.has(productId)) {
+                            price = window.PRODUCT_PRICES_CACHE.get(productId);
+                            console.log('✅ Using original INR price from cache:', price);
+                        } else {
+                            // Last resort: parse DOM (but only for display, will show wrong currency!)
+                            price = parseFloat(priceText.replace(/[^0-9.]/g, ''));
+                            console.warn('⚠️ Parsing DOM text for price (may be converted):', price);
+                        }
+                    }
+
                     const productId = containerEl ? containerEl.dataset.productId : '';
                     const imageSrc = imageEl ? imageEl.src : '';
 

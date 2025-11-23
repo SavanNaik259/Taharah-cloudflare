@@ -545,15 +545,31 @@ window.CartManager = (function() {
                         return;
                     }
 
-                    // Get price - check data attribute FIRST, then DOM
+                    // Get price - CRITICAL: ALWAYS use original INR price, never converted display price!
                     let price = 0;
 
-                    // First check for data-product-price attribute on the product container
-                    if (productContainer.dataset.productPrice) {
+                    // CRITICAL FIX: Priority 1 - Use global product details (product detail page)
+                    if (isProductDetailPage && window.productDetails && window.productDetails.price) {
+                        price = window.productDetails.price;
+                        console.log('✅ CART: Using global product details ORIGINAL INR price:', price);
+                    }
+                    // Priority 2 - Check for data-original-price attribute (has original INR)
+                    else if (productContainer.dataset.originalPrice) {
+                        price = parseFloat(productContainer.dataset.originalPrice);
+                        console.log('✅ CART: Using data-original-price from container:', price);
+                    }
+                    // Priority 3 - Check for data-product-price attribute on the product container
+                    else if (productContainer.dataset.productPrice) {
                         price = parseFloat(productContainer.dataset.productPrice);
-                        console.log('Got price from data-product-price attribute:', price);
-                    } else {
-                        // Fallback: Check for data-original-price on current-price element
+                        console.log('✅ CART: Using data-product-price from container:', price);
+                    } 
+                    // Priority 4 - Check price cache for original prices
+                    else if (productId && window.PRODUCT_PRICES_CACHE && window.PRODUCT_PRICES_CACHE.has(productId)) {
+                        price = window.PRODUCT_PRICES_CACHE.get(productId);
+                        console.log('✅ CART: Using cached original price:', price);
+                    }
+                    // Priority 5 - Fallback: Check for data-original-price on price element
+                    else {
                         let priceElem = null;
 
                         if (isProductDetailPage) {
@@ -573,19 +589,13 @@ window.CartManager = (function() {
                             // Check for data-original-price attribute first (stores original INR)
                             if (priceElem.dataset.originalPrice) {
                                 price = parseFloat(priceElem.dataset.originalPrice);
-                                console.log('Got price from data-original-price attribute:', price);
+                                console.log('✅ CART: Got price from price element data-original-price:', price);
                             } else {
-                                // Fallback to parsing text content
+                                // Last resort: parse text content (may be converted!)
                                 price = parseFloat(priceElem.textContent.replace(/[^0-9.]/g, ''));
-                                console.log('Got price from text content:', price);
+                                console.warn('⚠️ CART: Parsing text content for price (may be converted):', price);
                             }
                         }
-                    }
-
-                    // Use global product data if available (for product detail pages)
-                    if (isProductDetailPage && window.productDetails) {
-                        price = window.productDetails.price || price;
-                        console.log('Using global product details price:', price);
                     }
 
                     // Find image source - enhanced selectors for product detail pages

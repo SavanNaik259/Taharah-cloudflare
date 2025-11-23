@@ -6,6 +6,50 @@ Auric is a premium e-commerce platform for jewelry, offering a seamless online s
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (Nov 23, 2025)
+
+### CRITICAL FIX: Cart Pricing Bug - $280 Showing as $25,000 (v3.4.0 ✅ COMPLETE)
+
+**ROOT CAUSE IDENTIFIED & FIXED**:
+The cart was storing CONVERTED DISPLAY PRICES instead of ORIGINAL INR prices, causing 89x multiplier errors when displaying in different currencies.
+
+**The Bug**: 
+- Product display: $280.00 USD
+- Code extracted: 280 (from DOM text "$280.00")
+- Cart stored: 280 (treating as INR!)
+- Cart displayed: 280 × 89 ≈ **$25,000.00** ❌
+
+**Root Issues**:
+1. `product-detail.html` `getCurrentProductDetails()` parsed DOM text (converted price)
+2. `cart-manager.js` didn't prioritize `data-original-price` attributes
+3. No validation that extracted price was original INR
+
+**Complete Solution (v3.4.0)**:
+
+**Part 1: Fixed product-detail.html** (lines 902-956)
+- Modified `getCurrentProductDetails()` with 5-level priority:
+  1. `window.productDetails.price` (ORIGINAL INR) ✅
+  2. `data-original-price` attribute ✅
+  3. `data-product-price` attribute ✅
+  4. Global price cache ✅
+  5. DOM text (last resort only) ✅
+
+**Part 2: Fixed cart-manager.js** (lines 551-602)
+- Implemented same 5-level priority system when adding to cart
+- Prioritizes global product details FIRST
+- Falls back to data attributes
+- Uses price cache
+- Warns if parsing DOM (may be converted)
+
+**Result (v3.4.0)**:
+- ✅ Product: $280.00 displayed correctly in USD
+- ✅ Cart stores: 25000 INR (original price)
+- ✅ Cart displays: $280.00 USD (correct!)
+- ✅ Works across all currencies
+- ✅ Console shows price source for debugging
+
+---
+
 ## System Architecture
 
 ### Frontend
