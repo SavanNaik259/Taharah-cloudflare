@@ -7328,6 +7328,128 @@
             }, 1000);
         });
 
+        // Load dashboard data from localStorage cache for instant display
+        function loadDashboardCachedData() {
+            try {
+                console.log('📦 Loading dashboard data from cache...');
+                const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
+                
+                // Load cached orders
+                try {
+                    const cachedOrders = localStorage.getItem('admin_dashboard_orders');
+                    if (cachedOrders) {
+                        const { timestamp, data } = JSON.parse(cachedOrders);
+                        const cacheAge = Date.now() - timestamp;
+                        
+                        if (cacheAge < CACHE_DURATION) {
+                            console.log(`✅ Using cached orders (${Math.round(cacheAge / 1000)}s old)`);
+                            allOrders = data.allOrders || [];
+                            newOrders = data.newOrders || [];
+                            confirmedOrders = data.confirmedOrders || [];
+                            cancelledOrders = data.cancelledOrders || [];
+                            updateOrdersDisplay();
+                            updateNewOrdersDisplay();
+                            updateOrdersStats();
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Failed to load cached orders:', err);
+                }
+                
+                // Load cached customers
+                try {
+                    const cachedCustomers = localStorage.getItem('admin_dashboard_customers');
+                    if (cachedCustomers) {
+                        const { timestamp, data } = JSON.parse(cachedCustomers);
+                        const cacheAge = Date.now() - timestamp;
+                        
+                        if (cacheAge < CACHE_DURATION) {
+                            console.log(`✅ Using cached customers (${Math.round(cacheAge / 1000)}s old)`);
+                            allCustomers = data || [];
+                            updateCustomersDisplay();
+                            updateCustomersStats();
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Failed to load cached customers:', err);
+                }
+                
+                // Load cached notifications
+                try {
+                    const cachedNotifications = localStorage.getItem('admin_dashboard_notifications');
+                    if (cachedNotifications) {
+                        const { timestamp, data } = JSON.parse(cachedNotifications);
+                        const cacheAge = Date.now() - timestamp;
+                        
+                        if (cacheAge < CACHE_DURATION) {
+                            console.log(`✅ Using cached notifications (${Math.round(cacheAge / 1000)}s old)`);
+                            notifications = data || [];
+                            updateNotificationDisplay();
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Failed to load cached notifications:', err);
+                }
+            } catch (error) {
+                console.error('Error loading dashboard cache:', error);
+            }
+        }
+        
+        // Load fresh dashboard data from Firebase and update displays
+        async function loadDashboardFreshData() {
+            try {
+                console.log('📡 Loading fresh dashboard data from Firebase...');
+                
+                // Load orders
+                try {
+                    await loadOrders();
+                    // Save to cache
+                    localStorage.setItem('admin_dashboard_orders', JSON.stringify({
+                        timestamp: Date.now(),
+                        data: {
+                            allOrders,
+                            newOrders,
+                            confirmedOrders,
+                            cancelledOrders
+                        }
+                    }));
+                    console.log('💾 Cached fresh orders data');
+                } catch (err) {
+                    console.warn('Failed to load fresh orders:', err);
+                }
+                
+                // Load customers
+                try {
+                    await loadCustomers();
+                    // Save to cache
+                    localStorage.setItem('admin_dashboard_customers', JSON.stringify({
+                        timestamp: Date.now(),
+                        data: allCustomers
+                    }));
+                    console.log('💾 Cached fresh customers data');
+                } catch (err) {
+                    console.warn('Failed to load fresh customers:', err);
+                }
+                
+                // Load notifications
+                try {
+                    await loadNotifications();
+                    // Save to cache
+                    localStorage.setItem('admin_dashboard_notifications', JSON.stringify({
+                        timestamp: Date.now(),
+                        data: notifications
+                    }));
+                    console.log('💾 Cached fresh notifications data');
+                } catch (err) {
+                    console.warn('Failed to load fresh notifications:', err);
+                }
+                
+                console.log('✅ Dashboard data refresh complete');
+            } catch (error) {
+                console.error('Error loading fresh dashboard data:', error);
+            }
+        }
+
         // Initialize dashboard with authentication
         async function initializeAuthenticatedDashboard() {
             try {
@@ -7348,21 +7470,15 @@
                     console.warn('⚠️ Inventory summary load failed:', err);
                 });
 
-                // Load critical dashboard data in parallel
-                console.log('📋 Loading critical dashboard data in parallel...');
-                await Promise.all([
-                    loadOrders(),
-                    loadCustomers(),
-                    loadNotifications()
-                ]);
+                // Load cached dashboard data for instant display
+                console.log('💾 Loading cached dashboard data for instant display...');
+                loadDashboardCachedData();
 
-                console.log('✅ Dashboard initialization complete');
+                // Load fresh dashboard data in parallel (updates will happen automatically)
+                console.log('📋 Loading fresh dashboard data in parallel...');
+                loadDashboardFreshData();
 
-                // Update all displays
-                updateOrdersDisplay();
-                updateNewOrdersDisplay();
-                updateCustomersDisplay();
-                updateNotificationDisplay();
+                console.log('✅ Dashboard initialization complete (using cached data, fresh data loading in background)');
 
                 // Lazy load full inventory data in the background (non-blocking)
                 setTimeout(() => {
