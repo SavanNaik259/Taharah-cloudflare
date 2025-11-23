@@ -343,7 +343,7 @@ const FilterSortHandler = (function() {
         }).format(product.price);
 
         return `
-            <div class="product-item" data-product-id="${product.id}">
+            <div class="product-item" data-product-id="${product.id}" data-product-price="${product.price}" data-product-name="${product.name}" data-product-image="${product.image}">
                 <a href="product-detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">
                     <div class="product-image">
                         <img src="${product.image}" alt="${product.name}" loading="lazy">
@@ -353,7 +353,7 @@ const FilterSortHandler = (function() {
                     </div>
                     <div class="product-details">
                         <h3 class="product-name">${product.name}</h3>
-                        <div class="current-price">${formattedPrice}</div>
+                        <div class="current-price" data-original-price="${product.price}">${formattedPrice}</div>
                     </div>
                 </a>
             </div>

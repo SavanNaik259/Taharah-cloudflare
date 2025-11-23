@@ -61,7 +61,7 @@ When user changed currency and added products from new arrivals page to wishlist
 
 ---
 
-### COMPLETE FIX: Wishlist Not Working on All Pages (v3.0.9 → v3.1.0 ✅ COMPLETE)
+### COMPLETE FIX: Wishlist Not Working on All Pages (v3.0.9 → v3.1.1 ✅ COMPLETE)
 
 **ROOT CAUSE IDENTIFIED & FIXED**:
 The wishlist buttons had **inline onclick handlers** with `event.stopPropagation()` that were BLOCKING event bubbling to the document-level event delegation listener!
@@ -115,6 +115,31 @@ The wishlist buttons had **inline onclick handlers** with `event.stopPropagation
 - Works on hardcoded products (home page) ✅
 - Works on dynamically loaded products (collections) ✅
 - Works on category pages (bangles, rings, necklaces, earrings) ✅
+
+---
+
+## HOTFIX: $0.00 Prices on All Collection & Featured Collection (v3.1.1)
+
+**Issue Reported**: 
+When users added items from all-collection or featured-collection pages to wishlist, prices showed as $0.00
+
+**Root Cause**: 
+The filter-sort-handler.js (used by all-collection page) was missing critical price data attributes:
+- Missing `data-product-price` on product-item container
+- Missing `data-original-price` on current-price span
+- While button had `data-product-price`, the multi-level extraction needs fallback sources
+
+**Solution Applied (v3.1.1)**:
+- Updated js/filter-sort-handler.js generateProductHTML():
+  - Added: `data-product-price="${product.price}"` to product-item container ✅
+  - Added: `data-original-price="${product.price}"` to current-price span ✅
+  - Ensured consistency with featured-collection-products-loader.js ✅
+
+**Result**: 
+- ✅ Wishlist prices now correctly show original INR values
+- ✅ Works on all-collection page
+- ✅ Works on featured-collection page
+- ✅ Multi-level price extraction works as designed
 
 ---
 
