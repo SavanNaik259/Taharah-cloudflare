@@ -731,6 +731,8 @@ window.CartManager = (function() {
                 const total = `${currencySymbol}${displayTotal.toFixed(2)}`;
                 if (subtotalElement.textContent !== total) {
                     subtotalElement.textContent = total;
+                    // Store original INR price for currency converter to use
+                    subtotalElement.dataset.originalPrice = totalINR;
                 }
             }
 
@@ -798,13 +800,13 @@ window.CartManager = (function() {
                 </div>
                 <div class="cart-item-details">
                     <div class="cart-item-name">${item.name}</div>
-                    <div class="cart-item-price">${currencySymbol}${itemPriceDisplay.toFixed(2)}</div>
+                    <div class="cart-item-price" data-original-price="${item.price}">${currencySymbol}${itemPriceDisplay.toFixed(2)}</div>
                     <div class="cart-item-quantity">
                         <button class="quantity-btn decrement">-</button>
                         <input type="text" class="quantity-input" value="${item.quantity}" readonly>
                         <button class="quantity-btn increment">+</button>
                     </div>
-                    <div class="cart-item-total">${currencySymbol}${itemTotalDisplay}</div>
+                    <div class="cart-item-total" data-original-price="${item.price * item.quantity}">${currencySymbol}${itemTotalDisplay}</div>
                 </div>
                 <button class="remove-item-btn">&times;</button>
             `;

@@ -243,7 +243,9 @@ const CurrencyConverter = (function() {
             '.showcase-product-price',
             '.popup-product-price',
             '.cart-item-price',
+            '.cart-item-total',
             '.cart-total-price',
+            '.subtotal-amount',
             '.checkout-total',
             '.order-total'
         ];
