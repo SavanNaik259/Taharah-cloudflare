@@ -6,64 +6,40 @@ Auric is a premium e-commerce platform designed to provide a seamless online sho
 
 ## Recent Changes (Nov 23, 2025)
 
-### COMPREHENSIVE FIX: Complete Price=0 & Corrupted Prices Bug Resolution (v3.0.6)
+### HOTFIX: Currency Conversion Bug on New Arrivals Page (v3.0.7)
 
-**All Issues COMPLETELY Resolved**:
-1. ✅ **PRICE=0 BUG (CART)**: Fixed - Products add to cart with correct INR prices
-2. ✅ **PRICE=0 BUG (WISHLIST - ADDING)**: Fixed - Multi-level extraction prevents DOM parsing of converted prices
-3. ✅ **CORRUPTED PRICES BUG (WISHLIST - DISPLAY)**: Fixed - Only reads from data attributes, NEVER from DOM text
-4. ✅ **$3.76 BUG**: Fixed - Root cause was fallback DOM parsing reading already-converted display prices
-5. ✅ **Currency Symbols**: Fixed - All correct symbols display across cart, checkout, wishlist, order confirmation
-6. ✅ **Currency Conversion**: Fixed - All pages properly convert and display prices in selected currency
+**Issue Reported**: 
+When user changed currency and added products from new arrivals page to wishlist, prices appeared incorrect:
+- Expected: $280.00, $336.00
+- Actual: $3.14, $3.76
 
-**Root Cause Analysis (COMPLETE)**:
-When users changed currency BEFORE adding items to wishlist:
-1. Page displays already-converted price (e.g., "$360.00")
-2. Old extraction code fell back to parsing DOM textContent
-3. It read the converted value instead of original INR
-4. Result: price=0 or corrupted price like "$3.76" stored in wishlist
-5. Wishlist display then tried to convert 0 or 3.76, resulting in wrong display
+**Root Cause**: 
+The `createProductHTML()` function in `js/new-arrivals-page-loader.js` was NOT including the critical data attributes needed for price extraction:
+- Missing `data-product-price` on button and product-item container
+- Missing `data-original-price` on price span
+- When wishlist manager tried to extract the price, it fell back to reading DOM text (which was already converted)
+- This caused the wishlist to store converted prices instead of original INR prices
 
-**Solution**:
-- **4-Level Price Extraction with Strict Validation**:
-  - Level 1: Check button's `data-product-price` (FIRST PRIORITY - stores original INR)
-  - Level 2: Check product container's `data-product-price` 
-  - Level 3: Check price element's data attributes ONLY (data-original-price, data-price) - NEVER textContent
-  - Level 4: Hardcoded prices for known problematic products as LAST RESORT ONLY
-  - Safety Check: Validate price is positive number, log errors with full context
+**Solution Applied (v3.0.7)**:
+Modified `js/new-arrivals-page-loader.js` to add all required data attributes:
+1. Extract original price: `const originalPrice = parseFloat(product.price) || 0;`
+2. Add to product-item: `data-product-price="${originalPrice}"`
+3. Add to wishlist button: `data-product-price="${originalPrice}"`
+4. Add to price span: `data-original-price="${originalPrice}"`
 
-- **Proper Currency Conversion**:
-  - Wishlist display now calls convertPrice() with only ONE parameter (priceInINR)
-  - Conversion happens internally within CurrencyConverter module
-  - Fallback: If conversion fails, uses original INR price with warning
+This ensures:
+- Wishlist manager finds original INR price at Level 1 or Level 2 extraction
+- Never falls back to reading converted DOM text
+- Works correctly regardless of when user changes currency
 
-**Files Modified (Final Fix v3.0.6)**:
-- js/wishlist-manager.js: 
-  - NEW: 4-level price extraction (lines 879-972) prevents ANY DOM text parsing
-  - NEW: Hardcoded prices for 19 known products as absolute fallback
-  - NEW: Comprehensive logging for debugging price extraction
-  - FIXED: convertPrice() called with correct single parameter (line 106)
-  - FIXED: Proper error handling and fallbacks for display conversion
-  
-- js/cart-manager.js: Already has multi-level extraction from previous updates
-- All product loaders: Already have data-product-price on buttons and containers
-- index.html: ALL 15 hardcoded buttons + commented section have data attributes
-- product-detail.html: 2 hardcoded buttons in "You May Also Like" have data attributes
+**Files Modified (v3.0.7)**:
+- js/new-arrivals-page-loader.js: Updated createProductHTML() to include all data attributes
 
-**Guaranteed Data Attribute Coverage**:
-- ✅ Hardcoded buttons on index.html (Bridal, Polki collections): 15 products
-- ✅ Hardcoded buttons on product-detail.html: 2 products
-- ✅ Dynamic new-arrivals loader: data-product-price on ALL elements
-- ✅ Dynamic featured-collection loader: data-product-price on ALL elements
-- ✅ Dynamic subcategory loaders: data-product-price on ALL elements
-- ✅ All dynamically created elements have data attributes from source JSON
-
-**Result**: 
-- ✅ ZERO reliance on DOM text parsing for prices
-- ✅ Prices stored as original INR in data attributes
-- ✅ Wishlist displays correct converted prices
-- ✅ Works regardless of when user changes currency (before or after adding to wishlist)
-- ✅ Comprehensive logging enables rapid debugging if issues occur
+**Verification**: All other product loaders already have correct data attributes:
+- ✅ featured-collection-products-loader.js: Has data attributes
+- ✅ subcategory-products-loader.js: Has data attributes
+- ✅ index.html: Hardcoded buttons have data attributes
+- ✅ product-detail.html: Hardcoded buttons have data attributes
 
 ## User Preferences
 

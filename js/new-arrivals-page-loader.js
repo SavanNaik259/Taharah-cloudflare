@@ -236,7 +236,8 @@ function displayAllProducts(products) {
  * Create HTML for a single product (matching the design from home page)
  */
 function createProductHTML(product) {
-    // Format price
+    // Format price - CRITICAL: Store the original INR price for wishlist extraction
+    const originalPrice = parseFloat(product.price) || 0;
     const price = typeof product.price === 'number' ? 
         `₹${product.price.toLocaleString('en-IN')}` : 
         `₹${product.price}`;
@@ -246,18 +247,18 @@ function createProductHTML(product) {
     let imageUrl = product.image || product.imageUrl || '';
 
     return `
-        <div class="product-item" data-product-id="${product.id}" style="background: none;">
+        <div class="product-item" data-product-id="${product.id}" data-product-price="${originalPrice}" style="background: none;">
             <a href="product-detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">
                 <div class="product-image">
                     ${imageUrl ? `<img src="${imageUrl}" alt="${product.name}" loading="lazy">` : ''}
-                    <button class="add-to-wishlist" data-product-id="${product.id}">
+                    <button class="add-to-wishlist" data-product-id="${product.id}" data-product-price="${originalPrice}">
                         <i class="far fa-heart"></i>
                     </button>
                 </div>
                 <div class="product-details">
                     <h3 class="product-name">${product.name}</h3>
                     <div class="product-pricing">
-                        <span class="current-price">${price}</span>
+                        <span class="current-price" data-original-price="${originalPrice}">${price}</span>
                     </div>
                 </div>
             </a>

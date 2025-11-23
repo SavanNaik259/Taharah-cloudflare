@@ -893,6 +893,10 @@ const WishlistManager = (function() {
                     let productPrice = 0;
                     let priceFound = false;
                     
+                    console.log('🔍 PRICE EXTRACTION DEBUG - Starting for product:', productId);
+                    console.log('   Button data attributes:', this.dataset);
+                    console.log('   Product item data attributes:', productItem?.dataset);
+                    
                     // CRITICAL FIX: LEVEL 0 - Check global price cache FIRST
                     // This cache is populated by product loaders and is immune to DOM modifications
                     if (productId && window.PRODUCT_PRICES_CACHE && window.PRODUCT_PRICES_CACHE.has(productId)) {
