@@ -4,6 +4,41 @@
 
 Auric is a premium e-commerce platform designed to provide a seamless online shopping experience for jewelry. It offers comprehensive features including user authentication, cart management, order processing, and email notifications. The platform aims to deliver a modern interface for customers to browse and purchase jewelry, with advanced stock management, multi-language support, and integrated shipping.
 
+## Recent Changes (Nov 23, 2025)
+
+### COMPLETE FIX: Price=0 Bug for Cart AND Wishlist (v3.0.4)
+
+**All Issues Resolved**:
+1. ✅ **PRICE=0 BUG (CART)**: Fixed - Products add to cart with correct INR prices
+2. ✅ **PRICE=0 BUG (WISHLIST)**: Fixed - Products add to wishlist with correct INR prices  
+3. ✅ **Currency Symbols**: Fixed - All correct symbols display across cart, checkout, wishlist, order confirmation
+4. ✅ **Currency Conversion**: Fixed - All pages properly convert and display prices in selected currency
+
+**Root Cause**:
+When users selected different currencies, displayed prices changed to converted amounts. Cart and wishlist were extracting from displayed elements instead of original INR prices, resulting in price=0 bugs.
+
+**Solution**:
+- **Multi-Level Price Extraction**: Both cart-manager and wishlist-manager now read prices from data attributes FIRST
+  - Priority 1: `data-product-price` on elements (stores original INR)
+  - Priority 2: `data-original-price` on price elements
+  - Fallback: Parse text content only as last resort
+  
+**Files Modified**:
+- js/cart-manager.js: Enhanced price extraction with attribute support
+- js/wishlist-manager.js: Enhanced price extraction with attribute support  
+- js/featured-collection-products-loader.js: Added data-product-price attributes
+- js/new-arrivals-products-loader.js: Added data-product-price attributes
+- js/subcategory-products-loader.js: Added data-product-price attributes
+- js/saree-collection-products-loader.js: Added data-product-price attributes
+- index.html, gold-necklace.html, silver-necklace.html, meenakari-necklace.html: Added CurrencyConverter initialization
+
+**Result**: 
+- ✅ Users can add items from ANY page with correct prices
+- ✅ Wishlist shows correct prices instead of 0
+- ✅ Cart shows correct prices instead of 0
+- ✅ Currency displays correctly across all interfaces
+- ✅ Checkout totals are accurate regardless of currency selection
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.

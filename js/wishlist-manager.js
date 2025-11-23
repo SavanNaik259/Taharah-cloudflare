@@ -859,52 +859,70 @@ const WishlistManager = (function() {
                     const productName = productNameEl ? productNameEl.textContent.trim() : 'Unknown Product';
                     console.log('Product name:', productName);
 
-                    // Look for price element - handle both regular products and bridal products
-                    const priceElement = productItem.querySelector('.current-price') || 
-                                       productItem.querySelector('.original-price') ||
-                                       productItem.querySelector('.product-pricing .current-price');
-
-                    // Improved price extraction to handle different formats (₹32,500 or Rs. 15,550.00 or ₹15500.00)
+                    // FIRST: Check for data attributes on the button or product container (stores original INR price)
                     let productPrice = 0;
-                    if (priceElement) {
-                        // First try to get from data attribute if available
-                        if (priceElement.dataset.price) {
-                            productPrice = parseFloat(priceElement.dataset.price);
-                        } else {
-                            // Otherwise extract from text content
-                            // First remove currency symbols and spaces
-                            let priceText = priceElement.textContent.trim();
-                            console.log('Raw price text (item):', priceText);
+                    
+                    // Check button's data-product-price attribute FIRST
+                    if (this.dataset.productPrice) {
+                        productPrice = parseFloat(this.dataset.productPrice);
+                        console.log('Got price from button data attribute:', productPrice);
+                    } 
+                    // Check product container's data-product-price attribute
+                    else if (productItem.dataset.productPrice) {
+                        productPrice = parseFloat(productItem.dataset.productPrice);
+                        console.log('Got price from product-item data attribute:', productPrice);
+                    }
+                    // FALLBACK: Look for price element - handle both regular products and bridal products
+                    else {
+                        const priceElement = productItem.querySelector('.current-price') || 
+                                           productItem.querySelector('.original-price') ||
+                                           productItem.querySelector('.product-pricing .current-price');
 
-                            // Special handling for Rs. format with commas (like CHRM-07 and GSSE-11)
-                            if (priceText.includes('Rs.')) {
-                                console.log('Detected Rs. format price for item:', productId);
-                                // Extract the number portion and convert directly
-                                const match = priceText.match(/Rs\.\s*([\d,]+\.\d+)/);
-                                if (match && match[1]) {
-                                    // Remove commas and convert to float
-                                    const cleanedPrice = match[1].replace(/,/g, '');
-                                    console.log('Extracted price using regex (item):', cleanedPrice);
-                                    productPrice = parseFloat(cleanedPrice);
+                        // Improved price extraction to handle different formats (₹32,500 or Rs. 15,550.00 or ₹15500.00)
+                        if (priceElement) {
+                            // Check for data-original-price attribute (stores original INR)
+                            if (priceElement.dataset.originalPrice) {
+                                productPrice = parseFloat(priceElement.dataset.originalPrice);
+                                console.log('Got price from data-original-price attribute:', productPrice);
+                            } else if (priceElement.dataset.price) {
+                                productPrice = parseFloat(priceElement.dataset.price);
+                                console.log('Got price from data-price attribute:', productPrice);
+                            } else {
+                                // Otherwise extract from text content
+                                // First remove currency symbols and spaces
+                                let priceText = priceElement.textContent.trim();
+                                console.log('Raw price text (item):', priceText);
+
+                                // Special handling for Rs. format with commas (like CHRM-07 and GSSE-11)
+                                if (priceText.includes('Rs.')) {
+                                    console.log('Detected Rs. format price for item:', productId);
+                                    // Extract the number portion and convert directly
+                                    const match = priceText.match(/Rs\.\s*([\d,]+\.\d+)/);
+                                    if (match && match[1]) {
+                                        // Remove commas and convert to float
+                                        const cleanedPrice = match[1].replace(/,/g, '');
+                                        console.log('Extracted price using regex (item):', cleanedPrice);
+                                        productPrice = parseFloat(cleanedPrice);
+                                    } else {
+                                        // Fallback to normal cleaning
+                                        priceText = priceText.replace(/[^0-9.,]/g, '').replace(/,/g, '');
+                                        console.log('Cleaned price text (item):', priceText);
+                                        productPrice = parseFloat(priceText);
+                                    }
                                 } else {
-                                    // Fallback to normal cleaning
-                                    priceText = priceText.replace(/[^0-9.,]/g, '').replace(/,/g, '');
+                                    // Normal price cleaning for other formats - handle bridal product currency format
+                                    // Remove ₹ symbol and commas, keep decimals
+                                    priceText = priceText.replace(/₹|,/g, '').trim();
                                     console.log('Cleaned price text (item):', priceText);
                                     productPrice = parseFloat(priceText);
                                 }
-                            } else {
-                                // Normal price cleaning for other formats - handle bridal product currency format
-                                // Remove ₹ symbol and commas, keep decimals
-                                priceText = priceText.replace(/₹|,/g, '').trim();
-                                console.log('Cleaned price text (item):', priceText);
-                                productPrice = parseFloat(priceText);
-                            }
 
-                            // Hardcoded price for known problematic products as fallback
-                            if ((productId === 'CHRM-07' || productId === 'GSSE-11') && productPrice < 1000) {
-                                console.log('Applying hardcoded price for item:', productId);
-                                if (productId === 'CHRM-07') productPrice = 15550.00;
-                                if (productId === 'GSSE-11') productPrice = 17750.00;
+                                // Hardcoded price for known problematic products as fallback
+                                if ((productId === 'CHRM-07' || productId === 'GSSE-11') && productPrice < 1000) {
+                                    console.log('Applying hardcoded price for item:', productId);
+                                    if (productId === 'CHRM-07') productPrice = 15550.00;
+                                    if (productId === 'GSSE-11') productPrice = 17750.00;
+                                }
                             }
                         }
                     }
