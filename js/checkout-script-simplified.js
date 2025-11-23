@@ -478,6 +478,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update all total price displays
         if (orderTotalElement) {
             orderTotalElement.textContent = `₹${total.toFixed(2)}`;
+            orderTotalElement.dataset.originalPrice = total; // Store original price for currency conversion
         }
 
         // Add event listeners to quantity buttons
@@ -597,12 +598,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update total in all steps
         if (orderTotalElement) {
             orderTotalElement.textContent = `₹${total.toFixed(2)}`;
+            orderTotalElement.dataset.originalPrice = total; // Store original price for currency conversion
         }
         if (orderTotalStep2) {
             orderTotalStep2.textContent = `₹${total.toFixed(2)}`;
+            orderTotalStep2.dataset.originalPrice = total; // Store original price for currency conversion
         }
         if (orderTotalStep3) {
             orderTotalStep3.textContent = `₹${total.toFixed(2)}`;
+            orderTotalStep3.dataset.originalPrice = total; // Store original price for currency conversion
         }
     }
 

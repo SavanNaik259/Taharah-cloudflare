@@ -374,7 +374,7 @@ const JewelrySubcategoriesLoader = (function() {
                     <div class="arrival-details">
                         <h3 class="arrival-title">${product.name}</h3>
                         <div class="product-pricing">
-                            <span class="current-price">${formattedPrice}</span>
+                            <span class="current-price" data-original-price="${product.price}">${formattedPrice}</span>
                         </div>
                     </div>
                 </a>

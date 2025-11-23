@@ -364,7 +364,7 @@ const BridalProductsLoader = (function() {
                     <div class="product-details" style="text-align: center;">
                         <h3 class="product-name">${product.name}</h3>
                         <div class="product-pricing">
-                            <span class="current-price">${formattedPrice}</span>
+                            <span class="current-price" data-original-price="${product.price}">${formattedPrice}</span>
                         </div>
                     </div>
                 </a>
