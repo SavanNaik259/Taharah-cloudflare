@@ -10,7 +10,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Nov 23, 2025)
 
-### Inventory Management Improvements
+### Currency Conversion System Enhancement
+- **Order Confirmation Emails**: Users now receive order confirmation emails with prices displayed in their selected currency
+- **Email Template Updates**: Modified email-templates.js to support currency conversion with formatCurrencyPrice function
+- **Checkout Integration**: Added currency-converter script to checkout.html and updated order data to include userSelectedCurrency
+- **Currency Support**: All 7 supported currencies (INR, USD, EUR, GBP, AED, CAD, AUD) now work in order emails
+- **Collection Pages**: Currency conversion fully functional on new-arrivals, featured-collection, all-collection, and saree-collection pages
+- **Cart & Wishlist Support**: Currency display supported across cart and checkout interfaces
+
+### Previous Updates
 - **Fixed Image Display**: Product images in inventory section (out-of-stock and low-stock) now display properly with correct opacity and aspect ratio
 - **CSS Styling**: Added comprehensive styling for inventory product cards with visual differentiation for stock status
 - **Video Management Caching**: Fixed "Watch & Buy Video Management" section loading with two-stage caching and parallel product fetching

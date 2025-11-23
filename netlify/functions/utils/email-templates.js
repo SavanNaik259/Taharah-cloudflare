@@ -5,6 +5,30 @@
  * Each template is a function that takes data parameters and returns formatted HTML.
  */
 
+// Currency formatter
+const currencySymbols = {
+  'INR': { symbol: '₹', decimals: 0 },
+  'USD': { symbol: '$', decimals: 2 },
+  'EUR': { symbol: '€', decimals: 2 },
+  'GBP': { symbol: '£', decimals: 2 },
+  'AED': { symbol: 'د.إ', decimals: 2 },
+  'CAD': { symbol: 'C$', decimals: 2 },
+  'AUD': { symbol: 'A$', decimals: 2 }
+};
+
+const exchangeRates = {
+  'INR': 1, 'USD': 0.012, 'EUR': 0.011, 'GBP': 0.0095, 'AED': 0.044, 'CAD': 0.016, 'AUD': 0.018
+};
+
+function formatCurrencyPrice(priceInINR, currency = 'INR') {
+  const rate = exchangeRates[currency] || 1;
+  const converted = priceInINR * rate;
+  const currencyInfo = currencySymbols[currency] || currencySymbols['INR'];
+  const { symbol, decimals } = currencyInfo;
+  const formatted = decimals === 0 ? Math.round(converted).toLocaleString() : converted.toFixed(decimals);
+  return `${symbol}${formatted}`;
+}
+
 /**
  * Customer Order Confirmation Email Template
  * 
@@ -14,10 +38,11 @@
  * @param {String} data.orderReference - Order reference number
  * @param {String} data.orderDate - Order date
  * @param {Number} data.orderTotal - Order total
+ * @param {String} data.userSelectedCurrency - User's selected currency (defaults to 'INR')
  * @returns {String} - HTML email content
  */
 function customerOrderTemplate(data) {
-  const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, status, cancellationReason } = data;
+  const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, status, cancellationReason, userSelectedCurrency = 'INR' } = data;
 
   // Format date to be more readable
   const orderDateFormatted = new Date(orderDate).toLocaleString('en-US', {
@@ -29,13 +54,13 @@ function customerOrderTemplate(data) {
     minute: '2-digit'
   });
 
-  // Format the products into an HTML table
+  // Format the products into an HTML table with user's selected currency
   const productsHTML = products.map(product => `
     <tr>
       <td style="padding: 10px; border-bottom: 1px solid #e1e1e1;">${product.name || product.productName || 'Product'}</td>
       <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: center;">${product.quantity || 1}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">₹${(product.price || 0).toFixed(2)}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">₹${(product.total || product.price * product.quantity || 0).toFixed(2)}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${formatCurrencyPrice(product.price || 0, userSelectedCurrency)}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${formatCurrencyPrice(product.total || product.price * product.quantity || 0, userSelectedCurrency)}</td>
     </tr>
   `).join('');
 
@@ -129,7 +154,7 @@ function customerOrderTemplate(data) {
           ${productsHTML}
           <tr class="total-row">
             <td colspan="3" style="padding: 10px; text-align: right;"><strong>Total:</strong></td>
-            <td style="padding: 10px; text-align: right;">₹${(orderTotal || 0).toFixed(2)}</td>
+            <td style="padding: 10px; text-align: right;">${formatCurrencyPrice(orderTotal || 0, userSelectedCurrency)}</td>
           </tr>
         </tbody>
       </table>
@@ -164,10 +189,11 @@ function customerOrderTemplate(data) {
  * @param {String} data.orderReference - Order reference number
  * @param {String} data.orderDate - Order date
  * @param {Number} data.orderTotal - Order total
+ * @param {String} data.userSelectedCurrency - User's selected currency (defaults to 'INR')
  * @returns {String} - HTML email content
  */
 function ownerOrderTemplate(data) {
-  const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, notes } = data;
+  const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, notes, userSelectedCurrency = 'INR' } = data;
 
   // Format date to be more readable
   const orderDateFormatted = new Date(orderDate).toLocaleString('en-US', {
@@ -179,13 +205,13 @@ function ownerOrderTemplate(data) {
     minute: '2-digit'
   });
 
-  // Format the products into an HTML table
+  // Format the products into an HTML table (owner gets prices in customer's selected currency too)
   const productsHTML = products.map(product => `
     <tr>
       <td style="padding: 10px; border-bottom: 1px solid #e1e1e1;">${product.name || product.productName || 'Product'}</td>
       <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: center;">${product.quantity || 1}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">₹${(product.price || 0).toFixed(2)}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">₹${(product.total || product.price * product.quantity || 0).toFixed(2)}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${formatCurrencyPrice(product.price || 0, userSelectedCurrency)}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${formatCurrencyPrice(product.total || product.price * product.quantity || 0, userSelectedCurrency)}</td>
     </tr>
   `).join('');
 
@@ -308,7 +334,7 @@ function ownerOrderTemplate(data) {
           ${productsHTML}
           <tr class="total-row">
             <td colspan="3" style="padding: 10px; text-align: right;"><strong>Total:</strong></td>
-            <td style="padding: 10px; text-align: right;">₹${(orderTotal || 0).toFixed(2)}</td>
+            <td style="padding: 10px; text-align: right;">${formatCurrencyPrice(orderTotal || 0, userSelectedCurrency)}</td>
           </tr>
         </tbody>
       </table>

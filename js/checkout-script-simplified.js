@@ -769,7 +769,9 @@ document.addEventListener('DOMContentLoaded', function() {
             orderTotal: calculateTotal(cartItems),
             orderReference: generateOrderReference(),
             orderDate: new Date().toISOString(),
-            notes: formData.get('notes') || ''
+            notes: formData.get('notes') || '',
+            // Include user's selected currency for email formatting
+            userSelectedCurrency: window.CurrencyConverter ? window.CurrencyConverter.getCurrentCurrency() : 'INR'
         };
 
         // Disable submit button and show loading state
