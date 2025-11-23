@@ -42,8 +42,8 @@ Preferred communication style: Simple, everyday language.
 - **Stock Management**: Comprehensive system with `stock-manager.js` for Firebase operations, server-side updates via Netlify functions, automatic stock updates during checkout, an admin inventory dashboard with real-time alerts, and visual indicators for out-of-stock products.
 - **Multi-Language Support**: A dynamic translation system uses MyMemory Translation API to support 6 languages (English, Hindi, Spanish, French, Arabic, German). It employs a hybrid approach with static UI translations and API-powered dynamic content, including automatic translation of new products, browser language detection, RTL support, and translation caching.
 - **Category Pages**: Dedicated submenu category pages for various jewelry types (e.g., gold/silver/meenakari variants of necklaces, earrings, bangles, rings) with specific hero sections and dynamic product loading.
-- **Admin Dashboard Caching**: Implemented localStorage-based data caching (10-minute expiration) for instant dashboard display. The system loads cached orders, customers, and notifications immediately, while fresh data from Firebase loads in the background and updates the display automatically.
-- **Inventory Data Caching**: localStorage caching with 5-minute expiration for inventory summary data, enabling instant badge display on page load with automatic refresh when fresh data arrives.
+- **Admin Dashboard Caching**: Implemented localStorage-based data caching for instant dashboard display. The system loads cached orders, customers, and notifications immediately, while fresh data from Firebase loads in the background and updates the display automatically. No cache expiration—cached data is always shown instantly and fresh data always fetches in parallel.
+- **Inventory Data Caching**: localStorage caching for inventory summary (out-of-stock, low stock, in-stock counts) enabling instant stat card and badge display on page load. Fresh data always fetches in the background and updates automatically. No cache expiration—always shows cached data while fetching fresh.
 
 ## External Dependencies
 

@@ -5235,45 +5235,38 @@
                 console.log('Loading inventory summary...');
 
                 const CACHE_KEY = 'admin_inventory_summary';
-                const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache
 
-                // Try to load from localStorage cache first
+                // Try to load from localStorage cache first (always show cached data if available)
                 if (!forceRefresh) {
                     try {
                         const cachedData = localStorage.getItem(CACHE_KEY);
                         if (cachedData) {
-                            const { timestamp, summary } = JSON.parse(cachedData);
-                            const cacheAge = Date.now() - timestamp;
+                            const { summary } = JSON.parse(cachedData);
+                            console.log(`✅ Using cached inventory data (instant display)`);
                             
-                            if (cacheAge < CACHE_DURATION) {
-                                console.log(`✅ Using cached inventory data (${Math.round(cacheAge / 1000)}s old)`);
-                                
-                                // Update UI with cached data immediately
-                                document.getElementById('out-of-stock-count').textContent = summary.outOfStockCount;
-                                document.getElementById('low-stock-count').textContent = summary.lowStockCount;
-                                document.getElementById('in-stock-count').textContent = summary.inStockCount;
-                                document.getElementById('total-products-count').textContent = summary.totalProductsCount;
-                                document.getElementById('out-of-stock-tab-count').textContent = summary.outOfStockCount;
-                                document.getElementById('low-stock-tab-count').textContent = summary.lowStockCount;
-                                
-                                // Update navigation badge
-                                const inventoryBadge = document.getElementById('inventory-alert-badge');
-                                if (summary.outOfStockCount > 0) {
-                                    inventoryBadge.textContent = summary.outOfStockCount;
-                                    inventoryBadge.style.display = 'flex';
-                                } else {
-                                    inventoryBadge.style.display = 'none';
-                                }
-                                
-                                // Still update in-memory cache for tab views
-                                inventoryCache.outOfStock = summary.outOfStockProducts || [];
-                                inventoryCache.lowStock = summary.lowStockProducts || [];
-                                inventoryCache.allProducts = summary.allProducts || [];
-                                
-                                return; // Exit early, using cache
+                            // Update UI with cached data immediately
+                            document.getElementById('out-of-stock-count').textContent = summary.outOfStockCount;
+                            document.getElementById('low-stock-count').textContent = summary.lowStockCount;
+                            document.getElementById('in-stock-count').textContent = summary.inStockCount;
+                            document.getElementById('total-products-count').textContent = summary.totalProductsCount;
+                            document.getElementById('out-of-stock-tab-count').textContent = summary.outOfStockCount;
+                            document.getElementById('low-stock-tab-count').textContent = summary.lowStockCount;
+                            
+                            // Update navigation badge
+                            const inventoryBadge = document.getElementById('inventory-alert-badge');
+                            if (summary.outOfStockCount > 0) {
+                                inventoryBadge.textContent = summary.outOfStockCount;
+                                inventoryBadge.style.display = 'flex';
                             } else {
-                                console.log('📦 Cache expired, loading fresh data...');
+                                inventoryBadge.style.display = 'none';
                             }
+                            
+                            // Still update in-memory cache for tab views
+                            inventoryCache.outOfStock = summary.outOfStockProducts || [];
+                            inventoryCache.lowStock = summary.lowStockProducts || [];
+                            inventoryCache.allProducts = summary.allProducts || [];
+                            
+                            // Continue to fetch fresh data in background (don't return early)
                         }
                     } catch (err) {
                         console.warn('Failed to load cached inventory data:', err);
