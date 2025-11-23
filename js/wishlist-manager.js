@@ -859,8 +859,24 @@ const WishlistManager = (function() {
         // Use event delegation on document level to catch both existing and dynamically added buttons
         // This runs ONCE and handles ALL .add-to-wishlist clicks, including future ones
         document.addEventListener('click', function(event) {
+            // DEBUG: Log every click to ensure the listener is working
+            if (event.target.closest('.add-to-wishlist') || event.target.classList.contains('add-to-wishlist') || event.target.tagName === 'BUTTON') {
+                console.log('🔵 CLICK DETECTED - Target:', event.target.tagName, 'Classes:', event.target.className);
+            }
+            
             const button = event.target.closest('.add-to-wishlist');
-            if (!button) return;
+            if (!button) {
+                // DEBUG: Check if we're clicking on the icon inside the button
+                const icon = event.target.closest('i');
+                if (icon) {
+                    const iconButton = icon.closest('.add-to-wishlist');
+                    if (iconButton) {
+                        console.log('🟡 Found button through icon parent');
+                        event.target = iconButton;
+                    }
+                }
+                if (!button && !event.target.closest('.add-to-wishlist')) return;
+            }
 
             event.preventDefault();
             event.stopPropagation();

@@ -367,7 +367,7 @@ const JewelrySubcategoriesLoader = (function() {
                 <a href="product-detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">
                     <div class="arrival-image">
                         <img src="${product.image}" alt="${product.name}" loading="lazy">
-                        <button class="add-to-wishlist" data-product-id="${product.id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-image="${product.image}" onclick="event.preventDefault(); event.stopPropagation();">
+                        <button class="add-to-wishlist" data-product-id="${product.id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-image="${product.image}" >
                             <i class="far fa-heart"></i>
                         </button>
                     </div>
