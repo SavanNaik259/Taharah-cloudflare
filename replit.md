@@ -30,7 +30,12 @@ When users selected different currencies, displayed prices changed to converted 
 - js/new-arrivals-products-loader.js: Added data-product-price attributes
 - js/subcategory-products-loader.js: Added data-product-price attributes
 - js/saree-collection-products-loader.js: Added data-product-price attributes
-- index.html, gold-necklace.html, silver-necklace.html, meenakari-necklace.html: Added CurrencyConverter initialization
+- index.html: Added CurrencyConverter initialization + data attributes to 5 hardcoded wishlist buttons (RBC-01, EBS-02, TBE-03, CBJ-04)
+- product-detail.html: Added data attributes to 2 hardcoded wishlist buttons in "You May Also Like" (GLBR-11, SLAT-12)
+- All subcategory pages (gold-necklace.html, silver-necklace.html, etc.): Added CurrencyConverter initialization
+
+**Final Root Cause (User Report)**:
+Hardcoded product wishlist buttons on home page and product-detail page lacked `data-product-price` attributes. When users changed currency BEFORE adding to wishlist, the price extraction code fell back to DOM parsing which read the converted (displayed) price instead of original INR, resulting in price=0 being stored. The fix ensures ALL wishlist buttons (both dynamically loaded AND hardcoded) have the original INR price in data attributes.
 
 **Result**: 
 - ✅ Users can add items from ANY page with correct prices
