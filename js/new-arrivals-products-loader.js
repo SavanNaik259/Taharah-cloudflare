@@ -283,19 +283,9 @@ const NewArrivalsProductsLoader = (function() {
                     product.image = product.images[0].url;
                 }
 
-                // Ensure price is a number and handle potential null/undefined
-                if (product.price === null || product.price === undefined) {
-                    console.warn(`Product ${product.id} has null or undefined price, setting to 0`);
-                    product.price = 0;
-                } else {
-                    // Attempt to parse price, default to 0 if invalid
-                    const parsedPrice = parseFloat(product.price);
-                    product.price = isNaN(parsedPrice) ? 0 : parsedPrice;
-                }
-
                 return product;
             }).filter(product => {
-                const isValid = product.name && product.price !== undefined && product.image;
+                const isValid = product.name && product.price && product.image;
                 if (!isValid) {
                     console.warn('Skipping invalid product from Storage:', {
                         id: product.id,
@@ -546,64 +536,30 @@ const NewArrivalsProductsLoader = (function() {
      * Generate HTML for a product item - matching homepage product structure
      */
     function generateProductHTML(product) {
-        // Ensure price is a number, default to 0 if invalid or missing
-        const price = typeof product.price === 'number' ? product.price : parseFloat(product.price) || 0;
         const formattedPrice = new Intl.NumberFormat('en-IN', {
             style: 'currency',
             currency: 'INR',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0 // Ensure no fractional digits for typical Indian currency display
-        }).format(price);
+            minimumFractionDigits: 0
+        }).format(product.price);
 
-        // Determine image URL, fallback to placeholder
-        const imageUrl = product.image || 'images/product-placeholder.jpg';
-
-        // Discount badge logic (assuming discount is a percentage or a fixed amount)
-        let discountBadgeHTML = '';
-        if (product.originalPrice && parseFloat(product.originalPrice) > price) {
-            const discountAmount = parseFloat(product.originalPrice) - price;
-            const discountPercentage = ((discountAmount / parseFloat(product.originalPrice)) * 100).toFixed(0);
-            discountBadgeHTML = `<div class="discount-badge">-${discountPercentage}%</div>`;
-        }
-
-        // CRITICAL: Cache the price in global cache BEFORE rendering
-        if (window.PRODUCT_PRICES_CACHE && product.id && typeof price === 'number') {
-            window.PRODUCT_PRICES_CACHE.set(product.id, price);
-            console.log('🎯 Cached price for', product.id, ':', price, 'INR (new arrivals)');
-        }
-
-        // Create product HTML with proper data attributes and cache price
-        const productHTML = `
-            <div class="product-item arrival-item" data-product-id="${product.id}" data-product-price="${price}">
+        return `
+            <div class="product-item" data-product-id="${product.id}" data-product-price="${product.price}" data-product-name="${product.name}" data-product-image="${product.image}" style="background: none;">
                 <a href="product-detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">
-                    <div class="product-image arrival-image">
-                        <img src="${imageUrl}"
-                             alt="${product.name}"
-                             loading="lazy"
-                             decoding="async"
-                             onerror="this.src='images/product-placeholder.jpg'">
-                        ${product.isOutOfStock ? '<div class="sold-out-badge">SOLD OUT</div>' : ''}
-                        ${discountBadgeHTML}
-                        <button class="add-to-wishlist"
-                                data-product-id="${product.id}"
-                                data-product-name="${product.name}"
-                                data-product-price="${price}"
-                                data-product-image="${imageUrl}">
+                    <div class="product-image">
+                        <img src="${product.image}" alt="${product.name}" loading="lazy">
+                        <button class="add-to-wishlist" data-product-id="${product.id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-image="${product.image}" onclick="event.preventDefault(); event.stopPropagation();">
                             <i class="far fa-heart"></i>
                         </button>
                     </div>
-                    <div class="product-details arrival-details">
-                        <h3 class="product-name arrival-title">${product.name}</h3>
-                        <div class="product-pricing arrival-pricing">
-                            <span class="current-price arrival-price" data-price="${price}" data-original-price="${price}">${formattedPrice}</span>
-                            ${product.originalPrice && parseFloat(product.originalPrice) > price ? `<span class="original-price">₹${parseFloat(product.originalPrice).toLocaleString('en-IN')}</span>` : ''}
+                    <div class="product-details" style="text-align: center;">
+                        <h3 class="product-name">${product.name}</h3>
+                        <div class="product-pricing">
+                            <span class="current-price" data-original-price="${product.price}">${formattedPrice}</span>
                         </div>
                     </div>
                 </a>
             </div>
         `;
-
-        return productHTML;
     }
 
     /**
