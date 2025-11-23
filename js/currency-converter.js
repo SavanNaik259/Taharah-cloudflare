@@ -29,55 +29,58 @@ const CurrencyConverter = (function() {
     let isLoading = false;
     let userCountry = null;
     let userCurrency = null;
+    let isInitialized = false;
 
     /**
      * Initialize the currency converter
      */
     async function init() {
+        if (isInitialized) {
+            console.log('✅ Currency Converter already initialized');
+            return;
+        }
+
         try {
-            console.log('Initializing Currency Converter...');
+            console.log('🚀 Starting Currency Converter initialization...');
 
             // Detect user location (with timeout)
-            console.log('🌍 Detecting user location...');
             try {
                 await Promise.race([
                     detectUserLocation(),
                     new Promise((_, reject) => setTimeout(() => reject(new Error('Location detection timeout')), 2000))
                 ]);
             } catch (e) {
-                console.warn('⚠️ Location detection failed:', e.message);
-                // Continue even if location detection fails
+                console.log('ℹ️ Location detection skipped');
             }
 
-            // Load selected currency from localStorage
+            // CRITICAL: Load and restore saved currency from localStorage
             const savedCurrency = localStorage.getItem(SELECTED_CURRENCY_KEY);
+            console.log('📦 Saved currency from localStorage:', savedCurrency);
+            
             if (savedCurrency && CURRENCIES[savedCurrency]) {
                 currentCurrency = savedCurrency;
-                console.log('💾 Loaded saved currency:', currentCurrency);
+                console.log('✅ Restored saved currency:', currentCurrency);
             }
 
             // Load exchange rates with fallback
-            console.log('💱 Loading exchange rates...');
             await loadExchangeRatesWithFallback();
 
-            // Set up UI
-            console.log('🎨 Setting up currency selector UI...');
+            // Set up UI to show restored currency
             updateCurrencySelector();
             
-            // Convert prices on page if not base currency
+            // Mark as initialized
+            isInitialized = true;
+            console.log('✅ Currency Converter initialized with currency:', currentCurrency);
+            
+            // Convert prices if not base currency
             if (currentCurrency !== BASE_CURRENCY) {
-                // Give a small delay to ensure DOM is ready
-                console.log('💰 Converting prices to', currentCurrency);
-                setTimeout(() => {
-                    convertAllPrices();
-                }, 100);
+                console.log('💱 Converting prices to:', currentCurrency);
+                convertAllPrices();
             }
 
-            console.log('✅ Currency Converter initialized with currency:', currentCurrency);
         } catch (error) {
-            console.error('❌ Currency Converter initialization failed:', error);
-            // Ensure default state even on failure
-            console.log('✅ Using default currency: INR');
+            console.error('❌ Currency Converter initialization error:', error);
+            isInitialized = true;
         }
     }
 
@@ -86,25 +89,18 @@ const CurrencyConverter = (function() {
      */
     async function detectUserLocation() {
         try {
-            // Try to get location from ipapi.co (free API)
             const response = await fetch('https://ipapi.co/json/');
             const data = await response.json();
             
             if (data.country_name && data.currency) {
                 userCountry = data.country_name;
                 userCurrency = data.currency;
-                
-                // Save to localStorage
                 localStorage.setItem('user_country', userCountry);
                 localStorage.setItem('user_detected_currency', userCurrency);
-                
-                console.log('Detected location:', userCountry, 'Currency:', userCurrency);
             }
         } catch (error) {
-            // Fallback to localStorage if API fails
             userCountry = localStorage.getItem('user_country') || 'Unknown';
             userCurrency = localStorage.getItem('user_detected_currency') || 'INR';
-            console.log('Using cached location data');
         }
     }
 
@@ -121,69 +117,51 @@ const CurrencyConverter = (function() {
             const age = now - parseInt(cacheTimestamp);
             if (age < CACHE_DURATION) {
                 exchangeRates = JSON.parse(cachedRates);
-                console.log('✅ Using cached exchange rates');
+                console.log('💰 Using cached exchange rates');
                 return;
             }
         }
 
         // Fetch new rates
-        console.log('📡 Fetching fresh exchange rates...');
         try {
             const response = await fetch(API_URL);
             const data = await response.json();
 
             if (data && data.rates) {
                 exchangeRates = data.rates;
-                
-                // Cache the rates
                 localStorage.setItem(CACHE_KEY, JSON.stringify(exchangeRates));
                 localStorage.setItem(CACHE_TIMESTAMP_KEY, now.toString());
-                
-                console.log('✅ Exchange rates updated successfully');
+                console.log('💰 Exchange rates fetched successfully');
             } else {
                 throw new Error('Invalid rates data');
             }
         } catch (error) {
-            console.error('❌ Error fetching fresh rates:', error);
+            console.error('❌ Exchange rate fetch failed:', error);
             throw error;
         }
     }
     
     /**
-     * Load exchange rates with fallback and timeout
+     * Load exchange rates with fallback
      */
     async function loadExchangeRatesWithFallback() {
         try {
-            console.log('🔄 Starting exchange rate load...');
-            
-            // Set a timeout for exchange rate loading (3 seconds)
-            const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('Exchange rate loading timeout')), 3000);
-            });
-            
-            // Race against timeout
-            try {
-                await Promise.race([loadExchangeRates(), timeoutPromise]);
-                console.log('✅ Exchange rates loaded successfully');
-            } catch (timeoutError) {
-                throw timeoutError;
-            }
+            await loadExchangeRates();
         } catch (error) {
-            console.warn('⚠️ Exchange rate loading failed:', error.message);
+            console.warn('⚠️ Exchange rate loading failed, using fallback...');
             
-            // Try to use cached rates as fallback
             const cachedRates = localStorage.getItem(CACHE_KEY);
             if (cachedRates) {
                 try {
                     exchangeRates = JSON.parse(cachedRates);
-                    console.log('✅ Using cached exchange rates as fallback');
-                    return; // Success - cached rates loaded
+                    console.log('✅ Using cached exchange rates');
+                    return;
                 } catch (e) {
-                    console.warn('⚠️ Cached rates are invalid, using defaults');
+                    console.warn('Cached rates are invalid');
                 }
             }
             
-            // Set default rates if no cache available
+            // Set default rates
             exchangeRates = {
                 'INR': 1,
                 'USD': 0.012,
@@ -221,13 +199,10 @@ const CurrencyConverter = (function() {
         const currencyInfo = CURRENCIES[currentCurrency];
         const symbol = currencyInfo ? currencyInfo.symbol : '₹';
 
-        // Format number with proper decimals
         let formattedPrice;
         if (currentCurrency === 'INR') {
-            // No decimals for INR
             formattedPrice = Math.round(price).toLocaleString('en-IN');
         } else {
-            // 2 decimals for other currencies
             formattedPrice = price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         }
 
@@ -238,12 +213,28 @@ const CurrencyConverter = (function() {
      * Convert all prices on the page
      */
     function convertAllPrices() {
+        // CRITICAL FIX: Ensure we have the latest currency from localStorage
+        // This handles the case where currency is saved but init() hasn't run yet
+        const savedCurrency = localStorage.getItem(SELECTED_CURRENCY_KEY);
+        if (savedCurrency && CURRENCIES[savedCurrency] && savedCurrency !== currentCurrency) {
+            currentCurrency = savedCurrency;
+            console.log('🔄 Updated current currency to:', currentCurrency);
+        }
+
+        // If still using base currency, don't convert
+        if (currentCurrency === BASE_CURRENCY) {
+            return;
+        }
+
+        // Ensure exchange rates are loaded
+        if (!exchangeRates || Object.keys(exchangeRates).length === 0) {
+            console.warn('⚠️ No exchange rates available, skipping conversion');
+            return;
+        }
+
         isLoading = true;
-        
-        // Show loading state
         document.body.classList.add('converting-currency');
 
-        // Find all price elements
         const priceSelectors = [
             '.current-price',
             '.original-price',
@@ -264,7 +255,6 @@ const CurrencyConverter = (function() {
             });
         });
 
-        // Remove loading state
         setTimeout(() => {
             document.body.classList.remove('converting-currency');
             isLoading = false;
@@ -275,41 +265,33 @@ const CurrencyConverter = (function() {
      * Convert a single price element
      */
     function convertPriceElement(element) {
-        // Get original price in INR
         let priceInINR = parseFloat(element.dataset.originalPrice);
         
-        // If no original price stored, extract and store it
         if (!priceInINR) {
             const text = element.textContent.trim();
-            // Store original full text to preserve labels
             if (!element.dataset.originalText) {
                 element.dataset.originalText = text;
             }
             
-            // Extract number from text (handles ₹, $, etc.)
             const match = text.match(/[\d,]+\.?\d*/);
             if (match) {
                 priceInINR = parseFloat(match[0].replace(/,/g, ''));
                 element.dataset.originalPrice = priceInINR;
             } else {
-                return; // Skip if can't extract price
+                return;
             }
         }
 
-        // Convert price
         const convertedPrice = convertPrice(priceInINR);
         const formattedPrice = formatPrice(convertedPrice);
         
-        // Preserve labels/text by replacing only the price portion
         const originalText = element.dataset.originalText || element.textContent;
         const originalPriceMatch = originalText.match(/[\d,]+\.?\d*/);
         
         if (originalPriceMatch) {
-            // Replace only the price number, keeping labels/prefixes
             const updatedText = originalText.replace(/[₹$€£]?[\d,]+\.?\d*/, formattedPrice);
             element.textContent = updatedText;
         } else {
-            // Fallback: just update with formatted price
             element.textContent = formattedPrice;
         }
     }
@@ -328,13 +310,10 @@ const CurrencyConverter = (function() {
         currentCurrency = newCurrency;
         localStorage.setItem(SELECTED_CURRENCY_KEY, currentCurrency);
 
-        // Update UI
         updateCurrencySelector();
-
-        // Convert all prices
         convertAllPrices();
 
-        console.log('Currency changed to:', currentCurrency);
+        console.log('✅ Currency changed to:', currentCurrency);
     }
 
     /**
@@ -345,7 +324,6 @@ const CurrencyConverter = (function() {
         if (selector) {
             selector.value = currentCurrency;
             
-            // Update options with flags
             Array.from(selector.options).forEach(option => {
                 const currCode = option.value;
                 const currInfo = CURRENCIES[currCode];
@@ -355,14 +333,12 @@ const CurrencyConverter = (function() {
             });
         }
 
-        // Update the flag display in bottom nav
         const flagDisplay = document.getElementById('selected-currency-flag');
         if (flagDisplay) {
             const currencyInfo = CURRENCIES[currentCurrency];
             flagDisplay.textContent = currencyInfo.flag;
         }
 
-        // Update the currency code display in bottom nav
         const codeDisplay = document.getElementById('selected-currency-code');
         if (codeDisplay) {
             codeDisplay.textContent = currentCurrency;
@@ -374,7 +350,6 @@ const CurrencyConverter = (function() {
             selectedDisplay.textContent = `${currencyInfo.flag} ${currentCurrency}`;
         }
 
-        // Show user's current location if detected
         showUserLocation();
     }
 
@@ -385,21 +360,16 @@ const CurrencyConverter = (function() {
         const wrapper = document.querySelector('.currency-selector-wrapper');
         if (!wrapper) return;
 
-        // Remove existing location info
         const existingInfo = wrapper.querySelector('.current-location-info');
         if (existingInfo) {
             existingInfo.remove();
         }
 
-        // Add new location info if available
         if (userCountry && userCountry !== 'Unknown') {
             const locationInfo = document.createElement('div');
             locationInfo.className = 'current-location-info';
-            
-            // Find flag for user's country
             const userFlag = getCountryFlag(userCountry);
             locationInfo.innerHTML = `<span class="location-flag">${userFlag}</span> ${userCountry}`;
-            
             wrapper.appendChild(locationInfo);
         }
     }
@@ -463,14 +433,6 @@ const CurrencyConverter = (function() {
 
     /**
      * Convert price from selected currency back to INR
-     * 
-     * WARNING: This function should ONLY be used for converting actual display
-     * currency amounts (like user input in USD) back to INR.
-     * 
-     * DO NOT use this for cart totals or stored prices - those are already in INR!
-     * 
-     * @param {number} priceInCurrentCurrency - Amount in the currently selected display currency
-     * @returns {number} - Equivalent amount in INR
      */
     function convertToINR(priceInCurrentCurrency) {
         if (currentCurrency === BASE_CURRENCY) {
@@ -483,8 +445,6 @@ const CurrencyConverter = (function() {
             return priceInCurrentCurrency;
         }
 
-        // Divide by rate to convert back to INR
-        // Example: $100 USD at rate 0.012 = 100 / 0.012 = ₹8,333
         return priceInCurrentCurrency / rate;
     }
 
@@ -514,14 +474,9 @@ const CurrencyConverter = (function() {
      * Refresh exchange rates
      */
     async function refreshRates() {
-        // Clear cache
         localStorage.removeItem(CACHE_KEY);
         localStorage.removeItem(CACHE_TIMESTAMP_KEY);
-        
-        // Load fresh rates
         await loadExchangeRates();
-        
-        // Reconvert prices
         if (currentCurrency !== BASE_CURRENCY) {
             convertAllPrices();
         }
@@ -539,6 +494,7 @@ const CurrencyConverter = (function() {
         getSupportedCurrencies,
         refreshRates,
         getCountryFlag,
+        convertAllPrices,
         CURRENCIES,
         BASE_CURRENCY
     };
@@ -550,10 +506,10 @@ window.CurrencyConverter = CurrencyConverter;
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        console.log('📱 DOM loaded, initializing Currency Converter...');
+        console.log('📱 DOM ready, initializing Currency Converter');
         CurrencyConverter.init();
     });
 } else {
-    console.log('📱 DOM already loaded, initializing Currency Converter...');
+    console.log('📱 DOM already loaded, initializing Currency Converter');
     CurrencyConverter.init();
 }
