@@ -35,7 +35,7 @@
     <script src="js/netlify-helpers.js"></script>
 
     <!-- Currency Converter -->
-    <script src="js/currency-converter.js?v=1.0.0"></script>
+    <script src="js/currency-converter.js?v=3.0.0"></script>
 
     <!-- Note: Debug scripts removed as requested -->
 
@@ -56,6 +56,11 @@
             console.log('Using Firebase configuration for authentication and order storage');
 
             try {
+                // Initialize currency converter
+                if (typeof CurrencyConverter !== 'undefined') {
+                    CurrencyConverter.init();
+                }
+
                 // Only initialize Firebase if it's not already initialized
                 if (!firebase.apps || !firebase.apps.length) {
                     // Initialize Firebase
