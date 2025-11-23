@@ -4693,6 +4693,66 @@
         // Make function global
         window.markAsDelivered = markAsDelivered;
 
+        // Load cached video data for instant display (no expiration check)
+        function loadWatchBuyVideosCachedData() {
+            try {
+                console.log('📹 Loading cached video data...');
+                const cachedVideos = localStorage.getItem('admin_dashboard_videos');
+                if (cachedVideos) {
+                    const { data } = JSON.parse(cachedVideos);
+                    console.log('✅ Using cached video data (instant display):', data);
+                    
+                    // Display cached video data instantly
+                    const loadingElement = document.getElementById('watch-buy-loading');
+                    const contentElement = document.getElementById('watch-buy-content');
+                    if (loadingElement) loadingElement.style.display = 'none';
+                    if (contentElement) contentElement.style.display = 'block';
+                    
+                    // Populate each video's SKU and product name from cache
+                    for (let i = 1; i <= 6; i++) {
+                        if (data[`video${i}`]) {
+                            document.getElementById(`video${i}-sku`).value = data[`video${i}`].productSKU || '';
+                            document.getElementById(`video${i}-product-name`).innerHTML = data[`video${i}`].html || '';
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn('Failed to load cached video data:', err);
+            }
+        }
+
+        // Load fresh video data from Firebase in background
+        async function loadWatchBuyVideosFreshData() {
+            try {
+                console.log('📡 Loading fresh video data from Firebase...');
+                await loadWatchBuyVideos();
+                
+                // Save to cache
+                try {
+                    const videoData = {};
+                    for (let i = 1; i <= 6; i++) {
+                        const skuElement = document.getElementById(`video${i}-sku`);
+                        const htmlElement = document.getElementById(`video${i}-product-name`);
+                        if (skuElement && htmlElement) {
+                            videoData[`video${i}`] = {
+                                productSKU: skuElement.value,
+                                html: htmlElement.innerHTML
+                            };
+                        }
+                    }
+                    localStorage.setItem('admin_dashboard_videos', JSON.stringify({
+                        timestamp: Date.now(),
+                        data: videoData
+                    }));
+                    console.log('💾 Cached fresh video data');
+                } catch (cacheErr) {
+                    console.warn('Failed to cache video data:', cacheErr);
+                }
+            } catch (err) {
+                console.warn('Failed to load fresh video data:', err);
+            }
+        }
+
         // Watch & Buy Video Management Functions
         async function loadWatchBuyVideos() {
             console.log('Loading Watch & Buy video configurations...');
@@ -4700,8 +4760,11 @@
             const loadingElement = document.getElementById('watch-buy-loading');
             const contentElement = document.getElementById('watch-buy-content');
             
-            if (loadingElement) loadingElement.style.display = 'flex';
-            if (contentElement) contentElement.style.display = 'none';
+            // Don't show loading if we already have cached data displayed
+            if (!document.getElementById(`video1-sku`).value) {
+                if (loadingElement) loadingElement.style.display = 'flex';
+                if (contentElement) contentElement.style.display = 'none';
+            }
             
             try {
                 // Load video links from Firestore
@@ -4711,16 +4774,18 @@
                     const videoLinks = videoLinksDoc.data();
                     console.log('Loaded video links:', videoLinks);
                     
-                    // Populate each video's SKU and product name
+                    // Populate each video's SKU and product name (non-blocking)
+                    const promises = [];
                     for (let i = 1; i <= 6; i++) {
                         const videoData = videoLinks[`video${i}`];
                         if (videoData && videoData.productSKU) {
                             document.getElementById(`video${i}-sku`).value = videoData.productSKU;
-                            
-                            // Fetch and display product name
-                            await fetchAndDisplayProductName(i, videoData.productSKU);
+                            // Fetch product names in parallel instead of sequential
+                            promises.push(fetchAndDisplayProductName(i, videoData.productSKU));
                         }
                     }
+                    // Wait for all product fetches to complete
+                    await Promise.all(promises);
                 } else {
                     console.log('No video links configured yet');
                 }
@@ -4745,7 +4810,7 @@
             const productNameElement = document.getElementById(`video${videoNumber}-product-name`);
             
             try {
-                // Search for product across ALL categories including subcategories
+                // Search for product across ALL categories including subcategories (in parallel)
                 const categories = [
                     'featured-collection', 
                     'new-arrivals', 
@@ -4763,16 +4828,22 @@
                     'silver-rings',
                     'meenakari-rings'
                 ];
+                
+                // Fetch all categories in parallel for faster search
+                const categoryPromises = categories.map(category =>
+                    fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`)
+                        .then(response => response.ok ? response.json() : null)
+                        .catch(() => null)
+                );
+                
+                const categoryResults = await Promise.all(categoryPromises);
                 let productFound = null;
                 
-                for (const category of categories) {
-                    const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.success && data.products) {
-                            productFound = data.products.find(p => p.id === sku);
-                            if (productFound) break;
-                        }
+                // Search for product in results
+                for (const result of categoryResults) {
+                    if (result && result.success && result.products) {
+                        productFound = result.products.find(p => p.id === sku);
+                        if (productFound) break;
                     }
                 }
                 
@@ -4809,7 +4880,7 @@
             showGlobalLoader(`Saving link for Video ${videoNumber}...`);
             
             try {
-                // Validate that product exists - search ALL collections including subcategories
+                // Validate that product exists - search ALL collections including subcategories (in parallel)
                 const categories = [
                     'featured-collection', 
                     'new-arrivals', 
@@ -4827,16 +4898,22 @@
                     'silver-rings',
                     'meenakari-rings'
                 ];
+                
+                // Fetch all categories in parallel for faster search
+                const categoryPromises = categories.map(category =>
+                    fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`)
+                        .then(response => response.ok ? response.json() : null)
+                        .catch(() => null)
+                );
+                
+                const categoryResults = await Promise.all(categoryPromises);
                 let productFound = null;
                 
-                for (const category of categories) {
-                    const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.success && data.products) {
-                            productFound = data.products.find(p => p.id === sku);
-                            if (productFound) break;
-                        }
+                // Search for product in results
+                for (const result of categoryResults) {
+                    if (result && result.success && result.products) {
+                        productFound = result.products.find(p => p.id === sku);
+                        if (productFound) break;
                     }
                 }
                 
@@ -7509,6 +7586,10 @@
                 // Load cached products for instant display
                 console.log('💾 Loading cached products data for instant display...');
                 loadProductsCachedData();
+                
+                // Load cached videos for instant display
+                console.log('💾 Loading cached video data for instant display...');
+                loadWatchBuyVideosCachedData();
 
                 // Load fresh dashboard data in parallel (updates will happen automatically)
                 console.log('📋 Loading fresh dashboard data in parallel...');
@@ -7517,6 +7598,10 @@
                 // Load fresh products data in parallel (updates will happen automatically)
                 console.log('📡 Loading fresh products data in parallel...');
                 loadProductsFreshData();
+                
+                // Load fresh videos data in parallel (updates will happen automatically)
+                console.log('📡 Loading fresh video data in parallel...');
+                loadWatchBuyVideosFreshData();
 
                 console.log('✅ Dashboard initialization complete (using cached data, fresh data loading in background)');
 
