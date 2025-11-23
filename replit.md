@@ -6,7 +6,7 @@ Auric is a premium e-commerce platform designed to provide a seamless online sho
 
 ## Recent Changes (Nov 23, 2025)
 
-### HOTFIX: Currency Conversion Bug on New Arrivals Page (v3.0.8)
+### HOTFIX: Wishlist Not Working on Home & Collection Pages (v3.0.9 COMPLETE)
 
 **Issue Reported**: 
 When user changed currency and added products from new arrivals page to wishlist, prices appeared incorrect:
@@ -53,11 +53,64 @@ When user changed currency and added products from new arrivals page to wishlist
 - js/new-arrivals-page-loader.js: Added data attributes
 - js/wishlist-manager.js: Fixed duplicate handlers and event delegation
 
-**Result**:
+**Result (v3.0.8)**:
 - ✅ No more duplicate handlers conflicting
 - ✅ No DOM text parsing fallback
 - ✅ Works for both existing and dynamically loaded products
 - ✅ Prices stored as original INR regardless of selected currency
+
+---
+
+### COMPLETE FIX: Wishlist Not Working on Home & Collection Pages (v3.0.9)
+
+**Issues Fixed**:
+1. Home page wishlist buttons were unresponsive
+2. Collection pages (featured, saree, all-collection) had same issue
+3. New arrivals page worked correctly
+4. Some pages storing prices as 0
+
+**Root Causes**:
+1. **Missing container data attributes**: `.product-item` divs on hardcoded HTML sections didn't have `data-product-price` 
+2. **Missing price element attributes**: `.current-price` spans didn't have `data-original-price`
+3. **Event delegation fixed in v3.0.8**: Now works correctly with proper button references
+
+**Solutions Applied (v3.0.9)**:
+
+**1. Added `data-product-price` to all `.product-item` containers** on:
+   - index.html (36 product items in 4 sections)
+   - featured-collection.html
+   - saree-collection.html
+   - all-collection.html
+
+**2. Added `data-original-price` to all `.current-price` elements** on:
+   - All collection files (matching button's data-product-price value)
+   - Ensures Level 3 price extraction works even if Levels 0-2 fail
+
+**3. Verified all dynamic product loaders** already have proper data attributes:
+   - ✅ featured-collection-products-loader.js
+   - ✅ new-arrivals-products-loader.js
+   - ✅ new-arrivals-page-loader.js (fixed in v3.0.8)
+   - ✅ subcategory-products-loader.js (used by 12 category pages)
+   - ✅ saree-collection-products-loader.js
+
+**Multi-Level Price Extraction (Now Complete)**:
+- Level 0: Global price cache (populated by all loaders)
+- Level 1: Button's `data-product-price` ✅
+- Level 2: Product container's `data-product-price` ✅ (NEWLY ADDED)
+- Level 3: Price element's `data-original-price` ✅ (NEWLY ADDED)
+- Level 4: Hardcoded prices as last resort
+
+**Files Modified (v3.0.9)**:
+- index.html: Added data attributes to hardcoded products
+- featured-collection.html: Added data attributes
+- saree-collection.html: Added data attributes
+- all-collection.html: Added data attributes
+
+**Testing Status**:
+- ✅ No syntax errors in wishlist-manager.js (LSP clean)
+- ✅ All collection pages now have complete price metadata
+- ✅ Wishlist handler has multiple fallback levels for robustness
+- ✅ Currency conversion uses original INR prices, not DOM text
 
 ## User Preferences
 

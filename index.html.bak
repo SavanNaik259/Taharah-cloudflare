@@ -186,6 +186,7 @@ background-color: #000 !important;
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-solid-straight/css/uicons-solid-straight.css'>
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-straight/css/uicons-regular-straight.css'>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/first-visit-banner.css?v=1.0.0">
     <link href="https://fonts.cdnfonts.com/css/futura-pt" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css?v=2.0.0">
     <link rel="stylesheet" href="css/responsive.css?v=1.0.4">
@@ -275,6 +276,19 @@ background-color: #000 !important;
         }
     </style>
   <body>
+
+    <!-- First Visit Modal -->
+    <div id="firstVisitModal" class="first-visit-modal">
+        <div class="first-visit-modal-content">
+            <button class="first-visit-modal-close" onclick="closeFirstVisitModal()">&times;</button>
+            <img src="images/7ee0b1b1ef79410cac60d42a3ff800c7.jpg" alt="Welcome to Royal Meenakari" class="first-visit-banner-image">
+            <div class="first-visit-banner-text">
+                <h2>Welcome to Royal Meenakari!</h2>
+                <p>Discover our exquisite collection of handcrafted Meenakari jewelry. Sign up today to receive exclusive offers and updates.</p>
+                <a href="signup.html" class="first-visit-cta-button">Sign Up Now</a>
+            </div>
+        </div>
+    </div>
 
     <!-- Header -->
     <header class="header">
@@ -617,11 +631,11 @@ background-color: #000 !important;
     <!-- Product Categories Section --
     <section class="you-may-also-like full-width-section" style="margin-bottom: 20px;">
         <div class="product-scroll-container">
-            <div class="product-item" data-product-id="RBC-01" style="background: none;">
+            <div class="product-item" data-product-id="RBC-01" data-product-price="125000" style="background: none;">
                 <a href="#" style="text-decoration: none; color: inherit;">
                     <div class="product-image">
                         <img src="images/6Y4A6490.jpg" alt="Royal Bridal Collection">
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                        <button class="add-to-wishlist" data-product-id="RBC-01" data-product-name="Royal Bridal Collection" data-product-price="125000" data-product-image="images/6Y4A6490.jpg"><i class="far fa-heart"></i></button>
                     </div>
                     <div class="product-details" style="text-align: center;">
                         <h3 class="product-name">Royal Bridal Collection</h3>
@@ -632,11 +646,11 @@ background-color: #000 !important;
                 </a>
             </div>
 
-            <div class="product-item" data-product-id="EBS-02" style="background: none;">
+            <div class="product-item" data-product-id="EBS-02" data-product-price="98500" style="background: none;">
                 <a href="#" style="text-decoration: none; color: inherit;">
                     <div class="product-image">
                         <img src="images/6Y4A6534.jpg" alt="Elegant Bridal Set">
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                        <button class="add-to-wishlist" data-product-id="EBS-02" data-product-name="Elegant Bridal Set" data-product-price="98500" data-product-image="images/6Y4A6534.jpg"><i class="far fa-heart"></i></button>
                     </div>
                     <div class="product-details" style="text-align: center;">
                         <h3 class="product-name">Elegant Bridal Set</h3>
@@ -646,11 +660,11 @@ background-color: #000 !important;
                     </div>
                 </a>
             </div>
-            <div class="product-item" data-product-id="TBE-03" style="background: none;">
+            <div class="product-item" data-product-id="TBE-03" data-product-price="145000" style="background: none;">
                 <a href="#" style="text-decoration: none; color: inherit;">
                     <div class="product-image">
                         <img src="images/6Y4A6225.jpg" alt="Traditional Bridal Ensemble">
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                        <button class="add-to-wishlist" data-product-id="TBE-03" data-product-name="Traditional Bridal Ensemble" data-product-price="145000" data-product-image="images/6Y4A6225.jpg"><i class="far fa-heart"></i></button>
                     </div>
                     <div class="product-details" style="text-align: center;">
                         <h3 class="product-name">Traditional Bridal Ensemble</h3>
@@ -660,11 +674,11 @@ background-color: #000 !important;
                     </div>
                 </a>
             </div>
-            <div class="product-item" data-product-id="TBE-03" style="background: none;">
+            <div class="product-item" data-product-id="TBE-03" data-product-price="145000" style="background: none;">
                 <a href="#" style="text-decoration: none; color: inherit;">
                     <div class="product-image">
                         <img src="images/6Y4A6490.jpg" alt="Traditional Bridal Ensemble">
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                        <button class="add-to-wishlist" data-product-id="TBE-03" data-product-name="Traditional Bridal Ensemble" data-product-price="145000" data-product-image="images/6Y4A6490.jpg"><i class="far fa-heart"></i></button>
                     </div>
                     <div class="product-details" style="text-align: center;">
                         <h3 class="product-name">Traditional Bridal Ensemble</h3>
@@ -674,11 +688,11 @@ background-color: #000 !important;
                     </div>
                 </a>
             </div>
-            <div class="product-item" data-product-id="CBJ-04" style="background: none;">
+            <div class="product-item" data-product-id="CBJ-04" data-product-price="115000" style="background: none;">
                 <a href="#" style="text-decoration: none; color: inherit;">
                     <div class="product-image">
                         <img src="images/6Y4A6225.jpg" alt="Classic Bridal Jewelry">
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                        <button class="add-to-wishlist" data-product-id="CBJ-04" data-product-name="Classic Bridal Jewelry" data-product-price="115000" data-product-image="images/6Y4A6225.jpg"><i class="far fa-heart"></i></button>
                     </div>
                     <div class="product-details" style="text-align: center;">
                         <h3 class="product-name">Classic Bridal Jewelry</h3>
@@ -732,11 +746,11 @@ background-color: #000 !important;
     <!-- Polki Product Categories Section  --
     <section class="polki-products full-width-section" style="margin-bottom: 20px;">
         <div class="product-scroll-container">
-            <div class="product-item" data-product-id="PKN-01" style="background: none;">
+            <div class="product-item" data-product-id="PKN-01" data-product-price="245000" style="background: none;">
                 <a href="#" style="text-decoration: none; color: inherit;">
                     <div class="product-image">
                         <img src="images/d3268961-a795-4d9c-a4fd-a9a208519453_7a3f17fb-bf85-476a-810b-5991bb3874eb.jpg">
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                        <button class="add-to-wishlist" data-product-id="PKN-01" data-product-name="Exquisite Polki Necklace" data-product-price="245000" data-product-image="images/d3268961-a795-4d9c-a4fd-a9a208519453_7a3f17fb-bf85-476a-810b-5991bb3874eb.jpg"><i class="far fa-heart"></i></button>
                     </div>
                     <div class="product-details" style="text-align: center;">
                         <h3 class="product-name">Exquisite Polki Necklace</h3>
@@ -746,11 +760,11 @@ background-color: #000 !important;
                     </div>
                 </a>
             </div>
-            <div class="product-item" data-product-id="PKB-02" style="background: none;">
+            <div class="product-item" data-product-id="PKB-02" data-product-price="185000" style="background: none;">
                 <a href="#" style="text-decoration: none; color: inherit;">
                     <div class="product-image">
                         <img src="images/490A9757.jpg" alt="Polki Bangles">
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                        <button class="add-to-wishlist" data-product-id="PKB-02" data-product-name="Traditional Polki Bangles" data-product-price="185000" data-product-image="images/490A9757.jpg"><i class="far fa-heart"></i></button>
                     </div>
                     <div class="product-details" style="text-align: center;">
                         <h3 class="product-name">Traditional Polki Bangles</h3>
@@ -760,11 +774,11 @@ background-color: #000 !important;
                     </div>
                 </a>
             </div>
-            <div class="product-item" data-product-id="PKB-02" style="background: none;">
+            <div class="product-item" data-product-id="PKB-02" data-product-price="185000" style="background: none;">
                 <a href="#" style="text-decoration: none; color: inherit;">
                     <div class="product-image">
                         <img src="images/490A9973.jpg" alt="Polki Bangles">
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                        <button class="add-to-wishlist" data-product-id="PKB-02" data-product-name="Traditional Polki Bangles" data-product-price="185000" data-product-image="images/490A9973.jpg"><i class="far fa-heart"></i></button>
                     </div>
                     <div class="product-details" style="text-align: center;">
                         <h3 class="product-name">Traditional Polki Bangles</h3>
@@ -774,11 +788,11 @@ background-color: #000 !important;
                     </div>
                 </a>
             </div>
-            <div class="product-item" data-product-id="PKE-03" style="background: none;">
+            <div class="product-item" data-product-id="PKE-03" data-product-price="125000" style="background: none;">
                 <a href="#" style="text-decoration: none; color: inherit;">
                     <div class="product-image">
                         <img src="images/6Y4A6534.jpg" alt="Polki Earrings">
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                        <button class="add-to-wishlist" data-product-id="PKE-03" data-product-name="Royal Polki Earrings" data-product-price="125000" data-product-image="images/6Y4A6534.jpg"><i class="far fa-heart"></i></button>
                     </div>
                     <div class="product-details" style="text-align: center;">
                         <h3 class="product-name">Royal Polki Earrings</h3>
@@ -788,11 +802,11 @@ background-color: #000 !important;
                     </div>
                 </a>
             </div>
-            <div class="product-item" data-product-id="PKR-04" style="background: none;">
+            <div class="product-item" data-product-id="PKR-04" data-product-price="95000" style="background: none;">
                 <a href="#" style="text-decoration: none; color: inherit;">
                     <div class="product-image">
                         <img src="images/490A9706.jpg" alt="Polki Rings">
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                        <button class="add-to-wishlist" data-product-id="PKR-04" data-product-name="Elegant Polki Rings" data-product-price="95000" data-product-image="images/490A9706.jpg"><i class="far fa-heart"></i></button>
                     </div>
                     <div class="product-details" style="text-align: center;">
                         <h3 class="product-name">Elegant Polki Rings</h3>
@@ -803,11 +817,11 @@ background-color: #000 !important;
                 </a>
             </div>
 
-            <div class="product-item" data-product-id="PKS-05" style="background: none;">
+            <div class="product-item" data-product-id="PKS-05" data-product-price="315000" style="background: none;">
                 <a href="#" style="text-decoration: none; color: inherit;">
                     <div class="product-image">
                         <img src="images/6Y4A6225.jpg" alt="Polki Set">
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                        <button class="add-to-wishlist" data-product-id="PKS-05" data-product-name="Complete Polki Set" data-product-price="315000" data-product-image="images/6Y4A6225.jpg"><i class="far fa-heart"></i></button>
                     </div>
                     <div class="product-details" style="text-align: center;">
                         <h3 class="product-name">Complete Polki Set</h3>
@@ -1464,7 +1478,7 @@ background-color: #000 !important;
                             <img src="images/category/IMG_20250504_145653.jpg" alt="Navy Blue Meenakshi Fusion Golden Earrings">
                             <div class="product-badge">SAVE 33%</div>
                             <div class="sold-out-badge">SOLD OUT</div>
-                            <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                            <button class="add-to-wishlist" data-product-id="NBMFE-12" data-product-name="Navy Blue Meenakshi Fusion Golden Earrings" data-product-price="21300" data-product-image="images/category/IMG_20250504_145653.jpg"><i class="far fa-heart"></i></button>
                         </div>
                         <div class="product-details">
                             <h3 class="product-name">Navy Blue Meenakshi Fusion Golden Earrings</h3>
@@ -1482,7 +1496,7 @@ background-color: #000 !important;
                         <div class="product-image">
                             <img src="images/category/Screenshot_20250504_130638.jpg" alt="Blue Meenakshi Fusion Earrings">
                             <div class="product-badge">SAVE 33%</div>
-                            <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                            <button class="add-to-wishlist" data-product-id="BMFE-09" data-product-name="Blue Meenakshi Fusion Earrings" data-product-price="21300" data-product-image="images/category/Screenshot_20250504_130638.jpg"><i class="far fa-heart"></i></button>
                         </div>
                         <div class="product-details">
                             <h3 class="product-name">Blue Meenakshi Fusion Earrings</h3>
@@ -1500,7 +1514,7 @@ background-color: #000 !important;
                         <div class="product-image">
                             <img src="images/category/Screenshot_20250504_130717.jpg" alt="Pearl Drop Earrings">
                             <div class="product-badge">SAVE 30%</div>
-                            <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                            <button class="add-to-wishlist" data-product-id="PDRE-10" data-product-name="Pearl Drop Earrings" data-product-price="19980" data-product-image="images/category/Screenshot_20250504_130717.jpg"><i class="far fa-heart"></i></button>
                         </div>
                         <div class="product-details">
                             <h3 class="product-name">Pearl Drop Earrings</h3>
@@ -1518,7 +1532,7 @@ background-color: #000 !important;
                         <div class="product-image">
                             <img src="images/category/Screenshot_20250504_130805.jpg" alt="Gemstone Stud Earrings">
                             <div class="product-badge">SAVE 25%</div>
-                            <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                            <button class="add-to-wishlist" data-product-id="GSSE-11" data-product-name="Gemstone Stud Earrings" data-product-price="17750" data-product-image="images/category/Screenshot_20250504_130805.jpg"><i class="far fa-heart"></i></button>
                         </div>
                         <div class="product-details">
                             <h3 class="product-name">Gemstone Stud Earrings</h3>
@@ -1560,11 +1574,11 @@ background-color: #000 !important;
     <!-- Polki Product Categories Section --
     <section class="you-may-also-like full-width-section" style="margin-bottom: 20px;">
         <div class="product-scroll-container">
-            <div class="product-item" data-product-id="PNC-01" style="background: none;">
+            <div class="product-item" data-product-id="PNC-01" data-product-price="245000" style="background: none;">
                 <a href="#" style="text-decoration: none; color: inherit;">
                     <div class="product-image">
                         <img src="images/d3268961-a795-4d9c-a4fd-a9a208519453_7a3f17fb-bf85-476a-810b-5991bb3874eb.jpg" alt="Polki Necklace Collection">
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                        <button class="add-to-wishlist" data-product-id="PNC-01" data-product-name="Polki Necklace Collection" data-product-price="245000" data-product-image="images/d3268961-a795-4d9c-a4fd-a9a208519453_7a3f17fb-bf85-476a-810b-5991bb3874eb.jpg"><i class="far fa-heart"></i></button>
                     </div>
                     <div class="product-details" style="text-align: center;">
                         <h3 class="product-name">Polki Necklace Collection</h3>
@@ -1575,11 +1589,11 @@ background-color: #000 !important;
                 </a>
             </div>
 
-            <div class="product-item" data-product-id="PBG-02" style="background: none;">
+            <div class="product-item" data-product-id="PBG-02" data-product-price="185000" style="background: none;">
                 <a href="#" style="text-decoration: none; color: inherit;">
                     <div class="product-image">
                         <img src="images/490A9744.jpg" alt="Polki Bangles Set">
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                        <button class="add-to-wishlist" data-product-id="PBG-02" data-product-name="Polki Bangles Set" data-product-price="185000" data-product-image="images/490A9744.jpg"><i class="far fa-heart"></i></button>
                     </div>
                     <div class="product-details" style="text-align: center;">
                         <h3 class="product-name">Polki Bangles Set</h3>
@@ -1590,11 +1604,11 @@ background-color: #000 !important;
                 </a>
             </div>
 
-            <div class="product-item" data-product-id="PER-03" style="background: none;">
+            <div class="product-item" data-product-id="PER-03" data-product-price="95000" style="background: none;">
                 <a href="#" style="text-decoration: none; color: inherit;">
                     <div class="product-image">
                         <img src="images/Frame_1000005344.png" alt="Polki Earrings">
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                        <button class="add-to-wishlist" data-product-id="PER-03" data-product-name="Polki Earrings" data-product-price="95000" data-product-image="images/Frame_1000005344.png"><i class="far fa-heart"></i></button>
                     </div>
                     <div class="product-details" style="text-align: center;">
                         <h3 class="product-name">Polki Earrings</h3>
@@ -1605,11 +1619,11 @@ background-color: #000 !important;
                 </a>
             </div>
 
-            <div class="product-item" data-product-id="PRG-04" style="background: none;">
+            <div class="product-item" data-product-id="PRG-04" data-product-price="75000" style="background: none;">
                 <a href="#" style="text-decoration: none; color: inherit;">
                     <div class="product-image">
                         <img src="images/490A0064.jpg" alt="Polki Rings">
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                        <button class="add-to-wishlist" data-product-id="PRG-04" data-product-name="Polki Rings" data-product-price="75000" data-product-image="images/490A0064.jpg"><i class="far fa-heart"></i></button>
                     </div>
                     <div class="product-details" style="text-align: center;">
                         <h3 class="product-name">Polki Rings</h3>
@@ -1620,11 +1634,11 @@ background-color: #000 !important;
                 </a>
             </div>
 
-            <div class="product-item" data-product-id="PCS-05" style="background: none;">
+            <div class="product-item" data-product-id="PCS-05" data-product-price="325000" style="background: none;">
                 <a href="#" style="text-decoration: none; color: inherit;">
                     <div class="product-image">
                         <img src="images/6Y4A6225.jpg" alt="Polki Choker Set">
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                        <button class="add-to-wishlist" data-product-id="PCS-05" data-product-name="Polki Choker Set" data-product-price="325000" data-product-image="images/6Y4A6225.jpg"><i class="far fa-heart"></i></button>
                     </div>
                     <div class="product-details" style="text-align: center;">
                         <h3 class="product-name">Polki Choker Set</h3>
@@ -2022,7 +2036,48 @@ background-color: #000 !important;
     <script src="js/wishlist-local-storage.js?v=1.0.0"></script>
     <script src="js/firebase/firebase-wishlist-manager.js?v=1.0.0"></script>
     <script src="js/wishlist-manager.js?v=1.0.0"></script>
+    
+    <!-- Initialize Price Cache for Hardcoded Products (CRITICAL FIX) -->
+    <script>
+        // Populate PRODUCT_PRICES_CACHE with all hardcoded button prices IMMEDIATELY
+        // This happens before any currency conversion or DOM manipulation
+        if (window.PRODUCT_PRICES_CACHE) {
+            const hardcodedPrices = {
+                'RBC-01': 125000,
+                'EBS-02': 98500,
+                'TBE-03': 145000,
+                'CBJ-04': 115000,
+                'PKN-01': 245000,
+                'PKB-02': 185000,
+                'PKE-03': 125000,
+                'PKR-04': 95000,
+                'PKS-05': 315000,
+                'NBMFE-12': 21300,
+                'BMFE-09': 21300,
+                'PDRE-10': 19980,
+                'GSSE-11': 17750,
+                'PNC-01': 245000,
+                'PBG-02': 185000,
+                'PER-03': 95000,
+                'PRG-04': 75000,
+                'PCS-05': 325000,
+                'CHRM-07': 15550,
+                'GLBR-11': 38500,
+                'SLAT-12': 42000
+            };
+            
+            Object.entries(hardcodedPrices).forEach(([productId, price]) => {
+                window.PRODUCT_PRICES_CACHE.set(productId, price);
+                console.log('🎯 Cached hardcoded price for', productId, ':', price, 'INR');
+            });
+            console.log('✅ All', Object.keys(hardcodedPrices).length, 'hardcoded product prices cached');
+        }
+    </script>
+    
     <script src="js/main.js"></script>
+
+    <!-- Currency Converter (Load FIRST before products render) -->
+    <script src="js/currency-converter.js?v=3.0.0"></script>
 
     <!-- Featured Collection Scroll Arrows -->
     <script src="js/featured-collection-scroll.js?v=1.0.0"></script>
@@ -2139,10 +2194,10 @@ background-color: #000 !important;
       }
     </style>
     <!-- Cart Panel -->
-    <div id="auricCartPanel" class="cart-panel" style="position:fixed !important; top:0 !important; right:-400px !important; width:400px !important; max-width:90% !important; height:100% !important; background:#ffffff !important; box-shadow:-2px 0 10px rgba(0,0,0,0.3) !important; z-index:999999 !important; transition:right 0.3s ease-in-out !important; display:flex !important; flex-direction:column !important; overflow:hidden !important; visibility:visible !important; pointer-events:auto !important;">
+    <div id="auricCartPanel" class="cart-panel">
       <div class="cart-panel-header">
         <h3 data-translate="shopping_bag">Your Shopping Bag</h3>
-        <button class="close-cart-btn" onclick="closeCartDirectly(); return false;">×</button>
+        <button class="close-cart-btn">×</button>
       </div>
       <div class="cart-items">
         <!-- Cart items will be inserted here by JavaScript -->
@@ -2154,14 +2209,14 @@ background-color: #000 !important;
           <span class="subtotal-amount">₹0.00</span>
         </div>
         <div class="cart-panel-buttons">
-          <button class="view-cart-btn continue-shopping-btn" onclick="closeCartDirectly(); return false;" data-translate="continue_shopping">Continue Shopping</button>
+          <button class="view-cart-btn continue-shopping-btn" data-translate="continue_shopping">Continue Shopping</button>
           <a href="checkout.html" class="checkout-btn" data-translate="checkout">Checkout</a>
         </div>
       </div>
     </div>
 
     <!-- Ultra-direct Cart Overlay with ALL inline styles -->
-    <div id="auricCartOverlay" class="cart-panel-overlay" onclick="closeCartDirectly(); return false;" style="position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; background:rgba(0,0,0,0.5) !important; z-index:999998 !important; display:none !important; visibility:hidden !important;"></div>
+    <div id="auricCartOverlay" class="cart-panel-overlay"></div>
 
 
     <!-- Fix for closeCartDirectly error -->
@@ -2276,10 +2331,10 @@ background-color: #000 !important;
     <!-- Interactive Product Showcase -->
     <script src="js/interactive-showcase.js?v=2.0.5"></script>
 
-    <!-- Currency Converter -->
-    <script src="js/currency-converter.js?v=1.0.0"></script>
-
     <!-- Language Translator -->
     <script src="js/language-translator.js?v=1.0.0"></script>
+
+    <!-- First Visit Banner Modal -->
+    <script src="js/first-visit-banner.js?v=1.0.0"></script>
   </body>
 </html>
