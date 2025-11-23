@@ -739,7 +739,7 @@
                             <div class="product-image">
                                 <img src="${imageUrl}" alt="${product.name}" loading="lazy" onerror="this.src='images/product-placeholder.jpg'">
                                 ${categoryBadge}
-                                <button class="add-to-wishlist" data-product-id="${product.id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-image="${imageUrl}" onclick="event.preventDefault(); event.stopPropagation();">
+                                <button class="add-to-wishlist" data-product-id="${product.id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-image="${imageUrl}">
                                     <i class="far fa-heart"></i>
                                 </button>
                             </div>
@@ -830,6 +830,14 @@
                 
                 const productsHTML = products.map(product => generateProductHTML(product)).join('');
                 productsGrid.innerHTML = productsHTML;
+                
+                // CRITICAL: Populate global price cache BEFORE currency conversion
+                products.forEach(product => {
+                    if (window.PRODUCT_PRICES_CACHE) {
+                        window.PRODUCT_PRICES_CACHE.set(product.id, product.price);
+                        console.log('📦 Cached all-collection price for', product.id, ':', product.price, 'INR');
+                    }
+                });
                 
                 // Convert prices to user's selected currency
                 if (typeof window.CurrencyConverter !== 'undefined') {
@@ -1008,15 +1016,9 @@
                 const productNameEl = productItem.querySelector('.product-name');
                 const productName = productNameEl ? productNameEl.textContent.trim() : (button.dataset.productName || 'Unknown Product');
 
-                const priceElement = productItem.querySelector('.current-price');
-                let productPrice = 0;
-                if (priceElement) {
-                    const priceText = priceElement.textContent.trim();
-                    const cleanedPrice = priceText.replace(/[₹,]/g, '').trim();
-                    productPrice = parseFloat(cleanedPrice);
-                } else {
-                    productPrice = parseFloat(button.dataset.productPrice) || 0;
-                }
+                // CRITICAL FIX: Use button's data-product-price (original INR) - NEVER parse DOM text
+                let productPrice = parseFloat(button.dataset.productPrice) || 0;
+                console.log('All Collection: Using data-product-price:', productPrice, 'for product:', productId);
 
                 const imageElement = productItem.querySelector('.product-image img');
                 const productImage = imageElement ? imageElement.src : (button.dataset.productImage || '');
