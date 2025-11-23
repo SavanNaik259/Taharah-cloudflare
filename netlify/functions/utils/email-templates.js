@@ -55,14 +55,30 @@ function customerOrderTemplate(data) {
   });
 
   // Format the products into an HTML table with user's selected currency
-  const productsHTML = products.map(product => `
+  // CRITICAL: Use pre-converted prices from frontend (priceDisplay/totalDisplay) to match checkout display
+  const productsHTML = products.map(product => {
+    // Get currency symbol
+    const currencyInfo = currencySymbols[userSelectedCurrency] || currencySymbols['INR'];
+    const { symbol } = currencyInfo;
+    
+    // Use pre-converted display prices if available (these use frontend's live exchange rates)
+    // Otherwise fall back to re-converting using backend rates (legacy fallback)
+    const priceDisplay = product.priceDisplay !== undefined 
+      ? `${symbol}${product.priceDisplay.toFixed(2)}` 
+      : formatCurrencyPrice(product.price || 0, userSelectedCurrency);
+    const totalDisplay = product.totalDisplay !== undefined 
+      ? `${symbol}${product.totalDisplay.toFixed(2)}` 
+      : formatCurrencyPrice(product.total || product.price * product.quantity || 0, userSelectedCurrency);
+    
+    return `
     <tr>
       <td style="padding: 10px; border-bottom: 1px solid #e1e1e1;">${product.name || product.productName || 'Product'}</td>
       <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: center;">${product.quantity || 1}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${formatCurrencyPrice(product.price || 0, userSelectedCurrency)}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${formatCurrencyPrice(product.total || product.price * product.quantity || 0, userSelectedCurrency)}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${priceDisplay}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${totalDisplay}</td>
     </tr>
-  `).join('');
+  `;
+  }).join('');
 
   return `
   <!DOCTYPE html>
@@ -154,7 +170,15 @@ function customerOrderTemplate(data) {
           ${productsHTML}
           <tr class="total-row">
             <td colspan="3" style="padding: 10px; text-align: right;"><strong>Total:</strong></td>
-            <td style="padding: 10px; text-align: right;">${formatCurrencyPrice(orderTotal || 0, userSelectedCurrency)}</td>
+            <td style="padding: 10px; text-align: right;">${
+              data.orderTotalDisplay !== undefined 
+                ? (() => {
+                    const currencyInfo = currencySymbols[userSelectedCurrency] || currencySymbols['INR'];
+                    const { symbol } = currencyInfo;
+                    return `${symbol}${data.orderTotalDisplay.toFixed(2)}`;
+                  })()
+                : formatCurrencyPrice(orderTotal || 0, userSelectedCurrency)
+            }</td>
           </tr>
         </tbody>
       </table>
@@ -206,14 +230,30 @@ function ownerOrderTemplate(data) {
   });
 
   // Format the products into an HTML table (owner gets prices in customer's selected currency too)
-  const productsHTML = products.map(product => `
+  // CRITICAL: Use pre-converted prices from frontend (priceDisplay/totalDisplay) to match checkout display
+  const productsHTML = products.map(product => {
+    // Get currency symbol
+    const currencyInfo = currencySymbols[userSelectedCurrency] || currencySymbols['INR'];
+    const { symbol } = currencyInfo;
+    
+    // Use pre-converted display prices if available (these use frontend's live exchange rates)
+    // Otherwise fall back to re-converting using backend rates (legacy fallback)
+    const priceDisplay = product.priceDisplay !== undefined 
+      ? `${symbol}${product.priceDisplay.toFixed(2)}` 
+      : formatCurrencyPrice(product.price || 0, userSelectedCurrency);
+    const totalDisplay = product.totalDisplay !== undefined 
+      ? `${symbol}${product.totalDisplay.toFixed(2)}` 
+      : formatCurrencyPrice(product.total || product.price * product.quantity || 0, userSelectedCurrency);
+    
+    return `
     <tr>
       <td style="padding: 10px; border-bottom: 1px solid #e1e1e1;">${product.name || product.productName || 'Product'}</td>
       <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: center;">${product.quantity || 1}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${formatCurrencyPrice(product.price || 0, userSelectedCurrency)}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${formatCurrencyPrice(product.total || product.price * product.quantity || 0, userSelectedCurrency)}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${priceDisplay}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${totalDisplay}</td>
     </tr>
-  `).join('');
+  `;
+  }).join('');
 
   return `
   <!DOCTYPE html>
@@ -334,7 +374,15 @@ function ownerOrderTemplate(data) {
           ${productsHTML}
           <tr class="total-row">
             <td colspan="3" style="padding: 10px; text-align: right;"><strong>Total:</strong></td>
-            <td style="padding: 10px; text-align: right;">${formatCurrencyPrice(orderTotal || 0, userSelectedCurrency)}</td>
+            <td style="padding: 10px; text-align: right;">${
+              data.orderTotalDisplay !== undefined 
+                ? (() => {
+                    const currencyInfo = currencySymbols[userSelectedCurrency] || currencySymbols['INR'];
+                    const { symbol } = currencyInfo;
+                    return `${symbol}${data.orderTotalDisplay.toFixed(2)}`;
+                  })()
+                : formatCurrencyPrice(orderTotal || 0, userSelectedCurrency)
+            }</td>
           </tr>
         </tbody>
       </table>
