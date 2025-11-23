@@ -2036,6 +2036,44 @@ background-color: #000 !important;
     <script src="js/wishlist-local-storage.js?v=1.0.0"></script>
     <script src="js/firebase/firebase-wishlist-manager.js?v=1.0.0"></script>
     <script src="js/wishlist-manager.js?v=1.0.0"></script>
+    
+    <!-- Initialize Price Cache for Hardcoded Products (CRITICAL FIX) -->
+    <script>
+        // Populate PRODUCT_PRICES_CACHE with all hardcoded button prices IMMEDIATELY
+        // This happens before any currency conversion or DOM manipulation
+        if (window.PRODUCT_PRICES_CACHE) {
+            const hardcodedPrices = {
+                'RBC-01': 125000,
+                'EBS-02': 98500,
+                'TBE-03': 145000,
+                'CBJ-04': 115000,
+                'PKN-01': 245000,
+                'PKB-02': 185000,
+                'PKE-03': 125000,
+                'PKR-04': 95000,
+                'PKS-05': 315000,
+                'NBMFE-12': 21300,
+                'BMFE-09': 21300,
+                'PDRE-10': 19980,
+                'GSSE-11': 17750,
+                'PNC-01': 245000,
+                'PBG-02': 185000,
+                'PER-03': 95000,
+                'PRG-04': 75000,
+                'PCS-05': 325000,
+                'CHRM-07': 15550,
+                'GLBR-11': 38500,
+                'SLAT-12': 42000
+            };
+            
+            Object.entries(hardcodedPrices).forEach(([productId, price]) => {
+                window.PRODUCT_PRICES_CACHE.set(productId, price);
+                console.log('🎯 Cached hardcoded price for', productId, ':', price, 'INR');
+            });
+            console.log('✅ All', Object.keys(hardcodedPrices).length, 'hardcoded product prices cached');
+        }
+    </script>
+    
     <script src="js/main.js"></script>
 
     <!-- Currency Converter (Load FIRST before products render) -->

@@ -716,6 +716,14 @@ const BridalProductsLoader = (function() {
             const productsHTML = products.map(product => generateProductHTML(product)).join('');
             productsGrid.innerHTML = productsHTML;
 
+            // CRITICAL: Populate global price cache BEFORE currency conversion
+            products.forEach(product => {
+                if (window.PRODUCT_PRICES_CACHE) {
+                    window.PRODUCT_PRICES_CACHE.set(product.id, product.price);
+                    console.log('📦 Cached price for', product.id, ':', product.price, 'INR');
+                }
+            });
+
             // Setup wishlist event listeners
             setupWishlistEventListeners();
 

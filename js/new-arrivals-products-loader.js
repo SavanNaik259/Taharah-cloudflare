@@ -427,6 +427,15 @@ const NewArrivalsProductsLoader = (function() {
             const productsHTML = products.map(product => generateProductHTML(product)).join('');
             productsGrid.innerHTML = productsHTML;
 
+            // CRITICAL: Populate global price cache BEFORE currency conversion
+            // This ensures prices are cached before any DOM modifications
+            products.forEach(product => {
+                if (window.PRODUCT_PRICES_CACHE) {
+                    window.PRODUCT_PRICES_CACHE.set(product.id, product.price);
+                    console.log('📦 Cached price for', product.id, ':', product.price, 'INR');
+                }
+            });
+
             // Convert prices to user's selected currency
             if (typeof window.CurrencyConverter !== 'undefined') {
                 window.CurrencyConverter.convertAllPrices();
@@ -478,6 +487,14 @@ const NewArrivalsProductsLoader = (function() {
             if (products.length > 0) {
                 const productsHTML = products.map(product => generateProductHTML(product)).join('');
                 productsGrid.innerHTML = productsHTML;
+
+                // CRITICAL: Populate global price cache BEFORE currency conversion
+                products.forEach(product => {
+                    if (window.PRODUCT_PRICES_CACHE) {
+                        window.PRODUCT_PRICES_CACHE.set(product.id, product.price);
+                        console.log('📦 Cached price for', product.id, ':', product.price, 'INR');
+                    }
+                });
 
                 // Convert prices to user's selected currency
                 if (typeof window.CurrencyConverter !== 'undefined') {

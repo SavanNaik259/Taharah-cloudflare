@@ -1,4 +1,12 @@
 /**
+ * GLOBAL PRODUCT PRICES CACHE
+ * Stores original INR prices for ALL products to prevent DOM-based price corruption
+ * Populated by product loaders when they load products
+ * Accessed by wishlist manager to get guaranteed correct prices
+ */
+window.PRODUCT_PRICES_CACHE = window.PRODUCT_PRICES_CACHE || new Map();
+
+/**
  * Auric Wishlist Manager
  * 
  * A wishlist management system that handles both local storage and Firebase.
@@ -885,8 +893,16 @@ const WishlistManager = (function() {
                     let productPrice = 0;
                     let priceFound = false;
                     
-                    // LEVEL 1: Check button's data-product-price attribute (FIRST PRIORITY)
-                    if (this.dataset.productPrice) {
+                    // CRITICAL FIX: LEVEL 0 - Check global price cache FIRST
+                    // This cache is populated by product loaders and is immune to DOM modifications
+                    if (productId && window.PRODUCT_PRICES_CACHE && window.PRODUCT_PRICES_CACHE.has(productId)) {
+                        productPrice = window.PRODUCT_PRICES_CACHE.get(productId);
+                        priceFound = true;
+                        console.log('✅ LEVEL 0 (CACHE): Got price from global cache:', productPrice, 'for product:', productId);
+                    } 
+                    
+                    // LEVEL 1: Check button's data-product-price attribute (SECOND PRIORITY)
+                    if (!priceFound && this.dataset.productPrice) {
                         const buttonPrice = parseFloat(this.dataset.productPrice);
                         if (!isNaN(buttonPrice) && buttonPrice > 0) {
                             productPrice = buttonPrice;
