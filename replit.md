@@ -6,40 +6,58 @@ Auric is a premium e-commerce platform designed to provide a seamless online sho
 
 ## Recent Changes (Nov 23, 2025)
 
-### HOTFIX: Currency Conversion Bug on New Arrivals Page (v3.0.7)
+### HOTFIX: Currency Conversion Bug on New Arrivals Page (v3.0.8)
 
 **Issue Reported**: 
 When user changed currency and added products from new arrivals page to wishlist, prices appeared incorrect:
 - Expected: $280.00, $336.00
 - Actual: $3.14, $3.76
 
-**Root Cause**: 
-The `createProductHTML()` function in `js/new-arrivals-page-loader.js` was NOT including the critical data attributes needed for price extraction:
-- Missing `data-product-price` on button and product-item container
-- Missing `data-original-price` on price span
-- When wishlist manager tried to extract the price, it fell back to reading DOM text (which was already converted)
-- This caused the wishlist to store converted prices instead of original INR prices
+**Root Causes Identified & Fixed**:
 
-**Solution Applied (v3.0.7)**:
-Modified `js/new-arrivals-page-loader.js` to add all required data attributes:
-1. Extract original price: `const originalPrice = parseFloat(product.price) || 0;`
-2. Add to product-item: `data-product-price="${originalPrice}"`
-3. Add to wishlist button: `data-product-price="${originalPrice}"`
-4. Add to price span: `data-original-price="${originalPrice}"`
+1. **Missing Data Attributes** (New Arrivals HTML):
+   - The `createProductHTML()` function in `js/new-arrivals-page-loader.js` was NOT including critical data attributes
+   - Added: `data-product-price`, `data-original-price` on all product elements
 
-This ensures:
-- Wishlist manager finds original INR price at Level 1 or Level 2 extraction
-- Never falls back to reading converted DOM text
-- Works correctly regardless of when user changes currency
+2. **Duplicate Event Handlers** (Wishlist Manager):
+   - TWO different event listeners were handling wishlist clicks on product cards:
+     - NEW (correct): Direct listeners using multi-level data attribute extraction (line 860+)
+     - OLD (broken): Document-level delegation parsing DOM text (line 1210+)
+   - BOTH were firing on the same click!
+   - Result: Old handler extracted converted price instead of original INR
 
-**Files Modified (v3.0.7)**:
-- js/new-arrivals-page-loader.js: Updated createProductHTML() to include all data attributes
+3. **Event Delegation Issue**:
+   - Direct listeners only attached to buttons existing at page load
+   - Dynamically added product HTML wasn't getting listeners attached
+   - Fixed by using proper event delegation with correct button references
 
-**Verification**: All other product loaders already have correct data attributes:
-- ✅ featured-collection-products-loader.js: Has data attributes
-- ✅ subcategory-products-loader.js: Has data attributes
-- ✅ index.html: Hardcoded buttons have data attributes
-- ✅ product-detail.html: Hardcoded buttons have data attributes
+**Solution Applied (v3.0.8)**:
+
+1. Modified `js/new-arrivals-page-loader.js`:
+   - Added all required data attributes to product HTML
+
+2. Fixed `js/wishlist-manager.js`:
+   - Removed duplicate legacy event handler (line 1210+)
+   - Converted direct listener to proper event delegation
+   - Fixed all references from `this` to `button` variable
+   - Now handles both existing and dynamically added buttons correctly
+
+**Multi-Level Price Extraction (Preserved)**:
+- Level 0: Global price cache
+- Level 1: Button's `data-product-price` ✅
+- Level 2: Product container's `data-product-price` ✅  
+- Level 3: Price element's data attributes ONLY ✅
+- Level 4: Hardcoded prices as last resort
+
+**Files Modified (v3.0.8)**:
+- js/new-arrivals-page-loader.js: Added data attributes
+- js/wishlist-manager.js: Fixed duplicate handlers and event delegation
+
+**Result**:
+- ✅ No more duplicate handlers conflicting
+- ✅ No DOM text parsing fallback
+- ✅ Works for both existing and dynamically loaded products
+- ✅ Prices stored as original INR regardless of selected currency
 
 ## User Preferences
 

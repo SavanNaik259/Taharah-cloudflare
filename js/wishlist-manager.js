@@ -854,185 +854,186 @@ const WishlistManager = (function() {
      * Set up all event listeners for wishlist functionality
      */
     function setupEventListeners() {
-        console.log('Setting up wishlist event listeners');
+        console.log('Setting up wishlist event listeners using event delegation');
 
-        // Add direct event listeners to all wishlist buttons (product cards)
-        document.querySelectorAll('.add-to-wishlist').forEach(button => {
-            console.log('Found wishlist button:', button);
-            button.addEventListener('click', function(event) {
+        // Use event delegation on document level to catch both existing and dynamically added buttons
+        // This runs ONCE and handles ALL .add-to-wishlist clicks, including future ones
+        document.addEventListener('click', function(event) {
+            const button = event.target.closest('.add-to-wishlist');
+            if (!button) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+            console.log('Wishlist button clicked via delegation');
+
+            // For bridal cards, also prevent the parent link from being clicked
+            const parentLink = button.closest('a');
+            if (parentLink) {
                 event.preventDefault();
                 event.stopPropagation();
-                console.log('Direct wishlist button clicked');
+                console.log('Prevented parent link navigation');
+            }
 
-                // For bridal cards, also prevent the parent link from being clicked
-                const parentLink = this.closest('a');
-                if (parentLink) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    console.log('Prevented parent link navigation');
-                }
+            // Handle product-item, arrival-item, and bridal-card structures
+            const productItem = button.closest('.product-item') || button.closest('.arrival-item') || button.closest('.bridal-card');
+            console.log('Found product container:', productItem);
 
-                // Handle product-item, arrival-item, and bridal-card structures
-                const productItem = this.closest('.product-item') || this.closest('.arrival-item') || this.closest('.bridal-card');
-                console.log('Found product container:', productItem);
+            if (productItem) {
+                const productId = productItem.dataset.productId;
+                console.log('Product ID:', productId);
 
-                if (productItem) {
-                    const productId = productItem.dataset.productId;
-                    console.log('Product ID:', productId);
+                // Handle different product name selectors
+                const productNameEl = productItem.querySelector('.product-name') || 
+                                     productItem.querySelector('.arrival-title') ||
+                                     productItem.querySelector('.product-title');
+                const productName = productNameEl ? productNameEl.textContent.trim() : 'Unknown Product';
+                console.log('Product name:', productName);
 
-                    // Handle different product name selectors
-                    const productNameEl = productItem.querySelector('.product-name') || 
-                                         productItem.querySelector('.arrival-title') ||
-                                         productItem.querySelector('.product-title');
-                    const productName = productNameEl ? productNameEl.textContent.trim() : 'Unknown Product';
-                    console.log('Product name:', productName);
-
-                    // CRITICAL FIX: Multi-Level Price Extraction with Strict Validation
-                    // ALWAYS use data attributes first - NEVER fall back to DOM text parsing
-                    // This prevents reading converted prices when currency is already changed
-                    let productPrice = 0;
-                    let priceFound = false;
-                    
-                    console.log('🔍 PRICE EXTRACTION DEBUG - Starting for product:', productId);
-                    console.log('   Button data attributes:', this.dataset);
-                    console.log('   Product item data attributes:', productItem?.dataset);
-                    
-                    // CRITICAL FIX: LEVEL 0 - Check global price cache FIRST
-                    // This cache is populated by product loaders and is immune to DOM modifications
-                    if (productId && window.PRODUCT_PRICES_CACHE && window.PRODUCT_PRICES_CACHE.has(productId)) {
-                        productPrice = window.PRODUCT_PRICES_CACHE.get(productId);
+                // CRITICAL FIX: Multi-Level Price Extraction with Strict Validation
+                // ALWAYS use data attributes first - NEVER fall back to DOM text parsing
+                // This prevents reading converted prices when currency is already changed
+                let productPrice = 0;
+                let priceFound = false;
+                
+                console.log('🔍 PRICE EXTRACTION DEBUG - Starting for product:', productId);
+                console.log('   Button data attributes:', button.dataset);
+                console.log('   Product item data attributes:', productItem?.dataset);
+                
+                // CRITICAL FIX: LEVEL 0 - Check global price cache FIRST
+                // This cache is populated by product loaders and is immune to DOM modifications
+                if (productId && window.PRODUCT_PRICES_CACHE && window.PRODUCT_PRICES_CACHE.has(productId)) {
+                    productPrice = window.PRODUCT_PRICES_CACHE.get(productId);
+                    priceFound = true;
+                    console.log('✅ LEVEL 0 (CACHE): Got price from global cache:', productPrice, 'for product:', productId);
+                } 
+                
+                // LEVEL 1: Check button's data-product-price attribute (SECOND PRIORITY)
+                if (!priceFound && button.dataset.productPrice) {
+                    const buttonPrice = parseFloat(button.dataset.productPrice);
+                    if (!isNaN(buttonPrice) && buttonPrice > 0) {
+                        productPrice = buttonPrice;
                         priceFound = true;
-                        console.log('✅ LEVEL 0 (CACHE): Got price from global cache:', productPrice, 'for product:', productId);
-                    } 
-                    
-                    // LEVEL 1: Check button's data-product-price attribute (SECOND PRIORITY)
-                    if (!priceFound && this.dataset.productPrice) {
-                        const buttonPrice = parseFloat(this.dataset.productPrice);
-                        if (!isNaN(buttonPrice) && buttonPrice > 0) {
-                            productPrice = buttonPrice;
-                            priceFound = true;
-                            console.log('✅ Level 1: Got price from button data-product-price:', productPrice);
-                        }
-                    } 
-                    
-                    // LEVEL 2: Check product container's data-product-price attribute
-                    if (!priceFound && productItem.dataset.productPrice) {
-                        const containerPrice = parseFloat(productItem.dataset.productPrice);
-                        if (!isNaN(containerPrice) && containerPrice > 0) {
-                            productPrice = containerPrice;
-                            priceFound = true;
-                            console.log('✅ Level 2: Got price from product-item data-product-price:', productPrice);
-                        }
+                        console.log('✅ Level 1: Got price from button data-product-price:', productPrice);
                     }
-                    
-                    // LEVEL 3: Check price element's data attributes ONLY (NOT textContent)
-                    if (!priceFound) {
-                        const priceElement = productItem.querySelector('.current-price') || 
-                                           productItem.querySelector('.original-price') ||
-                                           productItem.querySelector('.product-pricing .current-price');
+                } 
+                
+                // LEVEL 2: Check product container's data-product-price attribute
+                if (!priceFound && productItem.dataset.productPrice) {
+                    const containerPrice = parseFloat(productItem.dataset.productPrice);
+                    if (!isNaN(containerPrice) && containerPrice > 0) {
+                        productPrice = containerPrice;
+                        priceFound = true;
+                        console.log('✅ Level 2: Got price from product-item data-product-price:', productPrice);
+                    }
+                }
+                
+                // LEVEL 3: Check price element's data attributes ONLY (NOT textContent)
+                if (!priceFound) {
+                    const priceElement = productItem.querySelector('.current-price') || 
+                                       productItem.querySelector('.original-price') ||
+                                       productItem.querySelector('.product-pricing .current-price');
 
-                        if (priceElement) {
-                            // Check data-original-price attribute first
-                            if (priceElement.dataset.originalPrice) {
-                                const attrPrice = parseFloat(priceElement.dataset.originalPrice);
-                                if (!isNaN(attrPrice) && attrPrice > 0) {
-                                    productPrice = attrPrice;
-                                    priceFound = true;
-                                    console.log('✅ Level 3a: Got price from data-original-price attribute:', productPrice);
-                                }
-                            } 
-                            // Check data-price attribute
-                            if (!priceFound && priceElement.dataset.price) {
-                                const attrPrice = parseFloat(priceElement.dataset.price);
-                                if (!isNaN(attrPrice) && attrPrice > 0) {
-                                    productPrice = attrPrice;
-                                    priceFound = true;
-                                    console.log('✅ Level 3b: Got price from data-price attribute:', productPrice);
-                                }
+                    if (priceElement) {
+                        // Check data-original-price attribute first
+                        if (priceElement.dataset.originalPrice) {
+                            const attrPrice = parseFloat(priceElement.dataset.originalPrice);
+                            if (!isNaN(attrPrice) && attrPrice > 0) {
+                                productPrice = attrPrice;
+                                priceFound = true;
+                                console.log('✅ Level 3a: Got price from data-original-price attribute:', productPrice);
+                            }
+                        } 
+                        // Check data-price attribute
+                        if (!priceFound && priceElement.dataset.price) {
+                            const attrPrice = parseFloat(priceElement.dataset.price);
+                            if (!isNaN(attrPrice) && attrPrice > 0) {
+                                productPrice = attrPrice;
+                                priceFound = true;
+                                console.log('✅ Level 3b: Got price from data-price attribute:', productPrice);
                             }
                         }
                     }
-                    
-                    // LEVEL 4: Hardcoded prices for KNOWN PROBLEMATIC PRODUCTS (last resort only)
-                    if (!priceFound || productPrice === 0) {
-                        console.log('⚠️ Price extraction failed for product:', productId, '- checking hardcoded prices');
-                        const hardcodedPrices = {
-                            'CHRM-07': 15550.00,
-                            'GSSE-11': 17750.00,
-                            'RBC-01': 32500,
-                            'EBS-02': 28900,
-                            'TBE-03': 24500,
-                            'CBJ-04': 19800,
-                            'PKN-01': 245000,
-                            'PKB-02': 185000,
-                            'PKE-03': 95000,
-                            'PKR-04': 75000,
-                            'PCS-05': 325000,
-                            'PNC-01': 245000,
-                            'PBG-02': 185000,
-                            'PER-03': 95000,
-                            'PRG-04': 75000,
-                            'NBMFE-12': 21300,
-                            'BMFE-09': 21300,
-                            'PDRE-10': 19980,
-                            'GSSE-11': 17750
-                        };
-                        
-                        if (hardcodedPrices[productId]) {
-                            productPrice = hardcodedPrices[productId];
-                            priceFound = true;
-                            console.log('✅ Level 4: Applied hardcoded price for', productId, ':', productPrice);
-                        }
-                    }
-                    
-                    // SAFETY CHECK: Ensure we have a valid price
-                    if (!priceFound || isNaN(productPrice) || productPrice <= 0) {
-                        console.error('❌ CRITICAL: Failed to extract valid price for product:', productId, 'Final price:', productPrice);
-                        console.error('Button dataset:', this.dataset);
-                        console.error('Product item dataset:', productItem.dataset);
-                        // Set to 0 and continue - this will be caught downstream
-                        productPrice = 0;
-                    }
-
-                    // Handle different image selectors: .product-image img (new arrivals), .arrival-image img (bridal cards)
-                    const imageElement = productItem.querySelector('.product-image img') || 
-                                        productItem.querySelector('.arrival-image img') ||
-                                        productItem.querySelector('img');
-                    const productImage = imageElement ? imageElement.src : '';
-
-                    console.log('Product found:', { id: productId, name: productName, price: productPrice, image: productImage });
-
-                    const product = {
-                        id: productId,
-                        name: productName,
-                        price: productPrice,
-                        image: productImage
+                }
+                
+                // LEVEL 4: Hardcoded prices for KNOWN PROBLEMATIC PRODUCTS (last resort only)
+                if (!priceFound || productPrice === 0) {
+                    console.log('⚠️ Price extraction failed for product:', productId, '- checking hardcoded prices');
+                    const hardcodedPrices = {
+                        'CHRM-07': 15550.00,
+                        'GSSE-11': 17750.00,
+                        'RBC-01': 32500,
+                        'EBS-02': 28900,
+                        'TBE-03': 24500,
+                        'CBJ-04': 19800,
+                        'PKN-01': 245000,
+                        'PKB-02': 185000,
+                        'PKE-03': 95000,
+                        'PKR-04': 75000,
+                        'PCS-05': 325000,
+                        'PNC-01': 245000,
+                        'PBG-02': 185000,
+                        'PER-03': 95000,
+                        'PRG-04': 75000,
+                        'NBMFE-12': 21300,
+                        'BMFE-09': 21300,
+                        'PDRE-10': 19980,
+                        'GSSE-11': 17750
                     };
-
-                    // Toggle wishlist status
-                    if (isInWishlist(productId)) {
-                        removeFromWishlist(productId);
-                        // Don't add active class to maintain original appearance
-                        // Only change icon type to indicate status
-                        const icon = this.querySelector('i');
-                        if (icon) {
-                            icon.classList.add('far');
-                            icon.classList.remove('fas');
-                            // Don't add active class to prevent color change
-                        }
-                    } else {
-                        addToWishlist(product);
-                        // Don't add active class to maintain original appearance
-                        // Only change icon type to indicate status
-                        const icon = this.querySelector('i');
-                        if (icon) {
-                            icon.classList.remove('far');
-                            icon.classList.add('fas');
-                            // Don't add active class to prevent color change
-                        }
+                    
+                    if (hardcodedPrices[productId]) {
+                        productPrice = hardcodedPrices[productId];
+                        priceFound = true;
+                        console.log('✅ Level 4: Applied hardcoded price for', productId, ':', productPrice);
                     }
                 }
-            });
+                
+                // SAFETY CHECK: Ensure we have a valid price
+                if (!priceFound || isNaN(productPrice) || productPrice <= 0) {
+                    console.error('❌ CRITICAL: Failed to extract valid price for product:', productId, 'Final price:', productPrice);
+                    console.error('Button dataset:', button.dataset);
+                    console.error('Product item dataset:', productItem.dataset);
+                    // Set to 0 and continue - this will be caught downstream
+                    productPrice = 0;
+                }
+
+                // Handle different image selectors: .product-image img (new arrivals), .arrival-image img (bridal cards)
+                const imageElement = productItem.querySelector('.product-image img') || 
+                                    productItem.querySelector('.arrival-image img') ||
+                                    productItem.querySelector('img');
+                const productImage = imageElement ? imageElement.src : '';
+
+                console.log('Product found:', { id: productId, name: productName, price: productPrice, image: productImage });
+
+                const product = {
+                    id: productId,
+                    name: productName,
+                    price: productPrice,
+                    image: productImage
+                };
+
+                // Toggle wishlist status
+                if (isInWishlist(productId)) {
+                    removeFromWishlist(productId);
+                    // Don't add active class to maintain original appearance
+                    // Only change icon type to indicate status
+                    const icon = button.querySelector('i');
+                    if (icon) {
+                        icon.classList.add('far');
+                        icon.classList.remove('fas');
+                        // Don't add active class to prevent color change
+                    }
+                } else {
+                    addToWishlist(product);
+                    // Don't add active class to maintain original appearance
+                    // Only change icon type to indicate status
+                    const icon = button.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas');
+                        // Don't add active class to prevent color change
+                    }
+                }
+            }
         });
 
         // Add direct event listener to product detail page wishlist button
@@ -1207,104 +1208,9 @@ const WishlistManager = (function() {
                 closeWishlistPanel();
             }
 
-            // Add to wishlist buttons on product cards
-            if (e.target.closest('.add-to-wishlist')) {
-                e.preventDefault();
-                console.log('Wishlist button clicked');
-                const productCard = e.target.closest('.product-item') || e.target.closest('.product-card');
-                if (productCard) {
-                    console.log('Found product container:', productCard);
-                    const productId = productCard.dataset.productId || productCard.dataset.id;
-                    console.log('Product ID:', productId);
-                    const productName = productCard.querySelector('.product-name').textContent;
-                    console.log('Product Name:', productName);
-                    // Look for .current-price first, then .product-price
-                    const priceElement = productCard.querySelector('.current-price') || productCard.querySelector('.product-price');
-                    console.log('Price element:', priceElement);
-
-                    // Improved price extraction to handle different formats (₹32,500 or Rs. 15,550.00 or ₹15500.00)
-                    let productPrice = 0;
-                    if (priceElement) {
-                        // First try to get from data attribute if available
-                        if (priceElement.dataset.price) {
-                            productPrice = parseFloat(priceElement.dataset.price);
-                        } else {
-                            // Otherwise extract from text content
-                            // First remove currency symbols and spaces
-                            let priceText = priceElement.textContent.trim();
-                            console.log('Raw price text:', priceText);
-
-                            // Special handling for Rs. format with commas (like CHRM-07 and GSSE-11)
-                            if (priceText.includes('Rs.')) {
-                                console.log('Detected Rs. format price for product:', productId);
-                                // Extract the number portion and convert directly
-                                const match = priceText.match(/Rs\.\s*([\d,]+\.\d+)/);
-                                if (match && match[1]) {
-                                    // Remove commas and convert to float
-                                    const cleanedPrice = match[1].replace(/,/g, '');
-                                    console.log('Extracted price using regex:', cleanedPrice);
-                                    productPrice = parseFloat(cleanedPrice);
-                                } else {
-                                    // Fallback to normal cleaning
-                                    priceText = priceText.replace(/[^0-9.,]/g, '').replace(/,/g, '');
-                                    console.log('Cleaned price text (normal):', priceText);
-                                    productPrice = parseFloat(priceText);
-                                }
-                            } else {
-                                // Normal price cleaning for other formats
-                                priceText = priceText.replace(/[^0-9.,]/g, '').replace(/,/g, '');
-                                console.log('Cleaned price text (normal):', priceText);
-                                productPrice = parseFloat(priceText);
-                            }
-
-                            // Hardcoded price for known problematic products as fallback
-                            if ((productId === 'CHRM-07' || productId === 'GSSE-11') && productPrice < 1000) {
-                                console.log('Applying hardcoded price for product:', productId);
-                                if (productId === 'CHRM-07') productPrice = 15550.00;
-                                if (productId === 'GSSE-11') productPrice = 17750.00;
-                            }
-                        }
-                    }
-                    console.log('Product Price:', productPrice);
-                    const productImage = productCard.querySelector('.product-image img').src;
-                    console.log('Product Image:', productImage);
-
-                    const product = {
-                        id: productId,
-                        name: productName,
-                        price: productPrice,
-                        image: productImage
-                    };
-
-                    // Toggle wishlist status
-                    const wishlistBtn = e.target.closest('.add-to-wishlist');
-                    if (isInWishlist(productId)) {
-                        removeFromWishlist(productId);
-                        wishlistBtn.classList.remove('active');
-                        // Update icon but don't change color
-                        const icon = wishlistBtn.querySelector('i');
-                        if (icon) {
-                            // Change the icon style (solid vs regular) but don't add active class
-                            icon.classList.add('far');
-                            icon.classList.remove('fas');
-                            // No longer changing to pink
-                            icon.classList.remove('active');
-                        }
-                    } else {
-                        addToWishlist(product);
-                        // Don't add active class to maintain original appearance
-                        // Update icon without changing color
-                        const icon = wishlistBtn.querySelector('i');
-                        if (icon) {
-                            // Change icon from regular to solid, but don't add active class
-                            icon.classList.remove('far');
-                            icon.classList.add('fas');
-                            // No longer adding active class to avoid color change
-                            // icon.classList.add('active');
-                        }
-                    }
-                }
-            }
+            // Add to wishlist buttons on product cards - LEGACY HANDLER REMOVED
+            // This is now handled by the direct event listeners in setupEventListeners() (line 860+)
+            // DO NOT add another handler here - it will conflict and cause incorrect price extraction!
 
             // Add to wishlist button on product detail page
             if (e.target.closest('.add-to-wishlist-btn')) {
