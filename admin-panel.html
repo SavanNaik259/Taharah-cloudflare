@@ -862,6 +862,55 @@
             color: white;
         }
 
+        /* Inventory Product Card Styling for Out of Stock and Low Stock */
+        .product-card.out-of-stock {
+            opacity: 0.75;
+            position: relative;
+            filter: grayscale(50%) brightness(0.85) contrast(85%);
+        }
+
+        .product-card.out-of-stock:hover {
+            transform: none !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+            cursor: not-allowed;
+        }
+
+        .product-card.out-of-stock .product-image-container {
+            background-color: #f1f5f9;
+            position: relative;
+        }
+
+        .product-card.out-of-stock .product-image-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 46%, rgba(220, 38, 38, 0.08) 49%, rgba(220, 38, 38, 0.08) 51%, transparent 54%);
+            background-size: 20px 20px;
+            z-index: 2;
+            pointer-events: none;
+            border-radius: 6px;
+        }
+
+        .product-card.out-of-stock .product-image {
+            filter: grayscale(60%) brightness(0.9) contrast(90%) !important;
+        }
+
+        .product-card.low-stock {
+            position: relative;
+        }
+
+        .product-card.low-stock:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+        }
+
+        .product-card.low-stock .product-image-container {
+            border: 2px solid rgba(245, 158, 11, 0.3);
+        }
+
         /* Section Tabs */
         .section-tabs {
             display: flex;
