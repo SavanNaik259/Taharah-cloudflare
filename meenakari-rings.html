@@ -1189,10 +1189,25 @@
     </script>
 
     <!-- Currency Converter -->
-    <script src="js/currency-converter.js?v=1.0.0"></script>
+    <script src="js/currency-converter.js?v=3.0.0"></script>
 
     <!-- Language Translator -->
     <script src="js/language-translator.js?v=1.0.0"></script>
+
+    <!-- Initialize Currency Converter on this page -->
+    <script>
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof CurrencyConverter !== 'undefined') {
+                    CurrencyConverter.init();
+                }
+            });
+        } else {
+            if (typeof CurrencyConverter !== 'undefined') {
+                CurrencyConverter.init();
+            }
+        }
+    </script>
 
     <!-- Shop Page Functionality -->
     <script src="js/shop.js"></script>
