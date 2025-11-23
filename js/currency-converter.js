@@ -43,19 +43,6 @@ const CurrencyConverter = (function() {
         try {
             console.log('🚀 Starting Currency Converter initialization...');
 
-            // CRITICAL: Load and restore saved currency from localStorage FIRST - synchronously
-            const savedCurrency = localStorage.getItem(SELECTED_CURRENCY_KEY);
-            console.log('📦 Saved currency from localStorage:', savedCurrency);
-            
-            if (savedCurrency && CURRENCIES[savedCurrency]) {
-                currentCurrency = savedCurrency;
-                console.log('✅ Restored saved currency:', currentCurrency);
-            }
-
-            // IMMEDIATE: Update display synchronously before any async operations
-            updateCurrencySelector();
-            console.log('✅ Currency display updated immediately');
-
             // Detect user location (with timeout)
             try {
                 await Promise.race([
@@ -66,19 +53,25 @@ const CurrencyConverter = (function() {
                 console.log('ℹ️ Location detection skipped');
             }
 
+            // CRITICAL: Load and restore saved currency from localStorage
+            const savedCurrency = localStorage.getItem(SELECTED_CURRENCY_KEY);
+            console.log('📦 Saved currency from localStorage:', savedCurrency);
+            
+            if (savedCurrency && CURRENCIES[savedCurrency]) {
+                currentCurrency = savedCurrency;
+                console.log('✅ Restored saved currency:', currentCurrency);
+            }
+
             // Load exchange rates with fallback
             await loadExchangeRatesWithFallback();
 
-            // Force updates on next frames to ensure DOM is fully ready
+            // Set up UI to show restored currency
+            updateCurrencySelector();
+            
+            // Force a second update on next frame to ensure DOM is ready
             requestAnimationFrame(() => {
                 updateCurrencySelector();
-                console.log('✅ Currency display updated (frame 1)');
             });
-            
-            setTimeout(() => {
-                updateCurrencySelector();
-                console.log('✅ Currency display updated (timeout)');
-            }, 100);
             
             // Mark as initialized
             isInitialized = true;
@@ -338,60 +331,45 @@ const CurrencyConverter = (function() {
      * Update currency selector UI
      */
     function updateCurrencySelector() {
-        // Update immediately without waiting for requestAnimationFrame
-        const selector = document.getElementById('currency-selector');
-        if (selector) {
-            selector.value = currentCurrency;
-            
-            Array.from(selector.options).forEach(option => {
-                const currCode = option.value;
-                const currInfo = CURRENCIES[currCode];
-                if (currInfo) {
-                    option.textContent = `${currInfo.flag} ${currCode} - ${currInfo.name}`;
-                }
-            });
-        }
-
-        const flagDisplay = document.getElementById('selected-currency-flag');
-        if (flagDisplay) {
-            const currencyInfo = CURRENCIES[currentCurrency];
-            flagDisplay.textContent = currencyInfo.flag;
-            // Also set innerHTML as backup in case textContent doesn't work
-            flagDisplay.innerHTML = currencyInfo.flag;
-            console.log('🚩 Updated flag display to:', currencyInfo.flag, 'Element:', flagDisplay.textContent);
-        } else {
-            console.warn('⚠️ selected-currency-flag element not found on page');
-            console.warn('Looking for elements with id="selected-currency-flag"');
-            const allElements = document.querySelectorAll('[id*="selected-currency"]');
-            console.warn('Found elements:', allElements.length, allElements);
-        }
-
-        const codeDisplay = document.getElementById('selected-currency-code');
-        if (codeDisplay) {
-            codeDisplay.textContent = currentCurrency;
-            codeDisplay.innerHTML = currentCurrency;
-            console.log('🔤 Updated code display to:', currentCurrency);
-        } else {
-            console.warn('⚠️ selected-currency-code element not found');
-        }
-
-        const selectedDisplay = document.getElementById('selected-currency-display');
-        if (selectedDisplay) {
-            const currencyInfo = CURRENCIES[currentCurrency];
-            selectedDisplay.textContent = `${currencyInfo.flag} ${currentCurrency}`;
-            selectedDisplay.innerHTML = `${currencyInfo.flag} ${currentCurrency}`;
-        }
-
-        showUserLocation();
-        
-        // Also use requestAnimationFrame for second pass to ensure DOM is settled
+        // Use requestAnimationFrame to ensure DOM is ready
         requestAnimationFrame(() => {
-            const flag2 = document.getElementById('selected-currency-flag');
-            if (flag2) {
-                const currencyInfo = CURRENCIES[currentCurrency];
-                flag2.textContent = currencyInfo.flag;
-                console.log('🚩 Flag display confirmed (frame):', flag2.textContent);
+            const selector = document.getElementById('currency-selector');
+            if (selector) {
+                selector.value = currentCurrency;
+                
+                Array.from(selector.options).forEach(option => {
+                    const currCode = option.value;
+                    const currInfo = CURRENCIES[currCode];
+                    if (currInfo) {
+                        option.textContent = `${currInfo.flag} ${currCode} - ${currInfo.name}`;
+                    }
+                });
             }
+
+            const flagDisplay = document.getElementById('selected-currency-flag');
+            if (flagDisplay) {
+                const currencyInfo = CURRENCIES[currentCurrency];
+                flagDisplay.textContent = currencyInfo.flag;
+                console.log('🚩 Updated flag display to:', currencyInfo.flag);
+            } else {
+                console.warn('⚠️ selected-currency-flag element not found');
+            }
+
+            const codeDisplay = document.getElementById('selected-currency-code');
+            if (codeDisplay) {
+                codeDisplay.textContent = currentCurrency;
+                console.log('🔤 Updated code display to:', currentCurrency);
+            } else {
+                console.warn('⚠️ selected-currency-code element not found');
+            }
+
+            const selectedDisplay = document.getElementById('selected-currency-display');
+            if (selectedDisplay) {
+                const currencyInfo = CURRENCIES[currentCurrency];
+                selectedDisplay.textContent = `${currencyInfo.flag} ${currentCurrency}`;
+            }
+
+            showUserLocation();
         });
     }
 
