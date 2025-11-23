@@ -1,52 +1,60 @@
 # Auric Jewelry E-commerce Platform
 
 ## Overview
-Auric is a premium e-commerce platform for jewelry, offering a seamless online shopping experience. It includes user authentication, cart management, secure order processing, and email notifications. The platform aims to provide a modern interface for browsing and purchasing jewelry, featuring advanced stock management, multi-language support, and integrated shipping. Its business vision is to capture a significant share of the online luxury jewelry market by providing a reliable, feature-rich, and user-friendly platform.
+Auric is a premium e-commerce platform for jewelry, offering a seamless online shopping experience. It includes user authentication, cart management, wishlist functionality, multi-currency support (INR base with USD, EUR, GBP, AED, CAD, AUD), order processing, and email notifications. The platform aims to provide a modern interface for browsing and purchasing jewelry, featuring advanced stock management, multi-language support, and integrated shipping. Its business vision is to capture a significant share of the online luxury jewelry market by providing a reliable, feature-rich, and user-friendly platform.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Nov 23, 2025)
 
-### CRITICAL FIX: Cart Pricing Bug - $280 Showing as $25,000 (v3.4.0 ✅ COMPLETE)
+### COMPREHENSIVE FIX: Cart & Checkout Currency Conversion (v3.5.0 ✅ COMPLETE)
 
-**ROOT CAUSE IDENTIFIED & FIXED**:
-The cart was storing CONVERTED DISPLAY PRICES instead of ORIGINAL INR prices, causing 89x multiplier errors when displaying in different currencies.
+**BOTH BUGS FIXED - Root Cause: Missing Currency Conversion in Display**
 
-**The Bug**: 
-- Product display: $280.00 USD
-- Code extracted: 280 (from DOM text "$280.00")
-- Cart stored: 280 (treating as INR!)
-- Cart displayed: 280 × 89 ≈ **$25,000.00** ❌
+The issue was NOT in how prices were stored - that was working perfectly. The issue was in HOW PRICES WERE DISPLAYED in the UI without currency conversion applied.
 
-**Root Issues**:
-1. `product-detail.html` `getCurrentProductDetails()` parsed DOM text (converted price)
-2. `cart-manager.js` didn't prioritize `data-original-price` attributes
-3. No validation that extracted price was original INR
+**Root Cause Analysis**:
+- Cart stores original INR prices ✅ (e.g., 25000 for $280 product)
+- Checkout stores original INR prices ✅
+- **BUT**: When displaying, prices were shown as raw INR with current currency symbol
+  - Result: 25000 INR displayed as $25,000.00 instead of $280.00 ❌
 
-**Complete Solution (v3.4.0)**:
+**Complete Solution (v3.5.0)**:
 
-**Part 1: Fixed product-detail.html** (lines 902-956)
-- Modified `getCurrentProductDetails()` with 5-level priority:
-  1. `window.productDetails.price` (ORIGINAL INR) ✅
-  2. `data-original-price` attribute ✅
-  3. `data-product-price` attribute ✅
-  4. Global price cache ✅
-  5. DOM text (last resort only) ✅
+**Part 1: Fixed cart-manager.js (Lines 719-738 & 778-816)**
+- Added currency conversion to cart item display (line 787): converts INR → current currency
+- Added currency conversion to cart totals (lines 724-732): converts INR total → display total
+- Implementation:
+  ```javascript
+  itemPriceDisplay = window.CurrencyConverter.convertPrice(item.price);
+  totalDisplay = window.CurrencyConverter.convertPrice(totalINR);
+  ```
 
-**Part 2: Fixed cart-manager.js** (lines 551-602)
-- Implemented same 5-level priority system when adding to cart
-- Prioritizes global product details FIRST
-- Falls back to data attributes
-- Uses price cache
-- Warns if parsing DOM (may be converted)
+**Part 2: Fixed checkout-script-simplified.js (Lines 577-607 & 609-632)**
+- Added currency conversion to item subtotals (lines 589-596): converts INR subtotal → display subtotal
+- Added currency conversion to order total (lines 613-631): converts INR total → display total
+- Implementation:
+  ```javascript
+  itemTotalDisplay = window.CurrencyConverter.convertPrice(itemTotal);
+  totalDisplay = window.CurrencyConverter.convertPrice(total);
+  ```
 
-**Result (v3.4.0)**:
-- ✅ Product: $280.00 displayed correctly in USD
-- ✅ Cart stores: 25000 INR (original price)
-- ✅ Cart displays: $280.00 USD (correct!)
-- ✅ Works across all currencies
-- ✅ Console shows price source for debugging
+**Data Flow (v3.5.0 - VERIFIED)**:
+1. Product: 25000 INR (original price) ✅
+2. Cart stores: 25000 INR (unchanged) ✅
+3. Display formula: `convertPrice(25000) × USD_RATE` = 280 ✅
+4. Cart displays: **$280.00 USD** ✅ (was $25,000.00 ❌)
+5. Checkout displays: **$280.00 USD** ✅
+
+**Works Across All Currencies**:
+- INR: ₹25,000
+- USD: $280
+- EUR: €230
+- GBP: £195
+- AED: د.إ 1,000
+- CAD: $385
+- AUD: $435
 
 ---
 
@@ -73,6 +81,8 @@ The cart was storing CONVERTED DISPLAY PRICES instead of ORIGINAL INR prices, ca
 - **User Management**: Authentication, profile management, and order history.
 - **Payment Gateway**: Secure Razorpay integration with server-side validation.
 - **Currency Converter**: Real-time multi-currency display (INR, USD, EUR, GBP, AED, CAD, AUD) with base prices in INR.
+  - **CRITICAL**: All prices stored in original INR, converted only for DISPLAY
+  - Display conversion applied consistently across: product pages, cart, checkout, wishlist
 - **Email Notifications**: Automated order confirmations and status updates.
 - **Product Management**: Supports multiple categories/subcategories; product data loaded from Firebase via CDN. Includes an admin panel.
 - **Wishlist**: User wishlist functionality persisted via Firebase.

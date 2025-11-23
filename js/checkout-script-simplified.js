@@ -581,12 +581,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Update subtotal in all steps
         const itemTotal = item.price * item.quantity;
+        
+        // Convert to display currency if available
+        let itemTotalDisplay = itemTotal;
+        if (typeof window.CurrencyConverter !== 'undefined' && window.CurrencyConverter.convertPrice) {
+            itemTotalDisplay = window.CurrencyConverter.convertPrice(itemTotal);
+        }
+        
         const subtotalElements = document.querySelectorAll(`.item-subtotal[data-item-id="${itemId}"]`);
         subtotalElements.forEach(element => {
-            element.textContent = `${currencySymbol}${itemTotal.toFixed(2)}`;
+            element.textContent = `${currencySymbol}${itemTotalDisplay.toFixed(2)}`;
         });
 
-        // Update hidden input field
+        // Update hidden input field (store original INR for backend)
         const hiddenInput = document.querySelector(`.product-data[data-item-id="${itemId}"]`);
         if (hiddenInput) {
             const productData = JSON.parse(hiddenInput.value);
@@ -599,18 +606,24 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update order total across all steps
     function updateOrderTotal(items) {
         const total = calculateTotal(items);
+        
+        // Convert to display currency if available
+        let totalDisplay = total;
+        if (typeof window.CurrencyConverter !== 'undefined' && window.CurrencyConverter.convertPrice) {
+            totalDisplay = window.CurrencyConverter.convertPrice(total);
+        }
 
         // Update total in all steps
         if (orderTotalElement) {
-            orderTotalElement.textContent = `${currencySymbol}${total.toFixed(2)}`;
+            orderTotalElement.textContent = `${currencySymbol}${totalDisplay.toFixed(2)}`;
             orderTotalElement.dataset.originalPrice = total; // Store original price for currency conversion
         }
         if (orderTotalStep2) {
-            orderTotalStep2.textContent = `${currencySymbol}${total.toFixed(2)}`;
+            orderTotalStep2.textContent = `${currencySymbol}${totalDisplay.toFixed(2)}`;
             orderTotalStep2.dataset.originalPrice = total; // Store original price for currency conversion
         }
         if (orderTotalStep3) {
-            orderTotalStep3.textContent = `${currencySymbol}${total.toFixed(2)}`;
+            orderTotalStep3.textContent = `${currencySymbol}${totalDisplay.toFixed(2)}`;
             orderTotalStep3.dataset.originalPrice = total; // Store original price for currency conversion
         }
     }

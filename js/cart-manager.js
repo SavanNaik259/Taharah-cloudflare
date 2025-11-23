@@ -718,10 +718,17 @@ window.CartManager = (function() {
             if (subtotalElement) {
                 // Get current currency symbol from CurrencyConverter
                 let currencySymbol = '₹';
+                let totalINR = calculateTotal();
+                let displayTotal = totalINR;
+                
                 if (typeof window.CurrencyConverter !== 'undefined' && window.CurrencyConverter.getCurrencySymbol) {
                     currencySymbol = window.CurrencyConverter.getCurrencySymbol();
+                    // Convert INR total to current currency
+                    if (window.CurrencyConverter.convertPrice) {
+                        displayTotal = window.CurrencyConverter.convertPrice(totalINR);
+                    }
                 }
-                const total = `${currencySymbol}${calculateTotal().toFixed(2)}`;
+                const total = `${currencySymbol}${displayTotal.toFixed(2)}`;
                 if (subtotalElement.textContent !== total) {
                     subtotalElement.textContent = total;
                 }
@@ -766,13 +773,20 @@ window.CartManager = (function() {
         const fragment = document.createDocumentFragment();
 
         cartItems.forEach(item => {
-            const itemTotal = (item.price * item.quantity).toFixed(2);
-
             // Get current currency symbol from CurrencyConverter
             let currencySymbol = '₹';
+            let itemPriceDisplay = item.price;
+            
             if (typeof window.CurrencyConverter !== 'undefined' && window.CurrencyConverter.getCurrencySymbol) {
                 currencySymbol = window.CurrencyConverter.getCurrencySymbol();
+                // Convert item price from INR to current currency
+                if (window.CurrencyConverter.convertPrice) {
+                    itemPriceDisplay = window.CurrencyConverter.convertPrice(item.price);
+                }
             }
+            
+            // Calculate item total in current currency
+            const itemTotalDisplay = (itemPriceDisplay * item.quantity).toFixed(2);
 
             const cartItemDiv = document.createElement('div');
             cartItemDiv.className = 'cart-item';
@@ -784,13 +798,13 @@ window.CartManager = (function() {
                 </div>
                 <div class="cart-item-details">
                     <div class="cart-item-name">${item.name}</div>
-                    <div class="cart-item-price">${currencySymbol}${item.price.toFixed(2)}</div>
+                    <div class="cart-item-price">${currencySymbol}${itemPriceDisplay.toFixed(2)}</div>
                     <div class="cart-item-quantity">
                         <button class="quantity-btn decrement">-</button>
                         <input type="text" class="quantity-input" value="${item.quantity}" readonly>
                         <button class="quantity-btn increment">+</button>
                     </div>
-                    <div class="cart-item-total">${currencySymbol}${itemTotal}</div>
+                    <div class="cart-item-total">${currencySymbol}${itemTotalDisplay}</div>
                 </div>
                 <button class="remove-item-btn">&times;</button>
             `;
