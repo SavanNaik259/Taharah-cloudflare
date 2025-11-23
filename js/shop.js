@@ -481,6 +481,11 @@ function initShop() {
                 WishlistManager.updateWishlistUI();
             }, 100);
         }
+
+        // Convert prices to user's selected currency
+        if (typeof window.CurrencyConverter !== 'undefined') {
+            window.CurrencyConverter.convertAllPrices();
+        }
     }
 
     /**
@@ -555,6 +560,11 @@ function initShop() {
                 WishlistManager.updateWishlistUI();
             }, 100);
         }
+
+        // Convert prices to user's selected currency
+        if (typeof window.CurrencyConverter !== 'undefined') {
+            window.CurrencyConverter.convertAllPrices();
+        }
     }
     
     /**
@@ -595,6 +605,11 @@ function initShop() {
             setTimeout(() => {
                 WishlistManager.updateWishlistUI();
             }, 100);
+        }
+
+        // Convert prices to user's selected currency
+        if (typeof window.CurrencyConverter !== 'undefined') {
+            window.CurrencyConverter.convertAllPrices();
         }
     }
 

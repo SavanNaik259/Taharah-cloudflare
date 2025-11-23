@@ -60,6 +60,11 @@ function setupSortUI(products) {
         
         const sortedProducts = sortProducts(products, sortBy);
         displayAllProducts(sortedProducts);
+        
+        // Convert prices after sorting
+        if (typeof window.CurrencyConverter !== 'undefined') {
+            window.CurrencyConverter.convertAllPrices();
+        }
     });
 }
 
@@ -217,6 +222,11 @@ function displayAllProducts(products) {
             WishlistManager.updateWishlistUI();
             console.log(`Set up wishlist listeners for ${products.length} products`);
         }, 100);
+    }
+
+    // Convert prices to user's selected currency
+    if (typeof window.CurrencyConverter !== 'undefined') {
+        window.CurrencyConverter.convertAllPrices();
     }
 
     console.log(`Displayed ${products.length} products in grid layout`);
