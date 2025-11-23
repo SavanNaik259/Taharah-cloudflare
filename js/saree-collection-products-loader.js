@@ -383,123 +383,12 @@ const JewelrySubcategoriesLoader = (function() {
     }
 
     /**
-     * Set up event listeners for wishlist buttons in dynamically generated content
+     * REMOVED: Duplicate wishlist event listener setup
+     * Root cause: These functions were adding duplicate listeners on top of wishlist-manager.js
+     * Bug: Extracted prices from converted DOM textContent instead of data attributes
+     * Fix: Let wishlist-manager.js handle ALL button clicks uniformly with 5-level defense
+     * LEGACY CODE - DO NOT RESTORE
      */
-    function setupWishlistEventListeners() {
-        console.log('Setting up wishlist event listeners for polki products...');
-
-        // Find all wishlist buttons in the polki section
-        const polkiSection = document.querySelector('.polki-edit');
-        if (!polkiSection) {
-            console.warn('Polki section not found for wishlist setup');
-            return;
-        }
-
-        const wishlistButtons = polkiSection.querySelectorAll('.add-to-wishlist');
-        console.log('Found', wishlistButtons.length, 'wishlist buttons in polki section');
-
-        wishlistButtons.forEach(button => {
-            // Remove any existing listeners to prevent duplicates
-            button.removeEventListener('click', handleWishlistButtonClick);
-
-            // Add new listener
-            button.addEventListener('click', handleWishlistButtonClick);
-            console.log('Added wishlist listener to button for product:', button.dataset.productId);
-        });
-
-        // Update wishlist button states after setting up listeners
-        if (typeof window.WishlistManager !== 'undefined') {
-            setTimeout(() => {
-                window.WishlistManager.updateWishlistButtonsState();
-            }, 100);
-        }
-    }
-
-    /**
-     * Handle wishlist button clicks for polki products
-     */
-    function handleWishlistButtonClick(event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        console.log('Polki product wishlist button clicked');
-
-        const button = event.target.closest('.add-to-wishlist');
-        if (!button) {
-            console.error('Wishlist button not found');
-            return;
-        }
-
-        // Get the parent product container
-        const productItem = button.closest('.arrival-item') || button.closest('.polki-card');
-        if (!productItem) {
-            console.error('Product container not found');
-            return;
-        }
-
-        // Extract product data from the product container elements
-        const productId = productItem.dataset.productId || button.dataset.productId;
-        const productNameEl = productItem.querySelector('.arrival-title');
-        const productName = productNameEl ? productNameEl.textContent.trim() : (button.dataset.productName || 'Unknown Product');
-
-        // Get price from the price element in the product container
-        const priceElement = productItem.querySelector('.current-price');
-        let productPrice = 0;
-        if (priceElement) {
-            // Extract price from the formatted text (₹15,500.00 format)
-            const priceText = priceElement.textContent.trim();
-            console.log('Raw price text from polki product:', priceText);
-
-            // Remove currency symbols and commas, then parse
-            const cleanedPrice = priceText.replace(/[₹,]/g, '').trim();
-            productPrice = parseFloat(cleanedPrice);
-            console.log('Extracted price for polki product:', productPrice);
-        } else {
-            // Fallback to button data attribute
-            productPrice = parseFloat(button.dataset.productPrice) || 0;
-        }
-
-        // Get image from the product container
-        const imageElement = productItem.querySelector('.arrival-image img');
-        const productImage = imageElement ? imageElement.src : (button.dataset.productImage || '');
-
-        const productData = {
-            id: productId,
-            name: productName,
-            price: productPrice,
-            image: productImage
-        };
-
-        console.log('Polki product data extracted:', productData);
-
-        // Call the global wishlist manager if available
-        if (typeof WishlistManager !== 'undefined') {
-            // Check if item is already in wishlist and toggle accordingly
-            if (WishlistManager.isInWishlist(productId)) {
-                console.log('Removing from wishlist:', productName);
-                WishlistManager.removeFromWishlist(productId);
-                // Update icon to regular heart
-                const icon = button.querySelector('i');
-                if (icon) {
-                    icon.classList.add('far');
-                    icon.classList.remove('fas');
-                }
-            } else {
-                console.log('Adding to wishlist:', productName);
-                WishlistManager.addToWishlist(productData);
-                // Update icon to solid heart
-                const icon = button.querySelector('i');
-                if (icon) {
-                    icon.classList.remove('far');
-                    icon.classList.add('fas');
-                }
-            }
-        } else {
-            console.error('WishlistManager not available');
-            // Fallback: show a simple message
-            alert(`${productData.name} added to wishlist!`);
-        }
-    }
 
     /**
      * Update the Jewelry Collection section with loaded products
@@ -580,7 +469,6 @@ const JewelrySubcategoriesLoader = (function() {
                 `;
             }
 
-            setupWishlistEventListeners();
 
             if (window.reinitializeProductEvents) {
                 window.reinitializeProductEvents();

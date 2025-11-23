@@ -373,123 +373,12 @@ const BridalProductsLoader = (function() {
     }
 
     /**
-     * Set up event listeners for wishlist buttons in dynamically generated content
+     * REMOVED: Duplicate wishlist event listener setup
+     * Root cause: These functions were adding duplicate listeners on top of wishlist-manager.js
+     * Bug: Extracted prices from converted DOM textContent instead of data attributes
+     * Fix: Let wishlist-manager.js handle ALL button clicks uniformly with 5-level defense
+     * LEGACY CODE - DO NOT RESTORE
      */
-    function setupWishlistEventListeners() {
-        console.log('Setting up wishlist event listeners for bridal products...');
-
-        // Find all wishlist buttons in the bridal container
-        const featuredCollectionContainer = document.getElementById('featuredCollectionProductContainer');
-        if (!featuredCollectionContainer) {
-            console.warn('Bridal product container not found for wishlist setup');
-            return;
-        }
-
-        const wishlistButtons = featuredCollectionContainer.querySelectorAll('.add-to-wishlist');
-        console.log('Found', wishlistButtons.length, 'wishlist buttons in bridal section');
-
-        wishlistButtons.forEach(button => {
-            // Remove any existing listeners to prevent duplicates
-            button.removeEventListener('click', handleWishlistButtonClick);
-
-            // Add new listener
-            button.addEventListener('click', handleWishlistButtonClick);
-            console.log('Added wishlist listener to button for product:', button.dataset.productId);
-        });
-
-        // Update wishlist button states after setting up listeners
-        if (typeof window.WishlistManager !== 'undefined') {
-            setTimeout(() => {
-                window.WishlistManager.updateWishlistButtonsState();
-            }, 100);
-        }
-    }
-
-    /**
-     * Handle wishlist button clicks for bridal products
-     */
-    function handleWishlistButtonClick(event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        console.log('Bridal product wishlist button clicked');
-
-        const button = event.target.closest('.add-to-wishlist');
-        if (!button) {
-            console.error('Wishlist button not found');
-            return;
-        }
-
-        // Get the parent product container
-        const productItem = button.closest('.product-item');
-        if (!productItem) {
-            console.error('Product container not found');
-            return;
-        }
-
-        // Extract product data from the product container elements
-        const productId = productItem.dataset.productId || button.dataset.productId;
-        const productNameEl = productItem.querySelector('.product-name');
-        const productName = productNameEl ? productNameEl.textContent.trim() : (button.dataset.productName || 'Unknown Product');
-
-        // Get price from the price element in the product container
-        const priceElement = productItem.querySelector('.current-price');
-        let productPrice = 0;
-        if (priceElement) {
-            // Extract price from the formatted text (₹15,500.00 format)
-            const priceText = priceElement.textContent.trim();
-            console.log('Raw price text from bridal product:', priceText);
-
-            // Remove currency symbols and commas, then parse
-            const cleanedPrice = priceText.replace(/[₹,]/g, '').trim();
-            productPrice = parseFloat(cleanedPrice);
-            console.log('Extracted price for bridal product:', productPrice);
-        } else {
-            // Fallback to button data attribute
-            productPrice = parseFloat(button.dataset.productPrice) || 0;
-        } 
-
-        // Get image from the product container
-        const imageElement = productItem.querySelector('.product-image img');
-        const productImage = imageElement ? imageElement.src : (button.dataset.productImage || '');
-
-        const productData = {
-            id: productId,
-            name: productName,
-            price: productPrice,
-            image: productImage
-        };
-
-        console.log('Bridal product data extracted:', productData);
-
-        // Call the global wishlist manager if available
-        if (typeof WishlistManager !== 'undefined') {
-            // Check if item is already in wishlist and toggle accordingly
-            if (WishlistManager.isInWishlist(productId)) {
-                console.log('Removing from wishlist:', productName);
-                WishlistManager.removeFromWishlist(productId);
-                // Update icon to regular heart
-                const icon = button.querySelector('i');
-                if (icon) {
-                    icon.classList.add('far');
-                    icon.classList.remove('fas');
-                }
-            } else {
-                console.log('Adding to wishlist:', productName);
-                WishlistManager.addToWishlist(productData);
-                // Update icon to solid heart
-                const icon = button.querySelector('i');
-                if (icon) {
-                    icon.classList.remove('far');
-                    icon.classList.add('fas');
-                }
-            }
-        } else {
-            console.error('WishlistManager not available');
-            // Fallback: show a simple message
-            alert(`${productData.name} added to wishlist!`);
-        }
-    }
 
     /**
      * Update the Bridal Collection section with loaded products
@@ -577,7 +466,6 @@ const BridalProductsLoader = (function() {
             }
 
             // Reinitialize event listeners for dynamically generated product cards
-            setupWishlistEventListeners();
 
             // Update OutOfStockHandler with the loaded products
             if (window.OutOfStockHandler && products.length > 0) {
@@ -725,7 +613,6 @@ const BridalProductsLoader = (function() {
             });
 
             // Setup wishlist event listeners
-            setupWishlistEventListeners();
 
             // Update wishlist button states
             if (typeof window.WishlistManager !== 'undefined') {

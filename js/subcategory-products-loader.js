@@ -214,7 +214,6 @@ const SubcategoryProductsLoader = (function() {
                 }
 
                 // Setup wishlist event listeners
-                setupWishlistEventListeners();
 
                 // Update wishlist button states
                 if (typeof window.WishlistManager !== 'undefined') {
@@ -245,83 +244,12 @@ const SubcategoryProductsLoader = (function() {
     }
 
     /**
-     * Set up event listeners for wishlist buttons
+     * REMOVED: Duplicate wishlist event listener setup
+     * Root cause: These functions were adding duplicate listeners on top of wishlist-manager.js
+     * Bug: Extracted prices from converted DOM textContent instead of data attributes
+     * Fix: Let wishlist-manager.js handle ALL button clicks uniformly with 5-level defense
+     * LEGACY CODE - DO NOT RESTORE
      */
-    function setupWishlistEventListeners() {
-        const wishlistButtons = document.querySelectorAll('.add-to-wishlist');
-        console.log('Setting up wishlist listeners for', wishlistButtons.length, 'subcategory product buttons');
-
-        wishlistButtons.forEach(button => {
-            // Remove any existing listeners to avoid duplicates
-            const newButton = button.cloneNode(true);
-            button.parentNode.replaceChild(newButton, button);
-            
-            newButton.addEventListener('click', handleWishlistButtonClick);
-        });
-    }
-
-    /**
-     * Handle wishlist button clicks
-     */
-    function handleWishlistButtonClick(event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        const button = event.target.closest('.add-to-wishlist');
-        if (!button) return;
-
-        const productItem = button.closest('.product-item');
-        if (!productItem) return;
-
-        const productId = productItem.dataset.productId || button.dataset.productId;
-        const productNameEl = productItem.querySelector('.product-name');
-        const productName = productNameEl ? productNameEl.textContent.trim() : (button.dataset.productName || 'Unknown Product');
-
-        const priceElement = productItem.querySelector('.current-price');
-        let productPrice = 0;
-        if (priceElement) {
-            const priceText = priceElement.textContent.trim();
-            const cleanedPrice = priceText.replace(/[₹,]/g, '').trim();
-            productPrice = parseFloat(cleanedPrice);
-        } else {
-            productPrice = parseFloat(button.dataset.productPrice) || 0;
-        }
-
-        const imageElement = productItem.querySelector('.product-image img');
-        const productImage = imageElement ? imageElement.src : (button.dataset.productImage || '');
-
-        const productData = {
-            id: productId,
-            name: productName,
-            price: productPrice,
-            image: productImage
-        };
-
-        console.log('Wishlist button clicked for product:', productData);
-
-        if (typeof WishlistManager !== 'undefined') {
-            if (WishlistManager.isInWishlist(productId)) {
-                WishlistManager.removeFromWishlist(productId);
-                const icon = button.querySelector('i');
-                if (icon) {
-                    icon.classList.add('far');
-                    icon.classList.remove('fas');
-                }
-                button.classList.remove('active');
-            } else {
-                WishlistManager.addToWishlist(productData);
-                const icon = button.querySelector('i');
-                if (icon) {
-                    icon.classList.remove('far');
-                    icon.classList.add('fas');
-                }
-                button.classList.add('active');
-            }
-        } else {
-            console.error('WishlistManager not available');
-            alert(`${productData.name} added to wishlist!`);
-        }
-    }
 
     /**
      * Sort products by selected criteria
@@ -396,7 +324,6 @@ const SubcategoryProductsLoader = (function() {
             productsGrid.innerHTML = productsHTML;
 
             // Setup wishlist event listeners
-            setupWishlistEventListeners();
 
             // Update wishlist button states
             if (typeof window.WishlistManager !== 'undefined') {
