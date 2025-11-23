@@ -87,17 +87,31 @@ const WishlistManager = (function() {
             wishlistItemDiv.className = 'wishlist-item';
             wishlistItemDiv.setAttribute('data-product-id', item.id);
 
-            // Get current currency symbol from CurrencyConverter
+            // Get current currency symbol and apply conversion from CurrencyConverter
             let currencySymbol = '₹'; // Default to rupee
-            if (typeof window.CurrencyConverter !== 'undefined' && window.CurrencyConverter.getCurrencySymbol) {
-                currencySymbol = window.CurrencyConverter.getCurrencySymbol();
+            let displayPrice = item.price; // Default to stored INR price
+            
+            if (typeof window.CurrencyConverter !== 'undefined') {
+                if (window.CurrencyConverter.getCurrencySymbol) {
+                    currencySymbol = window.CurrencyConverter.getCurrencySymbol();
+                }
+                // Convert price from INR to selected currency
+                if (window.CurrencyConverter.convertPrice) {
+                    displayPrice = window.CurrencyConverter.convertPrice(item.price, 'INR');
+                } else if (window.CurrencyConverter.getSelectedCurrency && window.CurrencyConverter.exchangeRates) {
+                    // Fallback: manual conversion if convertPrice not available
+                    const selectedCurrency = window.CurrencyConverter.getSelectedCurrency() || 'INR';
+                    if (selectedCurrency !== 'INR' && window.CurrencyConverter.exchangeRates[selectedCurrency]) {
+                        displayPrice = item.price * window.CurrencyConverter.exchangeRates[selectedCurrency];
+                    }
+                }
             }
 
             wishlistItemDiv.innerHTML = `
                 <img src="${item.image}" alt="${item.name}" class="wishlist-item-image" loading="lazy" decoding="async">
                 <div class="wishlist-item-details">
                     <div class="wishlist-item-name" data-translate-dynamic>${item.name}</div>
-                    <div class="wishlist-item-price" data-translate-dynamic>${currencySymbol}${item.price.toFixed(2)}</div>
+                    <div class="wishlist-item-price" data-translate-dynamic>${currencySymbol}${displayPrice.toFixed(2)}</div>
                     <div class="wishlist-item-actions">
                         <button class="remove-from-wishlist" data-translate-dynamic>Remove</button>
                         <button class="move-to-cart" data-translate-dynamic>Move to Cart</button>
