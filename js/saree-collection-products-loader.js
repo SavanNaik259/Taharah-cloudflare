@@ -114,20 +114,21 @@ const JewelrySubcategoriesLoader = (function() {
             return shuffled.slice(0, MAX_PRODUCTS_TO_DISPLAY);
         }
 
-        // Check localStorage cache with ETag validation
+        // Check localStorage cache and ALWAYS show instantly (no expiration check)
+        // Fresh data will be fetched in background and update automatically
         if (!forceRefresh && !cacheInvalidated) {
             try {
                 const stored = localStorage.getItem('jewelrySubcategoriesProducts');
-                const storedTime = localStorage.getItem('jewelrySubcategoriesProductsTime');
                 const storedETag = localStorage.getItem('jewelrySubcategoriesProductsETag');
 
-                if (stored && storedTime && (now - parseInt(storedTime)) < SHORT_CACHE_DURATION) {
-                    console.log('Using localStorage cached jewelry products (ETag:', storedETag?.substring(0, 8) + ')');
+                if (stored) {
+                    console.log('✅ Using cached jewelry products (instant display)');
                     cachedProducts = JSON.parse(stored);
                     cachedETag = storedETag;
-                    lastFetchTime = parseInt(storedTime);
-                    const shuffled = shuffleArray(cachedProducts);
-                    return shuffled.slice(0, MAX_PRODUCTS_TO_DISPLAY);
+                    lastFetchTime = now;
+                    
+                    // Continue below to fetch fresh data in background
+                    // Don't return early - we want to fetch fresh data too
                 }
             } catch (e) {
                 console.warn('Error reading from localStorage cache:', e);
