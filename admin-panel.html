@@ -2131,6 +2131,10 @@
                 <h1 class="header-title"> Admin panel</h1>
             </div>
             <div class="header-actions">
+                <button class="btn btn-secondary" onclick="refreshDashboard()" title="Refresh all data">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh
+                </button>
                 <div style="position: relative; display: inline-block;">
                     <button class="btn btn-outline" onclick="showSection('notifications')" style="position: relative;">
                         <i class="fas fa-bell"></i>
@@ -3258,6 +3262,58 @@
         let productsCache = null; // Cache for product data
         let isLoadingProducts = false; // Flag to prevent multiple product loads
 
+        // Dashboard cache system
+        const DashboardCache = {
+            CACHE_KEY: 'admin_dashboard_cache',
+            CACHE_TTL: 60 * 60 * 1000, // 1 hour
+            
+            get() {
+                try {
+                    const cached = localStorage.getItem(this.CACHE_KEY);
+                    if (!cached) return null;
+                    
+                    const data = JSON.parse(cached);
+                    const age = Date.now() - data.timestamp;
+                    
+                    if (age > this.CACHE_TTL) {
+                        console.log('📦 Cache expired, clearing...');
+                        this.clear();
+                        return null;
+                    }
+                    
+                    console.log(`📦 Using cached dashboard data (age: ${Math.round(age/1000)}s)`);
+                    return data;
+                } catch (e) {
+                    console.warn('Failed to read cache:', e);
+                    return null;
+                }
+            },
+            
+            set(data) {
+                try {
+                    const cacheData = {
+                        timestamp: Date.now(),
+                        orders: data.orders || [],
+                        customers: data.customers || [],
+                        products: data.products || []
+                    };
+                    localStorage.setItem(this.CACHE_KEY, JSON.stringify(cacheData));
+                    console.log('💾 Dashboard data cached successfully');
+                } catch (e) {
+                    console.warn('Failed to cache dashboard data:', e);
+                }
+            },
+            
+            clear() {
+                try {
+                    localStorage.removeItem(this.CACHE_KEY);
+                    console.log('🧹 Dashboard cache cleared');
+                } catch (e) {
+                    console.warn('Failed to clear cache:', e);
+                }
+            }
+        };
+
         // Create demo data for testing when Firebase is unavailable
         function createDemoData() {
             console.log('Creating demo data for admin dashboard...');
@@ -3362,10 +3418,37 @@
             console.log(`✅ Created demo data: ${allOrders.length} orders, ${allCustomers.length} customers`);
         }
 
-        // Load orders from Firebase - EXACT copy from working admin-dashboard.html
-        async function loadOrders() {
+        // Load orders from Firebase with caching
+        async function loadOrders(forceRefresh = false) {
             try {
                 console.log('Loading orders from Firestore...');
+
+                // Try to load from cache first if not forcing refresh
+                if (!forceRefresh) {
+                    const cached = DashboardCache.get();
+                    if (cached && cached.orders && cached.orders.length > 0) {
+                        console.log('⚡ Loading orders from cache instantly...');
+                        allOrders = cached.orders;
+                        
+                        // Categorize cached orders
+                        newOrders = allOrders.filter(o => !o.adminConfirmed && o.status !== 'cancelled');
+                        confirmedOrders = allOrders.filter(o => o.adminConfirmed || o.status === 'confirmed');
+                        cancelledOrders = allOrders.filter(o => o.status === 'cancelled');
+                        
+                        // Update UI with cached data instantly
+                        updateOrdersDisplay();
+                        updateOrdersStats();
+                        updateNewOrdersDisplay();
+                        updateRecentOrdersDisplay();
+                        
+                        // Show refresh indicator
+                        showRefreshIndicator('Refreshing data...');
+                        
+                        // Load fresh data in background
+                        loadOrdersInBackground();
+                        return;
+                    }
+                }
 
                 // Show loading for dashboard orders
                 const ordersLoading = document.getElementById('orders-loading');
@@ -3418,6 +3501,135 @@
                             customerName: extractCustomerName(orderData),
                             customerEmail: extractCustomerEmail(orderData),
                             customerPhone: extractCustomerPhone(orderData),
+
+
+        // Load orders in background without showing loading indicators
+        async function loadOrdersInBackground() {
+            try {
+                console.log('🔄 Loading fresh orders in background...');
+                
+                const usersSnapshot = await db.collection('users').get();
+                const freshOrders = [];
+                const freshNewOrders = [];
+                const freshConfirmedOrders = [];
+                const freshCancelledOrders = [];
+
+                for (const userDoc of usersSnapshot.docs) {
+                    const ordersSnapshot = await userDoc.ref.collection('orders').get();
+
+                    ordersSnapshot.forEach(orderDoc => {
+                        const orderData = orderDoc.data();
+                        const processedOrder = {
+                            orderId: orderDoc.id,
+                            userId: userDoc.id,
+                            orderReference: orderData.orderReference || orderData.id || orderDoc.id,
+                            date: orderData.timestamp?.toDate() || (orderData.createdAt ? new Date(orderData.createdAt) : new Date()),
+                            amount: calculateOrderAmount(orderData),
+                            customerName: extractCustomerName(orderData),
+                            customerEmail: extractCustomerEmail(orderData),
+                            customerPhone: extractCustomerPhone(orderData),
+                            customerAddress: extractCustomerAddress(orderData),
+                            paymentMethod: orderData.paymentMethod || 'Not specified',
+                            products: orderData.products || orderData.items || [],
+                            notes: orderData.notes || orderData.specialInstructions || '',
+                            status: orderData.status || 'pending',
+                            deliveryStatus: orderData.deliveryStatus || 'pending'
+                        };
+
+                        freshOrders.push(processedOrder);
+
+                        if (orderData.status === 'confirmed' || processedOrder.adminConfirmed) {
+                            processedOrder.status = 'confirmed';
+                            freshConfirmedOrders.push(processedOrder);
+                        } else if (orderData.status === 'cancelled') {
+                            processedOrder.status = 'cancelled';
+                            freshCancelledOrders.push(processedOrder);
+                        } else {
+                            processedOrder.status = 'pending';
+                            freshNewOrders.push(processedOrder);
+                        }
+                    });
+                }
+
+                // Update global variables with fresh data
+                allOrders = freshOrders;
+                newOrders = freshNewOrders;
+                confirmedOrders = freshConfirmedOrders;
+                cancelledOrders = freshCancelledOrders;
+
+                // Update cache
+                DashboardCache.set({
+                    orders: allOrders,
+                    customers: allCustomers,
+                    products: productsCache || []
+                });
+
+                // Update UI with fresh data
+                updateOrdersDisplay();
+                updateOrdersStats();
+                updateNewOrdersDisplay();
+                updateRecentOrdersDisplay();
+
+                console.log('✅ Background refresh completed');
+                hideRefreshIndicator();
+
+            } catch (error) {
+                console.error('❌ Background refresh failed:', error);
+                hideRefreshIndicator();
+            }
+        }
+
+        // Show refresh indicator
+        function showRefreshIndicator(message = 'Refreshing data...') {
+            let indicator = document.getElementById('refresh-indicator');
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.id = 'refresh-indicator';
+                indicator.style.cssText = `
+                    position: fixed;
+                    top: 80px;
+                    right: 20px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    z-index: 9999;
+                    font-size: 14px;
+                    font-weight: 500;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                `;
+                indicator.innerHTML = `
+                    <i class="fas fa-sync-alt fa-spin"></i>
+                    <span>${message}</span>
+                `;
+                document.body.appendChild(indicator);
+            }
+        }
+
+        // Hide refresh indicator
+        function hideRefreshIndicator() {
+            const indicator = document.getElementById('refresh-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        // Manual refresh with cache clear
+        async function refreshDashboard() {
+            console.log('🔄 Manual refresh requested - clearing cache...');
+            DashboardCache.clear();
+            showRefreshIndicator('Refreshing dashboard...');
+            
+            await loadOrders(true);
+            await loadCustomers();
+            await loadInventoryData(true);
+            
+            hideRefreshIndicator();
+        }
+
                             customerAddress: extractCustomerAddress(orderData),
                             paymentMethod: orderData.paymentMethod || 'Not specified',
                             products: orderData.products || orderData.items || [],
@@ -3456,6 +3668,13 @@
                 updateOrdersStats();
                 updateNewOrdersDisplay();
                 updateRecentOrdersDisplay();
+
+                // Update cache with fresh data
+                DashboardCache.set({
+                    orders: allOrders,
+                    customers: allCustomers,
+                    products: productsCache || []
+                });
 
                 // Update notifications when orders change
                 await loadNotifications();
@@ -3737,9 +3956,21 @@
         }
 
         // Load customers with UID and search functionality
-        async function loadCustomers() {
+        async function loadCustomers(forceRefresh = false) {
             try {
                 console.log('Loading customers from Firestore...');
+
+                // Try cache first
+                if (!forceRefresh) {
+                    const cached = DashboardCache.get();
+                    if (cached && cached.customers && cached.customers.length > 0) {
+                        console.log('⚡ Loading customers from cache instantly...');
+                        allCustomers = cached.customers;
+                        updateCustomersDisplay();
+                        updateCustomersStats();
+                        return;
+                    }
+                }
 
                 const customersLoading = document.getElementById('customers-loading');
                 const customersTable = document.getElementById('customers-table');
@@ -3773,6 +4004,14 @@
                 }
 
                 console.log(`✅ Loaded ${allCustomers.length} customers`);
+                
+                // Update cache
+                DashboardCache.set({
+                    orders: allOrders,
+                    customers: allCustomers,
+                    products: productsCache || []
+                });
+                
                 updateCustomersDisplay();
                 updateCustomersStats();
 
