@@ -118,28 +118,54 @@ The wishlist buttons had **inline onclick handlers** with `event.stopPropagation
 
 ---
 
-## HOTFIX: $0.00 Prices on All Collection & Featured Collection (v3.1.1)
+## HOTFIX: $0.00 Prices on All Collection & Featured Collection (v3.1.1 → v3.2.0 ✅ COMPLETE)
 
-**Issue Reported**: 
-When users added items from all-collection or featured-collection pages to wishlist, prices showed as $0.00
+**ROOT CAUSE - COMPREHENSIVE ANALYSIS**:
 
-**Root Cause**: 
-The filter-sort-handler.js (used by all-collection page) was missing critical price data attributes:
-- Missing `data-product-price` on product-item container
-- Missing `data-original-price` on current-price span
-- While button had `data-product-price`, the multi-level extraction needs fallback sources
+The issue had TWO interacting problems:
 
-**Solution Applied (v3.1.1)**:
-- Updated js/filter-sort-handler.js generateProductHTML():
-  - Added: `data-product-price="${product.price}"` to product-item container ✅
-  - Added: `data-original-price="${product.price}"` to current-price span ✅
-  - Ensured consistency with featured-collection-products-loader.js ✅
+1. **Missing Price Data Attributes** (v3.1.1):
+   - filter-sort-handler.js products didn't have `data-product-price` on container
+   - featured-collection.js products didn't have `data-original-price` on price element
+   - These are fallback levels 2 & 3 for price extraction
 
-**Result**: 
-- ✅ Wishlist prices now correctly show original INR values
-- ✅ Works on all-collection page
-- ✅ Works on featured-collection page
-- ✅ Multi-level price extraction works as designed
+2. **Missing Global Price Cache Population** (v3.2.0):
+   - Level 0 (most reliable) extraction in wishlist-manager.js uses global PRODUCT_PRICES_CACHE
+   - filter-sort-handler.js was NOT populating this cache
+   - featured-collection-products-loader.js was NOT caching on initial load
+   - saree-collection-products-loader.js was NOT caching at all
+   - Result: When user clicked wishlist, price extraction found 0 or undefined
+
+**Multi-Level Price Extraction (wishlist-manager.js lines 908-1013)**:
+```
+Level 0: Global PRODUCT_PRICES_CACHE ← NEW FIX: Now populated by ALL loaders
+Level 1: Button's data-product-price ← Already had this
+Level 2: Product container's data-product-price ← FIXED v3.1.1
+Level 3: Price element's data-original-price ← FIXED v3.1.1
+Level 4: Hardcoded prices ← Fallback only
+```
+
+**Comprehensive Solution Applied (v3.1.1 → v3.2.0)**:
+
+**Part 1: Added Price Data Attributes (v3.1.1)** ✅
+- js/filter-sort-handler.js generateProductHTML(): Added `data-product-price="${product.price}"` to product-item
+- js/filter-sort-handler.js generateProductHTML(): Added `data-original-price="${product.price}"` to current-price
+
+**Part 2: Added Global Price Cache Population (v3.2.0)** ✅
+- js/filter-sort-handler.js renderProducts(): Populated PRODUCT_PRICES_CACHE for all-collection products
+- js/featured-collection-products-loader.js updateProductsGrid(): Populated cache for featured-collection initial load
+- js/featured-collection-products-loader.js displaySortedProducts(): Already cached (now verified)
+- js/saree-collection-products-loader.js updateJewelrySection(): Populated cache for jewelry products
+- js/new-arrivals-products-loader.js: Already had caching (verified)
+
+**Result** (v3.2.0):
+- ✅ All-collection products now cached with prices
+- ✅ Featured-collection products now cached on initial load AND sort
+- ✅ Saree-collection products now cached with prices
+- ✅ New-arrivals products continue to cache correctly
+- ✅ Level 0 price extraction now works for ALL pages
+- ✅ Wishlist displays correct prices instead of $0.00
+- ✅ Multi-level fallback system fully operational
 
 ---
 

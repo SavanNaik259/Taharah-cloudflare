@@ -324,6 +324,15 @@ const FilterSortHandler = (function() {
         const productsHTML = products.map(product => generateProductHTML(product)).join('');
         productsGrid.innerHTML = productsHTML;
 
+        // CRITICAL: Populate global price cache BEFORE currency conversion
+        // This ensures Level 0 price extraction works in wishlist-manager
+        products.forEach(product => {
+            if (window.PRODUCT_PRICES_CACHE) {
+                window.PRODUCT_PRICES_CACHE.set(product.id, product.price);
+                console.log('📦 Cached price for', product.id, ':', product.price, 'INR');
+            }
+        });
+
         // Reinitialize wishlist listeners
         if (typeof window.WishlistManager !== 'undefined') {
             setTimeout(() => {
