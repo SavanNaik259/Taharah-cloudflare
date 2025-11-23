@@ -418,6 +418,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const itemTotal = item.price * item.quantity;
             total += item.total || itemTotal; // Use item.total if available, otherwise calculate
 
+            // Convert prices for display
+            let itemPriceDisplay = item.price;
+            let itemTotalDisplay = itemTotal;
+            if (typeof window.CurrencyConverter !== 'undefined' && window.CurrencyConverter.convertPrice) {
+                itemPriceDisplay = window.CurrencyConverter.convertPrice(item.price);
+                itemTotalDisplay = window.CurrencyConverter.convertPrice(itemTotal);
+            }
+
             // HTML for order summary (compact version for sidebar)
             summaryHTML += `
                 <div class="card mb-2 cart-item" data-item-id="${item.id}">
@@ -430,14 +438,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <h6 class="mb-0">${item.name}</h6>
                                 <div class="d-flex justify-content-between align-items-center mt-2">
                                     <div class="d-flex align-items-center">
-                                        <span class="me-2">${currencySymbol}${item.price.toFixed(2)}</span>
+                                        <span class="me-2 product-price" data-original-price="${item.price}">${currencySymbol}${itemPriceDisplay.toFixed(2)}</span>
                                         <div class="quantity-controls d-flex align-items-center border rounded">
                                             <button type="button" class="btn btn-sm btn-quantity-minus" data-item-id="${item.id}">-</button>
                                             <span class="px-2 quantity-value" data-item-id="${item.id}">${item.quantity}</span>
                                             <button type="button" class="btn btn-sm btn-quantity-plus" data-item-id="${item.id}">+</button>
                                         </div>
                                     </div>
-                                    <span class="fw-bold item-subtotal" data-item-id="${item.id}">${currencySymbol}${itemTotal.toFixed(2)}</span>
+                                    <span class="fw-bold item-subtotal" data-item-id="${item.id}" data-original-price="${itemTotal}">${currencySymbol}${itemTotalDisplay.toFixed(2)}</span>
                                 </div>
                             </div>
                         </div>
@@ -481,8 +489,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Update all total price displays
+        let totalDisplay = total;
+        if (typeof window.CurrencyConverter !== 'undefined' && window.CurrencyConverter.convertPrice) {
+            totalDisplay = window.CurrencyConverter.convertPrice(total);
+        }
         if (orderTotalElement) {
-            orderTotalElement.textContent = `${currencySymbol}${total.toFixed(2)}`;
+            orderTotalElement.textContent = `${currencySymbol}${totalDisplay.toFixed(2)}`;
             orderTotalElement.dataset.originalPrice = total; // Store original price for currency conversion
         }
 
@@ -573,6 +585,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Update quantity display across all steps
     function updateQuantityDisplay(itemId, item) {
+        // Get current currency symbol
+        let currencySymbol = '₹';
+        if (typeof window.CurrencyConverter !== 'undefined' && window.CurrencyConverter.getCurrencySymbol) {
+            currencySymbol = window.CurrencyConverter.getCurrencySymbol();
+        }
+        
         // Update quantity value in all steps
         const quantityElements = document.querySelectorAll(`.quantity-value[data-item-id="${itemId}"]`);
         quantityElements.forEach(element => {
@@ -591,6 +609,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const subtotalElements = document.querySelectorAll(`.item-subtotal[data-item-id="${itemId}"]`);
         subtotalElements.forEach(element => {
             element.textContent = `${currencySymbol}${itemTotalDisplay.toFixed(2)}`;
+            element.dataset.originalPrice = itemTotal; // Update data attribute for currency converter
         });
 
         // Update hidden input field (store original INR for backend)
@@ -605,6 +624,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Update order total across all steps
     function updateOrderTotal(items) {
+        // Get current currency symbol
+        let currencySymbol = '₹';
+        if (typeof window.CurrencyConverter !== 'undefined' && window.CurrencyConverter.getCurrencySymbol) {
+            currencySymbol = window.CurrencyConverter.getCurrencySymbol();
+        }
+        
         const total = calculateTotal(items);
         
         // Convert to display currency if available
