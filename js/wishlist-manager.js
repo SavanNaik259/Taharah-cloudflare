@@ -96,14 +96,20 @@ const WishlistManager = (function() {
                     currencySymbol = window.CurrencyConverter.getCurrencySymbol();
                 }
                 // Convert price from INR to selected currency
+                // CRITICAL: convertPrice only takes ONE parameter (priceInINR)
                 if (window.CurrencyConverter.convertPrice) {
-                    displayPrice = window.CurrencyConverter.convertPrice(item.price, 'INR');
-                } else if (window.CurrencyConverter.getSelectedCurrency && window.CurrencyConverter.exchangeRates) {
-                    // Fallback: manual conversion if convertPrice not available
-                    const selectedCurrency = window.CurrencyConverter.getSelectedCurrency() || 'INR';
-                    if (selectedCurrency !== 'INR' && window.CurrencyConverter.exchangeRates[selectedCurrency]) {
-                        displayPrice = item.price * window.CurrencyConverter.exchangeRates[selectedCurrency];
+                    try {
+                        // Pass only the price in INR - convertPrice handles the conversion internally
+                        displayPrice = window.CurrencyConverter.convertPrice(item.price);
+                        console.log('Wishlist: Converted price', item.price, 'to', displayPrice, 'with symbol', currencySymbol);
+                    } catch (e) {
+                        console.error('Error converting price in wishlist:', e);
+                        displayPrice = item.price; // Fall back to original
                     }
+                } 
+                // If conversion still failed, just use the original price in INR
+                if (displayPrice === item.price && window.CurrencyConverter.getCurrentCurrency && window.CurrencyConverter.getCurrentCurrency() !== 'INR') {
+                    console.warn('Wishlist: Could not convert price, using original INR price');
                 }
             }
 
@@ -873,72 +879,99 @@ const WishlistManager = (function() {
                     const productName = productNameEl ? productNameEl.textContent.trim() : 'Unknown Product';
                     console.log('Product name:', productName);
 
-                    // FIRST: Check for data attributes on the button or product container (stores original INR price)
+                    // CRITICAL FIX: Multi-Level Price Extraction with Strict Validation
+                    // ALWAYS use data attributes first - NEVER fall back to DOM text parsing
+                    // This prevents reading converted prices when currency is already changed
                     let productPrice = 0;
+                    let priceFound = false;
                     
-                    // Check button's data-product-price attribute FIRST
+                    // LEVEL 1: Check button's data-product-price attribute (FIRST PRIORITY)
                     if (this.dataset.productPrice) {
-                        productPrice = parseFloat(this.dataset.productPrice);
-                        console.log('Got price from button data attribute:', productPrice);
+                        const buttonPrice = parseFloat(this.dataset.productPrice);
+                        if (!isNaN(buttonPrice) && buttonPrice > 0) {
+                            productPrice = buttonPrice;
+                            priceFound = true;
+                            console.log('✅ Level 1: Got price from button data-product-price:', productPrice);
+                        }
                     } 
-                    // Check product container's data-product-price attribute
-                    else if (productItem.dataset.productPrice) {
-                        productPrice = parseFloat(productItem.dataset.productPrice);
-                        console.log('Got price from product-item data attribute:', productPrice);
+                    
+                    // LEVEL 2: Check product container's data-product-price attribute
+                    if (!priceFound && productItem.dataset.productPrice) {
+                        const containerPrice = parseFloat(productItem.dataset.productPrice);
+                        if (!isNaN(containerPrice) && containerPrice > 0) {
+                            productPrice = containerPrice;
+                            priceFound = true;
+                            console.log('✅ Level 2: Got price from product-item data-product-price:', productPrice);
+                        }
                     }
-                    // FALLBACK: Look for price element - handle both regular products and bridal products
-                    else {
+                    
+                    // LEVEL 3: Check price element's data attributes ONLY (NOT textContent)
+                    if (!priceFound) {
                         const priceElement = productItem.querySelector('.current-price') || 
                                            productItem.querySelector('.original-price') ||
                                            productItem.querySelector('.product-pricing .current-price');
 
-                        // Improved price extraction to handle different formats (₹32,500 or Rs. 15,550.00 or ₹15500.00)
                         if (priceElement) {
-                            // Check for data-original-price attribute (stores original INR)
+                            // Check data-original-price attribute first
                             if (priceElement.dataset.originalPrice) {
-                                productPrice = parseFloat(priceElement.dataset.originalPrice);
-                                console.log('Got price from data-original-price attribute:', productPrice);
-                            } else if (priceElement.dataset.price) {
-                                productPrice = parseFloat(priceElement.dataset.price);
-                                console.log('Got price from data-price attribute:', productPrice);
-                            } else {
-                                // Otherwise extract from text content
-                                // First remove currency symbols and spaces
-                                let priceText = priceElement.textContent.trim();
-                                console.log('Raw price text (item):', priceText);
-
-                                // Special handling for Rs. format with commas (like CHRM-07 and GSSE-11)
-                                if (priceText.includes('Rs.')) {
-                                    console.log('Detected Rs. format price for item:', productId);
-                                    // Extract the number portion and convert directly
-                                    const match = priceText.match(/Rs\.\s*([\d,]+\.\d+)/);
-                                    if (match && match[1]) {
-                                        // Remove commas and convert to float
-                                        const cleanedPrice = match[1].replace(/,/g, '');
-                                        console.log('Extracted price using regex (item):', cleanedPrice);
-                                        productPrice = parseFloat(cleanedPrice);
-                                    } else {
-                                        // Fallback to normal cleaning
-                                        priceText = priceText.replace(/[^0-9.,]/g, '').replace(/,/g, '');
-                                        console.log('Cleaned price text (item):', priceText);
-                                        productPrice = parseFloat(priceText);
-                                    }
-                                } else {
-                                    // Normal price cleaning for other formats - handle bridal product currency format
-                                    // Remove ₹ symbol and commas, keep decimals
-                                    priceText = priceText.replace(/₹|,/g, '').trim();
-                                    console.log('Cleaned price text (item):', priceText);
-                                    productPrice = parseFloat(priceText);
+                                const attrPrice = parseFloat(priceElement.dataset.originalPrice);
+                                if (!isNaN(attrPrice) && attrPrice > 0) {
+                                    productPrice = attrPrice;
+                                    priceFound = true;
+                                    console.log('✅ Level 3a: Got price from data-original-price attribute:', productPrice);
                                 }
-
-                                // Hardcoded price for known problematic products as fallback
-                                if ((productId === 'CHRM-07' || productId === 'GSSE-11') && productPrice < 1000) {
-                                    console.log('Applying hardcoded price for item:', productId);
-                                    if (productId === 'CHRM-07') productPrice = 15550.00;
-                                    if (productId === 'GSSE-11') productPrice = 17750.00;
+                            } 
+                            // Check data-price attribute
+                            if (!priceFound && priceElement.dataset.price) {
+                                const attrPrice = parseFloat(priceElement.dataset.price);
+                                if (!isNaN(attrPrice) && attrPrice > 0) {
+                                    productPrice = attrPrice;
+                                    priceFound = true;
+                                    console.log('✅ Level 3b: Got price from data-price attribute:', productPrice);
                                 }
                             }
                         }
+                    }
+                    
+                    // LEVEL 4: Hardcoded prices for KNOWN PROBLEMATIC PRODUCTS (last resort only)
+                    if (!priceFound || productPrice === 0) {
+                        console.log('⚠️ Price extraction failed for product:', productId, '- checking hardcoded prices');
+                        const hardcodedPrices = {
+                            'CHRM-07': 15550.00,
+                            'GSSE-11': 17750.00,
+                            'RBC-01': 32500,
+                            'EBS-02': 28900,
+                            'TBE-03': 24500,
+                            'CBJ-04': 19800,
+                            'PKN-01': 245000,
+                            'PKB-02': 185000,
+                            'PKE-03': 95000,
+                            'PKR-04': 75000,
+                            'PCS-05': 325000,
+                            'PNC-01': 245000,
+                            'PBG-02': 185000,
+                            'PER-03': 95000,
+                            'PRG-04': 75000,
+                            'NBMFE-12': 21300,
+                            'BMFE-09': 21300,
+                            'PDRE-10': 19980,
+                            'GSSE-11': 17750
+                        };
+                        
+                        if (hardcodedPrices[productId]) {
+                            productPrice = hardcodedPrices[productId];
+                            priceFound = true;
+                            console.log('✅ Level 4: Applied hardcoded price for', productId, ':', productPrice);
+                        }
+                    }
+                    
+                    // SAFETY CHECK: Ensure we have a valid price
+                    if (!priceFound || isNaN(productPrice) || productPrice <= 0) {
+                        console.error('❌ CRITICAL: Failed to extract valid price for product:', productId, 'Final price:', productPrice);
+                        console.error('Button dataset:', this.dataset);
+                        console.error('Product item dataset:', productItem.dataset);
+                        // Set to 0 and continue - this will be caught downstream
+                        productPrice = 0;
                     }
 
                     // Handle different image selectors: .product-image img (new arrivals), .arrival-image img (bridal cards)
