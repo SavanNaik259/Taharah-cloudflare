@@ -478,17 +478,13 @@ const NewArrivalsProductsLoader = (function() {
         }
 
         try {
-            // Show loading
-            productsGrid.innerHTML = `
-                <div class="loading-products" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; padding: 60px 20px;">
-                    <div class="loading-spinner" style="width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top: 3px solid #6D3E25; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px;"></div>
-                    <p style="margin: 0; font-size: 16px; font-weight: 500; color: #666;">Loading Products...</p>
-                </div>
-            `;
-
             const products = await loadSubcategoryProducts(category);
 
             if (products.length > 0) {
+                // Hide loader before showing products
+                const loaderPage = document.getElementById('newArrivalsPageLoader');
+                if (loaderPage) loaderPage.style.display = 'none';
+                
                 const productsHTML = products.map(product => generateProductHTML(product)).join('');
                 productsGrid.innerHTML = productsHTML;
 
@@ -687,22 +683,8 @@ const NewArrivalsProductsLoader = (function() {
                 stack: error.stack
             });
 
-            // Show detailed error message
-            const loadingElements = newArrivalsGrid.querySelectorAll('.loading-products');
-            loadingElements.forEach(el => el.remove());
-
-            const existingErrorMsg = newArrivalsGrid.querySelector('.loading-error');
-            if (!existingErrorMsg) {
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'loading-error';
-                errorDiv.style.cssText = 'color: red; padding: 10px; margin: 10px; border: 1px solid red; background: #ffe6e6;';
-                errorDiv.innerHTML = `
-                    <strong>Error loading new arrivals products:</strong><br>
-                    ${error.message}<br>
-                    <small>Check console for details. Showing default collection.</small>
-                `;
-                newArrivalsGrid.insertBefore(errorDiv, newArrivalsGrid.firstChild);
-            }
+            // Log error for debugging
+            console.log('Error occurred, loader remains visible for user');
         }
     }
 
