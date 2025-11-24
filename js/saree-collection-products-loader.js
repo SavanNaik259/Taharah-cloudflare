@@ -445,6 +445,14 @@ const JewelrySubcategoriesLoader = (function() {
 
             if (products.length > 0) {
                 console.log('Jewelry products loaded, displaying', products.length, 'random items');
+                
+                // Hide loader before replacing innerHTML
+                const loader = document.getElementById('jewelryCollectionLoader');
+                if (loader) {
+                    console.log('🎬 Hiding jewelry loader');
+                    loader.style.display = 'none';
+                }
+                
                 const productsHTML = products.map(product => generateProductHTML(product)).join('');
                 jewelryGrid.innerHTML = productsHTML;
                 
