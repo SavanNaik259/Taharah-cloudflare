@@ -442,6 +442,12 @@ const BridalProductsLoader = (function() {
                 const firebaseProductsHTML = products.map(product => generateProductHTML(product)).join('');
                 featuredCollectionContainer.innerHTML = firebaseProductsHTML;
                 
+                // Hide loader after products are loaded
+                const loader = document.getElementById('featuredCollectionLoader');
+                if (loader) {
+                    loader.classList.remove('show');
+                }
+                
                 // CRITICAL: Populate global price cache BEFORE currency conversion
                 // This ensures Level 0 price extraction works in wishlist-manager
                 products.forEach(product => {

@@ -644,6 +644,12 @@ const NewArrivalsProductsLoader = (function() {
                 console.log('Firebase products found, showing only Firebase products');
                 const firebaseProductsHTML = products.map(product => generateProductHTML(product)).join('');
                 newArrivalsGrid.innerHTML = firebaseProductsHTML;
+                
+                // Hide loader after products are loaded
+                const loader = document.getElementById('newArrivalsLoader');
+                if (loader) {
+                    loader.classList.remove('show');
+                }
             } else {
                 // No Firebase products found - show message
                 console.log('No products found in Firebase');

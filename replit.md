@@ -8,6 +8,54 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Nov 24, 2025)
 
+### FEATURE: Product Loading Spinners - New Arrivals & Featured Collection (v3.7.0 ✅ COMPLETE)
+
+**User Request**: "On home page when the new arrivals, all collection and featured collection section products are loading then the loader should show"
+
+**Solution Implemented**:
+Added professional loading spinners to display while products are loading from Firebase Storage, improving user experience by showing clear visual feedback.
+
+**Technical Changes**:
+1. **Created `css/product-loader.css`**:
+   - Elegant spinning loader with gold accent color (#b5a681)
+   - Smooth 1s rotation animation
+   - Responsive positioning and sizing
+   - "Loading..." message below spinner
+
+2. **Modified `index.html`**:
+   - Added loader CSS link to `<head>`
+   - Added loader elements to New Arrivals section:
+     - ID: `#newArrivalsLoader` with class `.product-loader.show`
+   - Added loader elements to Featured Collection section:
+     - ID: `#featuredCollectionLoader` with class `.product-loader.show`
+   - Added container IDs for easier JavaScript targeting: `#newArrivalsProductContainer`, `#featuredCollectionProductContainer`
+
+3. **Modified `js/new-arrivals-products-loader.js`**:
+   - Added loader hiding logic (lines 651-655)
+   - Loader automatically hides when products successfully load
+   - Uses: `document.getElementById('newArrivalsLoader').classList.remove('show')`
+
+4. **Modified `js/featured-collection-products-loader.js`**:
+   - Added loader hiding logic (lines 448-452)
+   - Loader automatically hides when products successfully load
+   - Uses: `document.getElementById('featuredCollectionLoader').classList.remove('show')`
+
+**User Experience**:
+- ✅ Loaders show with elegant spinning animation while products load
+- ✅ Automatic hide once 6 New Arrivals products loaded
+- ✅ Automatic hide once 6 Featured Collection products loaded
+- ✅ Professional gold accent color matching site design (#b5a681)
+- ✅ Clear "Loading..." text message
+- ✅ Responsive positioning centered in product container
+
+**Files Modified**:
+- `index.html` - Added loader HTML elements
+- `css/product-loader.css` - NEW - Loader styling and animations
+- `js/new-arrivals-products-loader.js` - Added loader hiding
+- `js/featured-collection-products-loader.js` - Added loader hiding
+
+---
+
 ### CRITICAL FIX: First-Visit Welcome Banner - Image & Text Responsive Layout (v3.6.6 ✅ COMPLETE)
 
 **THE REAL ROOT CAUSE - After Comprehensive Line-by-Line Code Analysis**

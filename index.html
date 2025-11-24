@@ -199,6 +199,7 @@ background-color: #000 !important;
     <link rel="stylesheet" href="css/hero-slider.css?v=1.0.0">
     <link rel="stylesheet" href="css/about.css?v=1.0.0">
     <link rel="stylesheet" href="css/featured-collection-section.css?v=1.0.0">
+    <link rel="stylesheet" href="css/product-loader.css?v=1.0.0">
     <link rel="stylesheet" href="css/customer-reviews.css?v=1.0.0">
     <link rel="stylesheet" href="css/shop-by-category.css?v=1.0.0">
     <link rel="stylesheet" href="css/out-of-stock-styles.css?v=1.0.0">
@@ -561,7 +562,12 @@ background-color: #000 !important;
 
       <!-- New Arrivals Section -->
       <section class="new-arrivals-edit full-width-section" style="margin-bottom: 5px;">
-          <div class="product-scroll-container">
+          <div class="product-scroll-container" id="newArrivalsProductContainer">
+              <!-- Loader -->
+              <div class="product-loader show" id="newArrivalsLoader">
+                  <div class="product-loader-spinner"></div>
+                  <div class="product-loader-text">Loading new arrivals...</div>
+              </div>
               <!-- Products will be loaded here dynamically -->
           </div>
          <!-- <div class="view-all-container">
@@ -1453,6 +1459,11 @@ background-color: #000 !important;
 
 
             <div class="product-scroll-container" id="featuredCollectionProductContainer">
+                <!-- Loader -->
+                <div class="product-loader show" id="featuredCollectionLoader">
+                    <div class="product-loader-spinner"></div>
+                    <div class="product-loader-text">Loading featured collection...</div>
+                </div>
                 <!-- Products will be loaded here dynamically -->
             </div>
 
