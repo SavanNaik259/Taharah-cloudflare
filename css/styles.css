@@ -262,40 +262,14 @@ a {
 @media (max-width: 768px) {
     .promo-banner {
         font-size: 12px;
-        padding: 8px 0!important;
+        padding: 10px 0!important;
     }
     
     .promo-banner .banner-text {
-        font-size: 13px;
+        font-size: 14px;
         animation: scroll-left 15s linear infinite;
-        letter-spacing: 1px;
-        word-spacing: 2px;
-    }
-}
-
-/* Extra small devices */
-@media (max-width: 480px) {
-    .promo-banner {
-        padding: 6px 0!important;
-    }
-    
-    .promo-banner .banner-text {
-        font-size: 11px;
-        letter-spacing: 0.8px;
-        word-spacing: 1.5px;
-    }
-}
-
-/* Landscape mode on small devices */
-@media (max-height: 500px) and (max-width: 768px) {
-    .promo-banner {
-        padding: 4px 0!important;
-    }
-    
-    .promo-banner .banner-text {
-        font-size: 10px;
-        letter-spacing: 0.5px;
-        word-spacing: 1px;
+        letter-spacing: 1.2px;
+        word-spacing: 3px;
     }
 }
 
