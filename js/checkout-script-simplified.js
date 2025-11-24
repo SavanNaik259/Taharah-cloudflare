@@ -121,9 +121,29 @@ document.addEventListener('DOMContentLoaded', function() {
                                 console.error('Error loading cart from Firebase:', error);
                                 return { success: false, items: [] };
                             }
+                        },
+                        saveCartToFirebase: async function(items) {
+                            try {
+                                console.log('Saving cart to Firebase...');
+                                const result = await FirebaseCartManager.saveItems(items);
+                                return result;
+                            } catch (error) {
+                                console.error('Error saving cart to Firebase:', error);
+                                return { success: false, error: error.message };
+                            }
+                        },
+                        clearFirebaseCart: async function() {
+                            try {
+                                console.log('Clearing Firebase cart...');
+                                const result = await FirebaseCartManager.clearItems();
+                                return result;
+                            } catch (error) {
+                                console.error('Error clearing Firebase cart:', error);
+                                return { success: false, error: error.message };
+                            }
                         }
                     };
-                    console.log('Firebase cart module initialized');
+                    console.log('Firebase cart module initialized with all methods');
                 }
 
                 // Load Firebase Orders Module directly
