@@ -23,6 +23,7 @@
     border-radius: 12px;
     max-width: 600px;
     width: 90%;
+    height: 85vh;
     max-height: 85vh;
     overflow: hidden;
     position: relative;
@@ -130,6 +131,7 @@
     .first-visit-modal-content {
         max-width: 95%;
         width: 95%;
+        height: 75vh;
         max-height: 75vh;
     }
 
@@ -163,6 +165,7 @@
 /* Extra small devices */
 @media (max-width: 480px) {
     .first-visit-modal-content {
+        height: 65vh;
         max-height: 65vh;
     }
 
@@ -193,6 +196,7 @@
 /* Landscape mode on small devices */
 @media (max-height: 600px) and (max-width: 768px) {
     .first-visit-modal-content {
+        height: 55vh;
         max-height: 55vh;
     }
 

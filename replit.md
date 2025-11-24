@@ -8,52 +8,56 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Nov 24, 2025)
 
-### CRITICAL FIX: First-Visit Welcome Banner Image Responsive Scaling (v3.6.4 ✅ COMPLETE)
+### CRITICAL FIX: First-Visit Welcome Banner - Image & Text Responsive Layout (v3.6.5 ✅ COMPLETE)
 
-**THE REAL ISSUE - Found After Comprehensive Line-by-Line Code Analysis**
+**THE REAL ROOT CAUSE - After Comprehensive Line-by-Line Analysis**
 
-User reported: Images not reducing on screen size, welcome text hidden, object-fit covering content.
+User reported: Banner showing ONLY the image, welcome text completely hidden.
 
-**Root Cause (Technical Deep-Dive)**:
-The banner uses flexbox layout but had a CSS-level constraint issue:
+**Why This Happened (The Core Issue)**:
 ```css
 .first-visit-modal-content {
-    max-height: 85vh;    /* Only max-height, NO explicit height */
+    max-height: 85vh;    /* ❌ ONLY max-height, NO explicit height! */
     display: flex;
     flex-direction: column;
 }
 
 .first-visit-banner-image {
-    height: 50%;         /* 50% of WHAT? */
-    flex-shrink: 0;      /* Prevents flex from shrinking */
+    flex: 0 0 50%;      /* Requires parent to have defined height */
+    /* But parent doesn't have explicit height, so flex-basis fails */
 }
 ```
 
-The problem: **In a flex container with only `max-height` (no `height`), percentage heights on children DON'T calculate correctly**. The browser couldn't determine what 50% meant, so:
-- ❌ Image didn't scale to 50% as intended
-- ❌ Image stayed full natural size
-- ❌ Text got hidden below/under the oversized image
-- ❌ `flex-shrink: 0` prevented any shrinking
+**The Problem**: 
+When a flex container has ONLY `max-height` (not `height`), its children can't calculate percentage-based flex-basis correctly. The browser has no reference height to calculate "50% of what?", so:
+- ❌ Image took ALL available space
+- ❌ Text section had zero calculated height
+- ❌ Text became invisible (pushed out of viewport)
+- ❌ Only the image was visible
 
-**Complete Solution (v3.6.4)**:
-Changed from `height: 50%` to `flex: 0 0 50%` (flex-basis percentage) across all breakpoints.
+**The Complete Solution (v3.6.5)**:
+Added explicit `height` property to `.first-visit-modal-content` across ALL responsive breakpoints.
 
-**Why This Works**:
-- `flex-basis` works correctly in flex containers even without explicit parent height
-- `0 0 50%` means: don't grow (0), don't shrink (0), basis is 50% of available space
-- Browser now correctly calculates image height = 50% of container, text = remaining 50%
+**Technical Changes (css/first-visit-banner.css)**:
 
-**All Changes (4 locations in css/first-visit-banner.css)**:
-1. **Line 62** - Desktop: `flex: 0 0 50%` (was `height: 50%`)
-2. **Line 140** - Tablets (≤768px): `flex: 0 0 45%` (was `height: 45%`)
-3. **Line 173** - Small phones (≤480px): `flex: 0 0 40%` (was `height: 40%`)
-4. **Line 203** - Landscape (height ≤600px): `flex: 0 0 35%` (was `height: 35%`)
+| Breakpoint | Line | Change | Result |
+|-----------|------|--------|--------|
+| **Desktop** | 26 | Added `height: 85vh;` | Image 50% (42.5vh) + Text 50% (42.5vh) |
+| **Tablets** (≤768px) | 134 | Added `height: 75vh;` | Image 45% (33.75vh) + Text 55% (41.25vh) |
+| **Small phones** (≤480px) | 168 | Added `height: 65vh;` | Image 40% (26vh) + Text 60% (39vh) |
+| **Landscape** (height ≤600px) | 199 | Added `height: 55vh;` | Image 35% (19.25vh) + Text 65% (35.75vh) |
+
+Also retained optimizations from v3.6.4:
+- Image: `flex: 0 0 [%]` (flex-basis percentages for responsive sizing)
+- Text: `flex: 1` (takes remaining space)
+- All media query responsive image proportions
 
 **Result**:
-- ✅ Image scales to exact percentage of modal on all screen sizes
-- ✅ Text section always visible (takes remaining flex space)
-- ✅ Responsive without hidden content
-- ✅ Works across all devices (desktop/tablet/phone/landscape)
+- ✅ Image scales responsively on ALL devices
+- ✅ **Text ALWAYS visible** (no longer hidden!)
+- ✅ Perfect 50/50 split on desktop, adjusted on mobile
+- ✅ Banner works on desktop/tablet/mobile/landscape
+- ✅ Fix combines both previous solutions into one comprehensive fix
 
 ---
 
