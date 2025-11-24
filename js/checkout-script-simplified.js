@@ -538,23 +538,23 @@ document.addEventListener('DOMContentLoaded', function() {
         // Re-get buttons after cloning and add fresh event listeners
         const newPlusButtons = container.querySelectorAll('.btn-quantity-plus');
         newPlusButtons.forEach(button => {
-            button.addEventListener('click', function() {
+            button.addEventListener('click', async function() {
                 const itemId = this.getAttribute('data-item-id');
-                incrementItemQuantity(itemId, window.checkoutCartItems);
+                await incrementItemQuantity(itemId, window.checkoutCartItems);
             });
         });
 
         const newMinusButtons = container.querySelectorAll('.btn-quantity-minus');
         newMinusButtons.forEach(button => {
-            button.addEventListener('click', function() {
+            button.addEventListener('click', async function() {
                 const itemId = this.getAttribute('data-item-id');
-                decrementItemQuantity(itemId, window.checkoutCartItems);
+                await decrementItemQuantity(itemId, window.checkoutCartItems);
             });
         });
     }
 
     // Increment item quantity
-    function incrementItemQuantity(itemId, items) {
+    async function incrementItemQuantity(itemId, items) {
         // Update the items array
         const itemIndex = items.findIndex(item => item.id === itemId);
         if (itemIndex !== -1) {
@@ -565,24 +565,16 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update the display
             updateQuantityDisplay(itemId, items[itemIndex]);
 
-            // Update the localStorage - CRITICAL: Must persist before user navigates away
-            updateLocalStorage(items);
+            // Update BOTH localStorage and Firebase - MUST WAIT FOR FIREBASE
+            await syncCartToStorage(items);
             
-            // Verify save was successful
-            const savedCart = localStorage.getItem(STORAGE_KEY);
-            if (savedCart) {
-                const savedItems = JSON.parse(savedCart);
-                const savedItem = savedItems.find(i => i.id === itemId);
-                console.log('✅ Cart saved to localStorage. Item quantity in storage:', savedItem?.quantity);
-            }
-
             // Update order total
             updateOrderTotal(items);
         }
     }
 
     // Decrement item quantity
-    function decrementItemQuantity(itemId, items) {
+    async function decrementItemQuantity(itemId, items) {
         // Update the items array
         const itemIndex = items.findIndex(item => item.id === itemId);
         if (itemIndex !== -1 && items[itemIndex].quantity > 1) {
@@ -593,19 +585,47 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update the display
             updateQuantityDisplay(itemId, items[itemIndex]);
 
-            // Update the localStorage - CRITICAL: Must persist before user navigates away
-            updateLocalStorage(items);
+            // Update BOTH localStorage and Firebase - MUST WAIT FOR FIREBASE
+            await syncCartToStorage(items);
             
-            // Verify save was successful
-            const savedCart = localStorage.getItem(STORAGE_KEY);
-            if (savedCart) {
-                const savedItems = JSON.parse(savedCart);
-                const savedItem = savedItems.find(i => i.id === itemId);
-                console.log('✅ Cart saved to localStorage. Item quantity in storage:', savedItem?.quantity);
-            }
-
             // Update order total
             updateOrderTotal(items);
+        }
+    }
+
+    // Sync cart to both localStorage and Firebase (AWAITABLE)
+    // This ensures quantity changes are persisted before user navigates away
+    async function syncCartToStorage(items) {
+        try {
+            // Always save to localStorage first (instant)
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+            console.log('💾 Quantity change saved to localStorage');
+
+            // If user is logged in, AWAIT Firebase update
+            if (firebaseCartModule && firebase.auth && firebase.auth().currentUser) {
+                console.log('🔄 Syncing to Firebase...');
+                try {
+                    const result = await Promise.race([
+                        firebaseCartModule.saveCartToFirebase(items),
+                        new Promise((_, reject) => 
+                            setTimeout(() => reject(new Error('Firebase timeout')), 5000)
+                        )
+                    ]);
+                    
+                    if (result && result.success) {
+                        console.log('☁️ ✅ Quantity change confirmed in Firebase');
+                    } else {
+                        console.warn('⚠️ Firebase save did not confirm success');
+                    }
+                } catch (err) {
+                    console.error('❌ Firebase save failed:', err.message, '- but localStorage persisted');
+                }
+            } else {
+                console.log('📱 Guest user - quantity saved to localStorage only');
+            }
+        } catch (error) {
+            console.error('❌ Error syncing cart:', error);
+            throw error;
         }
     }
 
