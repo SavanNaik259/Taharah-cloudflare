@@ -27,7 +27,7 @@ Changed image sizing from `flex: 0 0 [%]` to explicit `height: [%]` with `flex-s
 | Component | Property | Desktop | Tablet | Phone | Landscape |
 |-----------|----------|---------|--------|-------|-----------|
 | **Container** | `height` | 85vh | 75vh | 65vh | 55vh |
-| **Image** | `height` | 50% | 45% | 40% | 35% |
+| **Image** | `height` | 65% | 60% | 55% | 50% |
 | **Image** | `flex-shrink` | 0 | 0 | 0 | 0 |
 | **Text** | `flex` | 1 | 1 | 1 | 1 |
 
@@ -56,10 +56,10 @@ Changed image sizing from `flex: 0 0 [%]` to explicit `height: [%]` with `flex-s
 ```
 
 **Responsive Breakpoints Applied**:
-- **Desktop**: Container 85vh → Image 50% (42.5vh) + Text 50% (42.5vh) ✅
-- **Tablets** (≤768px): Container 75vh → Image 45% (33.75vh) + Text 55% (41.25vh) ✅
-- **Small phones** (≤480px): Container 65vh → Image 40% (26vh) + Text 60% (39vh) ✅
-- **Landscape** (height ≤600px): Container 55vh → Image 35% (19.25vh) + Text 65% (35.75vh) ✅
+- **Desktop**: Container 85vh → Image 65% (55.25vh) + Text 35% (29.75vh) ✅
+- **Tablets** (≤768px): Container 75vh → Image 60% (45vh) + Text 40% (30vh) ✅
+- **Small phones** (≤480px): Container 65vh → Image 55% (35.75vh) + Text 45% (29.25vh) ✅
+- **Landscape** (height ≤600px): Container 55vh → Image 50% (27.5vh) + Text 50% (27.5vh) ✅
 
 **Result - VERIFIED WORKING**:
 - ✅ Image displays at exact responsive percentage on all devices
