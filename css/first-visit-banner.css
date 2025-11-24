@@ -60,9 +60,10 @@
 
 .first-visit-banner-image {
     width: 100%;
-    flex: 0 0 50%;
+    height: 50%;
     object-fit: cover;
     display: block;
+    flex-shrink: 0;
 }
 
 .first-visit-banner-text {
@@ -136,7 +137,8 @@
     }
 
     .first-visit-banner-image {
-        flex: 0 0 45%;
+        height: 45%;
+        flex-shrink: 0;
     }
 
     .first-visit-banner-text {
@@ -170,7 +172,8 @@
     }
 
     .first-visit-banner-image {
-        flex: 0 0 40%;
+        height: 40%;
+        flex-shrink: 0;
     }
 
     .first-visit-banner-text {
@@ -201,7 +204,8 @@
     }
 
     .first-visit-banner-image {
-        flex: 0 0 35%;
+        height: 35%;
+        flex-shrink: 0;
     }
 
     .first-visit-banner-text {
