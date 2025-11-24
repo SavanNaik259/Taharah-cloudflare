@@ -448,6 +448,12 @@ const JewelrySubcategoriesLoader = (function() {
                 const productsHTML = products.map(product => generateProductHTML(product)).join('');
                 jewelryGrid.innerHTML = productsHTML;
                 
+                // Hide loader after products are loaded
+                const loader = document.getElementById('jewelryCollectionLoader');
+                if (loader) {
+                    loader.classList.remove('show');
+                }
+                
                 // CRITICAL: Populate global price cache BEFORE currency conversion
                 // This ensures Level 0 price extraction works in wishlist-manager
                 products.forEach(product => {
