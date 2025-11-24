@@ -462,8 +462,8 @@ a {
 .hero-slider {
     position: relative;
     width: 100%;
-    height: 120vh; /* Increased from 100vh to 120vh */
-    max-height: 1000px; /* Increased from 800px to 1000px */
+    height: 100vh;
+    max-height: none;
     overflow: hidden;
 }
 
@@ -548,6 +548,25 @@ a {
 .slider-dot.active {
     background: #fff;
     transform: scale(1.2);
+}
+
+/* Responsive Hero Slider Heights */
+@media (max-width: 768px) {
+    .hero-slider {
+        height: 70vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-slider {
+        height: 50vh;
+    }
+}
+
+@media (max-height: 600px) and (max-width: 768px) {
+    .hero-slider {
+        height: 40vh;
+    }
 }
 
 /* Category Section */
