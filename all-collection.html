@@ -37,6 +37,7 @@
     <link rel="stylesheet" href="css/currency-converter.css?v=1.0.0">
     <link rel="stylesheet" href="css/language-selector.css?v=1.0.0">
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-straight/css/uicons-regular-straight.css'>
+    <link rel="stylesheet" href="css/product-loader.css?v=1.0.0">
     
     <!-- WhatsApp Tooltip Script -->
     <script src="js/whatsapp-tooltip.js"></script>
@@ -243,6 +244,11 @@
 
         <div class="shop-products">
             <div class="products-grid" id="all-collection-products-grid">
+                <!-- Loader -->
+                <div class="product-loader show" id="allCollectionPageLoader" style="grid-column: 1 / -1;">
+                    <div class="product-loader-spinner"></div>
+                    <div class="product-loader-text">Loading all collection...</div>
+                </div>
                 <!-- Products will be loaded here dynamically -->
             </div>
         </div>

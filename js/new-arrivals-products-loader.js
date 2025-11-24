@@ -424,6 +424,10 @@ const NewArrivalsProductsLoader = (function() {
         }
 
         if (products.length > 0) {
+            // Hide loader before showing products
+            const loaderPage = document.getElementById('newArrivalsPageLoader');
+            if (loaderPage) loaderPage.style.display = 'none';
+            
             const productsHTML = products.map(product => generateProductHTML(product)).join('');
             productsGrid.innerHTML = productsHTML;
 

@@ -205,6 +205,10 @@ const SubcategoryProductsLoader = (function() {
             const products = await loadSubcategoryProducts(category);
 
             if (products.length > 0) {
+                // Hide loader before showing products
+                const loaderPage = document.getElementById('allCollectionPageLoader');
+                if (loaderPage) loaderPage.style.display = 'none';
+                
                 const productsHTML = products.map(product => generateProductHTML(product)).join('');
                 productsGrid.innerHTML = productsHTML;
 
