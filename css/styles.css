@@ -212,7 +212,8 @@ a {
 .promo-banner {
     background-color: #b3a681!important;
     color: #333;
-    padding: 12px 0!important;
+    padding: 0!important;
+    min-height: 8vh;
     text-align: center;
     position: relative;
     display: flex;
@@ -262,7 +263,7 @@ a {
 @media (max-width: 768px) {
     .promo-banner {
         font-size: 12px;
-        padding: 8px 0!important;
+        min-height: 6vh;
     }
     
     .promo-banner .banner-text {
@@ -276,7 +277,7 @@ a {
 /* Extra small devices */
 @media (max-width: 480px) {
     .promo-banner {
-        padding: 6px 0!important;
+        min-height: 5vh;
     }
     
     .promo-banner .banner-text {
@@ -289,7 +290,7 @@ a {
 /* Landscape mode on small devices */
 @media (max-height: 500px) and (max-width: 768px) {
     .promo-banner {
-        padding: 4px 0!important;
+        min-height: 4vh;
     }
     
     .promo-banner .banner-text {
