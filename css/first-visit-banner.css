@@ -59,10 +59,9 @@
 
 .first-visit-banner-image {
     width: 100%;
-    height: 50%;
+    flex: 0 0 50%;
     object-fit: cover;
     display: block;
-    flex-shrink: 0;
 }
 
 .first-visit-banner-text {
@@ -135,7 +134,7 @@
     }
 
     .first-visit-banner-image {
-        height: 45%;
+        flex: 0 0 45%;
     }
 
     .first-visit-banner-text {
@@ -168,7 +167,7 @@
     }
 
     .first-visit-banner-image {
-        height: 40%;
+        flex: 0 0 40%;
     }
 
     .first-visit-banner-text {
@@ -198,7 +197,7 @@
     }
 
     .first-visit-banner-image {
-        height: 35%;
+        flex: 0 0 35%;
     }
 
     .first-visit-banner-text {

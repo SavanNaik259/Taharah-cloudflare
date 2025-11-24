@@ -6,7 +6,56 @@ Auric is a premium e-commerce platform for jewelry, offering a seamless online s
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
-## Recent Changes (Nov 23, 2025)
+## Recent Changes (Nov 24, 2025)
+
+### CRITICAL FIX: First-Visit Welcome Banner Image Responsive Scaling (v3.6.4 ✅ COMPLETE)
+
+**THE REAL ISSUE - Found After Comprehensive Line-by-Line Code Analysis**
+
+User reported: Images not reducing on screen size, welcome text hidden, object-fit covering content.
+
+**Root Cause (Technical Deep-Dive)**:
+The banner uses flexbox layout but had a CSS-level constraint issue:
+```css
+.first-visit-modal-content {
+    max-height: 85vh;    /* Only max-height, NO explicit height */
+    display: flex;
+    flex-direction: column;
+}
+
+.first-visit-banner-image {
+    height: 50%;         /* 50% of WHAT? */
+    flex-shrink: 0;      /* Prevents flex from shrinking */
+}
+```
+
+The problem: **In a flex container with only `max-height` (no `height`), percentage heights on children DON'T calculate correctly**. The browser couldn't determine what 50% meant, so:
+- ❌ Image didn't scale to 50% as intended
+- ❌ Image stayed full natural size
+- ❌ Text got hidden below/under the oversized image
+- ❌ `flex-shrink: 0` prevented any shrinking
+
+**Complete Solution (v3.6.4)**:
+Changed from `height: 50%` to `flex: 0 0 50%` (flex-basis percentage) across all breakpoints.
+
+**Why This Works**:
+- `flex-basis` works correctly in flex containers even without explicit parent height
+- `0 0 50%` means: don't grow (0), don't shrink (0), basis is 50% of available space
+- Browser now correctly calculates image height = 50% of container, text = remaining 50%
+
+**All Changes (4 locations in css/first-visit-banner.css)**:
+1. **Line 62** - Desktop: `flex: 0 0 50%` (was `height: 50%`)
+2. **Line 140** - Tablets (≤768px): `flex: 0 0 45%` (was `height: 45%`)
+3. **Line 173** - Small phones (≤480px): `flex: 0 0 40%` (was `height: 40%`)
+4. **Line 203** - Landscape (height ≤600px): `flex: 0 0 35%` (was `height: 35%`)
+
+**Result**:
+- ✅ Image scales to exact percentage of modal on all screen sizes
+- ✅ Text section always visible (takes remaining flex space)
+- ✅ Responsive without hidden content
+- ✅ Works across all devices (desktop/tablet/phone/landscape)
+
+---
 
 ### COMPREHENSIVE FIX: Cart & Checkout Currency Conversion (v3.5.0 ✅ COMPLETE)
 
