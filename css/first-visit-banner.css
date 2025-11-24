@@ -28,6 +28,8 @@
     position: relative;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     animation: slideUp 0.4s ease;
+    display: flex;
+    flex-direction: column;
 }
 
 .first-visit-modal-close {
@@ -57,13 +59,20 @@
 
 .first-visit-banner-image {
     width: 100%;
-    height: auto;
+    height: 50%;
+    object-fit: cover;
     display: block;
+    flex-shrink: 0;
 }
 
 .first-visit-banner-text {
-    padding: 25px;
+    padding: 20px;
     text-align: center;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow-y: auto;
 }
 
 .first-visit-banner-text h2 {
@@ -125,12 +134,22 @@
         max-height: 75vh;
     }
 
+    .first-visit-banner-image {
+        height: 45%;
+    }
+
+    .first-visit-banner-text {
+        padding: 18px;
+    }
+
     .first-visit-banner-text h2 {
         font-size: 22px;
+        margin-bottom: 10px;
     }
 
     .first-visit-banner-text p {
         font-size: 14px;
+        margin-bottom: 15px;
     }
 
     .first-visit-modal-close {
@@ -148,11 +167,26 @@
         max-height: 65vh;
     }
 
+    .first-visit-banner-image {
+        height: 40%;
+    }
+
+    .first-visit-banner-text {
+        padding: 15px;
+    }
+
     .first-visit-banner-text h2 {
-        font-size: 20px;
+        font-size: 18px;
+        margin-bottom: 8px;
     }
 
     .first-visit-banner-text p {
+        font-size: 12px;
+        margin-bottom: 12px;
+    }
+
+    .first-visit-cta-button {
+        padding: 10px 20px;
         font-size: 13px;
     }
 }
@@ -163,18 +197,26 @@
         max-height: 55vh;
     }
 
+    .first-visit-banner-image {
+        height: 35%;
+    }
+
+    .first-visit-banner-text {
+        padding: 12px;
+    }
+
     .first-visit-banner-text h2 {
-        font-size: 18px;
-        margin-bottom: 8px;
+        font-size: 16px;
+        margin-bottom: 6px;
     }
 
     .first-visit-banner-text p {
-        font-size: 12px;
-        margin-bottom: 15px;
+        font-size: 11px;
+        margin-bottom: 10px;
     }
 
     .first-visit-cta-button {
-        padding: 10px 20px;
-        font-size: 13px;
+        padding: 8px 16px;
+        font-size: 12px;
     }
 }
