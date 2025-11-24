@@ -194,14 +194,6 @@ const SubcategoryProductsLoader = (function() {
         }
 
         try {
-            // Show loading
-            productsGrid.innerHTML = `
-                <div class="loading-products" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; padding: 60px 20px;">
-                    <div class="loading-spinner" style="width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top: 3px solid #6D3E25; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px;"></div>
-                    <p style="margin: 0; font-size: 16px; font-weight: 500; color: #666;">Loading Products...</p>
-                </div>
-            `;
-
             const products = await loadSubcategoryProducts(category);
 
             if (products.length > 0) {
