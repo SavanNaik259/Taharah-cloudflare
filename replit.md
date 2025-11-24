@@ -8,50 +8,6 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Nov 23, 2025)
 
-### CRITICAL FIX: Firebase Quantity Persistence & Email Currency (v3.6.2 ✅ COMPLETE)
-
-**THREE ISSUES RESOLVED - Checkout now fully stable for all users**
-
-**Issue 1: Firebase Cart Not Updating for Logged-In Users**
-- **Problem**: When logged-in users changed quantities on checkout, Firebase cart was NOT being updated
-- **Root Cause**: Firebase save was async/fire-and-forget, not awaited properly
-- **Solution**: Created new `updateLocalStorageAndFirebase()` function
-  - Properly awaits Firebase save with 5-second timeout
-  - Logs confirmation when Firebase update succeeds
-  - Falls back gracefully if Firebase save fails
-- **Files Modified**: `js/checkout-script-simplified.js` (lines 559-775)
-- **Result**: Logged-in users' quantity changes now persist to Firebase ✅
-
-**Issue 2: Email Prices Don't Match Checkout Display**
-- **Problem**: Email showed $420/item but checkout showed $784/item (different exchange rates)
-- **Root Cause**: Email template used old hardcoded rates, frontend uses live API rates
-- **Solution**: Modified email templates to use pre-converted prices
-  - Uses `priceDisplay` and `totalDisplay` from frontend (calculated with live rates)
-  - Falls back to backend conversion only if display prices missing
-- **Files Modified**: `netlify/functions/utils/email-templates.js`
-  - Customer template (lines 60-85, 176-184)
-  - Owner template (lines 235-260, 380-389)
-- **Result**: Email now matches checkout prices exactly ✅
-
-**Issue 3: Quantity Persistence For Guest Users**
-- **Already Fixed in v3.6.0**: Enhanced with verification logging
-- **Enhanced in v3.6.2**: Added console output showing item quantities loaded from storage
-- **Result**: Both guest and logged-in users' quantities persist correctly ✅
-
-**Console Logging for Debugging**:
-- Quantity changes: `📦 Quantity incremented/decremented`
-- localStorage saves: `💾 Cart persisted to localStorage`
-- Verification: `✅ Cart saved to localStorage. Item quantity in storage: X`
-- Firebase updates: `☁️ ✅ Cart CONFIRMED updated in Firebase from checkout page`
-- Cart loads: `📥 Direct localStorage returned X items` with item-by-item details
-
-**Data Flow (v3.6.2 - VERIFIED)**:
-1. Guest User: localStorage only → persists ✅
-2. Logged-In User: localStorage FIRST, then Firebase AWAIT → both persist ✅
-3. Email: Uses pre-converted prices → matches checkout ✅
-
----
-
 ### COMPREHENSIVE FIX: Cart & Checkout Currency Conversion (v3.5.0 ✅ COMPLETE)
 
 **BOTH BUGS FIXED - Root Cause: Missing Currency Conversion in Display**

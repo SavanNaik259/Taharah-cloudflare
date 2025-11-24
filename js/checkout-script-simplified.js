@@ -565,8 +565,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update the display
             updateQuantityDisplay(itemId, items[itemIndex]);
 
-            // Update BOTH localStorage and Firebase
-            updateLocalStorageAndFirebase(items);
+            // Update the localStorage - CRITICAL: Must persist before user navigates away
+            updateLocalStorage(items);
             
             // Verify save was successful
             const savedCart = localStorage.getItem(STORAGE_KEY);
@@ -593,8 +593,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update the display
             updateQuantityDisplay(itemId, items[itemIndex]);
 
-            // Update BOTH localStorage and Firebase
-            updateLocalStorageAndFirebase(items);
+            // Update the localStorage - CRITICAL: Must persist before user navigates away
+            updateLocalStorage(items);
             
             // Verify save was successful
             const savedCart = localStorage.getItem(STORAGE_KEY);
@@ -696,7 +696,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // If Firebase cart module is loaded and user is logged in, also save to Firebase
-            // ASYNC OPERATION - does not block
             if (firebaseCartModule && firebase.auth && firebase.auth().currentUser) {
                 firebaseCartModule.saveCartToFirebase(items)
                     .then(result => {
@@ -712,54 +711,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error('❌ Error saving cart to storage:', error);
-
-            // Always try the most basic fallback method on error
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-                console.log('💾 Cart saved via fallback direct localStorage');
-            } catch (fallbackError) {
-                console.error('🔴 CRITICAL ERROR: Failed to save cart with fallback method', fallbackError);
-            }
-        }
-    }
-
-    // Update localStorage AND Firebase simultaneously (for quantity changes)
-    // This ensures both storages are updated before user navigates
-    async function updateLocalStorageAndFirebase(items) {
-        try {
-            // ALWAYS use direct localStorage for immediate persistence
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-            console.log('💾 Cart persisted to localStorage:', items.length, 'items');
-            
-            // Also try to use our new cart modules if available
-            if (typeof LocalStorageCart !== 'undefined' && LocalStorageCart.saveItems) {
-                LocalStorageCart.saveItems(items);
-                console.log('📦 Cart also updated using LocalStorageCart module');
-            }
-
-            // If Firebase cart module is loaded and user is logged in, AWAIT the Firebase save
-            // This is CRITICAL for quantity changes to be properly persisted
-            if (firebaseCartModule && firebase.auth && firebase.auth().currentUser) {
-                try {
-                    const result = await Promise.race([
-                        firebaseCartModule.saveCartToFirebase(items),
-                        new Promise((_, reject) => 
-                            setTimeout(() => reject(new Error('Firebase save timeout')), 5000)
-                        )
-                    ]);
-                    
-                    if (result && result.success) {
-                        console.log('☁️ ✅ Cart CONFIRMED updated in Firebase from checkout page');
-                    } else if (result) {
-                        console.warn('⚠️ Firebase save returned with status:', result.error);
-                    }
-                } catch (firebaseError) {
-                    console.error('❌ Error updating Firebase cart (continuing with localStorage):', firebaseError.message);
-                    // Cart is still saved in localStorage, so order can proceed
-                }
-            }
-        } catch (error) {
-            console.error('❌ Error in updateLocalStorageAndFirebase:', error);
 
             // Always try the most basic fallback method on error
             try {
