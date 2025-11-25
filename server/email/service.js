@@ -29,22 +29,22 @@ async function sendCustomerOrderConfirmation(orderData) {
     
     // Define email options
     const mailOptions = {
-      from: `"Nazakat" <${process.env.EMAIL_USER || 'nazakatwebsite24@gmail.com'}>`,
+      from: `"Royal Meenakari" <${process.env.EMAIL_USER || 'nazakatwebsite24@gmail.com'}>`,
       to: customer.email,
       subject: `Order Confirmation - ${orderData.orderReference}`,
       html: htmlContent,
       // Text version for email clients that don't support HTML
       text: `Order Confirmation - ${orderData.orderReference}
         
-Thank you for your order at Nazakat!
+Thank you for your order at Royal Meenakari!
         
 Order Reference: ${orderData.orderReference}
 Order Date: ${new Date(orderData.orderDate).toLocaleString()}
-Total: $${orderData.orderTotal.toFixed(2)}
+Total: ${orderData.selectedCurrency || 'INR'} ${orderData.orderTotal.toFixed(2)}
         
 Your order has been received and is being processed.
         
-If you have any questions, please contact us at nazakatwebsite24@gmail.com.
+If you have any questions, please contact us at nazakat2407@gmail.com.
       `
     };
     
@@ -87,21 +87,21 @@ async function sendOwnerOrderNotification(orderData) {
     
     // Define email options
     const mailOptions = {
-      from: `"Nazakat Orders" <${process.env.EMAIL_USER || 'nazakatwebsite24@gmail.com'}>`,
+      from: `"Royal Meenakari Orders" <${process.env.EMAIL_USER || 'nazakatwebsite24@gmail.com'}>`,
       to: ownerEmail,
       subject: `New Order - ${orderData.orderReference}`,
       html: htmlContent,
       // Text version for email clients that don't support HTML
       text: `New Order - ${orderData.orderReference}
         
-A new order has been placed on your Nazakat store.
+A new order has been placed on your Royal Meenakari store.
         
 Order Reference: ${orderData.orderReference}
 Order Date: ${new Date(orderData.orderDate).toLocaleString()}
 Customer: ${orderData.customer.firstName} ${orderData.customer.lastName}
 Email: ${orderData.customer.email}
 Phone: ${orderData.customer.phone}
-Total: $${orderData.orderTotal.toFixed(2)}
+Total (INR): ₹${orderData.orderTotal.toFixed(2)}
         
 Please log in to your dashboard to view the complete order details.
       `
@@ -145,7 +145,7 @@ async function sendCustomerOrderCancellation(orderData) {
     
     // Define email options
     const mailOptions = {
-      from: `"Nazakat" <${process.env.EMAIL_USER || 'nazakatwebsite24@gmail.com'}>`,
+      from: `"Royal Meenakari" <${process.env.EMAIL_USER || 'nazakatwebsite24@gmail.com'}>`,
       to: customer.email,
       subject: `Order Cancelled - ${orderData.orderReference}`,
       html: htmlContent,
@@ -156,12 +156,12 @@ We regret to inform you that your order has been cancelled.
         
 Order Reference: ${orderData.orderReference}
 Order Date: ${new Date(orderData.orderDate).toLocaleString()}
-Total: $${orderData.orderTotal.toFixed(2)}
+Total: ${orderData.selectedCurrency || 'INR'} ${orderData.orderTotal.toFixed(2)}
 ${orderData.cancellationReason ? `Cancellation Reason: ${orderData.cancellationReason}` : ''}
         
 If a refund is applicable, it will be processed within 5-7 business days.
         
-If you have any questions, please contact us at nazakatwebsite24@gmail.com.
+If you have any questions, please contact us at nazakat2407@gmail.com.
       `
     };
     
@@ -204,21 +204,21 @@ async function sendOwnerOrderCancellation(orderData) {
     
     // Define email options
     const mailOptions = {
-      from: `"Nazakat Orders" <${process.env.EMAIL_USER || 'nazakatwebsite24@gmail.com'}>`,
+      from: `"Royal Meenakari Orders" <${process.env.EMAIL_USER || 'nazakatwebsite24@gmail.com'}>`,
       to: ownerEmail,
       subject: `Order Cancelled - ${orderData.orderReference}`,
       html: htmlContent,
       // Text version for email clients that don't support HTML
       text: `Order Cancelled - ${orderData.orderReference}
         
-An order has been cancelled in your Nazakat store.
+An order has been cancelled in your Royal Meenakari store.
         
 Order Reference: ${orderData.orderReference}
 Order Date: ${new Date(orderData.orderDate).toLocaleString()}
 Customer: ${orderData.customer.firstName} ${orderData.customer.lastName}
 Email: ${orderData.customer.email}
 Phone: ${orderData.customer.phone}
-Total: $${orderData.orderTotal.toFixed(2)}
+Total (INR): ₹${orderData.orderTotal.toFixed(2)}
 ${orderData.cancellationReason ? `Cancellation Reason: ${orderData.cancellationReason}` : ''}
         
 You may need to process a refund for this cancelled order.
@@ -236,6 +236,116 @@ You may need to process a refund for this cancelled order.
     };
   } catch (error) {
     console.error('Error sending owner order cancellation notification:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+}
+
+/**
+ * Send customer delivery confirmation email
+ * 
+ * @param {Object} orderData - Order data including customer information
+ * @returns {Promise<Object>} - Result of email sending operation
+ */
+async function sendCustomerDeliveryConfirmation(orderData) {
+  try {
+    const { customer } = orderData;
+    
+    // Validate required data
+    if (!customer || !customer.email) {
+      throw new Error('Customer email is required to send delivery confirmation');
+    }
+    
+    // Get the HTML template for customer delivery email
+    const htmlContent = templates.customerDeliveryTemplate(orderData);
+    
+    // Define email options
+    const mailOptions = {
+      from: `"Royal Meenakari" <${process.env.EMAIL_USER || 'nazakatwebsite24@gmail.com'}>`,
+      to: customer.email,
+      subject: `Delivery Confirmed - ${orderData.orderReference}`,
+      html: htmlContent,
+      // Text version for email clients that don't support HTML
+      text: `Delivery Confirmed - ${orderData.orderReference}
+        
+Great news! Your order has been delivered successfully.
+        
+Order Reference: ${orderData.orderReference}
+Original Order Date: ${new Date(orderData.orderDate).toLocaleString()}
+${orderData.trackingNumber ? `Tracking Number: ${orderData.trackingNumber}` : ''}
+        
+If you have any questions, please contact us at nazakat2407@gmail.com.
+      `
+    };
+    
+    // Send the email
+    console.log(`Sending delivery confirmation email to customer: ${customer.email}`);
+    const result = await transporter.sendMail(mailOptions);
+    console.log(`Delivery confirmation email sent to customer: ${result.messageId}`);
+    
+    return {
+      success: true,
+      messageId: result.messageId
+    };
+  } catch (error) {
+    console.error('Error sending customer delivery confirmation email:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+}
+
+/**
+ * Send owner delivery confirmation email
+ * 
+ * @param {Object} orderData - Order data including customer information
+ * @returns {Promise<Object>} - Result of email sending operation
+ */
+async function sendOwnerDeliveryConfirmation(orderData) {
+  try {
+    // Get the owner's email from environment variables
+    const ownerEmail = process.env.OWNER_EMAIL || 'nazakatwebsite24@gmail.com';
+    
+    // Validate required data
+    if (!ownerEmail) {
+      throw new Error('Owner email is required to send delivery confirmation');
+    }
+    
+    // Get the HTML template for owner delivery email
+    const htmlContent = templates.ownerDeliveryTemplate(orderData);
+    
+    // Define email options
+    const mailOptions = {
+      from: `"Royal Meenakari Orders" <${process.env.EMAIL_USER || 'nazakatwebsite24@gmail.com'}>`,
+      to: ownerEmail,
+      subject: `Order Delivered - ${orderData.orderReference}`,
+      html: htmlContent,
+      // Text version for email clients that don't support HTML
+      text: `Order Delivered - ${orderData.orderReference}
+        
+An order has been successfully delivered to the customer.
+        
+Order Reference: ${orderData.orderReference}
+Customer: ${orderData.customer.firstName} ${orderData.customer.lastName}
+Email: ${orderData.customer.email}
+${orderData.trackingNumber ? `Tracking Number: ${orderData.trackingNumber}` : ''}
+      `
+    };
+    
+    // Send the email
+    console.log(`Sending delivery confirmation email to owner: ${ownerEmail}`);
+    const result = await transporter.sendMail(mailOptions);
+    console.log(`Delivery confirmation email sent to owner: ${result.messageId}`);
+    
+    return {
+      success: true,
+      messageId: result.messageId
+    };
+  } catch (error) {
+    console.error('Error sending owner delivery confirmation email:', error);
     return {
       success: false,
       error: error.message
@@ -264,6 +374,19 @@ async function sendOrderEmails(orderData) {
         customer: customerResult,
         owner: ownerResult,
         type: 'cancellation'
+      };
+    } else if (orderData.status === 'delivered') {
+      // Send delivery confirmation emails
+      const [customerResult, ownerResult] = await Promise.all([
+        sendCustomerDeliveryConfirmation(orderData),
+        sendOwnerDeliveryConfirmation(orderData)
+      ]);
+      
+      return {
+        success: customerResult.success && ownerResult.success,
+        customer: customerResult,
+        owner: ownerResult,
+        type: 'delivery'
       };
     } else {
       // Send confirmation emails (default behavior)
@@ -294,5 +417,7 @@ module.exports = {
   sendOwnerOrderNotification,
   sendCustomerOrderCancellation,
   sendOwnerOrderCancellation,
+  sendCustomerDeliveryConfirmation,
+  sendOwnerDeliveryConfirmation,
   sendOrderEmails
 };

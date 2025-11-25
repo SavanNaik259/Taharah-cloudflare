@@ -6,6 +6,63 @@
  */
 
 /**
+ * Helper function to convert date to IST timezone
+ */
+function formatToIST(dateString) {
+  const date = new Date(dateString);
+  const istFormatter = new Intl.DateTimeFormat('en-IN', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    timeZone: 'Asia/Kolkata'
+  });
+  return istFormatter.format(date);
+}
+
+/**
+ * Helper function to format price based on currency
+ */
+function formatPrice(priceInINR, currency = 'INR') {
+  const EXCHANGE_RATES = {
+    'INR': 1,
+    'USD': 0.012,
+    'EUR': 0.011,
+    'GBP': 0.0095,
+    'AED': 0.044,
+    'CAD': 0.016,
+    'AUD': 0.018
+  };
+
+  const CURRENCY_SYMBOLS = {
+    'INR': { symbol: '₹', decimals: 0 },
+    'USD': { symbol: '$', decimals: 2 },
+    'EUR': { symbol: '€', decimals: 2 },
+    'GBP': { symbol: '£', decimals: 2 },
+    'AED': { symbol: 'د.إ', decimals: 2 },
+    'CAD': { symbol: 'C$', decimals: 2 },
+    'AUD': { symbol: 'A$', decimals: 2 }
+  };
+
+  const rate = EXCHANGE_RATES[currency] || 1;
+  const convertedPrice = priceInINR * rate;
+  const currencyInfo = CURRENCY_SYMBOLS[currency] || CURRENCY_SYMBOLS['INR'];
+  const { symbol, decimals } = currencyInfo;
+
+  let formattedPrice;
+  if (decimals === 0) {
+    formattedPrice = Math.round(convertedPrice).toLocaleString('en-IN');
+  } else {
+    formattedPrice = convertedPrice.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  return `${symbol}${formattedPrice}`;
+}
+
+/**
  * Customer Order Confirmation Email Template
  * 
  * @param {Object} data - Order data
@@ -14,28 +71,22 @@
  * @param {String} data.orderReference - Order reference number
  * @param {String} data.orderDate - Order date
  * @param {Number} data.orderTotal - Order total
+ * @param {String} data.selectedCurrency - Customer's selected currency (default: INR)
  * @returns {String} - HTML email content
  */
 function customerOrderTemplate(data) {
-  const { customer, products, orderReference, orderDate, orderTotal, paymentMethod } = data;
+  const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, selectedCurrency = 'INR' } = data;
 
-  // Format date to be more readable
-  const orderDateFormatted = new Date(orderDate).toLocaleString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+  // Format date to IST
+  const orderDateFormatted = formatToIST(orderDate);
 
-  // Format the products into an HTML table
+  // Format the products into an HTML table with customer's selected currency
   const productsHTML = products.map(product => `
     <tr>
       <td style="padding: 10px; border-bottom: 1px solid #e1e1e1;">${product.name}</td>
       <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: center;">${product.quantity}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">$${product.price.toFixed(2)}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">$${product.total.toFixed(2)}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${formatPrice(product.price, selectedCurrency)}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${formatPrice(product.total, selectedCurrency)}</td>
     </tr>
   `).join('');
 
@@ -45,7 +96,7 @@ function customerOrderTemplate(data) {
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Confirmation - Nazakat</title>
+    <title>Order Confirmation - Royal Meenakari</title>
     <style>
       body { 
         font-family: Arial, sans-serif; 
@@ -102,7 +153,7 @@ function customerOrderTemplate(data) {
   <body>
     <div class="container">
       <div class="header">
-        <div class="logo">Nazakat</div>
+        <div class="logo">Royal Meenakari</div>
       </div>
 
       <h2>Order Confirmation</h2>
@@ -111,7 +162,7 @@ function customerOrderTemplate(data) {
 
       <div class="order-info">
         <p><strong>Order Reference:</strong> ${orderReference}</p>
-        <p><strong>Order Date:</strong> ${orderDateFormatted}</p>
+        <p><strong>Order Date:</strong> ${orderDateFormatted} IST</p>
         <p><strong>Payment Method:</strong> ${paymentMethod}</p>
       </div>
 
@@ -129,7 +180,7 @@ function customerOrderTemplate(data) {
           ${productsHTML}
           <tr class="total-row">
             <td colspan="3" style="padding: 10px; text-align: right;"><strong>Total:</strong></td>
-            <td style="padding: 10px; text-align: right;">$${orderTotal.toFixed(2)}</td>
+            <td style="padding: 10px; text-align: right;">${formatPrice(orderTotal, selectedCurrency)}</td>
           </tr>
         </tbody>
       </table>
@@ -142,10 +193,10 @@ function customerOrderTemplate(data) {
 
       <p>If you have any questions about your order, please contact our customer service team at <a href="mailto:nazakatwebsite24@gmail.com">nazakatwebsite24@gmail.com</a>.</p>
 
-      <p>Thank you for shopping with Nazakat!</p>
+      <p>Thank you for shopping with Royal Meenakari!</p>
 
       <div class="footer">
-        <p>&copy; 2025 Nazakat. All Rights Reserved.</p>
+        <p>&copy; 2025 Royal Meenakari. All Rights Reserved.</p>
         <p>This email was sent to ${customer.email}</p>
         <p>Contact us: nazakat2407@gmail.com | +91 93102 50047</p>
       </div>
@@ -157,35 +208,24 @@ function customerOrderTemplate(data) {
 
 /**
  * Store Owner Order Notification Email Template
+ * (Always in INR)
  * 
  * @param {Object} data - Order data
- * @param {Object} data.customer - Customer information
- * @param {Array} data.products - Products in the order
- * @param {String} data.orderReference - Order reference number
- * @param {String} data.orderDate - Order date
- * @param {Number} data.orderTotal - Order total
  * @returns {String} - HTML email content
  */
 function ownerOrderTemplate(data) {
-  const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, notes } = data;
+  const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, notes, selectedCurrency = 'INR' } = data;
 
-  // Format date to be more readable
-  const orderDateFormatted = new Date(orderDate).toLocaleString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+  // Format date to IST
+  const orderDateFormatted = formatToIST(orderDate);
 
-  // Format the products into an HTML table
+  // Format the products into an HTML table - always in INR for owner
   const productsHTML = products.map(product => `
     <tr>
       <td style="padding: 10px; border-bottom: 1px solid #e1e1e1;">${product.name}</td>
       <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: center;">${product.quantity}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">$${product.price.toFixed(2)}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">$${product.total.toFixed(2)}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${formatPrice(product.price, 'INR')}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${formatPrice(product.total, 'INR')}</td>
     </tr>
   `).join('');
 
@@ -195,7 +235,7 @@ function ownerOrderTemplate(data) {
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Order Notification - Nazakat</title>
+    <title>New Order Notification - Royal Meenakari</title>
     <style>
       body { 
         font-family: Arial, sans-serif; 
@@ -253,6 +293,15 @@ function ownerOrderTemplate(data) {
         margin: 20px 0;
         border-left: 4px solid #ffc107;
       }
+      .currency-note {
+        background-color: #e3f2fd;
+        padding: 10px;
+        border-radius: 5px;
+        border-left: 4px solid #2196F3;
+        margin: 15px 0;
+        font-size: 12px;
+        color: #1565c0;
+      }
       .footer {
         margin-top: 30px;
         text-align: center;
@@ -265,16 +314,21 @@ function ownerOrderTemplate(data) {
   <body>
     <div class="container">
       <div class="header">
-        <div class="logo">Nazakat</div>
+        <div class="logo">Royal Meenakari</div>
       </div>
 
       <h2>New Order Received</h2>
       <p>A new order has been placed on your store.</p>
 
+      <div class="currency-note">
+        <strong>Note:</strong> All prices below are in INR. Customer paid in ${selectedCurrency}.
+      </div>
+
       <div class="order-info">
         <p><strong>Order Reference:</strong> ${orderReference}</p>
-        <p><strong>Order Date:</strong> ${orderDateFormatted}</p>
+        <p><strong>Order Date:</strong> ${orderDateFormatted} IST</p>
         <p><strong>Payment Method:</strong> ${paymentMethod}</p>
+        <p><strong>Customer Currency:</strong> ${selectedCurrency}</p>
       </div>
 
       <h3>Customer Information</h3>
@@ -300,15 +354,15 @@ function ownerOrderTemplate(data) {
           <tr>
             <th>Product</th>
             <th style="text-align: center;">Quantity</th>
-            <th style="text-align: right;">Price</th>
-            <th style="text-align: right;">Total</th>
+            <th style="text-align: right;">Price (INR)</th>
+            <th style="text-align: right;">Total (INR)</th>
           </tr>
         </thead>
         <tbody>
           ${productsHTML}
           <tr class="total-row">
-            <td colspan="3" style="padding: 10px; text-align: right;"><strong>Total:</strong></td>
-            <td style="padding: 10px; text-align: right;">$${orderTotal.toFixed(2)}</td>
+            <td colspan="3" style="padding: 10px; text-align: right;"><strong>Total (INR):</strong></td>
+            <td style="padding: 10px; text-align: right;">${formatPrice(orderTotal, 'INR')}</td>
           </tr>
         </tbody>
       </table>
@@ -316,8 +370,8 @@ function ownerOrderTemplate(data) {
       <p>Please process this order as soon as possible.</p>
 
       <div class="footer">
-        <p>&copy; 2025 Nazakat. All Rights Reserved.</p>
-        <p>This is an automated email from your Nazakat website.</p>
+        <p>&copy; 2025 Royal Meenakari. All Rights Reserved.</p>
+        <p>This is an automated email from your Royal Meenakari website.</p>
       </div>
     </div>
   </body>
@@ -329,34 +383,22 @@ function ownerOrderTemplate(data) {
  * Customer Order Cancellation Email Template
  * 
  * @param {Object} data - Order data
- * @param {Object} data.customer - Customer information
- * @param {Array} data.products - Products in the order
- * @param {String} data.orderReference - Order reference number
- * @param {String} data.orderDate - Order date
- * @param {Number} data.orderTotal - Order total
- * @param {String} data.cancellationReason - Reason for cancellation
+ * @param {String} data.selectedCurrency - Customer's selected currency
  * @returns {String} - HTML email content
  */
 function customerCancellationTemplate(data) {
-  const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, cancellationReason } = data;
+  const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, cancellationReason, selectedCurrency = 'INR' } = data;
 
-  // Format date to be more readable
-  const orderDateFormatted = new Date(orderDate).toLocaleString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+  // Format date to IST
+  const orderDateFormatted = formatToIST(orderDate);
 
-  // Format the products into an HTML table
+  // Format the products into an HTML table with customer's selected currency
   const productsHTML = products.map(product => `
     <tr>
       <td style="padding: 10px; border-bottom: 1px solid #e1e1e1;">${product.name}</td>
       <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: center;">${product.quantity}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">$${product.price.toFixed(2)}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">$${product.total.toFixed(2)}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${formatPrice(product.price, selectedCurrency)}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${formatPrice(product.total, selectedCurrency)}</td>
     </tr>
   `).join('');
 
@@ -366,7 +408,7 @@ function customerCancellationTemplate(data) {
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Cancellation - Nazakat</title>
+    <title>Order Cancellation - Royal Meenakari</title>
     <style>
       body { 
         font-family: Arial, sans-serif; 
@@ -435,7 +477,7 @@ function customerCancellationTemplate(data) {
   <body>
     <div class="container">
       <div class="header">
-        <h1 class="logo">Nazakat</h1>
+        <h1 class="logo">Royal Meenakari</h1>
         <h2 style="color: #dc2626; margin: 10px 0;">Order Cancelled</h2>
       </div>
 
@@ -449,9 +491,9 @@ function customerCancellationTemplate(data) {
 
       <div class="order-info">
         <p><strong>Order Reference:</strong> ${orderReference}</p>
-        <p><strong>Order Date:</strong> ${orderDateFormatted}</p>
+        <p><strong>Order Date:</strong> ${orderDateFormatted} IST</p>
         <p><strong>Payment Method:</strong> ${paymentMethod}</p>
-        <p><strong>Total Amount:</strong> $${orderTotal.toFixed(2)}</p>
+        <p><strong>Total Amount:</strong> ${formatPrice(orderTotal, selectedCurrency)}</p>
         ${cancellationReason ? `<p><strong>Cancellation Reason:</strong> ${cancellationReason}</p>` : ''}
       </div>
 
@@ -469,19 +511,19 @@ function customerCancellationTemplate(data) {
           ${productsHTML}
           <tr class="total-row">
             <td colspan="3" style="padding: 10px; text-align: right;"><strong>Total:</strong></td>
-            <td style="padding: 10px; text-align: right;">$${orderTotal.toFixed(2)}</td>
+            <td style="padding: 10px; text-align: right;">${formatPrice(orderTotal, selectedCurrency)}</td>
           </tr>
         </tbody>
       </table>
 
       <p>If a refund is applicable, it will be processed within 5-7 business days to your original payment method.</p>
 
-      <p>If you have any questions about this cancellation, please contact our customer service team at <a href="mailto:auricbysubha.web@gmail.com">auricbysubha.web@gmail.com</a>.</p>
+      <p>If you have any questions about this cancellation, please contact our customer service team at <a href="mailto:nazakat2407@gmail.com">nazakat2407@gmail.com</a>.</p>
 
       <p>Thank you for your understanding.</p>
 
       <div class="footer">
-        <p>&copy; 2025 Nazakat. All Rights Reserved.</p>
+        <p>&copy; 2025 Royal Meenakari. All Rights Reserved.</p>
         <p>This email was sent to ${customer.email}</p>
         <p>Contact us: nazakat2407@gmail.com | +91 93102 50047</p>
       </div>
@@ -493,36 +535,24 @@ function customerCancellationTemplate(data) {
 
 /**
  * Owner Order Cancellation Notification Email Template
+ * (Always in INR)
  * 
  * @param {Object} data - Order data
- * @param {Object} data.customer - Customer information
- * @param {Array} data.products - Products in the order
- * @param {String} data.orderReference - Order reference number
- * @param {String} data.orderDate - Order date
- * @param {Number} data.orderTotal - Order total
- * @param {String} data.cancellationReason - Reason for cancellation
  * @returns {String} - HTML email content
  */
 function ownerCancellationTemplate(data) {
-  const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, notes, cancellationReason } = data;
+  const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, notes, cancellationReason, selectedCurrency = 'INR' } = data;
 
-  // Format date to be more readable
-  const orderDateFormatted = new Date(orderDate).toLocaleString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+  // Format date to IST
+  const orderDateFormatted = formatToIST(orderDate);
 
-  // Format the products into an HTML table
+  // Format the products into an HTML table - always in INR for owner
   const productsHTML = products.map(product => `
     <tr>
       <td style="padding: 10px; border-bottom: 1px solid #e1e1e1;">${product.name}</td>
       <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: center;">${product.quantity}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">$${product.price.toFixed(2)}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">$${product.total.toFixed(2)}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${formatPrice(product.price, 'INR')}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${formatPrice(product.total, 'INR')}</td>
     </tr>
   `).join('');
 
@@ -532,7 +562,7 @@ function ownerCancellationTemplate(data) {
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Cancellation Notification - Nazakat</title>
+    <title>Order Cancellation Notification - Royal Meenakari</title>
     <style>
       body { 
         font-family: Arial, sans-serif; 
@@ -596,16 +626,16 @@ function ownerCancellationTemplate(data) {
         <h2 style="color: #dc2626; margin: 10px 0;">Order Cancellation</h2>
       </div>
 
-      <p>An order has been cancelled in your Nazakat store.</p>
+      <p>An order has been cancelled in your Royal Meenakari store.</p>
 
       <div class="order-info">
         <p><strong>Order Reference:</strong> ${orderReference}</p>
-        <p><strong>Order Date:</strong> ${orderDateFormatted}</p>
+        <p><strong>Order Date:</strong> ${orderDateFormatted} IST</p>
         <p><strong>Customer:</strong> ${customer.firstName} ${customer.lastName}</p>
         <p><strong>Email:</strong> ${customer.email}</p>
         <p><strong>Phone:</strong> ${customer.phone}</p>
         <p><strong>Payment Method:</strong> ${paymentMethod}</p>
-        <p><strong>Total Amount:</strong> $${orderTotal.toFixed(2)}</p>
+        <p><strong>Total Amount (INR):</strong> ${formatPrice(orderTotal, 'INR')}</p>
         ${cancellationReason ? `<p><strong>Cancellation Reason:</strong> ${cancellationReason}</p>` : ''}
         ${notes ? `<p><strong>Order Notes:</strong> ${notes}</p>` : ''}
       </div>
@@ -616,15 +646,15 @@ function ownerCancellationTemplate(data) {
           <tr>
             <th>Product</th>
             <th style="text-align: center;">Quantity</th>
-            <th style="text-align: right;">Price</th>
-            <th style="text-align: right;">Total</th>
+            <th style="text-align: right;">Price (INR)</th>
+            <th style="text-align: right;">Total (INR)</th>
           </tr>
         </thead>
         <tbody>
           ${productsHTML}
           <tr class="total-row">
-            <td colspan="3" style="padding: 10px; text-align: right;"><strong>Total:</strong></td>
-            <td style="padding: 10px; text-align: right;">$${orderTotal.toFixed(2)}</td>
+            <td colspan="3" style="padding: 10px; text-align: right;"><strong>Total (INR):</strong></td>
+            <td style="padding: 10px; text-align: right;">${formatPrice(orderTotal, 'INR')}</td>
           </tr>
         </tbody>
       </table>
@@ -632,8 +662,260 @@ function ownerCancellationTemplate(data) {
       <p>You may need to process a refund for this cancelled order if payment was already collected.</p>
 
       <div class="footer">
-        <p>&copy; 2025 Nazakat. All Rights Reserved.</p>
-        <p>This is an automated email from your Nazakat website.</p>
+        <p>&copy; 2025 Royal Meenakari. All Rights Reserved.</p>
+        <p>This is an automated email from your Royal Meenakari website.</p>
+      </div>
+    </div>
+  </body>
+  </html>
+  `;
+}
+
+/**
+ * Customer Delivery Confirmation Email Template
+ * 
+ * @param {Object} data - Order data
+ * @param {String} data.selectedCurrency - Customer's selected currency
+ * @returns {String} - HTML email content
+ */
+function customerDeliveryTemplate(data) {
+  const { customer, orderReference, orderDate, orderTotal, selectedCurrency = 'INR', trackingNumber, deliveryDate } = data;
+
+  const orderDateFormatted = formatToIST(orderDate);
+  const deliveryDateFormatted = deliveryDate ? formatToIST(deliveryDate) : 'Today';
+
+  return `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Confirmation - Royal Meenakari</title>
+    <style>
+      body { 
+        font-family: Arial, sans-serif; 
+        line-height: 1.6; 
+        color: #333;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .header {
+        text-align: center;
+        padding: 20px 0;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border-radius: 8px;
+        margin-bottom: 20px;
+        color: white;
+      }
+      .logo {
+        font-size: 24px;
+        font-weight: bold;
+        color: white;
+        text-decoration: none;
+      }
+      .success-badge {
+        background-color: #d1fae5;
+        color: #065f46;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+        text-align: center;
+        font-weight: bold;
+      }
+      .order-info {
+        margin: 20px 0;
+        padding: 15px;
+        background-color: #f0fdf4;
+        border-radius: 5px;
+        border-left: 4px solid #10b981;
+      }
+      .info-row {
+        margin: 10px 0;
+        padding: 10px;
+        background-color: white;
+        border-radius: 3px;
+      }
+      .label {
+        font-weight: bold;
+        color: #059669;
+      }
+      .footer {
+        margin-top: 30px;
+        text-align: center;
+        padding: 20px 0;
+        font-size: 12px;
+        color: #999;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">Royal Meenakari</div>
+        <h2 style="margin: 10px 0; font-size: 18px;">Package Delivered!</h2>
+      </div>
+
+      <div class="success-badge">
+        ✓ Your order has been delivered successfully
+      </div>
+
+      <p>Dear ${customer.firstName} ${customer.lastName},</p>
+
+      <p>Great news! Your order has been delivered to your address. We hope you enjoy your beautiful jewelry from Royal Meenakari!</p>
+
+      <div class="order-info">
+        <div class="info-row">
+          <span class="label">Order Reference:</span> ${orderReference}
+        </div>
+        <div class="info-row">
+          <span class="label">Original Order Date:</span> ${orderDateFormatted} IST
+        </div>
+        <div class="info-row">
+          <span class="label">Delivered On:</span> ${deliveryDateFormatted} IST
+        </div>
+        ${trackingNumber ? `<div class="info-row">
+          <span class="label">Tracking Number:</span> ${trackingNumber}
+        </div>` : ''}
+        <div class="info-row">
+          <span class="label">Order Total:</span> ${formatPrice(orderTotal, selectedCurrency)}
+        </div>
+      </div>
+
+      <h3>Next Steps</h3>
+      <p>If you have any questions about your order or need to report any issues with the delivered items, please don't hesitate to contact us:</p>
+      <ul>
+        <li>Email: <a href="mailto:nazakat2407@gmail.com">nazakat2407@gmail.com</a></li>
+        <li>Phone: +91 93102 50047</li>
+      </ul>
+
+      <p>We appreciate your business and look forward to serving you again!</p>
+
+      <div class="footer">
+        <p>&copy; 2025 Royal Meenakari. All Rights Reserved.</p>
+        <p>This email was sent to ${customer.email}</p>
+        <p>Contact us: nazakat2407@gmail.com | +91 93102 50047</p>
+      </div>
+    </div>
+  </body>
+  </html>
+  `;
+}
+
+/**
+ * Owner Delivery Confirmation Email Template
+ * 
+ * @param {Object} data - Order data
+ * @returns {String} - HTML email content
+ */
+function ownerDeliveryTemplate(data) {
+  const { customer, orderReference, orderDate, orderTotal, trackingNumber, deliveryDate } = data;
+
+  const orderDateFormatted = formatToIST(orderDate);
+  const deliveryDateFormatted = deliveryDate ? formatToIST(deliveryDate) : 'Today';
+
+  return `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Delivery Confirmation - Royal Meenakari</title>
+    <style>
+      body { 
+        font-family: Arial, sans-serif; 
+        line-height: 1.6; 
+        color: #333;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .header {
+        text-align: center;
+        padding: 20px 0;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border-radius: 8px;
+        margin-bottom: 20px;
+        color: white;
+      }
+      .logo {
+        font-size: 24px;
+        font-weight: bold;
+        color: white;
+        text-decoration: none;
+      }
+      .order-info {
+        margin: 20px 0;
+        padding: 15px;
+        background-color: #f0fdf4;
+        border-radius: 5px;
+        border-left: 4px solid #10b981;
+      }
+      .info-row {
+        margin: 10px 0;
+        padding: 10px;
+        background-color: white;
+        border-radius: 3px;
+      }
+      .label {
+        font-weight: bold;
+        color: #059669;
+      }
+      .footer {
+        margin-top: 30px;
+        text-align: center;
+        padding: 20px 0;
+        font-size: 12px;
+        color: #999;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">Royal Meenakari</div>
+        <h2 style="margin: 10px 0; font-size: 18px;">Order Delivered</h2>
+      </div>
+
+      <p>An order has been successfully delivered to the customer.</p>
+
+      <div class="order-info">
+        <div class="info-row">
+          <span class="label">Order Reference:</span> ${orderReference}
+        </div>
+        <div class="info-row">
+          <span class="label">Customer:</span> ${customer.firstName} ${customer.lastName}
+        </div>
+        <div class="info-row">
+          <span class="label">Customer Email:</span> ${customer.email}
+        </div>
+        <div class="info-row">
+          <span class="label">Original Order Date:</span> ${orderDateFormatted} IST
+        </div>
+        <div class="info-row">
+          <span class="label">Delivery Confirmed On:</span> ${deliveryDateFormatted} IST
+        </div>
+        ${trackingNumber ? `<div class="info-row">
+          <span class="label">Tracking Number:</span> ${trackingNumber}
+        </div>` : ''}
+        <div class="info-row">
+          <span class="label">Order Total (INR):</span> ${formatPrice(orderTotal, 'INR')}
+        </div>
+      </div>
+
+      <p>The customer has been notified about the delivery via email.</p>
+
+      <div class="footer">
+        <p>&copy; 2025 Royal Meenakari. All Rights Reserved.</p>
+        <p>This is an automated email from your Royal Meenakari website.</p>
       </div>
     </div>
   </body>
@@ -645,5 +927,7 @@ module.exports = {
   customerOrderTemplate,
   ownerOrderTemplate,
   customerCancellationTemplate,
-  ownerCancellationTemplate
+  ownerCancellationTemplate,
+  customerDeliveryTemplate,
+  ownerDeliveryTemplate
 };
