@@ -352,6 +352,72 @@ Please log in to your dashboard to view the complete order details.
 }
 
 /**
+ * Send customer delivery confirmation email
+ */
+async function sendCustomerDeliveryConfirmation(orderData) {
+  try {
+    const { customer } = orderData;
+
+    if (!customer || !customer.email) {
+      throw new Error('Customer email is required to send delivery confirmation');
+    }
+
+    const transporter = createTransporter();
+    const htmlContent = templates.customerDeliveryTemplate(orderData);
+
+    const mailOptions = {
+      from: `"Nazakat Team" <${process.env.EMAIL_USER || 'nazakatwebsite24@gmail.com'}>`,
+      to: customer.email,
+      subject: `✅ Delivery Confirmed - ${orderData.orderReference}`,
+      html: htmlContent,
+      text: `Delivery Confirmed - ${orderData.orderReference}\n\nGreat news! Your order has been successfully delivered.\n\nOrder Reference: ${orderData.orderReference}\nIf you have any questions, please contact us at nazakat2407@gmail.com.`
+    };
+
+    console.log(`Sending delivery confirmation email to customer: ${customer.email}`);
+    const result = await transporter.sendMail(mailOptions);
+    console.log(`Delivery confirmation email sent to customer: ${result.messageId}`);
+
+    return { success: true, messageId: result.messageId };
+  } catch (error) {
+    console.error('Error sending customer delivery confirmation email:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Send owner delivery confirmation email
+ */
+async function sendOwnerDeliveryConfirmation(orderData) {
+  try {
+    const ownerEmail = process.env.OWNER_EMAIL || 'nazakatwebsite24@gmail.com';
+
+    if (!ownerEmail) {
+      throw new Error('Owner email is required to send delivery confirmation');
+    }
+
+    const transporter = createTransporter();
+    const htmlContent = templates.ownerDeliveryTemplate(orderData);
+
+    const mailOptions = {
+      from: `"Nazakat Orders" <${process.env.EMAIL_USER || 'nazakatwebsite24@gmail.com'}>`,
+      to: ownerEmail,
+      subject: `✅ Order Delivered - ${orderData.orderReference}`,
+      html: htmlContent,
+      text: `Order Delivered - ${orderData.orderReference}\n\nAn order has been successfully delivered to the customer.\n\nOrder Reference: ${orderData.orderReference}\nCustomer: ${orderData.customer.firstName} ${orderData.customer.lastName}`
+    };
+
+    console.log(`Sending delivery confirmation email to owner: ${ownerEmail}`);
+    const result = await transporter.sendMail(mailOptions);
+    console.log(`Delivery confirmation email sent to owner: ${result.messageId}`);
+
+    return { success: true, messageId: result.messageId };
+  } catch (error) {
+    console.error('Error sending owner delivery confirmation email:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * Send both customer and owner emails for an order
  *
  * @param {Object} orderData - Order data including customer information and products
@@ -360,6 +426,23 @@ Please log in to your dashboard to view the complete order details.
 async function sendOrderEmails(orderData) {
   try {
     console.log('Starting to send order emails for:', orderData.orderReference);
+
+    // Check if this is a delivery confirmation email
+    if (orderData.status && orderData.status.toLowerCase() === 'delivered') {
+      const [customerResult, ownerResult] = await Promise.all([
+        sendCustomerDeliveryConfirmation(orderData),
+        sendOwnerDeliveryConfirmation(orderData)
+      ]);
+
+      console.log('Delivery confirmation emails sent:', { customerResult, ownerResult });
+
+      return {
+        success: customerResult.success && ownerResult.success,
+        customer: customerResult,
+        owner: ownerResult,
+        type: 'delivery'
+      };
+    }
 
     // Send both emails in parallel
     const [customerResult, ownerResult] = await Promise.all([
@@ -1032,9 +1115,12 @@ async function sendContactEmail(contactData) {
 }
 
 // Export the email service functions
+// Export the email service functions
 module.exports = {
   sendCustomerOrderConfirmation,
   sendOwnerOrderNotification,
+  sendCustomerDeliveryConfirmation,
+  sendOwnerDeliveryConfirmation,
   sendOrderEmails,
   sendVerificationEmail,
   sendPasswordResetEmail,

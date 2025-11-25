@@ -5,6 +5,22 @@
  * Each template is a function that takes data parameters and returns formatted HTML.
  */
 
+// Format date to IST timezone (UTC+5:30)
+function formatToIST(dateString) {
+  const date = new Date(dateString);
+  const istFormatter = new Intl.DateTimeFormat('en-IN', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    timeZone: 'Asia/Kolkata'
+  });
+  return istFormatter.format(date);
+}
+
 // Currency formatter
 const currencySymbols = {
   'INR': { symbol: '₹', decimals: 0 },
@@ -44,15 +60,8 @@ function formatCurrencyPrice(priceInINR, currency = 'INR') {
 function customerOrderTemplate(data) {
   const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, status, cancellationReason, userSelectedCurrency = 'INR' } = data;
 
-  // Format date to be more readable
-  const orderDateFormatted = new Date(orderDate).toLocaleString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+  // Format date to IST timezone
+  const orderDateFormatted = formatToIST(orderDate);
 
   // Format the products into an HTML table with user's selected currency
   // CRITICAL: Use pre-converted prices from frontend (priceDisplay/totalDisplay) to match checkout display
@@ -219,15 +228,8 @@ function customerOrderTemplate(data) {
 function ownerOrderTemplate(data) {
   const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, notes, userSelectedCurrency = 'INR' } = data;
 
-  // Format date to be more readable
-  const orderDateFormatted = new Date(orderDate).toLocaleString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+  // Format date to IST timezone
+  const orderDateFormatted = formatToIST(orderDate);
 
   // Format the products into an HTML table (owner gets prices in customer's selected currency too)
   // CRITICAL: Use pre-converted prices from frontend (priceDisplay/totalDisplay) to match checkout display
@@ -399,7 +401,125 @@ function ownerOrderTemplate(data) {
   `;
 }
 
+/**
+ * Customer Delivery Confirmation Email Template
+ */
+function customerDeliveryTemplate(data) {
+  const { customer, orderReference, orderDate, trackingNumber, userSelectedCurrency = 'INR' } = data;
+  const orderDateFormatted = formatToIST(orderDate);
+
+  return `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Confirmed - Royal Meenakari</title>
+    <style>
+      body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+      .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+      .header { text-align: center; padding: 20px 0; background-color: #f8f9fa; }
+      .logo { font-size: 24px; font-weight: bold; color: #000; }
+      .success-box { background-color: #e8f5e9; border: 2px solid #4caf50; color: #2e7d32; padding: 20px; border-radius: 5px; margin: 20px 0; }
+      .order-info { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; }
+      .footer { margin-top: 30px; text-align: center; padding: 20px 0; font-size: 12px; color: #999; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">Royal Meenakari</div>
+      </div>
+
+      <h2 style="color: #4caf50; text-align: center;">✅ Your Order Has Been Delivered!</h2>
+      <p>Dear ${customer.firstName || ''} ${customer.lastName || ''},</p>
+      <p>Great news! Your order has been successfully delivered. We hope you enjoy your beautiful jewelry from Royal Meenakari.</p>
+
+      <div class="success-box">
+        <h3 style="margin: 0 0 10px 0;">Delivery Confirmed</h3>
+        <p style="margin: 0;">Your order has reached you safely.</p>
+      </div>
+
+      <div class="order-info">
+        <p><strong>Order Reference:</strong> ${orderReference || 'N/A'}</p>
+        <p><strong>Original Order Date:</strong> ${orderDateFormatted}</p>
+        ${trackingNumber ? `<p><strong>Tracking Number:</strong> ${trackingNumber}</p>` : ''}
+      </div>
+
+      <p>If you have any questions about your order or need any assistance, please don't hesitate to contact us at <a href="mailto:nazakat2407@gmail.com">nazakat2407@gmail.com</a> or call us at +91 93102 50047.</p>
+
+      <p>We'd love to hear from you! Please share your feedback and help us improve your shopping experience.</p>
+
+      <div class="footer">
+        <p>&copy; 2025 Royal Meenakari. All Rights Reserved.</p>
+        <p>Thank you for shopping with us!</p>
+        <p>Contact us: nazakat2407@gmail.com | +91 93102 50047</p>
+      </div>
+    </div>
+  </body>
+  </html>
+  `;
+}
+
+/**
+ * Owner Delivery Confirmation Email Template
+ */
+function ownerDeliveryTemplate(data) {
+  const { customer, orderReference, trackingNumber } = data;
+
+  return `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Delivered Notification</title>
+    <style>
+      body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+      .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+      .header { text-align: center; padding: 20px 0; background-color: #f8f9fa; }
+      .logo { font-size: 24px; font-weight: bold; color: #000; }
+      .success-box { background-color: #e8f5e9; border: 2px solid #4caf50; color: #2e7d32; padding: 20px; border-radius: 5px; margin: 20px 0; }
+      .order-info { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; }
+      .footer { margin-top: 30px; text-align: center; padding: 20px 0; font-size: 12px; color: #999; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">Royal Meenakari</div>
+      </div>
+
+      <h2 style="color: #4caf50; text-align: center;">✅ Order Delivered</h2>
+      <p>An order has been successfully delivered to the customer.</p>
+
+      <div class="success-box">
+        <h3 style="margin: 0 0 10px 0;">Delivery Confirmed</h3>
+        <p style="margin: 0;">Order Reference: <strong>${orderReference}</strong></p>
+      </div>
+
+      <div class="order-info">
+        <p><strong>Customer:</strong> ${customer.firstName || ''} ${customer.lastName || ''}</p>
+        <p><strong>Email:</strong> ${customer.email || 'N/A'}</p>
+        <p><strong>Phone:</strong> ${customer.phone || 'N/A'}</p>
+        ${trackingNumber ? `<p><strong>Tracking Number:</strong> ${trackingNumber}</p>` : ''}
+      </div>
+
+      <p>The customer has been notified of the successful delivery.</p>
+
+      <div class="footer">
+        <p>&copy; 2025 Royal Meenakari. All Rights Reserved.</p>
+        <p>This is an automated email from your Royal Meenakari website.</p>
+      </div>
+    </div>
+  </body>
+  </html>
+  `;
+}
+
 module.exports = {
   customerOrderTemplate,
-  ownerOrderTemplate
+  ownerOrderTemplate,
+  customerDeliveryTemplate,
+  ownerDeliveryTemplate
 };

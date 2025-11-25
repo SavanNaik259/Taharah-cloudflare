@@ -4706,7 +4706,16 @@
                 const confirmed = confirm('Are you sure you want to mark this order as delivered?');
                 if (!confirmed) return;
 
-                showGlobalLoader('Updating delivery status...');
+                showGlobalLoader('Updating delivery status and sending confirmation email...');
+
+                // Get the current order data from Firebase
+                const orderSnapshot = await db.collection('users')
+                    .doc(userId)
+                    .collection('orders')
+                    .doc(orderId)
+                    .get();
+
+                const orderData = orderSnapshot.data();
 
                 // Update order in Firebase
                 await db.collection('users')
@@ -4720,12 +4729,48 @@
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
 
+                // Send delivery confirmation email
+                try {
+                    const emailPayload = {
+                        customer: orderData.customer || {
+                            firstName: orderData.firstName || '',
+                            lastName: orderData.lastName || '',
+                            email: orderData.email || ''
+                        },
+                        orderReference: orderData.orderReference || orderId,
+                        orderDate: orderData.orderDate || orderData.timestamp?.toDate?.()?.toISOString() || new Date().toISOString(),
+                        status: 'delivered',
+                        trackingNumber: orderData.trackingNumber || ''
+                    };
+
+                    console.log('Sending delivery confirmation email with payload:', emailPayload);
+
+                    // Try Netlify Functions first
+                    if (window.netlifyHelpers && typeof window.netlifyHelpers.callNetlifyFunction === 'function') {
+                        await window.netlifyHelpers.callNetlifyFunction('send-order-email', {
+                            method: 'POST',
+                            body: JSON.stringify(emailPayload)
+                        });
+                    } else {
+                        // Fallback to Express server
+                        await fetch('/api/send-order-email', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(emailPayload)
+                        });
+                    }
+                    console.log('✅ Delivery confirmation email sent successfully');
+                } catch (emailError) {
+                    console.warn('⚠️ Failed to send delivery email:', emailError);
+                    // Don't fail the whole process if email fails
+                }
+
                 hideGlobalLoader();
 
                 showSuccessModal({
                     icon: '<i class="fas fa-check-circle"></i>',
                     title: 'Order Marked as Delivered',
-                    message: 'The order has been successfully marked as delivered. Customer will be notified.'
+                    message: 'The order has been successfully marked as delivered. Delivery confirmation email sent to customer.'
                 });
 
                 // Reload orders to reflect changes
