@@ -75,7 +75,7 @@ function formatPrice(priceInINR, currency = 'INR') {
  * @returns {String} - HTML email content
  */
 function customerOrderTemplate(data) {
-  const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, selectedCurrency = 'INR' } = data;
+  const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, userSelectedCurrency = 'INR' } = data;
 
   // Format date to IST
   const orderDateFormatted = formatToIST(orderDate);
@@ -214,7 +214,7 @@ function customerOrderTemplate(data) {
  * @returns {String} - HTML email content
  */
 function ownerOrderTemplate(data) {
-  const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, notes, selectedCurrency = 'INR' } = data;
+  const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, notes, userSelectedCurrency = 'INR' } = data;
 
   // Format date to IST
   const orderDateFormatted = formatToIST(orderDate);
@@ -321,14 +321,14 @@ function ownerOrderTemplate(data) {
       <p>A new order has been placed on your store.</p>
 
       <div class="currency-note">
-        <strong>Note:</strong> All prices below are in INR. Customer paid in ${selectedCurrency}.
+        <strong>Note:</strong> All prices below are in INR. Customer paid in ${userSelectedCurrency}.
       </div>
 
       <div class="order-info">
         <p><strong>Order Reference:</strong> ${orderReference}</p>
         <p><strong>Order Date:</strong> ${orderDateFormatted} IST</p>
         <p><strong>Payment Method:</strong> ${paymentMethod}</p>
-        <p><strong>Customer Currency:</strong> ${selectedCurrency}</p>
+        <p><strong>Customer Currency:</strong> ${userSelectedCurrency}</p>
       </div>
 
       <h3>Customer Information</h3>
@@ -387,7 +387,7 @@ function ownerOrderTemplate(data) {
  * @returns {String} - HTML email content
  */
 function customerCancellationTemplate(data) {
-  const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, cancellationReason, selectedCurrency = 'INR' } = data;
+  const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, cancellationReason, userSelectedCurrency = 'INR' } = data;
 
   // Format date to IST
   const orderDateFormatted = formatToIST(orderDate);
@@ -541,7 +541,7 @@ function customerCancellationTemplate(data) {
  * @returns {String} - HTML email content
  */
 function ownerCancellationTemplate(data) {
-  const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, notes, cancellationReason, selectedCurrency = 'INR' } = data;
+  const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, notes, cancellationReason, userSelectedCurrency = 'INR' } = data;
 
   // Format date to IST
   const orderDateFormatted = formatToIST(orderDate);
@@ -679,7 +679,7 @@ function ownerCancellationTemplate(data) {
  * @returns {String} - HTML email content
  */
 function customerDeliveryTemplate(data) {
-  const { customer, orderReference, orderDate, orderTotal, selectedCurrency = 'INR', trackingNumber, deliveryDate } = data;
+  const { customer, orderReference, orderDate, orderTotal, userSelectedCurrency = 'INR', trackingNumber, deliveryDate } = data;
 
   const orderDateFormatted = formatToIST(orderDate);
   const deliveryDateFormatted = deliveryDate ? formatToIST(deliveryDate) : 'Today';
