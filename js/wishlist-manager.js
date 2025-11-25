@@ -1066,32 +1066,49 @@ const WishlistManager = (function() {
                     const productId = detailContainer.dataset.productId;
                     const productNameEl = detailContainer.querySelector('.product-title');
                     const productName = productNameEl ? productNameEl.textContent : 'Unknown Product';
-                    // Look for price elements with multiple selectors for product detail page
-                    const priceElement = detailContainer.querySelector('.price-value') || 
-                                       detailContainer.querySelector('.product-price') ||
-                                       detailContainer.querySelector('.current-price') ||
-                                       detailContainer.querySelector('.price') ||
-                                       document.querySelector('.price-value') ||
-                                       document.querySelector('.current-price') ||
-                                       document.querySelector('.product-price');
-
-                    console.log('Price element found:', priceElement);
-                    console.log('Price element content:', priceElement ? priceElement.textContent : 'No element found');
-
-                    // Improved price extraction to handle different formats (₹32,500 or Rs. 15,550.00 or ₹15500.00)
+                    
+                    // CRITICAL FIX: Use PRODUCT_PRICES_CACHE to get original INR price, NOT DOM display price
+                    // This prevents storing corrupted prices when customer has changed currency
                     let productPrice = 0;
-                    if (priceElement) {
-                        // First try to get from data attribute if available
-                        if (priceElement.dataset.price) {
-                            productPrice = parseFloat(priceElement.dataset.price);
-                            console.log('Price extracted from data attribute:', productPrice);
-                        } else {
-                            // Otherwise extract from text content
-                            let priceText = priceElement.textContent.trim();
-                            console.log('Raw price text (detail container):', priceText);
+                    let priceFound = false;
+                    
+                    // LEVEL 0: Check global price cache FIRST (priority #1)
+                    // This cache is populated by product loaders and contains original INR prices
+                    if (productId && window.PRODUCT_PRICES_CACHE && window.PRODUCT_PRICES_CACHE.has(productId)) {
+                        productPrice = window.PRODUCT_PRICES_CACHE.get(productId);
+                        priceFound = true;
+                        console.log('✅ DETAIL PAGE - Got price from global cache:', productPrice, 'for product:', productId);
+                    }
+                    
+                    // LEVEL 1: If cache miss, try to extract from DOM (fallback only)
+                    if (!priceFound) {
+                        console.log('⚠️ DETAIL PAGE - Cache miss for product:', productId, 'falling back to DOM extraction');
+                        
+                        // Look for price elements with multiple selectors for product detail page
+                        const priceElement = detailContainer.querySelector('.price-value') || 
+                                           detailContainer.querySelector('.product-price') ||
+                                           detailContainer.querySelector('.current-price') ||
+                                           detailContainer.querySelector('.price') ||
+                                           document.querySelector('.price-value') ||
+                                           document.querySelector('.current-price') ||
+                                           document.querySelector('.product-price');
+
+                        console.log('Price element found:', priceElement);
+                        console.log('Price element content:', priceElement ? priceElement.textContent : 'No element found');
+
+                        // Improved price extraction to handle different formats (₹32,500 or Rs. 15,550.00 or ₹15500.00)
+                        if (priceElement) {
+                            // First try to get from data attribute if available
+                            if (priceElement.dataset.price) {
+                                productPrice = parseFloat(priceElement.dataset.price);
+                                console.log('Price extracted from data attribute:', productPrice);
+                            } else {
+                                // Otherwise extract from text content
+                                let priceText = priceElement.textContent.trim();
+                                console.log('Raw price text (detail container):', priceText);
 
                             // Special handling for Rs. format with commas (like CHRM-07 and GSSE-11)
-                            if (priceText.includes('Rs.')) {
+                                if (priceText.includes('Rs.')) {
                                 console.log('Detected Rs. format price for detail container:', productId);
                                 // Extract the number portion and convert directly
                                 const match = priceText.match(/Rs\.\s*([\d,]+(?:\.\d+)?)/);
@@ -1106,7 +1123,7 @@ const WishlistManager = (function() {
                                     console.log('Cleaned price text (detail container):', priceText);
                                     productPrice = parseFloat(priceText);
                                 }
-                            } else if (priceText.includes('₹')) {
+                                } else if (priceText.includes('₹')) {
                                 // Handle rupee symbol format
                                 console.log('Detected ₹ format price for detail container:', productId);
                                 // Extract numbers after ₹ symbol
@@ -1121,12 +1138,12 @@ const WishlistManager = (function() {
                                     console.log('Cleaned ₹ price text (detail container):', priceText);
                                     productPrice = parseFloat(priceText);
                                 }
-                            } else {
+                                } else {
                                 // Normal price cleaning for other formats
                                 priceText = priceText.replace(/[^0-9.,]/g, '').replace(/,/g, '');
                                 console.log('Cleaned price text (detail container):', priceText);
                                 productPrice = parseFloat(priceText);
-                            }
+                                }
 
                             // Ensure we have a valid price
                             if (isNaN(productPrice) || productPrice <= 0) {
@@ -1153,23 +1170,23 @@ const WishlistManager = (function() {
                                 if (productId === 'CHRM-07') productPrice = 15550.00;
                                 if (productId === 'GSSE-11') productPrice = 17750.00;
                             }
-                        }
-                    } else {
-                        console.warn('No price element found on product detail page');
+                        } else {
+                            console.warn('No price element found on product detail page');
 
-                        // Last resort: try to find any element containing price info
-                        const fallbackElements = document.querySelectorAll('*');
-                        for (let element of fallbackElements) {
-                            const text = element.textContent || '';
-                            if ((text.includes('₹') || text.includes('Rs.')) && element.children.length === 0) {
-                                console.log('Found potential price in fallback element:', text);
-                                const match = text.match(/(?:₹|Rs\.)\s*([\d,]+(?:\.\d+)?)/);
-                                if (match && match[1]) {
-                                    const price = parseFloat(match[1].replace(/,/g, ''));
-                                    if (!isNaN(price) && price > 0) {
-                                        productPrice = price;
-                                        console.log('Extracted price from fallback element:', productPrice);
-                                        break;
+                            // Last resort: try to find any element containing price info
+                            const fallbackElements = document.querySelectorAll('*');
+                            for (let element of fallbackElements) {
+                                const text = element.textContent || '';
+                                if ((text.includes('₹') || text.includes('Rs.')) && element.children.length === 0) {
+                                    console.log('Found potential price in fallback element:', text);
+                                    const match = text.match(/(?:₹|Rs\.)\s*([\d,]+(?:\.\d+)?)/);
+                                    if (match && match[1]) {
+                                        const price = parseFloat(match[1].replace(/,/g, ''));
+                                        if (!isNaN(price) && price > 0) {
+                                            productPrice = price;
+                                            console.log('Extracted price from fallback element:', productPrice);
+                                            break;
+                                        }
                                     }
                                 }
                             }
