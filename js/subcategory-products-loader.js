@@ -221,6 +221,13 @@ const SubcategoryProductsLoader = (function() {
                     }, 100);
                 }
             } else {
+                // Hide loader when no products
+                const loaderPage = document.getElementById(`${category}-loader`);
+                if (loaderPage) {
+                    loaderPage.classList.remove('show');
+                    loaderPage.style.display = 'none';
+                }
+                
                 productsGrid.innerHTML = `
                     <div class="no-products-message" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
                         <i class="fas fa-gem" style="font-size: 48px; color: #6D3E25; margin-bottom: 20px;"></i>
@@ -232,6 +239,13 @@ const SubcategoryProductsLoader = (function() {
 
             console.log(`${category} section updated with ${products.length} products`);
         } catch (error) {
+            // Hide loader on error
+            const loaderPage = document.getElementById(`${category}-loader`);
+            if (loaderPage) {
+                loaderPage.classList.remove('show');
+                loaderPage.style.display = 'none';
+            }
+            
             console.error(`Error updating ${category} section:`, error);
             productsGrid.innerHTML = `
                 <div class="loading-error" style="grid-column: 1 / -1; color: red; padding: 20px; text-align: center;">

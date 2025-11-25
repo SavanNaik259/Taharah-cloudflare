@@ -431,6 +431,12 @@ const JewelrySubcategoriesLoader = (function() {
                     window.CurrencyConverter.convertAllPrices();
                 }
             } else {
+                // Hide loader when no products
+                const loader = document.getElementById('jewelryCollectionLoader');
+                if (loader) {
+                    loader.style.display = 'none';
+                }
+                
                 console.log('No products found in subcategories');
 
                 const isNetlify = window.location.hostname.includes('netlify') || window.location.hostname.includes('.app');

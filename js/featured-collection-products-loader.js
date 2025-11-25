@@ -421,6 +421,12 @@ const BridalProductsLoader = (function() {
                     window.CurrencyConverter.convertAllPrices();
                 }
             } else {
+                // Hide loader when no products
+                const loader = document.getElementById('featuredCollectionLoader');
+                if (loader) {
+                    loader.classList.remove('show');
+                }
+                
                 // No Firebase products found - show message
                 console.log('No products found in Firebase');
 
