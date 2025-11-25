@@ -444,11 +444,7 @@ function initShop() {
         elements.productsGrid.innerHTML = '';
         
         if (products.length === 0) {
-            // Show no products message
-            const noProducts = document.createElement('div');
-            noProducts.className = 'no-results';
-            noProducts.innerHTML = '<p>No products available in shop.</p>';
-            elements.productsGrid.appendChild(noProducts);
+            // Don't show a message here - let category loaders handle empty states
             return;
         }
         
@@ -499,11 +495,7 @@ function initShop() {
         elements.productsGrid.innerHTML = '';
         
         if (products.length === 0) {
-            // Show no results message
-            const noResults = document.createElement('div');
-            noResults.className = 'no-results';
-            noResults.innerHTML = '<p>No products match your filters. Please try different criteria.</p>';
-            elements.productsGrid.appendChild(noResults);
+            // Don't show a message here - let category loaders handle empty states
             return;
         }
         
