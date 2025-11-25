@@ -222,37 +222,33 @@ function customerOrderTemplate(data) {
  * @param {String} data.orderReference - Order reference number
  * @param {String} data.orderDate - Order date
  * @param {Number} data.orderTotal - Order total
- * @param {String} data.userSelectedCurrency - User's selected currency (defaults to 'INR')
+ * @param {String} data.userSelectedCurrency - User's selected currency (IGNORED - owner always gets INR)
  * @returns {String} - HTML email content
  */
 function ownerOrderTemplate(data) {
-  const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, notes, userSelectedCurrency = 'INR' } = data;
+  const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, notes } = data;
 
   // Format date to IST timezone
   const orderDateFormatted = formatToIST(orderDate);
 
-  // Format the products into an HTML table (owner gets prices in customer's selected currency too)
-  // CRITICAL: Use pre-converted prices from frontend (priceDisplay/totalDisplay) to match checkout display
+  // Format the products into an HTML table - OWNER ALWAYS GETS INR PRICES
+  // The owner must see original INR prices, not customer's selected currency
   const productsHTML = products.map(product => {
-    // Get currency symbol
-    const currencyInfo = currencySymbols[userSelectedCurrency] || currencySymbols['INR'];
+    // CRITICAL: Owner email always shows INR, never customer's selected currency
+    const currencyInfo = currencySymbols['INR'];
     const { symbol } = currencyInfo;
     
-    // Use pre-converted display prices if available (these use frontend's live exchange rates)
-    // Otherwise fall back to re-converting using backend rates (legacy fallback)
-    const priceDisplay = product.priceDisplay !== undefined 
-      ? `${symbol}${product.priceDisplay.toFixed(2)}` 
-      : formatCurrencyPrice(product.price || 0, userSelectedCurrency);
-    const totalDisplay = product.totalDisplay !== undefined 
-      ? `${symbol}${product.totalDisplay.toFixed(2)}` 
-      : formatCurrencyPrice(product.total || product.price * product.quantity || 0, userSelectedCurrency);
+    // Always show original INR prices to owner (no currency conversion)
+    // Use original price field which is in INR
+    const priceINR = product.price || 0;
+    const totalINR = product.total || (priceINR * (product.quantity || 1));
     
     return `
     <tr>
       <td style="padding: 10px; border-bottom: 1px solid #e1e1e1;">${product.name || product.productName || 'Product'}</td>
       <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: center;">${product.quantity || 1}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${priceDisplay}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${totalDisplay}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${symbol}${Math.round(priceINR).toLocaleString()}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${symbol}${Math.round(totalINR).toLocaleString()}</td>
     </tr>
   `;
   }).join('');
@@ -376,15 +372,7 @@ function ownerOrderTemplate(data) {
           ${productsHTML}
           <tr class="total-row">
             <td colspan="3" style="padding: 10px; text-align: right;"><strong>Total:</strong></td>
-            <td style="padding: 10px; text-align: right;">${
-              data.orderTotalDisplay !== undefined 
-                ? (() => {
-                    const currencyInfo = currencySymbols[userSelectedCurrency] || currencySymbols['INR'];
-                    const { symbol } = currencyInfo;
-                    return `${symbol}${data.orderTotalDisplay.toFixed(2)}`;
-                  })()
-                : formatCurrencyPrice(orderTotal || 0, userSelectedCurrency)
-            }</td>
+            <td style="padding: 10px; text-align: right;">₹${Math.round(orderTotal || 0).toLocaleString()}</td>
           </tr>
         </tbody>
       </table>
