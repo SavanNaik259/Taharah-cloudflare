@@ -17,6 +17,23 @@ const currencySymbols = {
   'AUD': 'A$'
 };
 
+// Exchange rates (base currency: INR)
+const exchangeRates = {
+  'INR': 1,
+  'USD': 0.012,
+  'EUR': 0.011,
+  'GBP': 0.0095,
+  'AED': 0.044,
+  'CAD': 0.016,
+  'AUD': 0.018
+};
+
+// Helper function to convert price from INR to target currency
+function convertCurrencyPrice(priceInINR, targetCurrency = 'INR') {
+  const rate = exchangeRates[targetCurrency] || 1;
+  return priceInINR * rate;
+}
+
 /**
  * Generate cancellation email HTML content
  * CUSTOMER EMAIL - Shows prices in customer's selected currency
@@ -33,11 +50,19 @@ function generateCancellationEmailContent(orderData) {
   // Helper function to format price in customer's selected currency
   const formatCustomerPrice = (priceINR, priceDisplay) => {
     // Use pre-converted display price if available (matches checkout display)
-    if (priceDisplay !== undefined) {
-      return `${userSelectedCurrencySymbol}${priceDisplay.toFixed(userSelectedCurrency === 'INR' ? 0 : 2)}`;
+    if (priceDisplay !== undefined && priceDisplay !== null) {
+      const decimals = userSelectedCurrency === 'INR' ? 0 : 2;
+      return `${userSelectedCurrencySymbol}${priceDisplay.toFixed(decimals)}`;
     }
-    // Fallback to showing INR if no display price
-    return `${userSelectedCurrencySymbol}${priceINR.toLocaleString('en-IN')}`;
+    
+    // Convert from INR to customer's selected currency
+    const convertedPrice = convertCurrencyPrice(priceINR || 0, userSelectedCurrency);
+    const decimals = userSelectedCurrency === 'INR' ? 0 : 2;
+    const formatted = decimals === 0 
+      ? Math.round(convertedPrice).toLocaleString() 
+      : convertedPrice.toFixed(decimals);
+    
+    return `${userSelectedCurrencySymbol}${formatted}`;
   };
 
   return `
