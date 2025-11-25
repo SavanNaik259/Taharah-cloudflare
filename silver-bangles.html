@@ -35,6 +35,7 @@
     <link rel="stylesheet" href="css/cart.css?v=1.0.2">
     <link rel="stylesheet" href="css/shop.css?v=1.0.2">
     <link rel="stylesheet" href="css/new-arrivals-grid.css?v=2.0.0">
+    <link rel="stylesheet" href="css/product-loader.css?v=1.0.0">
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -302,6 +303,11 @@
         </div>
 
         <div class="shop-products">
+            <!-- Product Loader -->
+            <div class="product-loader show" id="silver-bangles-loader" style="margin: 40px auto;">
+                <div class="loader-spinner"></div>
+                <p class="loader-text">Loading silver-bangles...</p>
+            </div>
             <div class="products-grid" id="silver-bangles-products-grid">
                 <!-- Products will be loaded here dynamically -->
             </div>

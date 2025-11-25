@@ -197,9 +197,12 @@ const SubcategoryProductsLoader = (function() {
             const products = await loadSubcategoryProducts(category);
 
             if (products.length > 0) {
-                // Hide loader before showing products
-                const loaderPage = document.getElementById('allCollectionPageLoader');
-                if (loaderPage) loaderPage.style.display = 'none';
+                // Hide loader before showing products - dynamic category ID
+                const loaderPage = document.getElementById(`${category}-loader`);
+                if (loaderPage) {
+                    loaderPage.classList.remove('show');
+                    loaderPage.style.display = 'none';
+                }
                 
                 const productsHTML = products.map(product => generateProductHTML(product)).join('');
                 productsGrid.innerHTML = productsHTML;
