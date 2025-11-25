@@ -397,8 +397,8 @@ function customerCancellationTemplate(data) {
     <tr>
       <td style="padding: 10px; border-bottom: 1px solid #e1e1e1;">${product.name}</td>
       <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: center;">${product.quantity}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${formatPrice(product.price, selectedCurrency)}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${formatPrice(product.total, selectedCurrency)}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${formatPrice(product.price, userSelectedCurrency)}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${formatPrice(product.total, userSelectedCurrency)}</td>
     </tr>
   `).join('');
 
@@ -493,7 +493,7 @@ function customerCancellationTemplate(data) {
         <p><strong>Order Reference:</strong> ${orderReference}</p>
         <p><strong>Order Date:</strong> ${orderDateFormatted} IST</p>
         <p><strong>Payment Method:</strong> ${paymentMethod}</p>
-        <p><strong>Total Amount:</strong> ${formatPrice(orderTotal, selectedCurrency)}</p>
+        <p><strong>Total Amount:</strong> ${formatPrice(orderTotal, userSelectedCurrency)}</p>
         ${cancellationReason ? `<p><strong>Cancellation Reason:</strong> ${cancellationReason}</p>` : ''}
       </div>
 
@@ -511,7 +511,7 @@ function customerCancellationTemplate(data) {
           ${productsHTML}
           <tr class="total-row">
             <td colspan="3" style="padding: 10px; text-align: right;"><strong>Total:</strong></td>
-            <td style="padding: 10px; text-align: right;">${formatPrice(orderTotal, selectedCurrency)}</td>
+            <td style="padding: 10px; text-align: right;">${formatPrice(orderTotal, userSelectedCurrency)}</td>
           </tr>
         </tbody>
       </table>
