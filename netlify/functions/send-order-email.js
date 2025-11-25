@@ -68,11 +68,15 @@ exports.handler = async (event, context) => {
     }
     
     // Validate required data
-    if (!orderData || !orderData.customer || !orderData.products) {
+    // For delivery confirmations, products may be optional
+    const isDeliveryConfirmation = orderData.status && orderData.status.toLowerCase() === 'delivered';
+    
+    if (!orderData || !orderData.customer) {
       console.error('Missing required order data:', {
         hasOrderData: !!orderData,
         hasCustomer: !!(orderData && orderData.customer),
-        hasProducts: !!(orderData && orderData.products)
+        hasProducts: !!(orderData && orderData.products),
+        isDeliveryConfirmation
       });
       
       return {
@@ -84,19 +88,44 @@ exports.handler = async (event, context) => {
           debug: {
             hasOrderData: !!orderData,
             hasCustomer: !!(orderData && orderData.customer),
-            hasProducts: !!(orderData && orderData.products)
+            hasProducts: !!(orderData && orderData.products),
+            isDeliveryConfirmation
           }
         })
       };
     }
     
+    // For non-delivery orders, products are required
+    if (!isDeliveryConfirmation && !orderData.products) {
+      console.error('Missing products for order confirmation');
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({
+          success: false,
+          message: 'Missing products for order confirmation'
+        })
+      };
+    }
+    
+    // Ensure products array exists (for delivery confirmations, it can be empty)
+    if (!orderData.products) {
+      orderData.products = [];
+    }
+    
     console.log('Received order email request for:', orderData.orderReference);
+    console.log('Order status:', orderData.status);
+    console.log('Is delivery confirmation:', orderData.status && orderData.status.toLowerCase() === 'delivered');
+    console.log('Order data keys:', Object.keys(orderData));
     
     // Send emails
+    console.log('Calling emailService.sendOrderEmails...');
     const result = await emailService.sendOrderEmails(orderData);
     
+    console.log('Email service result:', result);
+    
     if (result.success) {
-      console.log('Order emails sent successfully for:', orderData.orderReference);
+      console.log('✅ Order emails sent successfully for:', orderData.orderReference);
       return {
         statusCode: 200,
         headers,
@@ -107,7 +136,7 @@ exports.handler = async (event, context) => {
         })
       };
     } else {
-      console.error('Failed to send order emails:', result.error);
+      console.error('❌ Failed to send order emails:', result.error);
       return {
         statusCode: 500,
         headers,

@@ -4733,35 +4733,38 @@
                 try {
                     const emailPayload = {
                         customer: orderData.customer || {
-                            firstName: orderData.firstName || '',
+                            firstName: orderData.firstName || 'Customer',
                             lastName: orderData.lastName || '',
-                            email: orderData.email || ''
+                            email: orderData.email || orderData.customerEmail || ''
                         },
                         orderReference: orderData.orderReference || orderId,
-                        orderDate: orderData.orderDate || orderData.timestamp?.toDate?.()?.toISOString() || new Date().toISOString(),
+                        orderDate: orderData.orderDate || (orderData.timestamp?.toDate ? orderData.timestamp.toDate().toISOString() : new Date().toISOString()),
                         status: 'delivered',
-                        trackingNumber: orderData.trackingNumber || ''
+                        trackingNumber: orderData.trackingNumber || orderData.awbNumber || '',
+                        products: orderData.products || orderData.items || [],
+                        userSelectedCurrency: orderData.userSelectedCurrency || 'INR',
+                        userSelectedCurrencySymbol: orderData.userSelectedCurrencySymbol || '₹'
                     };
 
-                    console.log('Sending delivery confirmation email with payload:', emailPayload);
+                    console.log('📧 Sending delivery confirmation email with payload:', JSON.stringify(emailPayload, null, 2));
 
-                    // Try Netlify Functions first
-                    if (window.netlifyHelpers && typeof window.netlifyHelpers.callNetlifyFunction === 'function') {
-                        await window.netlifyHelpers.callNetlifyFunction('send-order-email', {
-                            method: 'POST',
-                            body: JSON.stringify(emailPayload)
-                        });
+                    // Call Netlify Function endpoint
+                    const response = await fetch('/.netlify/functions/send-order-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(emailPayload)
+                    });
+
+                    const result = await response.json();
+                    console.log('📧 Netlify Function response:', result);
+
+                    if (!response.ok) {
+                        console.warn('⚠️ Netlify Function returned error:', response.status, result);
                     } else {
-                        // Fallback to Express server
-                        await fetch('/api/send-order-email', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(emailPayload)
-                        });
+                        console.log('✅ Delivery confirmation email triggered successfully');
                     }
-                    console.log('✅ Delivery confirmation email sent successfully');
                 } catch (emailError) {
-                    console.warn('⚠️ Failed to send delivery email:', emailError);
+                    console.error('⚠️ Failed to send delivery email:', emailError);
                     // Don't fail the whole process if email fails
                 }
 
