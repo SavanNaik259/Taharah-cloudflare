@@ -6,6 +6,17 @@
 const { createTransporter } = require('./email-config');
 const templates = require('./email-templates');
 
+// Currency symbol mapping
+const currencySymbols = {
+  'INR': '₹',
+  'USD': '$',
+  'EUR': '€',
+  'GBP': '£',
+  'AED': 'د.إ',
+  'CAD': 'C$',
+  'AUD': 'A$'
+};
+
 /**
  * Generate cancellation email HTML content
  * CUSTOMER EMAIL - Shows prices in customer's selected currency
@@ -14,7 +25,7 @@ function generateCancellationEmailContent(orderData) {
   const cancellationReason = orderData.cancellationReason || 'Order cancelled by store administrator';
   const cancellationNote = orderData.cancellationNote || '';
   const userSelectedCurrency = orderData.userSelectedCurrency || 'INR';
-  const userSelectedCurrencySymbol = orderData.userSelectedCurrencySymbol || '₹';
+  const userSelectedCurrencySymbol = currencySymbols[userSelectedCurrency] || currencySymbols['INR'];
 
   console.log('Generating cancellation email with reason:', cancellationReason);
   console.log('Customer currency:', userSelectedCurrency);
