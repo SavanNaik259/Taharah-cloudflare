@@ -8,12 +8,26 @@ const templates = require('./email-templates');
 
 /**
  * Generate cancellation email HTML content
+ * CUSTOMER EMAIL - Shows prices in customer's selected currency
  */
 function generateCancellationEmailContent(orderData) {
   const cancellationReason = orderData.cancellationReason || 'Order cancelled by store administrator';
   const cancellationNote = orderData.cancellationNote || '';
+  const userSelectedCurrency = orderData.userSelectedCurrency || 'INR';
+  const userSelectedCurrencySymbol = orderData.userSelectedCurrencySymbol || '₹';
 
   console.log('Generating cancellation email with reason:', cancellationReason);
+  console.log('Customer currency:', userSelectedCurrency);
+
+  // Helper function to format price in customer's selected currency
+  const formatCustomerPrice = (priceINR, priceDisplay) => {
+    // Use pre-converted display price if available (matches checkout display)
+    if (priceDisplay !== undefined) {
+      return `${userSelectedCurrencySymbol}${priceDisplay.toFixed(userSelectedCurrency === 'INR' ? 0 : 2)}`;
+    }
+    // Fallback to showing INR if no display price
+    return `${userSelectedCurrencySymbol}${priceINR.toLocaleString('en-IN')}`;
+  };
 
   return `
     <!DOCTYPE html>
@@ -33,7 +47,7 @@ function generateCancellationEmailContent(orderData) {
     <body>
         <div class="container">
             <div class="header">
-                <div class="logo">Nazakat</div>
+                <div class="logo">Royal Meenakari</div>
                 <h2 style="color: #dc2626; margin: 10px 0;">Order Cancelled</h2>
             </div>
 
@@ -51,14 +65,14 @@ function generateCancellationEmailContent(orderData) {
                 <h3 style="margin: 0 0 15px 0; color: #374151;">Order Information</h3>
                 <p><strong>Order Reference:</strong> ${orderData.orderReference}</p>
                 <p><strong>Order Date:</strong> ${new Date(orderData.orderDate).toLocaleDateString('en-IN')}</p>
-                <p><strong>Total Amount:</strong> ₹${orderData.orderTotal.toLocaleString('en-IN')}</p>
+                <p><strong>Total Amount:</strong> ${formatCustomerPrice(orderData.orderTotal, orderData.orderTotalDisplay)}</p>
                 <p><strong>Payment Method:</strong> ${orderData.paymentMethod}</p>
 
                 <h4 style="margin: 20px 0 10px 0; color: #374151;">Items in this order:</h4>
                 ${orderData.products.map(product => `
                     <div style="border-bottom: 1px solid #e5e7eb; padding: 10px 0;">
                         <p style="margin: 0;"><strong>${product.name || 'Product'}</strong></p>
-                        <p style="margin: 0; color: #666;">Quantity: ${product.quantity || 1} × ₹${(product.price || 0).toLocaleString('en-IN')}</p>
+                        <p style="margin: 0; color: #666;">Quantity: ${product.quantity || 1} × ${formatCustomerPrice(product.price || 0, product.priceDisplay)}</p>
                     </div>
                 `).join('')}
             </div>
@@ -71,8 +85,8 @@ function generateCancellationEmailContent(orderData) {
             <p>We apologize for any inconvenience this may have caused. If you have any questions or would like to place a new order, please don't hesitate to contact us.</p>
 
             <div class="footer">
-                <p>Thank you for choosing Nazakat</p>
-                <p>Email: auricbysubha.web@gmail.com | Phone: +91-XXXXXXXXXX</p>
+                <p>Thank you for choosing Royal Meenakari</p>
+                <p>Email: nazakat2407@gmail.com | Phone: +91 93102 50047</p>
                 <p style="font-size: 12px; color: #999;">This is an automated email. Please do not reply to this email.</p>
             </div>
         </div>
