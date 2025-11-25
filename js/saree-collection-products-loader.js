@@ -402,46 +402,7 @@ const JewelrySubcategoriesLoader = (function() {
         }
 
         try {
-            const existingLoadingMsg = jewelryGrid.querySelector('.loading-products');
-            if (!existingLoadingMsg) {
-                const loadingDiv = document.createElement('div');
-                loadingDiv.className = 'loading-products';
-                loadingDiv.style.cssText = `
-                    grid-column: 1 / -1;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    padding: 60px 20px;
-                    text-align: center;
-                    color: #5a3f2a;
-                    font-family: 'Lato', sans-serif;
-                `;
-                loadingDiv.innerHTML = `
-                    <div class="loading-spinner" style="
-                        width: 40px;
-                        height: 40px;
-                        border: 3px solid #f3f3f3;
-                        border-top: 3px solid #5a3f2a;
-                        border-radius: 50%;
-                        animation: spin 1s linear infinite;
-                        margin-bottom: 15px;
-                    "></div>
-                    <p style="margin: 0; font-size: 16px; font-weight: 500;">Loading Jewelry Products...</p>
-                    <style>
-                        @keyframes spin {
-                            0% { transform: rotate(0deg); }
-                            100% { transform: rotate(360deg); }
-                        }
-                    </style>
-                `;
-                jewelryGrid.insertBefore(loadingDiv, jewelryGrid.firstChild);
-            }
-
             const products = await loadJewelryProducts();
-
-            const loadingElements = jewelryGrid.querySelectorAll('.loading-products');
-            loadingElements.forEach(el => el.remove());
 
             if (products.length > 0) {
                 console.log('Jewelry products loaded, displaying', products.length, 'random items');

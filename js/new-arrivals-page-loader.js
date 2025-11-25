@@ -16,10 +16,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     console.log('Found products grid element:', productsGrid);
 
-    // Show loading state
-    productsGrid.innerHTML = '<div class="loading-spinner"></div>';
-    productsGrid.classList.add('loading');
-
     try {
         // Load products directly from Firebase without depending on external loaders
         const products = await loadNewArrivalsProductsDirect();
