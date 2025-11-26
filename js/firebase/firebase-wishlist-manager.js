@@ -245,11 +245,17 @@ const FirebaseWishlistManager = (function() {
                 console.log('Item already exists in wishlist:', product.name);
                 return { success: true, message: 'Item already in wishlist' };
             } else {
+                // Get original INR price - use product.originalPrice if available (to handle currency conversion)
+                // If product.originalPrice doesn't exist, use product.price (which should be INR from database)
+                const priceInINR = product.originalPrice || product.price;
+                
+                console.log('Adding item to wishlist with original price:', priceInINR, '(product.price:', product.price, ', product.originalPrice:', product.originalPrice, ')');
+                
                 // Add new item
                 wishlistItems.push({
                     id: product.id,
                     name: product.name,
-                    price: product.price,
+                    price: priceInINR,
                     image: product.image,
                     addedAt: new Date().toISOString()
                 });
