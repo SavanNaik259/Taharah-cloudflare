@@ -232,7 +232,7 @@ class OutOfStockHandler {
             stockBadge.className = 'out-of-stock-badge';
             
             // Insert badge into product image container
-            const imageContainer = productCard.querySelector('.product-image-container') || 
+            let imageContainer = productCard.querySelector('.product-image-container') || 
                                  productCard.querySelector('.product-image') ||
                                  productCard.querySelector('.arrival-image') ||
                                  productCard;

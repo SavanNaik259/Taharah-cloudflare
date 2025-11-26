@@ -4523,25 +4523,32 @@
             try {
                 console.log(`Confirming order ${orderId} for user ${userId}...`);
 
-                // Update order in Firebase using user subcollection structure
-                await db.collection('users')
-                    .doc(userId)
-                    .collection('orders')
-                    .doc(orderId)
-                    .update({
-                        adminConfirmed: true,
-                        confirmedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        status: 'confirmed',
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
+                // Determine if this is a guest order
+                const isGuestOrder = order && order.isGuestOrder;
+                console.log(`Order is guest order: ${isGuestOrder}`);
+
+                let orderDocRef;
+                if (isGuestOrder) {
+                    // Guest orders are stored at root level
+                    orderDocRef = db.collection('guest-orders').doc(orderId);
+                } else {
+                    // Authenticated user orders are in subcollection
+                    orderDocRef = db.collection('users')
+                        .doc(userId)
+                        .collection('orders')
+                        .doc(orderId);
+                }
+
+                // Update order in Firebase
+                await orderDocRef.update({
+                    adminConfirmed: true,
+                    confirmedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: 'confirmed',
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
 
                 // Get order data for email
-                const orderDoc = await db.collection('users')
-                    .doc(userId)
-                    .collection('orders')
-                    .doc(orderId)
-                    .get();
-
+                const orderDoc = await orderDocRef.get();
                 const orderData = orderDoc.data();
 
                 // Show success modal instead of alert
@@ -4594,26 +4601,38 @@
             try {
                 console.log(`Cancelling order ${orderId} for user ${userId}...`);
 
+                // Determine if this is a guest order
+                const isGuestOrder = order && order.isGuestOrder;
+                console.log(`Order is guest order: ${isGuestOrder}`);
+
+                let orderDocRef;
+                if (isGuestOrder) {
+                    // Guest orders are stored at root level
+                    orderDocRef = db.collection('guest-orders').doc(orderId);
+                } else {
+                    // Authenticated user orders are in subcollection
+                    orderDocRef = db.collection('users')
+                        .doc(userId)
+                        .collection('orders')
+                        .doc(orderId);
+                }
+
                 // Get the order data first to use in the notification
-                const orderDoc = await db.collection('users').doc(userId).collection('orders').doc(orderId).get();
+                const orderDoc = await orderDocRef.get();
                 const orderData = orderDoc.data();
 
                 if (!orderDoc.exists) {
                     throw new Error("Order not found for cancellation.");
                 }
 
-                await db.collection('users')
-                    .doc(userId)
-                    .collection('orders')
-                    .doc(orderId)
-                    .update({
-                        status: 'cancelled',
-                        cancelledAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        cancelledBy: 'admin',
-                        cancellationReason: cancellationData.reason, // Store cancellation reason
-                        cancellationNote: cancellationData.note, // Store cancellation note
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
+                await orderDocRef.update({
+                    status: 'cancelled',
+                    cancelledAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    cancelledBy: 'admin',
+                    cancellationReason: cancellationData.reason, // Store cancellation reason
+                    cancellationNote: cancellationData.note, // Store cancellation note
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
 
                 // Send cancellation email
                 try {
