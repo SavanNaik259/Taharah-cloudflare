@@ -38,106 +38,125 @@ if (!admin.apps.length) {
  * Fetch missing userSelectedCurrency from Firebase if not provided
  */
 async function enrichOrderDataWithCurrency(orderData) {
-  // Debug: Log what we're receiving
-  console.log('=== ENRICHMENT DEBUG START ===');
-  console.log('orderData.userSelectedCurrency:', orderData.userSelectedCurrency);
-  console.log('orderData.status:', orderData.status);
-  console.log('orderData.orderReference:', orderData.orderReference);
-  console.log('orderData.products count:', orderData.products ? orderData.products.length : 0);
-  if (orderData.products && orderData.products.length > 0) {
-    console.log('First product:', {
-      name: orderData.products[0].name,
-      price: orderData.products[0].price,
-      priceDisplay: orderData.products[0].priceDisplay
-    });
-  }
-  
-  // If userSelectedCurrency is already present, return as-is
-  if (orderData.userSelectedCurrency) {
-    console.log('✓ userSelectedCurrency already present:', orderData.userSelectedCurrency);
-    console.log('=== ENRICHMENT DEBUG END ===');
-    return orderData;
-  }
+  try {
+    console.log('\n=== ENRICHMENT START ===');
+    console.log('Input - userSelectedCurrency:', orderData.userSelectedCurrency);
+    console.log('Input - status:', orderData.status);
+    console.log('Input - orderReference:', orderData.orderReference);
+    console.log('Input - products count:', orderData.products ? orderData.products.length : 0);
+    
+    // EARLY EXIT: If userSelectedCurrency is already set and we have priceDisplay/totalDisplay, we're good
+    if (orderData.userSelectedCurrency && 
+        orderData.products && 
+        orderData.products.length > 0 && 
+        orderData.products[0].priceDisplay !== undefined &&
+        orderData.orderTotalDisplay !== undefined) {
+      console.log('✓ Data is COMPLETE - userSelectedCurrency, priceDisplay, totalDisplay all present');
+      console.log('=== ENRICHMENT END (complete) ===\n');
+      return orderData;
+    }
 
-  // For cancellations, try to fetch the original order to get the currency
-  if (orderData.status && orderData.status.toLowerCase() === 'cancelled' && orderData.orderReference) {
-    try {
-      console.log('🔍 Fetching original order to get userSelectedCurrency for:', orderData.orderReference);
+    // FOR CANCELLATIONS: Fetch complete original order from Firebase
+    if (orderData.status && orderData.status.toLowerCase() === 'cancelled' && orderData.orderReference) {
+      console.log('\n🔍 CANCELLATION DETECTED - Fetching original order from Firebase');
       
       const bucket = admin.storage().bucket();
       const ordersFile = bucket.file('orders/orders.json');
-      
       const [exists] = await ordersFile.exists();
+      
       if (exists) {
         const [fileContents] = await ordersFile.download();
         const allOrders = JSON.parse(fileContents.toString());
+        console.log(`✓ Firebase has ${allOrders.length} orders`);
         
-        console.log(`📦 Found ${allOrders.length} orders in Firebase`);
-        
-        // Find the original order by orderReference
         const originalOrder = allOrders.find(o => o.orderReference === orderData.orderReference);
         
         if (originalOrder) {
-          console.log('✓ Found original order');
-          console.log('Original order userSelectedCurrency:', originalOrder.userSelectedCurrency);
-          console.log('Original order products:', originalOrder.products ? originalOrder.products.length : 0);
+          console.log('✓ FOUND original order in Firebase');
+          console.log('  - userSelectedCurrency:', originalOrder.userSelectedCurrency);
+          console.log('  - orderTotalDisplay:', originalOrder.orderTotalDisplay);
+          console.log('  - products:', originalOrder.products ? originalOrder.products.length : 0);
           
+          // CRITICAL FIX: Copy ALL currency-related fields from original order
           if (originalOrder.userSelectedCurrency) {
-            console.log('✓ Found userSelectedCurrency in original order:', originalOrder.userSelectedCurrency);
             orderData.userSelectedCurrency = originalOrder.userSelectedCurrency;
-            
-            // CRITICAL: Replace products with original order products to get correct priceDisplay/totalDisplay
-            if (originalOrder.products && originalOrder.products.length > 0) {
-              console.log('🔄 Replacing products with original order products to preserve priceDisplay/totalDisplay');
-              orderData.products = originalOrder.products.map(product => ({
-                ...product,
+            console.log('  ✓ SET userSelectedCurrency to:', originalOrder.userSelectedCurrency);
+          }
+          
+          if (originalOrder.orderTotalDisplay !== undefined) {
+            orderData.orderTotalDisplay = originalOrder.orderTotalDisplay;
+            console.log('  ✓ SET orderTotalDisplay to:', originalOrder.orderTotalDisplay);
+          }
+          
+          if (originalOrder.orderTotal !== undefined) {
+            orderData.orderTotal = originalOrder.orderTotal;
+            console.log('  ✓ SET orderTotal to:', originalOrder.orderTotal);
+          }
+          
+          // Replace entire products array with original to preserve all pricing fields
+          if (originalOrder.products && originalOrder.products.length > 0) {
+            orderData.products = originalOrder.products.map((product, idx) => {
+              const enrichedProduct = {
                 name: product.name || product.productName,
                 price: product.price,
                 quantity: product.quantity,
                 priceDisplay: product.priceDisplay,
                 totalDisplay: product.totalDisplay,
                 total: product.total
-              }));
-              console.log(`✓ Replaced ${orderData.products.length} products with original data`);
-              console.log('First product after replacement:', {
-                name: orderData.products[0].name,
-                priceDisplay: orderData.products[0].priceDisplay,
-                totalDisplay: orderData.products[0].totalDisplay
-              });
-            }
-            
-            // Also copy over orderTotal and orderTotalDisplay if missing
-            if (originalOrder.orderTotal) {
-              orderData.orderTotal = originalOrder.orderTotal;
-              console.log('✓ Copied orderTotal:', originalOrder.orderTotal);
-            }
-            if (originalOrder.orderTotalDisplay) {
-              orderData.orderTotalDisplay = originalOrder.orderTotalDisplay;
-              console.log('✓ Copied orderTotalDisplay:', originalOrder.orderTotalDisplay);
-            }
-          } else {
-            console.warn('⚠️ Original order found but NO userSelectedCurrency in original order');
+              };
+              console.log(`  ✓ Product ${idx}: price=${product.price}, priceDisplay=${product.priceDisplay}, totalDisplay=${product.totalDisplay}`);
+              return enrichedProduct;
+            });
+            console.log(`✓ REPLACED products array with ${orderData.products.length} items from original`);
           }
         } else {
-          console.warn('⚠️ Original order NOT FOUND in Firebase for reference:', orderData.orderReference);
+          console.warn('⚠️ Original order NOT found in Firebase with reference:', orderData.orderReference);
         }
       } else {
-        console.warn('⚠️ orders.json file does not exist in Firebase');
+        console.warn('⚠️ orders.json does not exist in Firebase');
       }
-    } catch (error) {
-      console.error('❌ Error fetching original order:', error);
     }
-  }
 
-  // Default to INR if still not found
-  if (!orderData.userSelectedCurrency) {
-    console.warn('⚠️ No userSelectedCurrency found, DEFAULTING TO INR');
-    orderData.userSelectedCurrency = 'INR';
-  }
+    // FALLBACK: If we still don't have userSelectedCurrency, try to infer from priceDisplay
+    if (!orderData.userSelectedCurrency && orderData.products && orderData.products.length > 0) {
+      const firstProduct = orderData.products[0];
+      if (firstProduct.priceDisplay !== undefined && firstProduct.price !== undefined) {
+        const ratio = firstProduct.priceDisplay / firstProduct.price;
+        let inferredCurrency = 'INR';
+        
+        // Exchange rates for reference
+        if (ratio > 0.009 && ratio < 0.013) inferredCurrency = 'USD';
+        else if (ratio > 0.009 && ratio < 0.012) inferredCurrency = 'EUR';
+        else if (ratio > 0.008 && ratio < 0.010) inferredCurrency = 'GBP';
+        
+        console.log(`⚠️ Inferred currency from price ratio: ${ratio} -> ${inferredCurrency}`);
+        orderData.userSelectedCurrency = inferredCurrency;
+      }
+    }
 
-  console.log('Final userSelectedCurrency:', orderData.userSelectedCurrency);
-  console.log('=== ENRICHMENT DEBUG END ===');
-  return orderData;
+    // FINAL FALLBACK: Default to INR
+    if (!orderData.userSelectedCurrency) {
+      console.warn('⚠️ FINAL FALLBACK: Setting currency to INR');
+      orderData.userSelectedCurrency = 'INR';
+    }
+
+    console.log('\n✓ ENRICHMENT COMPLETE:');
+    console.log('  - Final userSelectedCurrency:', orderData.userSelectedCurrency);
+    console.log('  - Final orderTotalDisplay:', orderData.orderTotalDisplay);
+    console.log('  - Final products:', orderData.products ? orderData.products.length : 0);
+    if (orderData.products && orderData.products.length > 0) {
+      console.log('  - First product priceDisplay:', orderData.products[0].priceDisplay);
+      console.log('  - First product totalDisplay:', orderData.products[0].totalDisplay);
+    }
+    console.log('=== ENRICHMENT END ===\n');
+    
+    return orderData;
+  } catch (error) {
+    console.error('❌ CRITICAL ERROR in enrichOrderDataWithCurrency:', error);
+    console.log('Defaulting to INR as fallback');
+    orderData.userSelectedCurrency = orderData.userSelectedCurrency || 'INR';
+    return orderData;
+  }
 }
 
 exports.handler = async (event, context) => {
