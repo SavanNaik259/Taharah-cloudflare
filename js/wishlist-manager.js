@@ -1066,20 +1066,29 @@ const WishlistManager = (function() {
                     const productId = detailContainer.dataset.productId;
                     const productNameEl = detailContainer.querySelector('.product-title');
                     const productName = productNameEl ? productNameEl.textContent : 'Unknown Product';
-                    // Look for price elements with multiple selectors for product detail page
-                    const priceElement = detailContainer.querySelector('.price-value') || 
-                                       detailContainer.querySelector('.product-price') ||
-                                       detailContainer.querySelector('.current-price') ||
-                                       detailContainer.querySelector('.price') ||
-                                       document.querySelector('.price-value') ||
-                                       document.querySelector('.current-price') ||
-                                       document.querySelector('.product-price');
-
-                    console.log('Price element found:', priceElement);
-                    console.log('Price element content:', priceElement ? priceElement.textContent : 'No element found');
-
-                    // Improved price extraction to handle different formats (₹32,500 or Rs. 15,550.00 or ₹15500.00)
+                    
+                    // CRITICAL FIX: Use window.productDetails.price (original INR price) if available
+                    // This prevents reading the converted price when currency is changed
                     let productPrice = 0;
+                    
+                    // First priority: Use the original INR price from window.productDetails
+                    if (window.productDetails && window.productDetails.price && window.productDetails.price > 0) {
+                        productPrice = window.productDetails.price;
+                        console.log('✅ Using original INR price from window.productDetails:', productPrice);
+                    } else {
+                        console.log('⚠️ window.productDetails not available or has no price, falling back to DOM parsing');
+                        
+                        // Look for price elements with multiple selectors for product detail page
+                        const priceElement = detailContainer.querySelector('.price-value') || 
+                                           detailContainer.querySelector('.product-price') ||
+                                           detailContainer.querySelector('.current-price') ||
+                                           detailContainer.querySelector('.price') ||
+                                           document.querySelector('.price-value') ||
+                                           document.querySelector('.current-price') ||
+                                           document.querySelector('.product-price');
+
+                        console.log('Price element found:', priceElement);
+                        console.log('Price element content:', priceElement ? priceElement.textContent : 'No element found');
                     if (priceElement) {
                         // First try to get from data attribute if available
                         if (priceElement.dataset.price) {
