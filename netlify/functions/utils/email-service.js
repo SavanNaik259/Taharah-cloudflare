@@ -46,20 +46,24 @@ function generateCancellationEmailContent(orderData) {
 
   console.log('Generating cancellation email with reason:', cancellationReason);
   console.log('Customer currency:', userSelectedCurrency);
+  console.log('Currency symbol:', userSelectedCurrencySymbol);
 
   // Helper function to format price in customer's selected currency
   const formatCustomerPrice = (priceINR, priceDisplay) => {
     // Use pre-converted display price if available (matches checkout display)
-    if (priceDisplay !== undefined && priceDisplay !== null) {
+    if (priceDisplay !== undefined && priceDisplay !== null && priceDisplay !== '') {
       const decimals = userSelectedCurrency === 'INR' ? 0 : 2;
-      return `${userSelectedCurrencySymbol}${priceDisplay.toFixed(decimals)}`;
+      const formattedPrice = decimals === 0 
+        ? Math.round(priceDisplay).toLocaleString('en-IN')
+        : parseFloat(priceDisplay).toFixed(decimals);
+      return `${userSelectedCurrencySymbol}${formattedPrice}`;
     }
     
     // Convert from INR to customer's selected currency
     const convertedPrice = convertCurrencyPrice(priceINR || 0, userSelectedCurrency);
     const decimals = userSelectedCurrency === 'INR' ? 0 : 2;
     const formatted = decimals === 0 
-      ? Math.round(convertedPrice).toLocaleString() 
+      ? Math.round(convertedPrice).toLocaleString('en-IN')
       : convertedPrice.toFixed(decimals);
     
     return `${userSelectedCurrencySymbol}${formatted}`;
@@ -105,12 +109,15 @@ function generateCancellationEmailContent(orderData) {
                 <p><strong>Payment Method:</strong> ${orderData.paymentMethod}</p>
 
                 <h4 style="margin: 20px 0 10px 0; color: #374151;">Items in this order:</h4>
-                ${orderData.products.map(product => `
+                ${orderData.products.map(product => {
+                    const productPrice = formatCustomerPrice(product.price || 0, product.priceDisplay);
+                    return `
                     <div style="border-bottom: 1px solid #e5e7eb; padding: 10px 0;">
                         <p style="margin: 0;"><strong>${product.name || 'Product'}</strong></p>
-                        <p style="margin: 0; color: #666;">Quantity: ${product.quantity || 1} × ${formatCustomerPrice(product.price || 0, product.priceDisplay)}</p>
+                        <p style="margin: 0; color: #666;">Quantity: ${product.quantity || 1} × ${productPrice}</p>
                     </div>
-                `).join('')}
+                `;
+                }).join('')}
             </div>
 
             <div style="background-color: #fffbeb; border: 1px solid #fbbf24; padding: 15px; border-radius: 5px; margin: 20px 0;">
@@ -137,6 +144,12 @@ function generateCancellationEmailContent(orderData) {
 function generateOwnerCancellationContent(orderData) {
   const cancellationReason = orderData.cancellationReason || 'Order cancelled by store administrator';
   const cancellationNote = orderData.cancellationNote || '';
+
+  // Owner always sees INR prices
+  const formatOwnerPrice = (priceINR) => {
+    const formatted = Math.round(priceINR || 0).toLocaleString('en-IN');
+    return `₹${formatted}`;
+  };
 
   return `
     <!DOCTYPE html>
@@ -170,13 +183,13 @@ function generateOwnerCancellationContent(orderData) {
                 <p><strong>Email:</strong> ${orderData.customer.email}</p>
                 <p><strong>Phone:</strong> ${orderData.customer.phone}</p>
                 <p><strong>Order Date:</strong> ${new Date(orderData.orderDate).toLocaleDateString('en-IN')}</p>
-                <p><strong>Total Amount:</strong> ₹${orderData.orderTotal.toLocaleString('en-IN')}</p>
+                <p><strong>Total Amount:</strong> ${formatOwnerPrice(orderData.orderTotal)}</p>
 
                 <h4>Items in this order:</h4>
                 ${orderData.products.map(product => `
                     <div style="border-bottom: 1px solid #e5e7eb; padding: 10px 0;">
                         <p style="margin: 0;"><strong>${product.name || 'Product'}</strong></p>
-                        <p style="margin: 0; color: #666;">Quantity: ${product.quantity || 1} × ₹${(product.price || 0).toLocaleString('en-IN')}</p>
+                        <p style="margin: 0; color: #666;">Quantity: ${product.quantity || 1} × ${formatOwnerPrice(product.price || 0)}</p>
                     </div>
                 `).join('')}
             </div>
