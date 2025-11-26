@@ -263,10 +263,10 @@ async function sendCustomerOrderConfirmation(orderData) {
     });
 
     if (orderData.status && orderData.status.toLowerCase() === 'cancelled') {
-      // Cancellation email
+      // Cancellation email - use the same template as confirmation (handles currency properly)
       subject = `❌ Order Cancelled - ${completeOrderData.orderReference}`;
-      htmlContent = generateCancellationEmailContent(completeOrderData);
-      console.log('Generated cancellation email');
+      htmlContent = templates.customerOrderTemplate(completeOrderData);
+      console.log('Generated cancellation email using customerOrderTemplate');
     } else if (orderData.status && orderData.status.toLowerCase() === 'confirmed') {
       // Confirmation email
       subject = `✅ Order Confirmed - ${completeOrderData.orderReference}`;

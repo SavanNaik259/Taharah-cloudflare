@@ -120,11 +120,26 @@ function customerOrderTemplate(data) {
         color: #000;
         text-decoration: none;
       }
+      .alert-box {
+        background-color: #fee2e2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+      }
       .order-info {
         margin: 20px 0;
         padding: 15px;
         background-color: #f8f9fa;
         border-radius: 5px;
+      }
+      .refund-box {
+        background-color: #fffbeb;
+        border: 1px solid #fbbf24;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
       }
       .products-table {
         width: 100%;
@@ -155,9 +170,19 @@ function customerOrderTemplate(data) {
         <div class="logo">Royal Meenakari</div>
       </div>
 
-      <h2>Order Confirmation</h2>
+      ${status === 'cancelled' ? `
+        <h2 style="color: #dc2626;">Order Cancelled</h2>
+        <div class="alert-box">
+          <h3 style="margin: 0 0 10px 0;">❌ Your order has been cancelled</h3>
+          <p style="margin: 0 0 10px 0;"><strong>Reason:</strong> ${data.cancellationReason || 'Order cancelled by store administrator'}</p>
+          ${data.cancellationNote ? `<p style="margin: 0;"><strong>Additional Information:</strong> ${data.cancellationNote}</p>` : ''}
+        </div>
+      ` : `
+        <h2>Order ${status === 'confirmed' ? 'Confirmed' : 'Confirmation'}</h2>
+      `}
+      
       <p>Dear ${customer.firstName || ''} ${customer.lastName || ''},</p>
-      <p>Thank you for your order. We're pleased to confirm that we've received your order and it's being processed.</p>
+      <p>${status === 'cancelled' ? 'We regret to inform you that your order has been cancelled. Here are the details:' : 'Thank you for your order. We\'re pleased to confirm that we\'ve received your order and it\'s being processed.'}</p>
 
       <div class="order-info">
         <p><strong>Order Reference:</strong> ${orderReference || 'N/A'}</p>
@@ -192,15 +217,22 @@ function customerOrderTemplate(data) {
         </tbody>
       </table>
 
-      <h3>Shipping Information</h3>
-      <p>${customer.firstName || ''} ${customer.lastName || ''}<br>
-      ${customer.address || 'N/A'}<br>
-      ${customer.city ? customer.city + ', ' : ''}${customer.state ? customer.state + ' ' : ''}${customer.postalCode || ''}<br>
-      Phone: ${customer.phone || 'N/A'}</p>
+      ${status !== 'cancelled' ? `
+        <h3>Shipping Information</h3>
+        <p>${customer.firstName || ''} ${customer.lastName || ''}<br>
+        ${customer.address || 'N/A'}<br>
+        ${customer.city ? customer.city + ', ' : ''}${customer.state ? customer.state + ' ' : ''}${customer.postalCode || ''}<br>
+        Phone: ${customer.phone || 'N/A'}</p>
+      ` : `
+        <div class="refund-box">
+          <h3 style="margin: 0 0 10px 0; color: #92400e;">💳 Refund Information</h3>
+          <p style="margin: 0;">If you have already made the payment, a full refund will be processed within 5-7 business days to your original payment method.</p>
+        </div>
+      `}
 
-      <p>If you have any questions about your order, please contact our customer service team at <a href="mailto:nazakat2407@gmail.com">nazakat2407@gmail.com</a> or call us at +91 93102 50047.</p>
+      <p>If you have any questions${status === 'cancelled' ? ' or would like to place a new order' : ' about your order'}, please contact our customer service team at <a href="mailto:nazakat2407@gmail.com">nazakat2407@gmail.com</a> or call us at +91 93102 50047.</p>
 
-      <p>Thank you for shopping with Royal Meenakari!</p>
+      <p>Thank you for ${status === 'cancelled' ? 'your understanding' : 'shopping with Royal Meenakari'}!</p>
 
       <div class="footer">
         <p>&copy; 2025 Royal Meenakari. All Rights Reserved.</p>
