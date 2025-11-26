@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return false;
     }
 
-    // Load cart items from Firebase for logged in users
+    // Load cart items from Firebase for logged in users - WITH 5 SECOND TIMEOUT
     async function loadCartFromFirebase() {
         try {
             if (!firebase.auth || !firebase.auth().currentUser) {
@@ -244,44 +244,75 @@ document.addEventListener('DOMContentLoaded', function() {
                 return [];
             }
 
-            console.log('Loading cart from Firebase...');
+            console.log('Loading cart from Firebase with 5-second timeout...');
+
+            // Create a timeout promise that rejects after 5 seconds
+            const timeoutPromise = new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    reject(new Error('Firebase cart loading timed out after 5 seconds'));
+                }, 5000);
+            });
 
             // Try to use FirebaseCartManager directly if available
             if (typeof FirebaseCartManager !== 'undefined' && typeof FirebaseCartManager.getItems === 'function') {
-                console.log('Using FirebaseCartManager directly');
-                const result = await FirebaseCartManager.getItems();
-                console.log('FirebaseCartManager result:', result);
+                console.log('Using FirebaseCartManager directly with timeout protection');
+                try {
+                    // Race between Firebase call and timeout - whichever finishes first wins
+                    const result = await Promise.race([
+                        FirebaseCartManager.getItems(),
+                        timeoutPromise
+                    ]);
+                    console.log('FirebaseCartManager result received within timeout:', result);
 
-                if (result && result.success && result.items) {
-                    console.log('Firebase cart loaded successfully:', result.items.length, 'items');
-                    return result.items;
-                } else if (result && result.items) {
-                    // Handle case where success flag might be missing but items exist
-                    console.log('Firebase cart loaded (no success flag):', result.items.length, 'items');
-                    return result.items;
-                } else {
-                    console.log('Firebase cart is empty or failed to load');
-                    return [];
+                    if (result && result.success && result.items) {
+                        console.log('✅ Firebase cart loaded successfully:', result.items.length, 'items');
+                        return result.items;
+                    } else if (result && result.items) {
+                        // Handle case where success flag might be missing but items exist
+                        console.log('✅ Firebase cart loaded (no success flag):', result.items.length, 'items');
+                        return result.items;
+                    } else {
+                        console.log('Firebase cart is empty or failed to load');
+                        return [];
+                    }
+                } catch (timeoutError) {
+                    if (timeoutError.message.includes('timed out')) {
+                        console.warn('⏱️ Firebase cart loading timed out after 5 seconds, falling back to localStorage');
+                        return []; // Will trigger fallback to localStorage in calling function
+                    }
+                    throw timeoutError;
                 }
             }
             // Fallback to firebaseCartModule if available
             else if (firebaseCartModule && firebaseCartModule.loadCartFromFirebase) {
-                console.log('Using firebaseCartModule wrapper');
-                const result = await firebaseCartModule.loadCartFromFirebase();
+                console.log('Using firebaseCartModule wrapper with timeout protection');
+                try {
+                    const result = await Promise.race([
+                        firebaseCartModule.loadCartFromFirebase(),
+                        timeoutPromise
+                    ]);
 
-                if (result && result.success && result.items) {
-                    console.log('Cart loaded from Firebase using wrapper:', result.items.length, 'items');
-                    return result.items;
-                } else {
-                    console.log('Firebase cart is empty (from wrapper)');
-                    return [];
+                    if (result && result.success && result.items) {
+                        console.log('✅ Cart loaded from Firebase using wrapper:', result.items.length, 'items');
+                        return result.items;
+                    } else {
+                        console.log('Firebase cart is empty (from wrapper)');
+                        return [];
+                    }
+                } catch (timeoutError) {
+                    if (timeoutError.message.includes('timed out')) {
+                        console.warn('⏱️ Firebase cart wrapper timed out after 5 seconds, falling back to localStorage');
+                        return []; // Will trigger fallback to localStorage in calling function
+                    }
+                    throw timeoutError;
                 }
             } else {
                 console.log('No Firebase cart methods available');
                 return [];
             }
         } catch (error) {
-            console.error('Error in loadCartFromFirebase:', error);
+            console.error('❌ Error in loadCartFromFirebase:', error.message);
+            console.log('📦 Will fallback to localStorage');
             return [];
         }
     }
