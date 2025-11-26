@@ -80,27 +80,40 @@ async function enrichOrderDataWithCurrency(orderData) {
         if (originalOrder) {
           console.log('✓ Found original order');
           console.log('Original order userSelectedCurrency:', originalOrder.userSelectedCurrency);
+          console.log('Original order products:', originalOrder.products ? originalOrder.products.length : 0);
           
           if (originalOrder.userSelectedCurrency) {
             console.log('✓ Found userSelectedCurrency in original order:', originalOrder.userSelectedCurrency);
             orderData.userSelectedCurrency = originalOrder.userSelectedCurrency;
             
-            // Also copy over priceDisplay and orderTotalDisplay if missing
-            if (!orderData.orderTotalDisplay && originalOrder.orderTotalDisplay) {
-              orderData.orderTotalDisplay = originalOrder.orderTotalDisplay;
-              console.log('✓ Copied orderTotalDisplay:', originalOrder.orderTotalDisplay);
+            // CRITICAL: Replace products with original order products to get correct priceDisplay/totalDisplay
+            if (originalOrder.products && originalOrder.products.length > 0) {
+              console.log('🔄 Replacing products with original order products to preserve priceDisplay/totalDisplay');
+              orderData.products = originalOrder.products.map(product => ({
+                ...product,
+                name: product.name || product.productName,
+                price: product.price,
+                quantity: product.quantity,
+                priceDisplay: product.priceDisplay,
+                totalDisplay: product.totalDisplay,
+                total: product.total
+              }));
+              console.log(`✓ Replaced ${orderData.products.length} products with original data`);
+              console.log('First product after replacement:', {
+                name: orderData.products[0].name,
+                priceDisplay: orderData.products[0].priceDisplay,
+                totalDisplay: orderData.products[0].totalDisplay
+              });
             }
             
-            // Ensure products have priceDisplay
-            if (orderData.products && originalOrder.products) {
-              orderData.products = orderData.products.map((product, index) => {
-                if (!product.priceDisplay && originalOrder.products[index]) {
-                  product.priceDisplay = originalOrder.products[index].priceDisplay;
-                  product.totalDisplay = originalOrder.products[index].totalDisplay;
-                  console.log(`✓ Copied prices for product ${index}: priceDisplay=${product.priceDisplay}`);
-                }
-                return product;
-              });
+            // Also copy over orderTotal and orderTotalDisplay if missing
+            if (originalOrder.orderTotal) {
+              orderData.orderTotal = originalOrder.orderTotal;
+              console.log('✓ Copied orderTotal:', originalOrder.orderTotal);
+            }
+            if (originalOrder.orderTotalDisplay) {
+              orderData.orderTotalDisplay = originalOrder.orderTotalDisplay;
+              console.log('✓ Copied orderTotalDisplay:', originalOrder.orderTotalDisplay);
             }
           } else {
             console.warn('⚠️ Original order found but NO userSelectedCurrency in original order');
