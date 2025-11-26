@@ -4723,26 +4723,39 @@
 
                 showGlobalLoader('Updating delivery status and sending confirmation email...');
 
-                // Get the current order data from Firebase
-                const orderSnapshot = await db.collection('users')
-                    .doc(userId)
-                    .collection('orders')
-                    .doc(orderId)
-                    .get();
+                // Find the order to check if it's a guest order
+                const order = allOrders.find(o => o.orderId === orderId && o.userId === userId);
+                const isGuestOrder = order && order.isGuestOrder;
+                console.log(`Order is guest order: ${isGuestOrder}`);
 
+                // Build the correct document reference based on order type
+                let orderDocRef;
+                if (isGuestOrder) {
+                    // Guest orders are stored at root level
+                    orderDocRef = db.collection('guest-orders').doc(orderId);
+                } else {
+                    // Authenticated user orders are in subcollection
+                    orderDocRef = db.collection('users')
+                        .doc(userId)
+                        .collection('orders')
+                        .doc(orderId);
+                }
+
+                // Get the current order data from Firebase
+                const orderSnapshot = await orderDocRef.get();
                 const orderData = orderSnapshot.data();
 
+                if (!orderSnapshot.exists) {
+                    throw new Error('Order not found');
+                }
+
                 // Update order in Firebase
-                await db.collection('users')
-                    .doc(userId)
-                    .collection('orders')
-                    .doc(orderId)
-                    .update({
-                        deliveryStatus: 'delivered',
-                        deliveredAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        deliveredBy: 'admin',
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
+                await orderDocRef.update({
+                    deliveryStatus: 'delivered',
+                    deliveredAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    deliveredBy: 'admin',
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
 
                 // Send delivery confirmation email
                 try {
