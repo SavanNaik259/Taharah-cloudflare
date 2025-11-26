@@ -3412,7 +3412,7 @@
             console.log(`✅ Created demo data: ${allOrders.length} orders, ${allCustomers.length} customers`);
         }
 
-        // Load orders from Firebase - EXACT copy from working admin-dashboard.html
+        // Load orders from Firebase - Now includes both user and guest orders
         async function loadOrders() {
             try {
                 console.log('Loading orders from Firestore...');
@@ -3435,69 +3435,62 @@
                     document.getElementById('orders-section-table').style.display = 'none';
                 }
 
-                const usersSnapshot = await db.collection('users').get();
-                console.log(`Found ${usersSnapshot.size} users in Firestore`);
-
                 allOrders = [];
                 newOrders = [];
                 confirmedOrders = [];
                 cancelledOrders = [];
 
-                if (usersSnapshot.size === 0) {
-                    console.log('⚠️ No users found in Firestore - this means no customers have registered yet');
+                // Fetch ALL orders (both user and guest) using the new function
+                const allOrdersResult = await window.firebaseOrdersModule.getAllOrders();
+                
+                if (!allOrdersResult.success) {
+                    throw new Error(allOrdersResult.error || 'Failed to fetch orders');
                 }
 
-                for (const userDoc of usersSnapshot.docs) {
-                    const userId = userDoc.id;
-                    console.log(`🔍 Checking orders for user: ${userId}`);
-                    const ordersSnapshot = await userDoc.ref.collection('orders').get();
+                const fetchedOrders = allOrdersResult.orders || [];
+                console.log(`📦 Fetched ${fetchedOrders.length} total orders (including guest orders)`);
 
-                    console.log(`📝 Found ${ordersSnapshot.size} orders for user ${userId}`);
+                fetchedOrders.forEach(orderData => {
+                    // Process order data with comprehensive fallbacks
+                    const processedOrder = {
+                        orderId: orderData.id,
+                        userId: orderData.userId,
+                        isGuestOrder: orderData.isGuestOrder || false,
+                        orderReference: orderData.orderReference || orderData.id || orderData.id,
+                        date: orderData.timestamp?.toDate?.() ||
+                              (orderData.orderDate ? new Date(orderData.orderDate) : new Date()),
+                        amount: calculateOrderAmount(orderData),
+                        customerName: extractCustomerName(orderData),
+                        customerEmail: extractCustomerEmail(orderData),
+                        customerPhone: extractCustomerPhone(orderData),
+                        customerAddress: extractCustomerAddress(orderData),
+                        paymentMethod: orderData.paymentMethod || 'Not specified',
+                        products: orderData.products || orderData.items || [],
+                        notes: orderData.notes || orderData.specialInstructions || '',
+                        status: orderData.status || 'pending',
+                        deliveryStatus: orderData.deliveryStatus || 'pending'
+                    };
 
-                    ordersSnapshot.forEach(orderDoc => {
-                        const orderData = orderDoc.data();
+                    allOrders.push(processedOrder);
 
-                        // Process order data with comprehensive fallbacks
-                        const processedOrder = {
-                            orderId: orderDoc.id,
-                            userId: userId,
-                            orderReference: orderData.orderReference || orderData.id || orderDoc.id,
-                            date: orderData.timestamp?.toDate() ||
-                                  (orderData.createdAt ? new Date(orderData.createdAt) : new Date()),
-                            amount: calculateOrderAmount(orderData),
-                            customerName: extractCustomerName(orderData),
-                            customerEmail: extractCustomerEmail(orderData),
-                            customerPhone: extractCustomerPhone(orderData),
-                            customerAddress: extractCustomerAddress(orderData),
-                            paymentMethod: orderData.paymentMethod || 'Not specified',
-                            products: orderData.products || orderData.items || [],
-                            notes: orderData.notes || orderData.specialInstructions || '',
-                            status: orderData.status || 'pending', // Default status
-                            deliveryStatus: orderData.deliveryStatus || 'pending' // Add delivery status
-                        };
-
-                        allOrders.push(processedOrder);
-
-                        // Categorize orders by status with proper error handling
-                        try {
-                            if (orderData.status === 'confirmed' || processedOrder.adminConfirmed) {
-                                processedOrder.status = 'confirmed';
-                                confirmedOrders.push(processedOrder);
-                            } else if (orderData.status === 'cancelled') {
-                                processedOrder.status = 'cancelled';
-                                cancelledOrders.push(processedOrder);
-                            } else {
-                                processedOrder.status = 'pending';
-                                newOrders.push(processedOrder);
-                            }
-                        } catch (statusError) {
-                            console.warn('Error categorizing order:', statusError);
-                            // Default to pending order if there's an issue
+                    // Categorize orders by status
+                    try {
+                        if (orderData.status === 'confirmed' || processedOrder.adminConfirmed) {
+                            processedOrder.status = 'confirmed';
+                            confirmedOrders.push(processedOrder);
+                        } else if (orderData.status === 'cancelled') {
+                            processedOrder.status = 'cancelled';
+                            cancelledOrders.push(processedOrder);
+                        } else {
                             processedOrder.status = 'pending';
                             newOrders.push(processedOrder);
                         }
-                    });
-                }
+                    } catch (statusError) {
+                        console.warn('Error categorizing order:', statusError);
+                        processedOrder.status = 'pending';
+                        newOrders.push(processedOrder);
+                    }
+                });
 
                 console.log(`✅ Loaded ${allOrders.length} total orders from Firebase`);
                 console.log(`✅ New orders: ${newOrders.length}, Confirmed orders: ${confirmedOrders.length}, Cancelled orders: ${cancelledOrders.length}`);

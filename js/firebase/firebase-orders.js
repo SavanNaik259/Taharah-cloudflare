@@ -38,19 +38,6 @@ function checkOrderAuthRequirement() {
  */
 async function saveOrderToFirebase(orderData) {
     try {
-        // Check if user is authenticated
-        const user = firebase.auth().currentUser;
-        if (!user) {
-            console.log('User not authenticated, cannot save order to Firebase');
-            return {
-                success: false,
-                requiresAuth: true,
-                error: 'Authentication required for order placement'
-            };
-        }
-        
-        console.log('User authenticated, proceeding with Firebase order save for user:', user.uid);
-        
         // Validate orderData
         if (!orderData || !orderData.customer || !orderData.products) {
             console.error('Invalid order data structure');
@@ -60,29 +47,42 @@ async function saveOrderToFirebase(orderData) {
             };
         }
         
+        // Check if user is authenticated
+        const user = firebase.auth().currentUser;
+        
         // Create a clean copy of order data for Firebase
         const firebaseOrderData = {
             ...orderData,
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            userId: user.uid,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            userId: user ? user.uid : 'guest',
+            isGuestOrder: !user
         };
-        
-        // Create a new order document in the user's orders collection
-        const userOrdersRef = firebase.firestore().collection('users').doc(user.uid).collection('orders');
         
         console.log('Attempting to save order to Firebase with data:', {
             orderReference: firebaseOrderData.orderReference,
             paymentMethod: firebaseOrderData.paymentMethod,
             paymentStatus: firebaseOrderData.paymentStatus,
             totalAmount: firebaseOrderData.totalAmount,
-            itemCount: firebaseOrderData.products?.length || 0
+            itemCount: firebaseOrderData.products?.length || 0,
+            isGuestOrder: firebaseOrderData.isGuestOrder
         });
         
-        // Add order to Firestore
-        const orderRef = await userOrdersRef.add(firebaseOrderData);
+        let orderRef;
         
-        console.log('Successfully saved order to Firebase with ID:', orderRef.id);
+        if (user) {
+            // Authenticated user - save to user's orders collection
+            console.log('User authenticated, saving to user orders collection:', user.uid);
+            const userOrdersRef = firebase.firestore().collection('users').doc(user.uid).collection('orders');
+            orderRef = await userOrdersRef.add(firebaseOrderData);
+        } else {
+            // Guest order - save to root guest-orders collection
+            console.log('Guest order detected, saving to root guest-orders collection');
+            const guestOrdersRef = firebase.firestore().collection('guest-orders');
+            orderRef = await guestOrdersRef.add(firebaseOrderData);
+        }
+        
+        console.log('Successfully saved order to Firebase with ID:', orderRef.id, 'isGuest:', !user);
         
         return {
             success: true,
@@ -197,12 +197,79 @@ async function getUserOrders() {
     }
 }
 
+/**
+ * Get ALL orders from Firebase (both user and guest orders)
+ * For admin panel to display all orders
+ * @returns {Promise<Object>} Success status and all orders
+ */
+async function getAllOrders() {
+    try {
+        const allOrders = [];
+        
+        // Get all user orders
+        console.log('Fetching all user orders for admin...');
+        const usersSnapshot = await firebase.firestore().collection('users').get();
+        
+        for (const userDoc of usersSnapshot.docs) {
+            const userId = userDoc.id;
+            const userOrdersSnapshot = await userDoc.ref.collection('orders').get();
+            
+            userOrdersSnapshot.forEach(orderDoc => {
+                const data = orderDoc.data();
+                allOrders.push({
+                    id: orderDoc.id,
+                    userId: userId,
+                    isGuestOrder: false,
+                    ...data,
+                    orderDate: data.timestamp ? data.timestamp.toDate().toISOString() : new Date().toISOString()
+                });
+            });
+        }
+        
+        // Get all guest orders
+        console.log('Fetching all guest orders for admin...');
+        const guestOrdersSnapshot = await firebase.firestore().collection('guest-orders').get();
+        
+        guestOrdersSnapshot.forEach(orderDoc => {
+            const data = orderDoc.data();
+            allOrders.push({
+                id: orderDoc.id,
+                userId: 'guest',
+                isGuestOrder: true,
+                ...data,
+                orderDate: data.timestamp ? data.timestamp.toDate().toISOString() : new Date().toISOString()
+            });
+        });
+        
+        // Sort by timestamp descending
+        allOrders.sort((a, b) => {
+            const aTime = new Date(a.orderDate).getTime();
+            const bTime = new Date(b.orderDate).getTime();
+            return bTime - aTime;
+        });
+        
+        console.log('Successfully fetched all orders:', allOrders.length, '(User orders:', usersSnapshot.size, ', Guest orders:', guestOrdersSnapshot.size, ')');
+        
+        return {
+            success: true,
+            orders: allOrders
+        };
+    } catch (error) {
+        console.error('Error getting all orders:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
 // Create global object to expose functions
 window.firebaseOrdersModule = {
     checkOrderAuthRequirement,
     saveOrderToFirebase,
     updateOrderPaymentStatus,
-    getUserOrders
+    getUserOrders,
+    getAllOrders
 };
 
 // Log that the module is loaded
