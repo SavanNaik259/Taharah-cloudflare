@@ -444,6 +444,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 await new Promise(resolve => setTimeout(resolve, minimumLoadingTime - elapsedTime));
             }
 
+            // CRITICAL: Hide loading state on error
+            hideLoadingState();
+            console.log('🔴 Error occurred - loading state hidden');
+
             // Ultimate fallback
             console.log('Error encountered, showing empty cart message');
             showEmptyCartMessage();
@@ -557,6 +561,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Add event listeners to quantity buttons
         setupQuantityControls(items);
+        
+        // CRITICAL: Hide loading state after products successfully displayed
+        hideLoadingState();
+        console.log('✅ Loading state hidden - products are now visible');
     }
 
     // Set up quantity control buttons
