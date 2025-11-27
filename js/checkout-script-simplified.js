@@ -1989,6 +1989,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Guest address notice shown');
             }
 
+            // Add refresh button event listener
+            const refreshBtn = document.getElementById('refreshOrderSummary');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', async function() {
+                    console.log('🔄 User clicked refresh - reloading cart');
+                    showLoadingState();
+                    await loadCartItems();
+                });
+            }
+
             // Start at step 1
             goToStep(1);
 
