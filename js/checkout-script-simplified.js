@@ -562,9 +562,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add event listeners to quantity buttons
         setupQuantityControls(items);
         
-        // CRITICAL: Hide loading state after products successfully displayed
-        hideLoadingState();
-        console.log('✅ Loading state hidden - products are now visible');
+        console.log('✅ Cart items displayed successfully');
     }
 
     // Set up quantity control buttons
@@ -834,18 +832,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Hide loading state for order summary - CRITICAL FIX
+    // Hide loading state for order summary - ONLY clear spinner, not products
     function hideLoadingState() {
-        console.log('🔵 Hiding loading state - clearing spinner and loading message');
+        console.log('🔵 Hiding loading state - clearing spinner');
         
-        if (orderSummaryContainer) {
-            orderSummaryContainer.innerHTML = '';
-            console.log('Loading state HTML cleared from order summary container');
-        }
-        
-        if (orderTotalElement) {
-            orderTotalElement.textContent = ''; 
-            console.log('Order total cleared');
+        // Find and remove ONLY the spinner element, not the entire container
+        const spinner = document.querySelector('.checkout-loading-state');
+        if (spinner) {
+            spinner.remove();
+            console.log('Loading spinner removed');
         }
     }
 
