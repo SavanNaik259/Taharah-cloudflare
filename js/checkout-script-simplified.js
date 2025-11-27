@@ -826,6 +826,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Hide loading state for order summary - CRITICAL FIX
+    function hideLoadingState() {
+        console.log('🔵 Hiding loading state - clearing spinner and loading message');
+        
+        if (orderSummaryContainer) {
+            orderSummaryContainer.innerHTML = '';
+            console.log('Loading state HTML cleared from order summary container');
+        }
+        
+        if (orderTotalElement) {
+            orderTotalElement.textContent = ''; 
+            console.log('Order total cleared');
+        }
+    }
+
     // Show empty cart message
     function showEmptyCartMessage() {
         // Don't show empty message during loading - keep the loading state
@@ -833,6 +848,9 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Skipping empty cart message during loading');
             return;
         }
+
+        // First hide the loading state
+        hideLoadingState();
 
         if (orderSummaryContainer) {
             orderSummaryContainer.innerHTML = '<p class="text-center text-muted">Your cart is empty. Please add some products before checkout.</p>';
