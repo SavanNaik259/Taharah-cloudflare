@@ -562,6 +562,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add event listeners to quantity buttons
         setupQuantityControls(items);
         
+        // Hide loading state after products are displayed
+        hideLoadingState();
         console.log('✅ Cart items displayed successfully');
     }
 
@@ -836,11 +838,21 @@ document.addEventListener('DOMContentLoaded', function() {
     function hideLoadingState() {
         console.log('🔵 Hiding loading state - clearing spinner');
         
-        // Find and remove ONLY the spinner element, not the entire container
+        // Find and remove the entire loading state div
         const spinner = document.querySelector('.checkout-loading-state');
         if (spinner) {
-            spinner.remove();
+            // Remove the parent element that contains the spinner
+            spinner.parentElement?.removeChild(spinner);
             console.log('Loading spinner removed');
+        }
+        
+        // If loading state wasn't found, clear the container and let products show
+        if (orderSummaryContainer && !orderSummaryContainer.querySelector('.checkout-loading-state')) {
+            // Remove any default "no products" message that might be lingering
+            const noProductsMsg = orderSummaryContainer.querySelector('p');
+            if (noProductsMsg && noProductsMsg.textContent.includes('No products')) {
+                noProductsMsg.remove();
+            }
         }
     }
 
