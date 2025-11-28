@@ -96,7 +96,7 @@ exports.handler = async (event, context) => {
         if (updatedProduct) {
           console.log(`📉 Triggering PRICE-DROP notification for ${productId}`);
           
-          await fetch(process.env.SITE_URL + '/.netlify/functions/auto-price-drop-alerts', {
+          await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-price-drop-alerts', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

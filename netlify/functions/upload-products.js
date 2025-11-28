@@ -144,7 +144,7 @@ exports.handler = async (event, context) => {
           if (product.id || product.productId) {
             console.log(`⭐ Triggering NEW-PRODUCT notification for ${product.name}`);
             try {
-              await fetch(process.env.SITE_URL + '/.netlify/functions/auto-new-product-alerts', {
+              await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-new-product-alerts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

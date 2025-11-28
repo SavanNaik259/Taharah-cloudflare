@@ -110,7 +110,7 @@ exports.handler = async (event, context) => {
         if (previousStock === 0 && newStock > 0) {
           console.log(`📦 Triggering BACK-IN-STOCK notification for ${productId}`);
           try {
-            await fetch(process.env.SITE_URL + '/.netlify/functions/auto-back-in-stock-alerts', {
+            await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-back-in-stock-alerts', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -129,7 +129,7 @@ exports.handler = async (event, context) => {
         if (newStock <= 3 && newStock > 0) {
           console.log(`⚡ Triggering LOW-STOCK notification for ${productId} (${newStock} items left)`);
           try {
-            await fetch(process.env.SITE_URL + '/.netlify/functions/auto-low-stock-alerts', {
+            await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-low-stock-alerts', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
