@@ -67,6 +67,31 @@
 
   <!-- Main Container -->
   <div class="admin-container">
+    <!-- User Statistics Section -->
+    <div class="row mb-4" id="userStatsContainer">
+      <div class="col-md-4">
+        <div class="stats-box">
+          <div class="stat-number" id="loggedInUsersCount">0</div>
+          <div class="stat-label">👤 Logged-in Users</div>
+          <small style="color: #999;">With notifications enabled</small>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stats-box">
+          <div class="stat-number" id="guestTokensCount">0</div>
+          <div class="stat-label">🌐 Guest Devices</div>
+          <small style="color: #999;">Anonymous users</small>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stats-box">
+          <div class="stat-number" id="totalOptedInCount">0</div>
+          <div class="stat-label">✅ Total Opted-in</div>
+          <small style="color: #999;">All users + guests</small>
+        </div>
+      </div>
+    </div>
+
     <!-- Tabs -->
     <ul class="nav nav-tabs mb-4" role="tablist">
       <li class="nav-item">
@@ -77,6 +102,11 @@
       <li class="nav-item">
         <a class="nav-link" id="auto-tab" data-bs-toggle="tab" href="#auto-rules" role="tab">
           <i class="fas fa-bolt"></i> Automatic Rules
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="users-tab" data-bs-toggle="tab" href="#users-list" role="tab">
+          <i class="fas fa-users"></i> Opted-in Users
         </a>
       </li>
     </ul>
@@ -195,6 +225,34 @@
         <button class="btn btn-success mt-3" onclick="saveAutoRules()">
           <i class="fas fa-save"></i> Save Rules
         </button>
+      </div>
+
+      <!-- TAB 3: Opted-in Users List -->
+      <div class="tab-pane fade" id="users-list" role="tabpanel">
+        <h4 style="margin-bottom: 10px;">Notification Opt-in History</h4>
+        <p style="color: #999; margin-bottom: 30px;">Users and devices that have enabled push notifications</p>
+
+        <!-- Filter Options -->
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <select id="userTypeFilter" class="form-select" onchange="filterUsersList()">
+              <option value="all">All Users</option>
+              <option value="logged-in">Logged-in Users Only</option>
+              <option value="guests">Guest Devices Only</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <input type="text" id="userSearchInput" class="form-control" placeholder="🔍 Search by email or device ID...">
+          </div>
+        </div>
+
+        <!-- Users List -->
+        <div id="usersList" style="max-height: 500px; overflow-y: auto;">
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            <p style="margin-top: 20px; color: #999;">Loading users...</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -481,10 +539,121 @@
       });
     });
 
+    // Load User Statistics
+    async function loadUserStatistics() {
+      try {
+        // Count logged-in users with notifications
+        const usersSnapshot = await db.collection('users')
+          .where('notificationsEnabled', '==', true)
+          .get();
+        const loggedInCount = usersSnapshot.size;
+
+        // Count guest tokens
+        const guestSnapshot = await db.collection('guest_tokens').get();
+        const guestCount = guestSnapshot.size;
+
+        // Update display
+        document.getElementById('loggedInUsersCount').textContent = loggedInCount;
+        document.getElementById('guestTokensCount').textContent = guestCount;
+        document.getElementById('totalOptedInCount').textContent = loggedInCount + guestCount;
+
+        console.log(`✅ User Stats: ${loggedInCount} logged-in + ${guestCount} guests = ${loggedInCount + guestCount} total`);
+      } catch (error) {
+        console.error('Error loading user statistics:', error);
+      }
+    }
+
+    // Load and Display Users
+    let allUsers = [];
+    async function loadUsersList() {
+      try {
+        allUsers = [];
+        
+        // Load logged-in users
+        const usersSnapshot = await db.collection('users')
+          .where('notificationsEnabled', '==', true)
+          .orderBy('lastTokenUpdate', 'desc')
+          .get();
+
+        usersSnapshot.forEach(doc => {
+          allUsers.push({
+            type: 'logged-in',
+            id: doc.id,
+            data: doc.data()
+          });
+        });
+
+        // Load guest devices
+        const guestSnapshot = await db.collection('guest_tokens').orderBy('lastUpdate', 'desc').get();
+        guestSnapshot.forEach(doc => {
+          allUsers.push({
+            type: 'guest',
+            id: doc.id,
+            data: doc.data()
+          });
+        });
+
+        displayUsersList(allUsers);
+      } catch (error) {
+        console.error('Error loading users:', error);
+        document.getElementById('usersList').innerHTML = '<p>Error loading users. Check console.</p>';
+      }
+    }
+
+    function displayUsersList(users) {
+      const list = document.getElementById('usersList');
+      
+      if (users.length === 0) {
+        list.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>No opted-in users yet</p></div>';
+        return;
+      }
+
+      list.innerHTML = users.map(user => `
+        <div class="campaign-card" style="margin-bottom: 15px;">
+          <div class="campaign-info">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+              <div>
+                <h5 class="campaign-title">${user.type === 'logged-in' ? '👤 ' + (user.data.email || 'User ' + user.id.substr(0,8)) : '🌐 Guest Device'}</h5>
+                <p class="campaign-desc">Device/User ID: <code style="font-size: 11px; color: #666;">${user.id}</code></p>
+                <small style="color: #999;">
+                  Tokens: ${(user.data.fcmTokens || user.data.tokens || []).length}<br>
+                  Last Update: ${user.data.lastTokenUpdate?.toDate?.().toLocaleString() || user.data.lastUpdate?.toDate?.().toLocaleString() || 'Unknown'}
+                </small>
+              </div>
+              <span class="badge ${user.type === 'logged-in' ? 'bg-success' : 'bg-info'}">${user.type === 'logged-in' ? 'Registered' : 'Guest'}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterUsersList() {
+      const type = document.getElementById('userTypeFilter').value;
+      const filtered = allUsers.filter(u => type === 'all' || u.type === (type === 'logged-in' ? 'logged-in' : 'guest'));
+      displayUsersList(filtered);
+    }
+
+    document.getElementById('userSearchInput').addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase();
+      const filtered = allUsers.filter(u => {
+        const email = (u.data.email || '').toLowerCase();
+        const id = u.id.toLowerCase();
+        return email.includes(term) || id.includes(term);
+      });
+      displayUsersList(filtered);
+    });
+
     // Load on Page Load
     document.addEventListener('DOMContentLoaded', () => {
       loadCampaigns();
       updateCampaignStats();
+      loadUserStatistics();
+      loadUsersList();
+      
+      // Refresh stats every 30 seconds
+      setInterval(() => {
+        loadUserStatistics();
+      }, 30000);
     });
   </script>
 </body>
