@@ -131,6 +131,40 @@ exports.handler = async (event, context) => {
 
     console.log(`File uploaded successfully: ${fileName}`);
 
+    // ✅ TRIGGER NEW PRODUCT NOTIFICATIONS
+    try {
+      const productsData = JSON.parse(fileContent);
+      
+      // Check if this is a product data file and notify about new products
+      if (Array.isArray(productsData) && productsData.length > 0) {
+        // Get the first few products to announce as new
+        const newProducts = productsData.slice(0, 3); // Announce up to 3 new products
+        
+        for (const product of newProducts) {
+          if (product.id || product.productId) {
+            console.log(`⭐ Triggering NEW-PRODUCT notification for ${product.name}`);
+            try {
+              await fetch(process.env.SITE_URL + '/.netlify/functions/auto-new-product-alerts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  productId: product.id || product.productId,
+                  productName: product.name || product.productName,
+                  productImage: product.image || product.productImage || ''
+                })
+              });
+              console.log(`✅ New-product notification sent for ${product.name}`);
+            } catch (notifError) {
+              console.error(`Error sending new-product notification for ${product.name}:`, notifError.message);
+            }
+          }
+        }
+      }
+    } catch (notificationError) {
+      console.error('Error triggering new product notifications:', notificationError.message);
+      // Don't fail the main operation
+    }
+
     return {
       statusCode: 200,
       headers,

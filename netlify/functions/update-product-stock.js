@@ -100,6 +100,57 @@ exports.handler = async (event, context) => {
 
     console.log(`Successfully updated ${category} products file with new stock for ${productId}`);
 
+    // ✅ TRIGGER NOTIFICATIONS FOR STOCK CHANGES
+    try {
+      // Find the updated product to get details
+      const updatedProduct = products.find(p => p.id === productId || p.productId === productId);
+      
+      if (updatedProduct) {
+        // BACK-IN-STOCK: If stock went from 0 to available
+        if (previousStock === 0 && newStock > 0) {
+          console.log(`📦 Triggering BACK-IN-STOCK notification for ${productId}`);
+          try {
+            await fetch(process.env.SITE_URL + '/.netlify/functions/auto-back-in-stock-alerts', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                productId: productId,
+                productName: updatedProduct.name || updatedProduct.productName,
+                productImage: updatedProduct.image || updatedProduct.productImage || ''
+              })
+            });
+            console.log(`✅ Back-in-stock notification sent for ${productId}`);
+          } catch (notifError) {
+            console.error('Error sending back-in-stock notification:', notifError.message);
+          }
+        }
+        
+        // LOW-STOCK: If stock dropped to 3 or below
+        if (newStock <= 3 && newStock > 0) {
+          console.log(`⚡ Triggering LOW-STOCK notification for ${productId} (${newStock} items left)`);
+          try {
+            await fetch(process.env.SITE_URL + '/.netlify/functions/auto-low-stock-alerts', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                productId: productId,
+                productName: updatedProduct.name || updatedProduct.productName,
+                productImage: updatedProduct.image || updatedProduct.productImage || '',
+                stockRemaining: newStock,
+                threshold: 3
+              })
+            });
+            console.log(`✅ Low-stock notification sent for ${productId}`);
+          } catch (notifError) {
+            console.error('Error sending low-stock notification:', notifError.message);
+          }
+        }
+      }
+    } catch (notificationError) {
+      console.error('Error triggering stock notifications:', notificationError.message);
+      // Don't fail the main operation
+    }
+
     // Log stock update for audit trail
     try {
       const auditLog = {
