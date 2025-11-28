@@ -197,6 +197,73 @@ background-color: #000 !important;
     <link rel="stylesheet" href="css/search.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/hero-slider.css?v=1.0.0">
+    
+    <!-- Notification Opt-in Banner Styles -->
+    <style>
+      .notification-opt-in-banner {
+        background: linear-gradient(135deg, #603000 0%, #8b4513 100%);
+        padding: 15px 20px;
+        color: white;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        z-index: 100;
+        animation: slideDown 0.3s ease;
+      }
+      @keyframes slideDown {
+        from { transform: translateY(-100%); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+      .notification-banner-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+      .notification-banner-text {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        flex: 1;
+      }
+      .notification-opt-in-btn {
+        background: #ff9800;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 13px;
+        transition: background 0.3s;
+      }
+      .notification-opt-in-btn:hover {
+        background: #ffb833;
+      }
+      .notification-dismiss-btn {
+        background: transparent;
+        color: white;
+        border: 1px solid white;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        transition: all 0.3s;
+      }
+      .notification-dismiss-btn:hover {
+        background: rgba(255,255,255,0.1);
+      }
+      @media (max-width: 768px) {
+        .notification-banner-content {
+          flex-direction: column;
+          gap: 10px;
+        }
+        .notification-opt-in-btn, .notification-dismiss-btn {
+          width: 100%;
+        }
+      }
+    </style>
     <link rel="stylesheet" href="css/about.css?v=1.0.0">
     <link rel="stylesheet" href="css/featured-collection-section.css?v=1.0.0">
     <link rel="stylesheet" href="css/product-loader.css?v=1.0.0">
@@ -296,6 +363,22 @@ background-color: #000 !important;
         <!-- Promo Banner -->
         <div class="promo-banner">
             <p class="banner-text"></p>
+        </div>
+
+        <!-- Notification Opt-in Banner -->
+        <div id="notificationBanner" class="notification-opt-in-banner" style="display: none;">
+            <div class="notification-banner-content">
+                <div class="notification-banner-text">
+                    <i class="fas fa-bell" style="font-size: 18px; margin-right: 10px; color: #ff9800;"></i>
+                    <span>Get exclusive deals, restocks, and price drop alerts delivered directly to you!</span>
+                </div>
+                <button class="notification-opt-in-btn" onclick="enableNotifications()">
+                    Enable Notifications
+                </button>
+                <button class="notification-dismiss-btn" onclick="dismissNotificationBanner()">
+                    Not Now
+                </button>
+            </div>
         </div>
 
         <!-- New Responsive Navigation -->
@@ -2261,6 +2344,84 @@ background-color: #000 !important;
     <!-- Testimonial Script -->
     <script src="js/testimonial-scroller.js"></script>
     <script src="js/hero-slider.js"></script>
+
+    <!-- Notification Opt-in Script -->
+    <script>
+      // Show notification banner if user hasn't dismissed it
+      function showNotificationBanner() {
+        // Check if user already has notification permission or dismissed banner
+        const dismissed = localStorage.getItem('notificationBannerDismissed');
+        const hasPermission = localStorage.getItem('fcm_token');
+        
+        if (!dismissed && !hasPermission && 'Notification' in window) {
+          setTimeout(() => {
+            document.getElementById('notificationBanner').style.display = 'block';
+          }, 2000); // Show after 2 seconds
+        }
+      }
+
+      // Enable notifications
+      async function enableNotifications() {
+        try {
+          // Request permission
+          const permission = await Notification.requestPermission();
+          
+          if (permission === 'granted') {
+            console.log('✅ Notification permission granted by user');
+            
+            // Hide banner
+            document.getElementById('notificationBanner').style.display = 'none';
+            localStorage.setItem('notificationBannerDismissed', 'true');
+            
+            // Generate and save token
+            const token = `token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            localStorage.setItem('fcm_token', token);
+            
+            // Save to Firebase
+            const user = firebase.auth().currentUser;
+            const db = firebase.firestore();
+            
+            if (user) {
+              // Logged-in user
+              await db.collection('users').doc(user.uid).set({
+                fcmTokens: firebase.firestore.FieldValue.arrayUnion(token),
+                notificationsEnabled: true,
+                lastTokenUpdate: new Date()
+              }, { merge: true });
+              console.log('✅ Token saved for user:', user.uid);
+            } else {
+              // Guest user
+              const deviceId = localStorage.getItem('device_id') || `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+              localStorage.setItem('device_id', deviceId);
+              
+              await db.collection('guest_tokens').doc(deviceId).set({
+                tokens: firebase.firestore.FieldValue.arrayUnion(token),
+                lastUpdate: new Date()
+              }, { merge: true });
+              console.log('✅ Token saved for guest device:', deviceId);
+            }
+            
+            // Show success message
+            alert('✅ Notifications enabled! You\'ll now receive updates about deals, restocks, and price drops.');
+          } else {
+            console.log('⚠️ User denied notification permission');
+            alert('Notifications were denied. You can enable them in your browser settings.');
+          }
+        } catch (error) {
+          console.error('❌ Error enabling notifications:', error);
+          alert('Error enabling notifications. Please try again.');
+        }
+      }
+
+      // Dismiss banner
+      function dismissNotificationBanner() {
+        document.getElementById('notificationBanner').style.display = 'none';
+        localStorage.setItem('notificationBannerDismissed', 'true');
+      }
+
+      // Show banner when page loads
+      document.addEventListener('DOMContentLoaded', showNotificationBanner);
+    </script>
     <script src="js/product-scroll-auto.js"></script>
 
     <!-- About Section Learn More Script -->
