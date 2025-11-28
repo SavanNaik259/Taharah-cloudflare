@@ -36,9 +36,51 @@
     <!-- TAB 1: Manual Campaigns -->
     <div class="tab-content">
       <div class="tab-pane fade show active" id="manual-campaigns">
-        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#createCampaignModal">
-          <i class="fas fa-plus"></i> Create New Campaign
-        </button>
+        <div class="row mb-3">
+          <div class="col-md-8">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createCampaignModal">
+              <i class="fas fa-plus"></i> Create New Campaign
+            </button>
+          </div>
+          <div class="col-md-4">
+            <input type="text" id="campaignSearch" class="form-control" placeholder="Search campaigns...">
+          </div>
+        </div>
+
+        <div id="campaignStats" class="row mb-4" style="display: none;">
+          <div class="col-md-3">
+            <div class="card text-center">
+              <div class="card-body">
+                <h6 class="card-title">Total Sent</h6>
+                <h3 id="totalSent" style="color: #603000;">0</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card text-center">
+              <div class="card-body">
+                <h6 class="card-title">Total Opens</h6>
+                <h3 id="totalOpens" style="color: #ff9800;">0</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card text-center">
+              <div class="card-body">
+                <h6 class="card-title">Total Clicks</h6>
+                <h3 id="totalClicks" style="color: #9c27b0;">0</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card text-center">
+              <div class="card-body">
+                <h6 class="card-title">Click Rate</h6>
+                <h3 id="clickRate" style="color: #2196f3;">0%</h3>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div id="campaignsList">
           <p class="text-muted">Loading campaigns...</p>
@@ -413,3 +455,41 @@
   </script>
 </body>
 </html>
+
+    <script>
+      // Calculate and display statistics
+      async function updateCampaignStats() {
+        try {
+          const snapshot = await db.collection('promotions_manual').get();
+          let totalSent = 0, totalOpens = 0, totalClicks = 0;
+
+          snapshot.docs.forEach(doc => {
+            const campaign = doc.data();
+            totalSent += campaign.sentCount || 0;
+            totalOpens += campaign.analytics?.opens || 0;
+            totalClicks += campaign.analytics?.clicks || 0;
+          });
+
+          document.getElementById('totalSent').textContent = totalSent;
+          document.getElementById('totalOpens').textContent = totalOpens;
+          document.getElementById('totalClicks').textContent = totalClicks;
+          document.getElementById('clickRate').textContent = totalSent > 0 ? Math.round((totalClicks / totalSent) * 100) + '%' : '0%';
+          document.getElementById('campaignStats').style.display = 'grid';
+        } catch (error) {
+          console.error('Error updating stats:', error);
+        }
+      }
+
+      // Search campaigns
+      document.getElementById('campaignSearch')?.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('.campaign-card');
+        cards.forEach(card => {
+          const title = card.querySelector('h5').textContent.toLowerCase();
+          card.style.display = title.includes(searchTerm) ? 'block' : 'none';
+        });
+      });
+
+      // Update stats on load
+      document.addEventListener('DOMContentLoaded', updateCampaignStats);
+    </script>

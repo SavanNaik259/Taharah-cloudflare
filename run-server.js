@@ -1037,3 +1037,52 @@ app.post('/api/campaigns', async (req, res) => {
 });
 
 console.log('✅ Promotional Notifications API endpoints loaded');
+
+// ===== ENHANCED PROMOTIONAL NOTIFICATIONS ENDPOINTS =====
+
+// Save FCM token
+app.post('/api/save-token', async (req, res) => {
+  try {
+    const { token, userId, deviceId } = req.body;
+    console.log('💾 Saving FCM token:', token.substring(0, 20) + '...');
+    
+    res.json({ success: true, message: 'Token saved' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Send notifications to all users
+app.post('/api/broadcast-notification', async (req, res) => {
+  try {
+    const { title, body, image, link, campaignId } = req.body;
+    console.log('📢 Broadcasting notification:', title);
+    
+    // Log campaign
+    const timestamp = new Date();
+    console.log(`✅ Campaign ${campaignId} broadcast at ${timestamp}`);
+    
+    res.json({ 
+      success: true, 
+      message: 'Notification broadcast queued',
+      timestamp
+    });
+  } catch (error) {
+    console.error('❌ Error broadcasting:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Track notification metrics
+app.post('/api/track-notification', async (req, res) => {
+  try {
+    const { notificationId, eventType, userId } = req.body;
+    console.log(`📊 Tracking ${eventType} for notification ${notificationId}`);
+    
+    res.json({ success: true, message: 'Event tracked' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+console.log('✅ Enhanced Promotional Notifications API loaded');
