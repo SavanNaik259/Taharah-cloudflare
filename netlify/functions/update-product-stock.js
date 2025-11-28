@@ -162,7 +162,6 @@ exports.handler = async (event, context) => {
       } else {
         console.log(`❌ CRITICAL: Product details not found in products array`);
       }
-      }
     } catch (notificationError) {
       console.error('Error triggering stock notifications:', notificationError.message);
       // Don't fail the main operation
