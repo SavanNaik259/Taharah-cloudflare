@@ -804,10 +804,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Showing loading state for order summary');
 
         if (orderSummaryContainer) {
-            // CRITICAL: Empty the entire container first to remove default "No products" message
-            orderSummaryContainer.innerHTML = '';
-            
-            // Then add the loading state
             orderSummaryContainer.innerHTML = `
                 <div class="text-center py-4 checkout-loading-state">
                     <div class="spinner-border text-primary" role="status" style="width: 2rem; height: 2rem;">
