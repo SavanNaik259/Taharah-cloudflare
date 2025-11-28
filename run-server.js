@@ -2,9 +2,32 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const ShiprocketService = require('./services/shiprocket');
+const admin = require('firebase-admin');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Initialize Firebase Admin SDK
+try {
+  const firebaseConfig = {
+    projectId: process.env.FIREBASE_PROJECT_ID || 'auric-jewelry',
+    databaseURL: process.env.FIREBASE_DATABASE_URL || 'https://auric-jewelry.firebaseio.com'
+  };
+  
+  if (!admin.apps.length) {
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId: firebaseConfig.projectId,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL || 'firebase-adminsdk@auric-jewelry.iam.gserviceaccount.com',
+        privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n')
+      }),
+      databaseURL: firebaseConfig.databaseURL
+    });
+    console.log('✅ Firebase Admin SDK initialized');
+  }
+} catch (error) {
+  console.log('⚠️ Firebase Admin SDK not fully configured (will use client SDK for notifications):', error.message);
+}
 
 // Initialize Shiprocket service
 let shiprocketService = null;
@@ -983,6 +1006,110 @@ app.listen(PORT, '0.0.0.0', () => {
 });
 // ===== PROMOTIONAL NOTIFICATIONS API =====
 
+// Endpoint to send campaign notifications to all opted-in users
+app.post('/api/send-campaign', async (req, res) => {
+  try {
+    const { title, body, image, link } = req.body;
+    
+    if (!title || !body) {
+      return res.status(400).json({ success: false, error: 'Title and body required' });
+    }
+    
+    console.log(`📤 Sending campaign: "${title}"`);
+    
+    const db = admin.firestore();
+    let sentCount = 0;
+    let failedCount = 0;
+    
+    // Get all logged-in users with FCM tokens
+    try {
+      const usersSnapshot = await db.collection('users').get();
+      
+      for (const userDoc of usersSnapshot.docs) {
+        const user = userDoc.data();
+        if (user.fcmTokens && Array.isArray(user.fcmTokens)) {
+          for (const token of user.fcmTokens) {
+            try {
+              await admin.messaging().send({
+                token: token,
+                notification: {
+                  title: title,
+                  body: body,
+                  imageUrl: image || ''
+                },
+                webpush: {
+                  fcmOptions: { link: link || '/' },
+                  notification: {
+                    title: title,
+                    body: body,
+                    icon: image || '/images/logos/royalmeenakari.png'
+                  }
+                }
+              });
+              sentCount++;
+              console.log(`✅ Sent to logged-in user token: ${token.substring(0, 20)}...`);
+            } catch (error) {
+              failedCount++;
+              console.error(`❌ Failed to send to token ${token.substring(0, 20)}...`, error.message);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching logged-in users:', error.message);
+    }
+    
+    // Get all guest device tokens
+    try {
+      const guestSnapshot = await db.collection('guest_tokens').get();
+      
+      for (const deviceDoc of guestSnapshot.docs) {
+        const device = deviceDoc.data();
+        if (device.tokens && Array.isArray(device.tokens)) {
+          for (const token of device.tokens) {
+            try {
+              await admin.messaging().send({
+                token: token,
+                notification: {
+                  title: title,
+                  body: body,
+                  imageUrl: image || ''
+                },
+                webpush: {
+                  fcmOptions: { link: link || '/' },
+                  notification: {
+                    title: title,
+                    body: body,
+                    icon: image || '/images/logos/royalmeenakari.png'
+                  }
+                }
+              });
+              sentCount++;
+              console.log(`✅ Sent to guest device: ${deviceDoc.id}`);
+            } catch (error) {
+              failedCount++;
+              console.error(`❌ Failed to send to guest device ${deviceDoc.id}`, error.message);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching guest devices:', error.message);
+    }
+    
+    res.json({
+      success: true,
+      message: `Campaign sent to ${sentCount} devices`,
+      sentCount,
+      failedCount,
+      totalAttempted: sentCount + failedCount
+    });
+  } catch (error) {
+    console.error('❌ Error sending campaign:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Endpoint to send notifications
 app.post('/api/send-notification', async (req, res) => {
   try {
@@ -990,12 +1117,18 @@ app.post('/api/send-notification', async (req, res) => {
     
     console.log('📤 Sending notification to token:', fcmToken);
     
-    // In production, you would use Firebase Admin SDK to send via FCM
-    // For now, we'll simulate the notification
+    await admin.messaging().send({
+      token: fcmToken,
+      notification: {
+        title: title,
+        body: body,
+        imageUrl: image || ''
+      }
+    });
     
     res.json({
       success: true,
-      message: 'Notification queued for delivery',
+      message: 'Notification sent successfully',
       token: fcmToken
     });
   } catch (error) {

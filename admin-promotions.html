@@ -421,6 +421,28 @@
 
         const bannerUrl = `/images/campaign-${Date.now()}.jpg`;
 
+        // Send notifications immediately if 'now' is selected
+        if (sendType === 'now') {
+          console.log('📤 Sending campaign notifications...');
+          try {
+            const response = await fetch('http://localhost:5000/api/send-campaign', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                title: title,
+                body: description,
+                image: bannerUrl,
+                link: linkTarget
+              })
+            });
+
+            const result = await response.json();
+            console.log('✅ Campaign sent result:', result);
+          } catch (error) {
+            console.error('❌ Error sending campaign:', error);
+          }
+        }
+
         const campaign = {
           title, description, buttonText, linkTarget, bannerUrl,
           sendType,
@@ -432,7 +454,7 @@
         };
 
         await db.collection('promotions_manual').add(campaign);
-        alert('✅ Campaign created successfully!');
+        alert('✅ Campaign created and notifications sent to all opted-in users!');
         document.getElementById('campaignForm').reset();
         document.getElementById('bannerPreview').innerHTML = '';
         bootstrap.Modal.getInstance(document.getElementById('createCampaignModal')).hide();
