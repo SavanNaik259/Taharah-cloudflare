@@ -2414,16 +2414,27 @@ background-color: #000 !important;
             return;
           }
           
-          // Step 3: WAIT for Service Worker to be FULLY ACTIVE before getting FCM token
+          // Step 3: REGISTER Service Worker and wait for activation
           try {
-            // This is CRITICAL - must wait for service worker to be ready
             if ('serviceWorker' in navigator) {
-              console.log('⏳ Waiting for Service Worker to be active...');
+              console.log('📝 Registering Service Worker...');
+              // IMPORTANT: Must register the service worker first!
+              const registration = await navigator.serviceWorker.register('/service-worker.js', { 
+                scope: '/',
+                updateViaCache: 'none' // Ensure we always get fresh service worker
+              });
+              console.log('✅ Service Worker registered:', registration.scope);
+              
+              console.log('⏳ Waiting for Service Worker to be fully activated...');
               await navigator.serviceWorker.ready;
-              console.log('✅ Service Worker is now ACTIVE and READY');
+              console.log('✅ Service Worker is now ACTIVE');
+              
+              // Give the service worker an extra moment to initialize
+              await new Promise(resolve => setTimeout(resolve, 500));
             }
             
             const messaging = firebase.messaging();
+            console.log('🔑 Requesting FCM token...');
             const token = await messaging.getToken({
               vapidKey: 'BIWRF2leB0T2HGDSKEhgevQlbmdaeoCaQUi88hdUw8N9k_d36JuImK8I7Nwj52Wi4_sd9G4QfFdLJWLcqU5akOQ'
             });
