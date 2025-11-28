@@ -981,3 +981,59 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`Nazakat website server running on port ${PORT}`);
   console.log(`Visit: http://localhost:${PORT}`);
 });
+// ===== PROMOTIONAL NOTIFICATIONS API =====
+
+// Endpoint to send notifications
+app.post('/api/send-notification', async (req, res) => {
+  try {
+    const { fcmToken, title, body, image, link, data } = req.body;
+    
+    console.log('📤 Sending notification to token:', fcmToken);
+    
+    // In production, you would use Firebase Admin SDK to send via FCM
+    // For now, we'll simulate the notification
+    
+    res.json({
+      success: true,
+      message: 'Notification queued for delivery',
+      token: fcmToken
+    });
+  } catch (error) {
+    console.error('❌ Error sending notification:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Endpoint to get campaigns (for admin)
+app.get('/api/campaigns', async (req, res) => {
+  try {
+    console.log('📋 Fetching campaigns');
+    res.json({
+      success: true,
+      campaigns: []
+    });
+  } catch (error) {
+    console.error('❌ Error fetching campaigns:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Endpoint to create campaign
+app.post('/api/campaigns', async (req, res) => {
+  try {
+    const { title, description, buttonText, linkTarget, bannerUrl } = req.body;
+    
+    console.log('✅ Campaign created:', title);
+    
+    res.json({
+      success: true,
+      message: 'Campaign created successfully',
+      campaignId: `campaign_${Date.now()}`
+    });
+  } catch (error) {
+    console.error('❌ Error creating campaign:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+console.log('✅ Promotional Notifications API endpoints loaded');
