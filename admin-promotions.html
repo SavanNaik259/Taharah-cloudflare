@@ -446,28 +446,51 @@
           try {
             // Get the current domain to avoid localhost issues
             const apiUrl = `${window.location.origin}/.netlify/functions/send-campaign`;
+            console.log('🔗 API URL:', apiUrl);
+            
+            const payloadData = {
+              title: title,
+              body: description,
+              image: bannerUrl,
+              link: linkTarget
+            };
+            console.log('📦 Payload:', payloadData);
+            
             const response = await fetch(apiUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                title: title,
-                body: description,
-                image: bannerUrl,
-                link: linkTarget
-              })
+              body: JSON.stringify(payloadData)
             });
 
+            console.log('📡 Response status:', response.status);
+            
+            if (!response.ok) {
+              console.error('❌ HTTP Error:', response.status, response.statusText);
+              const errorText = await response.text();
+              console.error('❌ Error body:', errorText);
+              throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+            
             const result = await response.json();
             console.log('✅ Campaign sent - Result:', result);
+            
+            if (!result.success) {
+              console.warn('⚠️ Backend returned success=false:', result);
+            }
             
             // Update the campaign with actual sent count from backend
             if (result.sentCount !== undefined) {
               campaign.sentCount = result.sentCount;
               campaign.failedCount = result.failedCount || 0;
+              console.log(`✅ Updated campaign with ${result.sentCount} sent, ${result.failedCount} failed`);
+            }
+            
+            if (result.sentCount === 0) {
+              alert('⚠️ Campaign created but 0 notifications sent. Make sure users have enabled notifications.');
             }
           } catch (error) {
             console.error('❌ Error sending campaign:', error);
-            alert('⚠️ Warning: Campaign created but notifications may not have sent. Check Netlify logs.');
+            alert('⚠️ Error sending campaign: ' + error.message + '\n\nCampaign created but check browser console for details.');
           }
         }
 

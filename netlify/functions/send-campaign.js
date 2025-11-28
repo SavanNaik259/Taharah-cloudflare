@@ -59,27 +59,44 @@ db = initializeFirebaseAdmin();
 
 exports.handler = async (event, context) => {
   console.log('\n📢 ========== SEND-CAMPAIGN NETLIFY FUNCTION ==========');
+  console.log('🔍 Event method:', event.httpMethod);
+  console.log('🔍 Event path:', event.path);
+  console.log('🔍 Request headers:', JSON.stringify(event.headers, null, 2));
   
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
+    return { 
+      statusCode: 405, 
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'Method not allowed' }) 
+    };
   }
 
   try {
+    console.log('📝 Parsing request body...');
     const { title, body, image, link } = JSON.parse(event.body);
+    console.log('✅ Parsed body:', { title, body, link });
 
     if (!title || !body) {
       console.log('❌ Missing title or body');
       return { 
-        statusCode: 400, 
+        statusCode: 400,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ success: false, error: 'Title and body required' }) 
       };
     }
 
-    // Check Firebase initialization
+    // Re-initialize Firebase if needed
     if (!db) {
-      console.error('❌ Firebase not initialized');
+      console.error('❌ Firebase not initialized, reinitializing...');
+      db = initializeFirebaseAdmin();
+    }
+
+    // Check Firebase initialization again
+    if (!db) {
+      console.error('❌ Firebase still not initialized after retry');
       return { 
-        statusCode: 500, 
+        statusCode: 500,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           success: false, 
           error: 'Firebase not configured',
@@ -93,7 +110,7 @@ exports.handler = async (event, context) => {
     const failedTokens = [];
 
     console.log(`📋 Campaign: "${title}"`);
-    console.log('📋 Fetching opted-in users...');
+    console.log('📋 Fetching opted-in users and guests...');
 
     // Get all logged-in users with FCM tokens
     const usersSnapshot = await db.collection('users').where('fcmTokens', '!=', null).get();
@@ -175,10 +192,14 @@ exports.handler = async (event, context) => {
     }
 
     console.log(`\n✅ CAMPAIGN COMPLETE - Sent: ${sentCount}, Failed: ${failedCount}`);
+    if (failedTokens.length > 0) {
+      console.log('Failed tokens:', failedTokens.slice(0, 5));
+    }
     console.log(`====================================================\n`);
 
     return {
       statusCode: 200,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
       body: JSON.stringify({
         success: true,
         message: `Campaign sent to ${sentCount} devices (${failedCount} failed)`,
@@ -190,8 +211,10 @@ exports.handler = async (event, context) => {
 
   } catch (error) {
     console.error('❌ Error in send-campaign function:', error);
+    console.error('Stack:', error.stack);
     return {
       statusCode: 500,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
       body: JSON.stringify({
         success: false,
         error: error.message,

@@ -2473,11 +2473,17 @@ background-color: #000 !important;
               const deviceId = localStorage.getItem('device_id') || `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
               localStorage.setItem('device_id', deviceId);
               
+              console.log('👤 Saving FCM token for guest device:', deviceId);
               await db.collection('guest_tokens').doc(deviceId).set({
                 tokens: firebase.firestore.FieldValue.arrayUnion(token),
-                lastUpdate: new Date()
+                lastUpdate: new Date(),
+                notificationsEnabled: true
               }, { merge: true });
               console.log('✅ Real FCM token saved for guest:', deviceId);
+              
+              // Verify it was saved
+              const verifyDoc = await db.collection('guest_tokens').doc(deviceId).get();
+              console.log('✅ Verified guest token document:', verifyDoc.data());
             }
             
             alert('✅ Notifications ENABLED! You\'ll receive real push notifications about deals, restocks, and special offers.');
