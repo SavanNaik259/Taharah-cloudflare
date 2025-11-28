@@ -2397,6 +2397,62 @@
 
 
                     await updateProductData(updatedProductData, editCategory);
+                    
+                    // 🔔 TRIGGER NOTIFICATIONS FOR STOCK/PRICE CHANGES
+                    try {
+                      // Back-in-stock: Stock went from 0 to available
+                      if (originalProductData.stock === 0 && updatedProductData.stock > 0) {
+                        console.log('📦 Triggering back-in-stock notification...');
+                        await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-back-in-stock-alerts', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            productId: updatedProductData.id,
+                            productName: updatedProductData.name,
+                            productImage: updatedProductData.mainImage || ''
+                          })
+                        });
+                        console.log('✅ Back-in-stock notification triggered');
+                      }
+                      
+                      // Low-stock: Stock dropped to 3 or below
+                      if (updatedProductData.stock <= 3 && updatedProductData.stock > 0) {
+                        console.log('⚡ Triggering low-stock notification...');
+                        await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-low-stock-alerts', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            productId: updatedProductData.id,
+                            productName: updatedProductData.name,
+                            productImage: updatedProductData.mainImage || '',
+                            stockRemaining: updatedProductData.stock,
+                            threshold: 3
+                          })
+                        });
+                        console.log('✅ Low-stock notification triggered');
+                      }
+                      
+                      // Price-drop: Price decreased
+                      if (originalProductData.price > updatedProductData.price) {
+                        console.log('📉 Triggering price-drop notification...');
+                        await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-price-drop-alerts', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            productId: updatedProductData.id,
+                            productName: updatedProductData.name,
+                            productImage: updatedProductData.mainImage || '',
+                            oldPrice: originalProductData.price,
+                            newPrice: updatedProductData.price
+                          })
+                        });
+                        console.log('✅ Price-drop notification triggered');
+                      }
+                    } catch (notifError) {
+                      console.error('⚠️ Error triggering notifications:', notifError.message);
+                      // Don't fail the update if notifications fail
+                    }
+                    
                     showSuccess('Product updated successfully!');
                 } else {
                     console.log('Creating new product');
@@ -2417,6 +2473,25 @@
                     productData.createdAt = new Date().toISOString();
 
                     await saveProductData(productData, productData.category);
+                    
+                    // 🔔 TRIGGER NEW PRODUCT NOTIFICATION
+                    try {
+                      console.log('⭐ Triggering new-product notification...');
+                      await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-new-product-alerts', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          productId: productData.id,
+                          productName: productData.name,
+                          productImage: productData.mainImage || ''
+                        })
+                      });
+                      console.log('✅ New-product notification triggered');
+                    } catch (notifError) {
+                      console.error('⚠️ Error triggering new product notification:', notifError.message);
+                      // Don't fail the creation if notification fails
+                    }
+                    
                     showSuccess('Product created successfully!');
                 }
 
