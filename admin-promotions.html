@@ -421,12 +421,24 @@
 
         const bannerUrl = `/images/campaign-${Date.now()}.jpg`;
 
+        // Initialize campaign object FIRST
+        let campaign = {
+          title, description, buttonText, linkTarget, bannerUrl,
+          sendType,
+          scheduledTime: sendType === 'later' ? new Date(document.getElementById('scheduledTime').value) : new Date(),
+          status: sendType === 'now' ? 'sent' : 'scheduled',
+          createdAt: new Date(),
+          sentCount: 0,
+          failedCount: 0,
+          analytics: { opens: 0, clicks: 0 }
+        };
+
         // Send notifications immediately if 'now' is selected
         if (sendType === 'now') {
           console.log('📤 Sending campaign notifications...');
           try {
             // Get the current domain to avoid localhost issues
-            const apiUrl = `${window.location.origin}/api/send-campaign`;
+            const apiUrl = `${window.location.origin}/.netlify/functions/send-campaign`;
             const response = await fetch(apiUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -441,27 +453,16 @@
             const result = await response.json();
             console.log('✅ Campaign sent - Result:', result);
             
-            // Update the campaign with actual sent count BEFORE saving
-            if (result.sentCount) {
+            // Update the campaign with actual sent count from backend
+            if (result.sentCount !== undefined) {
               campaign.sentCount = result.sentCount;
               campaign.failedCount = result.failedCount || 0;
             }
           } catch (error) {
             console.error('❌ Error sending campaign:', error);
-            alert('⚠️ Warning: Campaign created but notifications may not have sent. Check backend logs.');
+            alert('⚠️ Warning: Campaign created but notifications may not have sent. Check Netlify logs.');
           }
         }
-
-        const campaign = {
-          title, description, buttonText, linkTarget, bannerUrl,
-          sendType,
-          scheduledTime: sendType === 'later' ? new Date(document.getElementById('scheduledTime').value) : new Date(),
-          status: sendType === 'now' ? 'sent' : 'scheduled',
-          createdAt: new Date(),
-          sentCount: 0,  // Will be updated with actual count from backend
-          failedCount: 0,
-          analytics: { opens: 0, clicks: 0 }
-        };
 
         await db.collection('promotions_manual').add(campaign);
         alert('✅ Campaign created and notifications sent to all opted-in users!');
