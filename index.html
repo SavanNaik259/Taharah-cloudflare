@@ -2395,7 +2395,7 @@ background-color: #000 !important;
           try {
             const messaging = firebase.messaging();
             const token = await messaging.getToken({
-              vapidKey: process.env.REACT_APP_VAPID_KEY || localStorage.getItem('vapid_key') || 'BO3iqQnxhSTHsDZLVpyL9rMEg6YrVcLKAGwFEUWiDSpRWJkE87_FRaOE1y2J6xAO8AyYLTWCEjk1rKnHPhMXhFU'
+              vapidKey: 'BIWRF2leB0T2HGDSKEhgevQlbmdaeoCaQUi88hdUw8N9k_d36JuImK8I7Nwj52Wi4_sd9G4QfFdLJWLcqU5akOQ'
             });
             
             if (!token) {
