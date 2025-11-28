@@ -425,7 +425,9 @@
         if (sendType === 'now') {
           console.log('📤 Sending campaign notifications...');
           try {
-            const response = await fetch('http://localhost:5000/api/send-campaign', {
+            // Get the current domain to avoid localhost issues
+            const apiUrl = `${window.location.origin}/api/send-campaign`;
+            const response = await fetch(apiUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -437,9 +439,16 @@
             });
 
             const result = await response.json();
-            console.log('✅ Campaign sent result:', result);
+            console.log('✅ Campaign sent - Result:', result);
+            
+            // Update the campaign with actual sent count BEFORE saving
+            if (result.sentCount) {
+              campaign.sentCount = result.sentCount;
+              campaign.failedCount = result.failedCount || 0;
+            }
           } catch (error) {
             console.error('❌ Error sending campaign:', error);
+            alert('⚠️ Warning: Campaign created but notifications may not have sent. Check backend logs.');
           }
         }
 
@@ -449,7 +458,8 @@
           scheduledTime: sendType === 'later' ? new Date(document.getElementById('scheduledTime').value) : new Date(),
           status: sendType === 'now' ? 'sent' : 'scheduled',
           createdAt: new Date(),
-          sentCount: sendType === 'now' ? Math.floor(Math.random() * 5000) : 0,
+          sentCount: 0,  // Will be updated with actual count from backend
+          failedCount: 0,
           analytics: { opens: 0, clicks: 0 }
         };
 

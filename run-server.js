@@ -998,106 +998,140 @@ app.listen(PORT, '0.0.0.0', () => {
 });
 // ===== PROMOTIONAL NOTIFICATIONS API =====
 
-// Endpoint to send campaign notifications to all opted-in users
+// Endpoint to send campaign notifications to all opted-in users via FCM
 app.post('/api/send-campaign', async (req, res) => {
   try {
     const { title, body, image, link } = req.body;
     
+    console.log(`\n📢 ========== CAMPAIGN SEND REQUEST ==========`);
+    console.log(`Title: ${title}`);
+    console.log(`Body: ${body}`);
+    
     if (!title || !body) {
+      console.log('❌ Missing required fields');
       return res.status(400).json({ success: false, error: 'Title and body required' });
     }
     
-    console.log(`📤 Sending campaign: "${title}"`);
-    
-    // Try using Firebase Admin SDK first
-    if (admin.apps && admin.apps.length > 0) {
-      try {
-        const db = admin.firestore();
-        let sentCount = 0;
-        let failedCount = 0;
-        
-        // Get all logged-in users with FCM tokens
-        const usersSnapshot = await db.collection('users').get();
-        
-        for (const userDoc of usersSnapshot.docs) {
-          const user = userDoc.data();
-          if (user.fcmTokens && Array.isArray(user.fcmTokens)) {
-            for (const token of user.fcmTokens) {
-              try {
-                await admin.messaging().send({
-                  token: token,
-                  notification: {
-                    title: title,
-                    body: body,
-                    imageUrl: image || ''
-                  },
-                  webpush: {
-                    fcmOptions: { link: link || '/' },
-                    notification: {
-                      title: title,
-                      body: body,
-                      icon: image || '/images/logos/royalmeenakari.png'
-                    }
-                  }
-                });
-                sentCount++;
-                console.log(`✅ Sent to user: ${token.substring(0, 20)}...`);
-              } catch (error) {
-                failedCount++;
-                console.error(`❌ Failed for token: ${error.message}`);
-              }
-            }
-          }
-        }
-        
-        // Get all guest device tokens
-        const guestSnapshot = await db.collection('guest_tokens').get();
-        
-        for (const deviceDoc of guestSnapshot.docs) {
-          const device = deviceDoc.data();
-          if (device.tokens && Array.isArray(device.tokens)) {
-            for (const token of device.tokens) {
-              try {
-                await admin.messaging().send({
-                  token: token,
-                  notification: {
-                    title: title,
-                    body: body,
-                    imageUrl: image || ''
-                  }
-                });
-                sentCount++;
-                console.log(`✅ Sent to guest: ${deviceDoc.id}`);
-              } catch (error) {
-                failedCount++;
-              }
-            }
-          }
-        }
-        
-        return res.json({
-          success: true,
-          message: `Campaign sent to ${sentCount} devices`,
-          sentCount,
-          failedCount
-        });
-      } catch (error) {
-        console.error('Admin SDK error:', error.message);
-      }
+    // Check if Firebase Admin is properly initialized
+    if (!admin.apps || admin.apps.length === 0) {
+      console.error('❌ Firebase Admin SDK not initialized');
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Firebase Admin SDK not configured',
+        sentCount: 0
+      });
     }
     
-    // Fallback: Save campaign to queue for Cloud Function to process
-    console.log('📝 Queueing campaign via Firestore...');
-    res.json({
-      success: true,
-      message: 'Campaign queued - enable Firebase credentials for direct sending',
-      sentCount: 0,
-      method: 'queued'
-    });
+    try {
+      const db = admin.firestore();
+      let sentCount = 0;
+      let failedCount = 0;
+      const failedTokens = [];
+      
+      console.log('\n📋 Fetching all opted-in users...');
+      
+      // Get all logged-in users with FCM tokens
+      const usersSnapshot = await db.collection('users').where('fcmTokens', '!=', null).get();
+      console.log(`👤 Found ${usersSnapshot.docs.length} users with FCM tokens`);
+      
+      for (const userDoc of usersSnapshot.docs) {
+        const user = userDoc.data();
+        if (user.fcmTokens && Array.isArray(user.fcmTokens) && user.fcmTokens.length > 0) {
+          console.log(`\n📨 Sending to user ${userDoc.id} (${user.fcmTokens.length} tokens)...`);
+          
+          for (const token of user.fcmTokens) {
+            try {
+              const response = await admin.messaging().send({
+                token: token,
+                notification: {
+                  title: title,
+                  body: body
+                },
+                webpush: {
+                  fcmOptions: { link: link || '/' },
+                  notification: {
+                    title: title,
+                    body: body,
+                    icon: '/images/logos/royalmeenakari.png',
+                    badge: '/images/logos/royalmeenakari.png'
+                  },
+                  data: {
+                    link: link || '/',
+                    image: image || ''
+                  }
+                }
+              });
+              sentCount++;
+              console.log(`   ✅ Message ID: ${response}`);
+            } catch (error) {
+              failedCount++;
+              failedTokens.push({token: token.substring(0, 20), error: error.message});
+              console.error(`   ❌ Error: ${error.message}`);
+            }
+          }
+        }
+      }
+      
+      // Get all guest device tokens
+      const guestSnapshot = await db.collection('guest_tokens').where('tokens', '!=', null).get();
+      console.log(`\n🌐 Found ${guestSnapshot.docs.length} guest devices with tokens`);
+      
+      for (const deviceDoc of guestSnapshot.docs) {
+        const device = deviceDoc.data();
+        if (device.tokens && Array.isArray(device.tokens) && device.tokens.length > 0) {
+          console.log(`\n📨 Sending to guest ${deviceDoc.id} (${device.tokens.length} tokens)...`);
+          
+          for (const token of device.tokens) {
+            try {
+              const response = await admin.messaging().send({
+                token: token,
+                notification: {
+                  title: title,
+                  body: body
+                },
+                webpush: {
+                  fcmOptions: { link: link || '/' },
+                  notification: {
+                    title: title,
+                    body: body,
+                    icon: '/images/logos/royalmeenakari.png'
+                  }
+                }
+              });
+              sentCount++;
+              console.log(`   ✅ Message ID: ${response}`);
+            } catch (error) {
+              failedCount++;
+              failedTokens.push({device: deviceDoc.id, error: error.message});
+              console.error(`   ❌ Error: ${error.message}`);
+            }
+          }
+        }
+      }
+      
+      console.log(`\n✅ CAMPAIGN COMPLETE - Sent: ${sentCount}, Failed: ${failedCount}`);
+      console.log(`===============================================\n`);
+      
+      return res.json({
+        success: true,
+        message: `Campaign sent to ${sentCount} devices (${failedCount} failed)`,
+        sentCount,
+        failedCount,
+        failedTokens: failedTokens.slice(0, 5) // Return first 5 failures for debugging
+      });
+      
+    } catch (error) {
+      console.error('❌ Error in send-campaign:', error);
+      return res.status(500).json({ 
+        success: false, 
+        error: error.message,
+        sentCount: 0
+      });
+    }
     
   } catch (error) {
-    console.error('❌ Error:', error);
-    res.status(500).json({ success: false, error: error.message });
+    console.error('❌ Unhandled error:', error);
+    return res.status(500).json({ success: false, error: error.message });
   }
 });
 
