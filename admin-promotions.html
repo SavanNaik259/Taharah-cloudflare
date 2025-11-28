@@ -441,6 +441,8 @@
         };
 
         // Send notifications immediately if 'now' is selected
+        let notificationResult = { sentCount: 0, failedCount: 0, success: false, message: '' };
+        
         if (sendType === 'now') {
           console.log('📤 Sending campaign notifications...');
           try {
@@ -454,7 +456,7 @@
               image: bannerUrl,
               link: linkTarget
             };
-            console.log('📦 Payload:', payloadData);
+            console.log('📦 Payload:', JSON.stringify(payloadData, null, 2));
             
             const response = await fetch(apiUrl, {
               method: 'POST',
@@ -462,40 +464,62 @@
               body: JSON.stringify(payloadData)
             });
 
-            console.log('📡 Response status:', response.status);
+            console.log('📡 Response status:', response.status, response.statusText);
             
             if (!response.ok) {
               console.error('❌ HTTP Error:', response.status, response.statusText);
               const errorText = await response.text();
-              console.error('❌ Error body:', errorText);
-              throw new Error(`HTTP ${response.status}: ${errorText}`);
+              console.error('❌ Error response body:', errorText);
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             
             const result = await response.json();
-            console.log('✅ Campaign sent - Result:', result);
+            console.log('📊 Backend response:', JSON.stringify(result, null, 2));
             
-            if (!result.success) {
-              console.warn('⚠️ Backend returned success=false:', result);
-            }
+            // CRITICAL: Store the actual result
+            notificationResult = {
+              sentCount: result.sentCount || 0,
+              failedCount: result.failedCount || 0,
+              success: result.success !== false,
+              message: result.message || 'Notifications sent'
+            };
             
-            // Update the campaign with actual sent count from backend
-            if (result.sentCount !== undefined) {
-              campaign.sentCount = result.sentCount;
-              campaign.failedCount = result.failedCount || 0;
-              console.log(`✅ Updated campaign with ${result.sentCount} sent, ${result.failedCount} failed`);
-            }
+            console.log(`✅ Notifications sent: ${notificationResult.sentCount}, Failed: ${notificationResult.failedCount}, Success: ${notificationResult.success}`);
             
-            if (result.sentCount === 0) {
-              alert('⚠️ Campaign created but 0 notifications sent. Make sure users have enabled notifications.');
-            }
+            // Update campaign with actual sent count
+            campaign.sentCount = notificationResult.sentCount;
+            campaign.failedCount = notificationResult.failedCount;
+            
           } catch (error) {
-            console.error('❌ Error sending campaign:', error);
-            alert('⚠️ Error sending campaign: ' + error.message + '\n\nCampaign created but check browser console for details.');
+            console.error('❌ CRITICAL ERROR sending campaign:', error.message);
+            console.error('Stack trace:', error.stack);
+            notificationResult = {
+              sentCount: 0,
+              failedCount: -1,
+              success: false,
+              message: `Error: ${error.message}`
+            };
           }
         }
 
+        // Save to Firestore
         await db.collection('promotions_manual').add(campaign);
-        alert('✅ Campaign created and notifications sent to all opted-in users!');
+        
+        // Show appropriate alert based on notification result
+        if (sendType === 'now') {
+          if (notificationResult.success && notificationResult.sentCount > 0) {
+            alert(`✅ Campaign created successfully!\n\n📊 Sent: ${notificationResult.sentCount} notifications\n❌ Failed: ${notificationResult.failedCount}`);
+          } else if (notificationResult.sentCount === 0 && notificationResult.success === false) {
+            alert(`⚠️ Campaign created but FAILED to send notifications!\n\n${notificationResult.message}\n\nCheck browser console (F12) for details.`);
+          } else if (notificationResult.sentCount === 0) {
+            alert(`⚠️ Campaign created but 0 notifications sent.\n\nPossible reasons:\n• No users have enabled notifications yet\n• Check admin panel to verify opted-in users count\n• Check browser console for backend errors (F12)`);
+          } else {
+            alert(`📢 Campaign created and sent!\n\n✅ Sent: ${notificationResult.sentCount}\n❌ Failed: ${notificationResult.failedCount}`);
+          }
+        } else {
+          alert('✅ Campaign created successfully and scheduled!');
+        }
+        
         document.getElementById('campaignForm').reset();
         document.getElementById('bannerPreview').innerHTML = '';
         bootstrap.Modal.getInstance(document.getElementById('createCampaignModal')).hide();
@@ -608,24 +632,41 @@
     // Load User Statistics
     async function loadUserStatistics() {
       try {
-        // Count logged-in users with notifications
-        const usersSnapshot = await db.collection('users')
-          .where('notificationsEnabled', '==', true)
-          .get();
-        const loggedInCount = usersSnapshot.size;
+        // FIX: Count logged-in users by checking if they have FCM tokens
+        let loggedInCount = 0;
+        const usersSnapshot = await db.collection('users').get();
+        
+        for (const doc of usersSnapshot.docs) {
+          const user = doc.data();
+          // Check if user has actual FCM tokens
+          if (user.fcmTokens && Array.isArray(user.fcmTokens) && user.fcmTokens.length > 0) {
+            loggedInCount++;
+          }
+        }
 
-        // Count guest tokens
+        // Count guest tokens - only count devices with actual tokens
+        let guestCount = 0;
         const guestSnapshot = await db.collection('guest_tokens').get();
-        const guestCount = guestSnapshot.size;
+        
+        for (const doc of guestSnapshot.docs) {
+          const device = doc.data();
+          // Check if device has actual tokens
+          if (device.tokens && Array.isArray(device.tokens) && device.tokens.length > 0) {
+            guestCount++;
+          }
+        }
 
         // Update display
         document.getElementById('loggedInUsersCount').textContent = loggedInCount;
         document.getElementById('guestTokensCount').textContent = guestCount;
         document.getElementById('totalOptedInCount').textContent = loggedInCount + guestCount;
 
-        console.log(`✅ User Stats: ${loggedInCount} logged-in + ${guestCount} guests = ${loggedInCount + guestCount} total`);
+        console.log(`✅ User Stats: ${loggedInCount} logged-in users + ${guestCount} guest devices = ${loggedInCount + guestCount} total with FCM tokens`);
       } catch (error) {
         console.error('Error loading user statistics:', error);
+        document.getElementById('loggedInUsersCount').textContent = '0';
+        document.getElementById('guestTokensCount').textContent = '0';
+        document.getElementById('totalOptedInCount').textContent = '0';
       }
     }
 
@@ -635,34 +676,58 @@
       try {
         allUsers = [];
         
-        // Load logged-in users
-        const usersSnapshot = await db.collection('users')
-          .where('notificationsEnabled', '==', true)
-          .orderBy('lastTokenUpdate', 'desc')
-          .get();
+        // FIX: Load ALL logged-in users and filter for those with actual FCM tokens
+        const usersSnapshot = await db.collection('users').get();
 
         usersSnapshot.forEach(doc => {
-          allUsers.push({
-            type: 'logged-in',
-            id: doc.id,
-            data: doc.data()
-          });
+          const user = doc.data();
+          // Only add users that have actual FCM tokens
+          if (user.fcmTokens && Array.isArray(user.fcmTokens) && user.fcmTokens.length > 0) {
+            allUsers.push({
+              type: 'logged-in',
+              id: doc.id,
+              data: user
+            });
+          }
         });
 
-        // Load guest devices
-        const guestSnapshot = await db.collection('guest_tokens').orderBy('lastUpdate', 'desc').get();
+        // Sort by lastTokenUpdate descending
+        allUsers.sort((a, b) => {
+          const timeA = a.data.lastTokenUpdate?.toDate?.() || new Date(0);
+          const timeB = b.data.lastTokenUpdate?.toDate?.() || new Date(0);
+          return timeB - timeA;
+        });
+
+        // FIX: Load ALL guest devices and filter for those with actual tokens
+        const guestSnapshot = await db.collection('guest_tokens').get();
+        const guestUsers = [];
+        
         guestSnapshot.forEach(doc => {
-          allUsers.push({
-            type: 'guest',
-            id: doc.id,
-            data: doc.data()
-          });
+          const device = doc.data();
+          // Only add devices that have actual tokens
+          if (device.tokens && Array.isArray(device.tokens) && device.tokens.length > 0) {
+            guestUsers.push({
+              type: 'guest',
+              id: doc.id,
+              data: device
+            });
+          }
         });
 
+        // Sort guest devices by lastUpdate descending
+        guestUsers.sort((a, b) => {
+          const timeA = a.data.lastUpdate?.toDate?.() || new Date(0);
+          const timeB = b.data.lastUpdate?.toDate?.() || new Date(0);
+          return timeB - timeA;
+        });
+
+        allUsers = allUsers.concat(guestUsers);
+        console.log(`✅ Loaded ${allUsers.length} users/devices with FCM tokens (${allUsers.filter(u => u.type === 'logged-in').length} logged-in, ${allUsers.filter(u => u.type === 'guest').length} guests)`);
+        
         displayUsersList(allUsers);
       } catch (error) {
         console.error('Error loading users:', error);
-        document.getElementById('usersList').innerHTML = '<p>Error loading users. Check console.</p>';
+        document.getElementById('usersList').innerHTML = '<p>Error loading users. Check console for details.</p>';
       }
     }
 
