@@ -89,14 +89,22 @@ exports.handler = async (event, context) => {
     console.log(`Successfully updated ${category} products file with new price for ${productId}`);
 
     // ✅ TRIGGER PRICE DROP NOTIFICATION (ONLY if price decreased)
+    console.log(`\n🔔 PRICE UPDATE TRIGGER FIRED`);
+    console.log(`   Product: ${productId}`);
+    console.log(`   Price: ₹${oldPrice} → ₹${newPrice}`);
+    
     if (newPrice < oldPrice) {
       try {
         const updatedProduct = products.find(p => p.id === productId || p.productId === productId);
         
+        console.log(`   Product details found:`, !!updatedProduct);
+        
         if (updatedProduct) {
-          console.log(`📉 Triggering PRICE-DROP notification for ${productId}`);
+          console.log(`\n📉 PRICE-DROP CONDITION MET - Calling automation function...`);
+          console.log(`   Product name: ${updatedProduct.name || updatedProduct.productName}`);
+          console.log(`   Discount: ${Math.round(((oldPrice - newPrice) / oldPrice) * 100)}%`);
           
-          await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-price-drop-alerts', {
+          const priceDrop Response = await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-price-drop-alerts', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -108,7 +116,10 @@ exports.handler = async (event, context) => {
             })
           });
           
-          console.log(`✅ Price-drop notification sent for ${productId}`);
+          const priceDropData = await priceDropResponse.json();
+          console.log(`✅ Price-drop function response:`, priceDropData);
+        } else {
+          console.log(`❌ CRITICAL: Product details not found in products array`);
         }
       } catch (notifError) {
         console.error('Error sending price-drop notification:', notifError.message);

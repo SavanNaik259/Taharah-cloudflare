@@ -135,6 +135,10 @@ exports.handler = async (event, context) => {
     try {
       const productsData = JSON.parse(fileContent);
       
+      console.log(`\n🔔 NEW PRODUCTS UPLOAD TRIGGER FIRED`);
+      console.log(`   File: ${fileName}`);
+      console.log(`   Products in file: ${Array.isArray(productsData) ? productsData.length : 'NOT AN ARRAY'}`);
+      
       // Check if this is a product data file and notify about new products
       if (Array.isArray(productsData) && productsData.length > 0) {
         // Get the first few products to announce as new
@@ -142,9 +146,11 @@ exports.handler = async (event, context) => {
         
         for (const product of newProducts) {
           if (product.id || product.productId) {
-            console.log(`⭐ Triggering NEW-PRODUCT notification for ${product.name}`);
+            console.log(`\n⭐ NEW-PRODUCT CONDITION MET - Calling automation function...`);
+            console.log(`   Product ID: ${product.id || product.productId}`);
+            console.log(`   Product name: ${product.name || product.productName}`);
             try {
-              await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-new-product-alerts', {
+              const newProductResponse = await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-new-product-alerts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -153,12 +159,17 @@ exports.handler = async (event, context) => {
                   productImage: product.image || product.productImage || ''
                 })
               });
-              console.log(`✅ New-product notification sent for ${product.name}`);
+              const newProductData = await newProductResponse.json();
+              console.log(`✅ New-product function response:`, newProductData);
             } catch (notifError) {
-              console.error(`Error sending new-product notification for ${product.name}:`, notifError.message);
+              console.error(`❌ Error sending new-product notification for ${product.name}:`, notifError.message);
             }
+          } else {
+            console.log(`❌ Product missing ID field:`, product);
           }
         }
+      } else {
+        console.log(`❌ CRITICAL: File content is not valid product array`);
       }
     } catch (notificationError) {
       console.error('Error triggering new product notifications:', notificationError.message);

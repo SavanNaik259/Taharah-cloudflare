@@ -52,7 +52,8 @@ db = initializeFirebaseAdmin();
 
 async function sendNotification(token, productImage, productName, productLink) {
   try {
-    await admin.messaging().send({
+    console.log(`📤 Sending FCM to token: ${token.substring(0, 20)}...`);
+    const response = await admin.messaging().send({
       token: token,
       notification: {
         title: `✨ New Collection: ${productName}`,
@@ -105,22 +106,36 @@ exports.handler = async (event, context) => {
     const allTokens = [];
     
     // Collect all opted-in user tokens
+    console.log(`\n📊 Fetching users with FCM tokens...`);
     const usersSnapshot = await db.collection('users').get();
+    console.log(`✅ Found ${usersSnapshot.docs.length} users`);
+    
+    let usersWithTokens = 0;
     for (const userDoc of usersSnapshot.docs) {
       const user = userDoc.data();
       if (user.fcmTokens && Array.isArray(user.fcmTokens) && user.fcmTokens.length > 0) {
+        usersWithTokens++;
+        console.log(`   ✅ User ${userDoc.id} has ${user.fcmTokens.length} token(s)`);
         allTokens.push(...user.fcmTokens);
       }
     }
+    console.log(`✅ Collected ${allTokens.length} tokens from ${usersWithTokens} users`);
     
     // Collect all guest device tokens
+    console.log(`📊 Fetching guest devices with tokens...`);
     const guestSnapshot = await db.collection('guest_tokens').get();
+    console.log(`✅ Found ${guestSnapshot.docs.length} guest devices`);
+    
+    let guestDevicesWithTokens = 0;
     for (const deviceDoc of guestSnapshot.docs) {
       const device = deviceDoc.data();
       if (device.tokens && Array.isArray(device.tokens) && device.tokens.length > 0) {
+        guestDevicesWithTokens++;
+        console.log(`   ✅ Guest device ${deviceDoc.id} has ${device.tokens.length} token(s)`);
         allTokens.push(...device.tokens);
       }
     }
+    console.log(`✅ Collected ${allTokens.length} total tokens (${usersWithTokens} users + ${guestDevicesWithTokens} guests)`);
     
     console.log(`📊 Sending to ${allTokens.length} opted-in users`);
     
@@ -133,7 +148,10 @@ exports.handler = async (event, context) => {
     }
     
     console.log(`\n✅ NEW PRODUCT ALERTS COMPLETE`);
-    console.log(`📊 Notifications sent: ${totalNotificationsSent}`);
+    console.log(`📊 Summary:`);
+    console.log(`   - Product: ${productName}`);
+    console.log(`   - Total tokens collected: ${allTokens.length}`);
+    console.log(`   - Notifications sent: ${totalNotificationsSent}`);
     console.log(`====================================================\n`);
     
     return {

@@ -52,7 +52,8 @@ db = initializeFirebaseAdmin();
 
 async function sendNotification(token, productImage, productName, stockRemaining, productLink) {
   try {
-    await admin.messaging().send({
+    console.log(`📤 Sending FCM to token: ${token.substring(0, 20)}... (${stockRemaining} items left)`);
+    const response = await admin.messaging().send({
       token: token,
       notification: {
         title: `⚡ Limited Stock!`,
@@ -108,18 +109,30 @@ exports.handler = async (event, context) => {
     console.log(`📢 Sending low stock alert for ${productId}: Only ${stockRemaining} left`);
     
     let totalNotificationsSent = 0;
+    let usersProcessed = 0;
+    let usersWithTokens = 0;
+    let productsInWishlistOrCart = 0;
     
     // Get all users
+    console.log(`\n📊 Fetching all users from Firestore...`);
     const usersSnapshot = await db.collection('users').get();
+    console.log(`✅ Found ${usersSnapshot.docs.length} users in Firestore`);
     
     for (const userDoc of usersSnapshot.docs) {
+      usersProcessed++;
       const user = userDoc.data();
       const userId = userDoc.id;
       
+      console.log(`\n👤 Processing user ${usersProcessed}/${usersSnapshot.docs.length}: ${userId}`);
+      
       // Skip if user doesn't have FCM tokens
       if (!user.fcmTokens || !Array.isArray(user.fcmTokens) || user.fcmTokens.length === 0) {
+        console.log(`   ⚠️  No FCM tokens found for user ${userId}`);
         continue;
       }
+      
+      usersWithTokens++;
+      console.log(`   ✅ User has ${user.fcmTokens.length} FCM token(s)`);
       
       // Check if user has this product in cart
       let hasProductInCart = false;
@@ -129,10 +142,16 @@ exports.handler = async (event, context) => {
         
         if (cartDoc.exists) {
           const cartItems = cartDoc.data().items || [];
+          console.log(`   📦 Cart found with ${cartItems.length} items`);
           hasProductInCart = cartItems.some(item => item.id === productId || item.productId === productId);
+          if (hasProductInCart) {
+            console.log(`   ✅ Product ${productId} FOUND in cart`);
+          }
+        } else {
+          console.log(`   ❌ No cart document found for user`);
         }
       } catch (error) {
-        console.error(`Error checking cart for user ${userId}:`, error.message);
+        console.error(`   ❌ Error checking cart for user ${userId}:`, error.message);
       }
       
       // Check if user has this product in wishlist
@@ -141,12 +160,16 @@ exports.handler = async (event, context) => {
         const wishlistRef = db.collection('users').doc(userId).collection('wishlist');
         const wishlistSnapshot = await wishlistRef.where('id', '==', productId).get();
         hasProductInWishlist = !wishlistSnapshot.empty;
+        if (hasProductInWishlist) {
+          console.log(`   ✅ Product ${productId} FOUND in wishlist`);
+        }
       } catch (error) {
-        console.error(`Error checking wishlist for user ${userId}:`, error.message);
+        console.error(`   ❌ Error checking wishlist for user ${userId}:`, error.message);
       }
       
       // Send notification only if product is in cart or wishlist
       if (hasProductInCart || hasProductInWishlist) {
+        productsInWishlistOrCart++;
         console.log(`✅ Sending low stock alert to user ${userId} for ${productId}`);
         
         const productLink = `/product/${productId}`;
@@ -160,7 +183,13 @@ exports.handler = async (event, context) => {
     }
     
     console.log(`\n✅ LOW STOCK ALERTS COMPLETE`);
-    console.log(`📊 Notifications sent: ${totalNotificationsSent}`);
+    console.log(`📊 Summary:`);
+    console.log(`   - Product: ${productName}`);
+    console.log(`   - Stock remaining: ${stockRemaining}`);
+    console.log(`   - Total users: ${usersSnapshot.docs.length}`);
+    console.log(`   - Users with FCM tokens: ${usersWithTokens}`);
+    console.log(`   - Users with product in cart/wishlist: ${productsInWishlistOrCart}`);
+    console.log(`   - Notifications sent: ${totalNotificationsSent}`);
     console.log(`====================================================\n`);
     
     return {

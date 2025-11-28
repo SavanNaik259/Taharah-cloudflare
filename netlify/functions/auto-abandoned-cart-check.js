@@ -52,7 +52,8 @@ db = initializeFirebaseAdmin();
 
 async function sendNotification(token, productImage, productName, productLink) {
   try {
-    await admin.messaging().send({
+    console.log(`📤 Sending FCM to token: ${token.substring(0, 20)}...`);
+    const response = await admin.messaging().send({
       token: token,
       notification: {
         title: `Complete Your Order!`,
@@ -99,19 +100,30 @@ exports.handler = async (event, context) => {
     console.log(`⏰ Checking for carts inactive since ${twentyFourHoursAgo.toISOString()}`);
     
     let totalNotificationsSent = 0;
+    let usersProcessed = 0;
+    let usersWithTokens = 0;
+    let abandonedCartCount = 0;
     
     // Get all users
+    console.log(`\n📊 Fetching all users from Firestore...`);
     const usersSnapshot = await db.collection('users').get();
-    console.log(`📊 Found ${usersSnapshot.docs.length} users`);
+    console.log(`✅ Found ${usersSnapshot.docs.length} users in Firestore`);
     
     for (const userDoc of usersSnapshot.docs) {
+      usersProcessed++;
       const user = userDoc.data();
       const userId = userDoc.id;
       
+      console.log(`\n👤 Processing user ${usersProcessed}/${usersSnapshot.docs.length}: ${userId}`);
+      
       // Skip if user doesn't have FCM tokens
       if (!user.fcmTokens || !Array.isArray(user.fcmTokens) || user.fcmTokens.length === 0) {
+        console.log(`   ⚠️  No FCM tokens found for user ${userId}`);
         continue;
       }
+      
+      usersWithTokens++;
+      console.log(`   ✅ User has ${user.fcmTokens.length} FCM token(s)`);
       
       // Check user's cart
       try {
@@ -129,10 +141,12 @@ exports.handler = async (event, context) => {
         const cartUpdatedAt = cartData.updatedAt?.toDate?.() || new Date(0);
         
         if (cartUpdatedAt < twentyFourHoursAgo) {
-          console.log(`✅ User ${userId} has abandoned cart (${cartItems.length} items, last updated: ${cartUpdatedAt.toISOString()})`);
+          abandonedCartCount++;
+          console.log(`✅ User ${userId} has ABANDONED cart (${cartItems.length} items, last updated: ${cartUpdatedAt.toISOString()})`);
           
           // Get first product details for notification
           const firstItem = cartItems[0];
+          console.log(`   📦 First cart item:`, { id: firstItem.id, name: firstItem.name, image: firstItem.image?.substring(0, 30) });
           const productImage = firstItem.image || firstItem.productImage || '/images/logos/royalmeenakari.png';
           const productName = firstItem.name || firstItem.productName || 'Your item';
           const productLink = `/product/${firstItem.id || firstItem.productId || ''}`;
@@ -150,7 +164,11 @@ exports.handler = async (event, context) => {
     }
     
     console.log(`\n✅ ABANDONED CART CHECK COMPLETE`);
-    console.log(`📊 Notifications sent: ${totalNotificationsSent}`);
+    console.log(`📊 Summary:`);
+    console.log(`   - Total users: ${usersSnapshot.docs.length}`);
+    console.log(`   - Users with FCM tokens: ${usersWithTokens}`);
+    console.log(`   - Abandoned carts found (24+ hrs inactive): ${abandonedCartCount}`);
+    console.log(`   - Notifications sent: ${totalNotificationsSent}`);
     console.log(`====================================================\n`);
     
     return {
