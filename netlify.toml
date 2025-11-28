@@ -17,6 +17,19 @@
   status = 200
   force = true
 
+# CRITICAL: Service workers MUST NOT be redirected - they need correct MIME type
+[[redirects]]
+  from = "/service-worker.js"
+  to = "/service-worker.js"
+  status = 200
+  force = false
+
+[[redirects]]
+  from = "/firebase-messaging-sw.js"
+  to = "/firebase-messaging-sw.js"
+  status = 200
+  force = false
+
 # Make sure each HTML page is properly served
 [[redirects]]
   from = "/checkout.html"
@@ -26,6 +39,11 @@
 [[redirects]]
   from = "/product-detail.html"
   to = "/product-detail.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin-promotions.html"
+  to = "/admin-promotions.html"
   status = 200
 
 [[redirects]]
