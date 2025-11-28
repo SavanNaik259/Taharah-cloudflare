@@ -61,7 +61,6 @@ exports.handler = async (event, context) => {
   console.log('\n📢 ========== SEND-CAMPAIGN NETLIFY FUNCTION ==========');
   console.log('🔍 Event method:', event.httpMethod);
   console.log('🔍 Event path:', event.path);
-  console.log('🔍 Request headers:', JSON.stringify(event.headers, null, 2));
   
   if (event.httpMethod !== 'POST') {
     return { 
@@ -108,93 +107,106 @@ exports.handler = async (event, context) => {
     let sentCount = 0;
     let failedCount = 0;
     const failedTokens = [];
+    const allTokens = [];
 
     console.log(`📋 Campaign: "${title}"`);
-    console.log('📋 Fetching opted-in users and guests...');
+    console.log('📋 Fetching ALL users (checking each for FCM tokens)...');
 
-    // Get all logged-in users with FCM tokens
-    const usersSnapshot = await db.collection('users').where('fcmTokens', '!=', null).get();
-    console.log(`👤 Found ${usersSnapshot.docs.length} users with FCM tokens`);
+    // FIX: Don't use where('field', '!=', null) - query ALL documents instead
+    const usersSnapshot = await db.collection('users').get();
+    console.log(`📊 Found ${usersSnapshot.docs.length} user documents`);
 
     for (const userDoc of usersSnapshot.docs) {
       const user = userDoc.data();
+      // Check if fcmTokens exists AND is an array AND has elements
       if (user.fcmTokens && Array.isArray(user.fcmTokens) && user.fcmTokens.length > 0) {
-        console.log(`📨 Sending to user ${userDoc.id} (${user.fcmTokens.length} tokens)...`);
-
+        console.log(`✅ User ${userDoc.id} has ${user.fcmTokens.length} FCM token(s)`);
+        
         for (const token of user.fcmTokens) {
-          try {
-            const response = await admin.messaging().send({
-              token: token,
-              notification: {
-                title: title,
-                body: body
-              },
-              webpush: {
-                fcmOptions: { link: link || '/' },
-                notification: {
-                  title: title,
-                  body: body,
-                  icon: '/images/logos/royalmeenakari.png',
-                  badge: '/images/logos/royalmeenakari.png'
-                },
-                data: {
-                  link: link || '/',
-                  image: image || ''
-                }
-              }
-            });
-            sentCount++;
-            console.log(`   ✅ Message ID: ${response}`);
-          } catch (error) {
-            failedCount++;
-            failedTokens.push({ token: token.substring(0, 20), error: error.message });
-            console.error(`   ❌ Error: ${error.message}`);
+          if (token && typeof token === 'string' && token.length > 0) {
+            allTokens.push(token);
           }
         }
+      } else {
+        console.log(`⚠️ User ${userDoc.id}: No FCM tokens (fcmTokens: ${user.fcmTokens ? 'exists but empty' : 'missing'})`);
       }
     }
 
-    // Get all guest device tokens
-    const guestSnapshot = await db.collection('guest_tokens').where('tokens', '!=', null).get();
-    console.log(`🌐 Found ${guestSnapshot.docs.length} guest devices with tokens`);
+    console.log(`\n📋 Fetching ALL guest devices (checking each for tokens)...`);
+    
+    // FIX: Don't use where('field', '!=', null) - query ALL documents instead
+    const guestSnapshot = await db.collection('guest_tokens').get();
+    console.log(`📊 Found ${guestSnapshot.docs.length} guest device documents`);
 
     for (const deviceDoc of guestSnapshot.docs) {
       const device = deviceDoc.data();
+      // Check if tokens exists AND is an array AND has elements
       if (device.tokens && Array.isArray(device.tokens) && device.tokens.length > 0) {
-        console.log(`📨 Sending to guest ${deviceDoc.id} (${device.tokens.length} tokens)...`);
-
+        console.log(`✅ Guest ${deviceDoc.id} has ${device.tokens.length} token(s)`);
+        
         for (const token of device.tokens) {
-          try {
-            const response = await admin.messaging().send({
-              token: token,
-              notification: {
-                title: title,
-                body: body
-              },
-              webpush: {
-                fcmOptions: { link: link || '/' },
-                notification: {
-                  title: title,
-                  body: body,
-                  icon: '/images/logos/royalmeenakari.png'
-                }
-              }
-            });
-            sentCount++;
-            console.log(`   ✅ Message ID: ${response}`);
-          } catch (error) {
-            failedCount++;
-            failedTokens.push({ device: deviceDoc.id, error: error.message });
-            console.error(`   ❌ Error: ${error.message}`);
+          if (token && typeof token === 'string' && token.length > 0) {
+            allTokens.push(token);
           }
         }
+      } else {
+        console.log(`⚠️ Guest ${deviceDoc.id}: No tokens (tokens: ${device.tokens ? 'exists but empty' : 'missing'})`);
       }
     }
 
-    console.log(`\n✅ CAMPAIGN COMPLETE - Sent: ${sentCount}, Failed: ${failedCount}`);
-    if (failedTokens.length > 0) {
-      console.log('Failed tokens:', failedTokens.slice(0, 5));
+    console.log(`\n📊 Total valid tokens collected: ${allTokens.length}`);
+
+    if (allTokens.length === 0) {
+      console.warn('⚠️ NO TOKENS FOUND! Users may not have enabled notifications or tokens not saved correctly.');
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({
+          success: false,
+          message: 'No users with notification tokens found',
+          sentCount: 0,
+          failedCount: 0,
+          warning: 'Make sure users have enabled notifications and tokens are saved to Firestore'
+        })
+      };
     }
+
+    console.log(`\n📤 Sending notifications to ${allTokens.length} token(s)...`);
+
+    for (const token of allTokens) {
+      try {
+        console.log(`📨 Sending to token: ${token.substring(0, 30)}...`);
+        const response = await admin.messaging().send({
+          token: token,
+          notification: {
+            title: title,
+            body: body
+          },
+          webpush: {
+            fcmOptions: { link: link || '/' },
+            notification: {
+              title: title,
+              body: body,
+              icon: '/images/logos/royalmeenakari.png',
+              badge: '/images/logos/royalmeenakari.png'
+            },
+            data: {
+              link: link || '/',
+              image: image || ''
+            }
+          }
+        });
+        sentCount++;
+        console.log(`   ✅ Message sent. ID: ${response.substring(0, 50)}...`);
+      } catch (error) {
+        failedCount++;
+        failedTokens.push({ token: token.substring(0, 20), error: error.message });
+        console.error(`   ❌ Failed: ${error.message}`);
+      }
+    }
+
+    console.log(`\n✅ CAMPAIGN COMPLETE`);
+    console.log(`📊 Sent: ${sentCount}, Failed: ${failedCount}`);
     console.log(`====================================================\n`);
 
     return {
@@ -205,6 +217,7 @@ exports.handler = async (event, context) => {
         message: `Campaign sent to ${sentCount} devices (${failedCount} failed)`,
         sentCount,
         failedCount,
+        totalTokens: allTokens.length,
         failedTokens: failedTokens.slice(0, 5)
       })
     };
