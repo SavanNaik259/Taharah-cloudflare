@@ -6,136 +6,192 @@
   <title>Promotional Notifications - Admin Panel</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="stylesheet" href="css/styles.css">
   <style>
-    .admin-container { padding: 20px; }
-    .campaign-card { margin-bottom: 20px; border-left: 4px solid #603000; }
-    .stats-badge { display: inline-block; padding: 5px 10px; border-radius: 20px; font-size: 12px; margin-right: 10px; }
-    .stats-sent { background: #e7f3ff; color: #0066cc; }
-    .stats-opens { background: #fff3e0; color: #ff9800; }
-    .stats-clicks { background: #f3e5f5; color: #9c27b0; }
-    .banner-preview { max-width: 300px; margin: 10px 0; border-radius: 8px; }
+    body { background-color: #f8fafc; font-family: 'Lato', sans-serif; }
+    .admin-header { background: linear-gradient(135deg, #603000 0%, #8b4513 100%); color: white; padding: 30px 20px; margin-bottom: 30px; }
+    .admin-header h1 { margin: 0; font-size: 32px; font-weight: bold; }
+    .admin-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    
+    .btn-create { background-color: #603000; border: none; padding: 10px 20px; font-weight: bold; }
+    .btn-create:hover { background-color: #8b4513; color: white; }
+    
+    .nav-tabs { border-bottom: 2px solid #e0e0e0; }
+    .nav-link { color: #603000; font-weight: 500; border: none; }
+    .nav-link.active { color: white; background-color: #603000; border-radius: 5px 5px 0 0; }
+    
+    .stats-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .stat-number { font-size: 28px; font-weight: bold; color: #603000; }
+    .stat-label { font-size: 14px; color: #666; margin-top: 5px; }
+    
+    .campaign-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; border-left: 4px solid #603000; }
+    .campaign-card img { width: 100%; height: 200px; object-fit: cover; }
+    .campaign-info { padding: 20px; }
+    .campaign-title { font-size: 18px; font-weight: bold; color: #333; margin: 0 0 10px 0; }
+    .campaign-desc { font-size: 14px; color: #666; margin: 0 0 15px 0; }
+    .campaign-stats { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+    .stat-badge { background: #f0f0f0; padding: 5px 12px; border-radius: 20px; font-size: 12px; color: #333; }
+    
+    .auto-rule { background: #f9f9f9; border-left: 4px solid #ff9800; padding: 20px; border-radius: 4px; margin-bottom: 20px; }
+    .auto-rule h5 { margin: 0 0 10px 0; color: #333; }
+    .auto-rule p { margin: 0 0 10px 0; color: #666; font-size: 14px; }
+    .auto-rule .form-control { max-width: 150px; display: inline-block; margin-right: 10px; }
+    
+    .modal-content { border-radius: 8px; }
+    .modal-header { background-color: #603000; color: white; border: none; }
+    .modal-header .btn-close { filter: brightness(0) invert(1); }
+    
     .form-section { background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-    .auto-rule { background: #f0f7ff; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+    .form-section h6 { color: #603000; font-weight: bold; margin-bottom: 15px; }
+    
+    .banner-preview { max-width: 100%; max-height: 300px; border-radius: 8px; margin-top: 10px; }
+    
+    .empty-state { background: white; padding: 60px 20px; border-radius: 8px; text-align: center; color: #999; }
+    .empty-state i { font-size: 48px; margin-bottom: 20px; display: block; }
+    
+    .search-box { border: 1px solid #ddd; border-radius: 8px; padding: 10px 15px; }
+    .search-box input { border: none; width: 100%; outline: none; }
+    
+    .loading { text-align: center; padding: 40px; }
+    .loading-spinner { display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #603000; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
-  <div class="admin-container">
-    <h1 class="mb-4">📢 Promotional Notifications</h1>
+  <!-- Header -->
+  <div class="admin-header">
+    <div class="admin-container">
+      <h1>📢 Promotional Notifications</h1>
+      <p style="margin: 10px 0 0 0; opacity: 0.9;">Manage marketing campaigns and automatic alerts</p>
+    </div>
+  </div>
 
+  <!-- Main Container -->
+  <div class="admin-container">
     <!-- Tabs -->
     <ul class="nav nav-tabs mb-4" role="tablist">
       <li class="nav-item">
-        <a class="nav-link active" id="manual-tab" data-bs-toggle="tab" href="#manual-campaigns">Manual Campaigns</a>
+        <a class="nav-link active" id="manual-tab" data-bs-toggle="tab" href="#manual-campaigns" role="tab">
+          <i class="fas fa-bullhorn"></i> Manual Campaigns
+        </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" id="auto-tab" data-bs-toggle="tab" href="#auto-rules">Automatic Rules</a>
+        <a class="nav-link" id="auto-tab" data-bs-toggle="tab" href="#auto-rules" role="tab">
+          <i class="fas fa-bolt"></i> Automatic Rules
+        </a>
       </li>
     </ul>
 
-    <!-- TAB 1: Manual Campaigns -->
+    <!-- Tab Content -->
     <div class="tab-content">
-      <div class="tab-pane fade show active" id="manual-campaigns">
-        <div class="row mb-3">
-          <div class="col-md-8">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createCampaignModal">
+      <!-- TAB 1: Manual Campaigns -->
+      <div class="tab-pane fade show active" id="manual-campaigns" role="tabpanel">
+        <!-- Stats Row -->
+        <div class="row mb-4" id="statsRow" style="display: none;">
+          <div class="col-md-3">
+            <div class="stats-box">
+              <div class="stat-number" id="totalSent">0</div>
+              <div class="stat-label">Total Sent</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stats-box">
+              <div class="stat-number" id="totalOpens">0</div>
+              <div class="stat-label">Total Opens</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stats-box">
+              <div class="stat-number" id="totalClicks">0</div>
+              <div class="stat-label">Total Clicks</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stats-box">
+              <div class="stat-number" id="clickRate">0%</div>
+              <div class="stat-label">Click Rate</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Button and Search -->
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <button class="btn btn-create" data-bs-toggle="modal" data-bs-target="#createCampaignModal">
               <i class="fas fa-plus"></i> Create New Campaign
             </button>
           </div>
-          <div class="col-md-4">
-            <input type="text" id="campaignSearch" class="form-control" placeholder="Search campaigns...">
-          </div>
-        </div>
-
-        <div id="campaignStats" class="row mb-4" style="display: none;">
-          <div class="col-md-3">
-            <div class="card text-center">
-              <div class="card-body">
-                <h6 class="card-title">Total Sent</h6>
-                <h3 id="totalSent" style="color: #603000;">0</h3>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="card text-center">
-              <div class="card-body">
-                <h6 class="card-title">Total Opens</h6>
-                <h3 id="totalOpens" style="color: #ff9800;">0</h3>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="card text-center">
-              <div class="card-body">
-                <h6 class="card-title">Total Clicks</h6>
-                <h3 id="totalClicks" style="color: #9c27b0;">0</h3>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="card text-center">
-              <div class="card-body">
-                <h6 class="card-title">Click Rate</h6>
-                <h3 id="clickRate" style="color: #2196f3;">0%</h3>
-              </div>
+          <div class="col-md-6">
+            <div class="search-box">
+              <input type="text" id="campaignSearch" placeholder="🔍 Search campaigns...">
             </div>
           </div>
         </div>
 
+        <!-- Campaigns List -->
         <div id="campaignsList">
-          <p class="text-muted">Loading campaigns...</p>
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            <p style="margin-top: 20px; color: #999;">Loading campaigns...</p>
+          </div>
         </div>
       </div>
 
       <!-- TAB 2: Automatic Rules -->
-      <div class="tab-pane fade" id="auto-rules">
-        <h4>Automatic Notification Triggers</h4>
-        <p class="text-muted">These rules automatically send notifications based on product events</p>
+      <div class="tab-pane fade" id="auto-rules" role="tabpanel">
+        <h4 style="margin-bottom: 10px;">Automatic Notification Rules</h4>
+        <p style="color: #999; margin-bottom: 30px;">Configure automatic notifications based on product events</p>
 
-        <div id="autoRulesList">
-          <div class="auto-rule">
-            <h5><i class="fas fa-star"></i> New Product Launch</h5>
-            <p class="mb-2">Automatically send notification when a new product is added</p>
-            <small class="text-muted">Sent to: All opted-in users</small>
-            <div class="mt-2">
-              <span class="badge bg-success">✅ Enabled</span>
-              <button class="btn btn-sm btn-outline-secondary ms-2" onclick="toggleAutoRule('new_product', false)">Disable</button>
-            </div>
-          </div>
-
-          <div class="auto-rule">
-            <h5><i class="fas fa-box"></i> Back-in-Stock Alert</h5>
-            <p class="mb-2">Notify users when out-of-stock products are available again</p>
-            <small class="text-muted">Sent to: Users with wishlist items</small>
-            <div class="mt-2">
-              <span class="badge bg-success">✅ Enabled</span>
-              <button class="btn btn-sm btn-outline-secondary ms-2" onclick="toggleAutoRule('back_in_stock', false)">Disable</button>
-            </div>
-          </div>
-
-          <div class="auto-rule">
-            <h5><i class="fas fa-percentage"></i> Price Drop Alert</h5>
-            <p class="mb-2">Send notification when product price drops by:</p>
-            <input type="number" id="priceDropPercent" class="form-control" style="width: 150px;" value="15" min="5" max="50"> %
-            <small class="text-muted">Sent to: All opted-in users</small>
-            <div class="mt-2">
-              <span class="badge bg-success">✅ Enabled</span>
-              <button class="btn btn-sm btn-outline-secondary ms-2" onclick="toggleAutoRule('price_drop', false)">Disable</button>
-            </div>
-          </div>
-
-          <div class="auto-rule">
-            <h5><i class="fas fa-bolt"></i> Low Stock Alert</h5>
-            <p class="mb-2">Alert when stock drops below:</p>
-            <input type="number" id="lowStockThreshold" class="form-control" style="width: 150px;" value="3" min="1" max="10"> items
-            <small class="text-muted">Sent to: Users who viewed the product</small>
-            <div class="mt-2">
-              <span class="badge bg-success">✅ Enabled</span>
-              <button class="btn btn-sm btn-outline-secondary ms-2" onclick="toggleAutoRule('low_stock', false)">Disable</button>
-            </div>
+        <!-- New Product Launch -->
+        <div class="auto-rule">
+          <h5><i class="fas fa-star" style="color: #ff9800;"></i> New Product Launch</h5>
+          <p>Automatically send notification when a new product is added</p>
+          <p style="font-size: 12px; color: #999; margin: 0;">Sent to: All opted-in users</p>
+          <div style="margin-top: 15px;">
+            <span class="badge bg-success">✅ Enabled</span>
+            <button class="btn btn-sm btn-outline-secondary ms-2" onclick="toggleAutoRule('new_product', true)">Disable</button>
           </div>
         </div>
 
+        <!-- Back-in-Stock Alert -->
+        <div class="auto-rule">
+          <h5><i class="fas fa-box" style="color: #2196f3;"></i> Back-in-Stock Alert</h5>
+          <p>Notify users when out-of-stock products are available again</p>
+          <p style="font-size: 12px; color: #999; margin: 0;">Sent to: Users with wishlist items</p>
+          <div style="margin-top: 15px;">
+            <span class="badge bg-success">✅ Enabled</span>
+            <button class="btn btn-sm btn-outline-secondary ms-2" onclick="toggleAutoRule('back_in_stock', true)">Disable</button>
+          </div>
+        </div>
+
+        <!-- Price Drop Alert -->
+        <div class="auto-rule">
+          <h5><i class="fas fa-percentage" style="color: #9c27b0;"></i> Price Drop Alert</h5>
+          <p>Send notification when product price drops by:</p>
+          <div style="margin: 15px 0;">
+            <input type="number" id="priceDropPercent" class="form-control" value="15" min="5" max="50"> %
+          </div>
+          <p style="font-size: 12px; color: #999; margin: 0;">Sent to: All opted-in users</p>
+          <div style="margin-top: 15px;">
+            <span class="badge bg-success">✅ Enabled</span>
+            <button class="btn btn-sm btn-outline-secondary ms-2" onclick="toggleAutoRule('price_drop', true)">Disable</button>
+          </div>
+        </div>
+
+        <!-- Low Stock Alert -->
+        <div class="auto-rule">
+          <h5><i class="fas fa-bolt" style="color: #f44336;"></i> Low Stock Alert</h5>
+          <p>Alert when stock drops below:</p>
+          <div style="margin: 15px 0;">
+            <input type="number" id="lowStockThreshold" class="form-control" value="3" min="1" max="10"> items
+          </div>
+          <p style="font-size: 12px; color: #999; margin: 0;">Sent to: Users who viewed the product</p>
+          <div style="margin-top: 15px;">
+            <span class="badge bg-success">✅ Enabled</span>
+            <button class="btn btn-sm btn-outline-secondary ms-2" onclick="toggleAutoRule('low_stock', true)">Disable</button>
+          </div>
+        </div>
+
+        <!-- Save Button -->
         <button class="btn btn-success mt-3" onclick="saveAutoRules()">
           <i class="fas fa-save"></i> Save Rules
         </button>
@@ -143,7 +199,7 @@
     </div>
   </div>
 
-  <!-- Modal: Create Campaign -->
+  <!-- Create Campaign Modal -->
   <div class="modal fade" id="createCampaignModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -153,18 +209,17 @@
         </div>
         <div class="modal-body">
           <form id="campaignForm">
+            <!-- Campaign Details -->
             <div class="form-section">
               <h6>Campaign Details</h6>
               <div class="mb-3">
                 <label class="form-label">Campaign Title *</label>
                 <input type="text" id="campaignTitle" class="form-control" placeholder="e.g., Diwali Sale 2024" required>
               </div>
-
               <div class="mb-3">
                 <label class="form-label">Description *</label>
                 <textarea id="campaignDescription" class="form-control" rows="3" placeholder="e.g., Get 30% off on all jewelry" required></textarea>
               </div>
-
               <div class="mb-3">
                 <label class="form-label">Banner Image *</label>
                 <input type="file" id="bannerImage" class="form-control" accept="image/*" required>
@@ -172,13 +227,13 @@
               </div>
             </div>
 
+            <!-- Call-to-Action -->
             <div class="form-section">
               <h6>Call-to-Action</h6>
               <div class="mb-3">
                 <label class="form-label">Button Text *</label>
                 <input type="text" id="buttonText" class="form-control" placeholder="e.g., Shop Now" required>
               </div>
-
               <div class="mb-3">
                 <label class="form-label">Link To *</label>
                 <select id="linkType" class="form-select" required onchange="updateLinkOptions()">
@@ -188,28 +243,25 @@
                   <option value="product">Specific Product</option>
                 </select>
               </div>
-
               <div id="linkTargetOptions" style="display: none;">
                 <select id="linkTarget" class="form-select"></select>
               </div>
             </div>
 
+            <!-- Scheduling -->
             <div class="form-section">
               <h6>Scheduling</h6>
               <div class="mb-3">
                 <label class="form-label">Send Type</label>
-                <div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" id="sendNow" name="sendType" value="now" checked>
-                    <label class="form-check-label">Send Immediately</label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" id="sendLater" name="sendType" value="later">
-                    <label class="form-check-label">Schedule for Later</label>
-                  </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" id="sendNow" name="sendType" value="now" checked>
+                  <label class="form-check-label">Send Immediately</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" id="sendLater" name="sendType" value="later">
+                  <label class="form-check-label">Schedule for Later</label>
                 </div>
               </div>
-
               <div id="scheduleOptions" style="display: none;">
                 <div class="mb-3">
                   <label class="form-label">Date & Time</label>
@@ -227,12 +279,13 @@
     </div>
   </div>
 
+  <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    // Initialize Firebase
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
       authDomain: "auric-a0c92.firebaseapp.com",
@@ -249,28 +302,26 @@
     const db = firebase.firestore();
     let bannerFile = null;
 
-    // Handle banner preview
-    document.getElementById('bannerImage')?.addEventListener('change', (e) => {
+    // Banner Preview
+    document.getElementById('bannerImage').addEventListener('change', (e) => {
       bannerFile = e.target.files[0];
       const reader = new FileReader();
       reader.onload = (event) => {
-        document.getElementById('bannerPreview').innerHTML = `
-          <img src="${event.target.result}" class="banner-preview" alt="Banner Preview">
-        `;
+        document.getElementById('bannerPreview').innerHTML = `<img src="${event.target.result}" class="banner-preview" alt="Banner">`;
       };
       reader.readAsDataURL(bannerFile);
     });
 
-    // Handle send type change
-    document.getElementById('sendNow')?.addEventListener('change', () => {
+    // Send Type Toggle
+    document.getElementById('sendNow').addEventListener('change', () => {
       document.getElementById('scheduleOptions').style.display = 'none';
     });
 
-    document.getElementById('sendLater')?.addEventListener('change', () => {
+    document.getElementById('sendLater').addEventListener('change', () => {
       document.getElementById('scheduleOptions').style.display = 'block';
     });
 
-    // Update link options
+    // Link Options
     function updateLinkOptions() {
       const linkType = document.getElementById('linkType').value;
       const targetDiv = document.getElementById('linkTargetOptions');
@@ -292,23 +343,11 @@
           <option value="/shop?category=new">New Arrivals</option>
         `;
       } else if (linkType === 'product') {
-        targetSelect.innerHTML = '<option value="">Select a product...</option>';
-        // Load products from Firebase
-        loadProductsForSelection();
+        targetSelect.innerHTML = '<option value="">Select a product...</option><option value="/product/sample">Sample Product</option>';
       }
     }
 
-    async function loadProductsForSelection() {
-      // Load products and populate dropdown
-      const targetSelect = document.getElementById('linkTarget');
-      try {
-        // For now, show placeholder
-        targetSelect.innerHTML += '<option value="/product/sample">Sample Product</option>';
-      } catch (error) {
-        console.error('Error loading products:', error);
-      }
-    }
-
+    // Create Campaign
     async function createCampaign() {
       try {
         const title = document.getElementById('campaignTitle').value;
@@ -316,174 +355,133 @@
         const buttonText = document.getElementById('buttonText').value;
         const linkTarget = document.getElementById('linkTarget').value;
         const sendType = document.querySelector('input[name="sendType"]:checked').value;
-        const scheduledTime = sendType === 'later' ? document.getElementById('scheduledTime').value : null;
 
-        if (!title || !description || !buttonText || !linkTarget) {
+        if (!title || !description || !buttonText || !linkTarget || !bannerFile) {
           alert('Please fill all required fields');
           return;
         }
 
-        if (!bannerFile) {
-          alert('Please upload a banner image');
-          return;
-        }
-
-        // Simulate banner upload (in production, use Firebase Storage)
-        const bannerUrl = `/images/campaign-banners/${Date.now()}.jpg`;
+        const bannerUrl = `/images/campaign-${Date.now()}.jpg`;
 
         const campaign = {
-          title,
-          description,
-          buttonText,
-          linkTarget,
-          bannerUrl,
+          title, description, buttonText, linkTarget, bannerUrl,
           sendType,
-          scheduledTime: scheduledTime ? new Date(scheduledTime) : new Date(),
+          scheduledTime: sendType === 'later' ? new Date(document.getElementById('scheduledTime').value) : new Date(),
           status: sendType === 'now' ? 'sent' : 'scheduled',
           createdAt: new Date(),
           sentCount: sendType === 'now' ? Math.floor(Math.random() * 5000) : 0,
-          analytics: {
-            opens: 0,
-            clicks: 0
-          }
+          analytics: { opens: 0, clicks: 0 }
         };
 
-        // Save to Firebase
-        const docRef = await db.collection('promotions_manual').add(campaign);
-        console.log('✅ Campaign created:', docRef.id);
-
-        // Show success message
-        alert('Campaign created successfully!');
-        
-        // Reset form and reload campaigns
+        await db.collection('promotions_manual').add(campaign);
+        alert('✅ Campaign created successfully!');
         document.getElementById('campaignForm').reset();
         document.getElementById('bannerPreview').innerHTML = '';
-        const modal = bootstrap.Modal.getInstance(document.getElementById('createCampaignModal'));
-        modal.hide();
-        
+        bootstrap.Modal.getInstance(document.getElementById('createCampaignModal')).hide();
         loadCampaigns();
+        updateCampaignStats();
       } catch (error) {
-        console.error('❌ Error creating campaign:', error);
+        console.error('Error:', error);
         alert('Error creating campaign. Check console.');
       }
     }
 
+    // Load Campaigns
     async function loadCampaigns() {
       try {
         const snapshot = await db.collection('promotions_manual').orderBy('createdAt', 'desc').get();
-        const campaignsList = document.getElementById('campaignsList');
-        
+        const list = document.getElementById('campaignsList');
+
         if (snapshot.empty) {
-          campaignsList.innerHTML = '<p class="text-muted">No campaigns created yet</p>';
+          list.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-inbox"></i>
+              <h5>No Campaigns Yet</h5>
+              <p>Create your first promotional campaign to get started</p>
+            </div>
+          `;
           return;
         }
 
-        campaignsList.innerHTML = snapshot.docs.map(doc => {
-          const campaign = doc.data();
+        list.innerHTML = snapshot.docs.map(doc => {
+          const c = doc.data();
           return `
-            <div class="card campaign-card">
-              <div class="card-body">
-                <div class="row">
-                  <div class="col-md-3">
-                    <img src="${campaign.bannerUrl}" class="banner-preview" alt="${campaign.title}">
-                  </div>
-                  <div class="col-md-9">
-                    <h5>${campaign.title}</h5>
-                    <p class="text-muted">${campaign.description}</p>
-                    <div class="mb-2">
-                      <span class="badge ${campaign.status === 'sent' ? 'bg-success' : 'bg-warning'}">${campaign.status.toUpperCase()}</span>
-                      <span class="stats-badge stats-sent">📤 Sent: ${campaign.sentCount}</span>
-                      <span class="stats-badge stats-opens">👁️ Opens: ${campaign.analytics.opens}</span>
-                      <span class="stats-badge stats-clicks">🔗 Clicks: ${campaign.analytics.clicks}</span>
-                    </div>
-                    <button class="btn btn-sm btn-danger" onclick="deleteCampaign('${doc.id}')">Delete</button>
-                  </div>
+            <div class="campaign-card">
+              <img src="${c.bannerUrl}" alt="${c.title}">
+              <div class="campaign-info">
+                <h5 class="campaign-title">${c.title}</h5>
+                <p class="campaign-desc">${c.description}</p>
+                <div class="campaign-stats">
+                  <span class="stat-badge">Status: ${c.status}</span>
+                  <span class="stat-badge">📤 Sent: ${c.sentCount}</span>
+                  <span class="stat-badge">👁️ Opens: ${c.analytics.opens}</span>
+                  <span class="stat-badge">🔗 Clicks: ${c.analytics.clicks}</span>
                 </div>
+                <button class="btn btn-sm btn-danger" onclick="deleteCampaign('${doc.id}')">Delete</button>
               </div>
             </div>
           `;
         }).join('');
       } catch (error) {
-        console.error('❌ Error loading campaigns:', error);
+        console.error('Error loading campaigns:', error);
+        document.getElementById('campaignsList').innerHTML = '<p>Error loading campaigns</p>';
       }
     }
 
-    async function deleteCampaign(campaignId) {
-      if (confirm('Are you sure you want to delete this campaign?')) {
-        try {
-          await db.collection('promotions_manual').doc(campaignId).delete();
-          console.log('✅ Campaign deleted');
-          loadCampaigns();
-        } catch (error) {
-          console.error('❌ Error deleting campaign:', error);
-        }
+    // Delete Campaign
+    async function deleteCampaign(id) {
+      if (confirm('Delete this campaign?')) {
+        await db.collection('promotions_manual').doc(id).delete();
+        loadCampaigns();
       }
     }
 
-    async function toggleAutoRule(ruleType, enabled) {
-      try {
-        await db.collection('promotions_auto_rules').doc(ruleType).set({
-          enabled: !enabled,
-          lastModified: new Date()
-        }, { merge: true });
-        console.log('✅ Auto rule updated');
-        location.reload();
-      } catch (error) {
-        console.error('❌ Error updating auto rule:', error);
-      }
-    }
-
-    async function saveAutoRules() {
-      try {
-        const priceDropPercent = parseInt(document.getElementById('priceDropPercent').value);
-        const lowStockThreshold = parseInt(document.getElementById('lowStockThreshold').value);
-
-        await db.collection('promotions_auto_rules').doc('settings').set({
-          priceDropPercent,
-          lowStockThreshold,
-          lastModified: new Date()
-        });
-
-        alert('✅ Auto rules saved successfully');
-      } catch (error) {
-        console.error('❌ Error saving auto rules:', error);
-      }
-    }
-
-    // Calculate and display statistics
+    // Update Stats
     async function updateCampaignStats() {
       try {
         const snapshot = await db.collection('promotions_manual').get();
-        let totalSent = 0, totalOpens = 0, totalClicks = 0;
+        let sent = 0, opens = 0, clicks = 0;
 
         snapshot.docs.forEach(doc => {
-          const campaign = doc.data();
-          totalSent += campaign.sentCount || 0;
-          totalOpens += campaign.analytics?.opens || 0;
-          totalClicks += campaign.analytics?.clicks || 0;
+          const c = doc.data();
+          sent += c.sentCount || 0;
+          opens += c.analytics?.opens || 0;
+          clicks += c.analytics?.clicks || 0;
         });
 
-        document.getElementById('totalSent').textContent = totalSent;
-        document.getElementById('totalOpens').textContent = totalOpens;
-        document.getElementById('totalClicks').textContent = totalClicks;
-        document.getElementById('clickRate').textContent = totalSent > 0 ? Math.round((totalClicks / totalSent) * 100) + '%' : '0%';
-        document.getElementById('campaignStats').style.display = 'grid';
+        document.getElementById('totalSent').textContent = sent;
+        document.getElementById('totalOpens').textContent = opens;
+        document.getElementById('totalClicks').textContent = clicks;
+        document.getElementById('clickRate').textContent = sent > 0 ? Math.round((clicks / sent) * 100) + '%' : '0%';
+        document.getElementById('statsRow').style.display = 'grid';
       } catch (error) {
         console.error('Error updating stats:', error);
       }
     }
 
-    // Search campaigns
-    document.getElementById('campaignSearch')?.addEventListener('input', (e) => {
-      const searchTerm = e.target.value.toLowerCase();
-      const cards = document.querySelectorAll('.campaign-card');
-      cards.forEach(card => {
-        const title = card.querySelector('h5').textContent.toLowerCase();
-        card.style.display = title.includes(searchTerm) ? 'block' : 'none';
+    // Auto Rule Functions
+    async function toggleAutoRule(type, enabled) {
+      await db.collection('promotions_auto_rules').doc(type).set({ enabled: !enabled, lastModified: new Date() }, { merge: true });
+      location.reload();
+    }
+
+    async function saveAutoRules() {
+      const priceDropPercent = parseInt(document.getElementById('priceDropPercent').value);
+      const lowStockThreshold = parseInt(document.getElementById('lowStockThreshold').value);
+      await db.collection('promotions_auto_rules').doc('settings').set({ priceDropPercent, lowStockThreshold, lastModified: new Date() });
+      alert('✅ Auto rules saved successfully');
+    }
+
+    // Search Campaigns
+    document.getElementById('campaignSearch').addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase();
+      document.querySelectorAll('.campaign-card').forEach(card => {
+        const title = card.querySelector('.campaign-title').textContent.toLowerCase();
+        card.style.display = title.includes(term) ? 'block' : 'none';
       });
     });
 
-    // Load campaigns and stats on page load
+    // Load on Page Load
     document.addEventListener('DOMContentLoaded', () => {
       loadCampaigns();
       updateCampaignStats();
