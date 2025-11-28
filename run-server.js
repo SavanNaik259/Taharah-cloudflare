@@ -9,24 +9,16 @@ const PORT = process.env.PORT || 5000;
 
 // Initialize Firebase Admin SDK
 try {
-  const firebaseConfig = {
-    projectId: process.env.FIREBASE_PROJECT_ID || 'auric-jewelry',
-    databaseURL: process.env.FIREBASE_DATABASE_URL || 'https://auric-jewelry.firebaseio.com'
-  };
-  
-  if (!admin.apps.length) {
+  if (!admin.apps.length && process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
     admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: firebaseConfig.projectId,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL || 'firebase-adminsdk@auric-jewelry.iam.gserviceaccount.com',
-        privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n')
-      }),
-      databaseURL: firebaseConfig.databaseURL
+      credential: admin.credential.cert(serviceAccount)
     });
-    console.log('✅ Firebase Admin SDK initialized');
+    console.log('✅ Firebase Admin SDK initialized with service account');
   }
 } catch (error) {
-  console.log('⚠️ Firebase Admin SDK not fully configured (will use client SDK for notifications):', error.message);
+  console.log('⚠️ Firebase Admin SDK not fully configured:', error.message);
+  console.log('💡 Add FIREBASE_SERVICE_ACCOUNT_KEY secret to enable notifications');
 }
 
 // Initialize Shiprocket service
