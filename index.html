@@ -2408,34 +2408,22 @@ background-color: #000 !important;
             const db = firebase.firestore();
             
             if (user) {
-              // Logged-in user
-              await db.collection('users').doc(user.uid).update({
+              // Logged-in user - use SET with merge to handle new/existing docs
+              await db.collection('users').doc(user.uid).set({
                 fcmTokens: firebase.firestore.FieldValue.arrayUnion(token),
                 notificationsEnabled: true,
                 lastTokenUpdate: new Date()
-              }).catch(() => {
-                // If update fails, create new document
-                return db.collection('users').doc(user.uid).set({
-                  fcmTokens: [token],
-                  notificationsEnabled: true,
-                  lastTokenUpdate: new Date()
-                }, { merge: true });
-              });
+              }, { merge: true });
               console.log('✅ FCM token saved for logged-in user:', user.uid);
             } else {
-              // Guest user
+              // Guest user - use SET with merge to handle new/existing docs
               const deviceId = localStorage.getItem('device_id') || `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
               localStorage.setItem('device_id', deviceId);
               
-              await db.collection('guest_tokens').doc(deviceId).update({
+              await db.collection('guest_tokens').doc(deviceId).set({
                 tokens: firebase.firestore.FieldValue.arrayUnion(token),
                 lastUpdate: new Date()
-              }).catch(() => {
-                return db.collection('guest_tokens').doc(deviceId).set({
-                  tokens: [token],
-                  lastUpdate: new Date()
-                }, { merge: true });
-              });
+              }, { merge: true });
               console.log('✅ FCM token saved for guest device:', deviceId);
             }
             
