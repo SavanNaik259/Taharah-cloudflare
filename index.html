@@ -2358,14 +2358,30 @@ background-color: #000 !important;
 
       // Show notification banner if user hasn't dismissed it
       function showNotificationBanner() {
-        const dismissed = localStorage.getItem('notificationBannerDismissed');
-        const hasPermission = localStorage.getItem('fcm_token');
+        // Check for new real FCM tokens (they start with 'BO' from the vapid key or are from messaging API)
+        const realToken = localStorage.getItem('fcm_token');
+        const isFakeToken = realToken && realToken.startsWith('fcm_');
         
-        if (!dismissed && !hasPermission && 'Notification' in window) {
+        // Show banner if: 
+        // - User has fake token (needs to upgrade to real FCM)
+        // - Or user dismissed it but clicked reset button
+        // - Or user has no token at all
+        const shouldShow = (isFakeToken || !localStorage.getItem('notificationBannerDismissed')) && 'Notification' in window;
+        
+        if (shouldShow) {
           setTimeout(() => {
-            document.getElementById('notificationBanner').style.display = 'block';
+            const banner = document.getElementById('notificationBanner');
+            if (banner) banner.style.display = 'block';
           }, 2000);
         }
+      }
+      
+      // Reset notifications (for testing or upgrading)
+      function resetNotifications() {
+        localStorage.removeItem('notificationBannerDismissed');
+        localStorage.removeItem('fcm_token');
+        localStorage.removeItem('device_id');
+        location.reload();
       }
 
       // Enable notifications - REAL FCM TOKENS
