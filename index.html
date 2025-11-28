@@ -2414,8 +2414,15 @@ background-color: #000 !important;
             return;
           }
           
-          // Step 3: Get REAL FCM token from Firebase Cloud Messaging
+          // Step 3: WAIT for Service Worker to be FULLY ACTIVE before getting FCM token
           try {
+            // This is CRITICAL - must wait for service worker to be ready
+            if ('serviceWorker' in navigator) {
+              console.log('⏳ Waiting for Service Worker to be active...');
+              await navigator.serviceWorker.ready;
+              console.log('✅ Service Worker is now ACTIVE and READY');
+            }
+            
             const messaging = firebase.messaging();
             const token = await messaging.getToken({
               vapidKey: 'BIWRF2leB0T2HGDSKEhgevQlbmdaeoCaQUi88hdUw8N9k_d36JuImK8I7Nwj52Wi4_sd9G4QfFdLJWLcqU5akOQ'
