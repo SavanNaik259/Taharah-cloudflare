@@ -450,46 +450,44 @@
       }
     }
 
-    // Load campaigns on page load
-    document.addEventListener('DOMContentLoaded', loadCampaigns);
+    // Calculate and display statistics
+    async function updateCampaignStats() {
+      try {
+        const snapshot = await db.collection('promotions_manual').get();
+        let totalSent = 0, totalOpens = 0, totalClicks = 0;
+
+        snapshot.docs.forEach(doc => {
+          const campaign = doc.data();
+          totalSent += campaign.sentCount || 0;
+          totalOpens += campaign.analytics?.opens || 0;
+          totalClicks += campaign.analytics?.clicks || 0;
+        });
+
+        document.getElementById('totalSent').textContent = totalSent;
+        document.getElementById('totalOpens').textContent = totalOpens;
+        document.getElementById('totalClicks').textContent = totalClicks;
+        document.getElementById('clickRate').textContent = totalSent > 0 ? Math.round((totalClicks / totalSent) * 100) + '%' : '0%';
+        document.getElementById('campaignStats').style.display = 'grid';
+      } catch (error) {
+        console.error('Error updating stats:', error);
+      }
+    }
+
+    // Search campaigns
+    document.getElementById('campaignSearch')?.addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      const cards = document.querySelectorAll('.campaign-card');
+      cards.forEach(card => {
+        const title = card.querySelector('h5').textContent.toLowerCase();
+        card.style.display = title.includes(searchTerm) ? 'block' : 'none';
+      });
+    });
+
+    // Load campaigns and stats on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCampaigns();
+      updateCampaignStats();
+    });
   </script>
 </body>
 </html>
-
-    <script>
-      // Calculate and display statistics
-      async function updateCampaignStats() {
-        try {
-          const snapshot = await db.collection('promotions_manual').get();
-          let totalSent = 0, totalOpens = 0, totalClicks = 0;
-
-          snapshot.docs.forEach(doc => {
-            const campaign = doc.data();
-            totalSent += campaign.sentCount || 0;
-            totalOpens += campaign.analytics?.opens || 0;
-            totalClicks += campaign.analytics?.clicks || 0;
-          });
-
-          document.getElementById('totalSent').textContent = totalSent;
-          document.getElementById('totalOpens').textContent = totalOpens;
-          document.getElementById('totalClicks').textContent = totalClicks;
-          document.getElementById('clickRate').textContent = totalSent > 0 ? Math.round((totalClicks / totalSent) * 100) + '%' : '0%';
-          document.getElementById('campaignStats').style.display = 'grid';
-        } catch (error) {
-          console.error('Error updating stats:', error);
-        }
-      }
-
-      // Search campaigns
-      document.getElementById('campaignSearch')?.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        const cards = document.querySelectorAll('.campaign-card');
-        cards.forEach(card => {
-          const title = card.querySelector('h5').textContent.toLowerCase();
-          card.style.display = title.includes(searchTerm) ? 'block' : 'none';
-        });
-      });
-
-      // Update stats on load
-      document.addEventListener('DOMContentLoaded', updateCampaignStats);
-    </script>

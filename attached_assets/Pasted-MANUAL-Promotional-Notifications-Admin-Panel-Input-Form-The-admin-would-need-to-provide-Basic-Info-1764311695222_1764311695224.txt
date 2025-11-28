@@ -1,0 +1,91 @@
+MANUAL Promotional Notifications
+Admin Panel Input Form
+The admin would need to provide:
+
+Basic Information:
+
+✏️ Campaign Title (text) - "Diwali Sale", "New Arrivals"
+✏️ Description/Subtitle (text) - "Get 30% off on all jewelry"
+📱 Banner Image (upload) - Required, optimized for mobile
+Call-to-Action:
+
+✏️ Button Text (text) - "Shop Now", "View Offer"
+🔗 Link Type (dropdown):
+Specific Product
+Product Collection
+General Shop
+🔗 Link Target (auto-populate based on selection)
+Audience & Timing:
+
+👥 Target Audience (dropdown):
+All Users (opt-in for promotions)
+Specific segment (repeat buyers, new users, etc.)
+📅 Send Type (radio buttons):
+Send Now (immediately)
+Schedule for Later (date + time picker)
+Example Admin Form:
+
+┌─────────────────────────────────────┐
+│ Create Promotional Notification     │
+├─────────────────────────────────────┤
+│ Campaign Title: [Diwali Sale 2024]  │
+│ Description: [Get 30% off]          │
+│ Banner Image: [Upload] ✓ (uploaded) │
+│ Button Text: [Shop Now]             │
+│ Link To: [Collection ▼]             │
+│ Select Collection: [Bridal ▼]       │
+│ Target Audience: [All Users ▼]      │
+│ Send: ○ Now  ○ Schedule             │
+│ Schedule Date: [Dec 15, 2024]       │
+│ Schedule Time: [10:00 AM]           │
+│                    [Create Campaign] │
+└─────────────────────────────────────┘
+What Happens:
+Admin fills form
+System creates notification record in Firestore
+Cloud Function sends to all opted-in users via FCM push
+Tracks: sent count, opens, clicks, conversions
+AUTOMATIC Promotional Notifications
+How It Works
+The system automatically triggers based on pre-defined rules and product events:
+
+Scenario 1: New Product Launch
+Trigger: New product added to Firestore
+Auto-generated:
+  - Banner: Product image (auto-cropped for mobile)
+  - Title: "New Arrival Alert"
+  - Description: "Check out our new [Product Name]"
+  - Button: "View Now"
+  - Link: Direct to product page
+  - Sent To: Users subscribed to category
+  - When: Immediately after product added
+Scenario 2: Stock Replenishment (Back-in-Stock)
+Trigger: Product stock changes from 0 → >0
+Auto-generated:
+  - Banner: Product image
+  - Title: "Back in Stock!"
+  - Description: "[Product Name] is available again"
+  - Button: "Add to Cart"
+  - Link: Direct to product
+  - Sent To: Users with product in wishlist + back-in-stock alerts enabled
+  - When: Real-time when stock updated
+Scenario 3: Flash Sale / Price Drop
+Trigger: Product price reduced by X% (set in admin rules)
+Auto-generated:
+  - Banner: Product image (with red "SALE" badge overlay)
+  - Title: "Price Drop! Save ₹2000"
+  - Description: "Now only ₹8000 (was ₹10,000)"
+  - Button: "Shop Now"
+  - Link: Direct to product
+  - Sent To: All users (or specific categories)
+  - When: Immediately when price updated
+Scenario 4: Low Stock Alert
+Trigger: Product stock falls below threshold (e.g., 2 items left)
+Auto-generated:
+  - Banner: Product image with "Hurry!" text
+  - Title: "Only 2 Left!"
+  - Description: "[Product Name] selling fast"
+  - Button: "Add to Cart"
+  - Link: Direct to product
+  - Sent To: Users who viewed this product in last 7 days
+  - When: Immediately when stock drops
