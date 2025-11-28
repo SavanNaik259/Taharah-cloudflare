@@ -2347,25 +2347,33 @@ background-color: #000 !important;
 
     <!-- Notification Opt-in Script -->
     <script>
+      // Register service worker for push notifications
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js').then(registration => {
+          console.log('✅ Service Worker registered:', registration);
+        }).catch(error => {
+          console.warn('⚠️ Service Worker registration failed:', error);
+        });
+      }
+
       // Show notification banner if user hasn't dismissed it
       function showNotificationBanner() {
-        // Check if user already has notification permission or dismissed banner
         const dismissed = localStorage.getItem('notificationBannerDismissed');
         const hasPermission = localStorage.getItem('fcm_token');
         
         if (!dismissed && !hasPermission && 'Notification' in window) {
           setTimeout(() => {
             document.getElementById('notificationBanner').style.display = 'block';
-          }, 2000); // Show after 2 seconds
+          }, 2000);
         }
       }
 
-      // Enable notifications - SIMPLIFIED APPROACH
+      // Enable notifications - REAL FCM TOKENS
       async function enableNotifications() {
         try {
-          console.log('📱 Starting notification opt-in process...');
+          console.log('📱 Starting REAL FCM token request...');
           
-          // Request browser permission FIRST
+          // Step 1: Request browser permission
           const permission = await Notification.requestPermission();
           
           if (permission !== 'granted') {
@@ -2376,29 +2384,37 @@ background-color: #000 !important;
           
           console.log('✅ Browser permission granted');
           
-          // Check if Firebase is available
-          if (typeof firebase === 'undefined' || !firebase.firestore) {
-            console.error('❌ Firebase not available');
-            alert('Error: Firebase not configured.');
+          // Step 2: Check Firebase availability
+          if (typeof firebase === 'undefined' || !firebase.messaging) {
+            console.error('❌ Firebase Messaging not available');
+            alert('Error: Firebase Messaging not configured. Please refresh the page.');
             return;
           }
           
-          // Generate a notification token - can be a browser installation ID
-          const token = `fcm_${Date.now()}_${Math.random().toString(36).substr(2, 20)}`;
-          console.log('✅ Notification token generated:', token.substring(0, 30) + '...');
-          
-          // Save token to localStorage as backup
-          localStorage.setItem('fcm_token', token);
-          localStorage.setItem('notificationBannerDismissed', 'true');
-          
-          // Hide banner
-          const banner = document.getElementById('notificationBanner');
-          if (banner) {
-            banner.style.display = 'none';
-          }
-          
-          // Save to Firebase
+          // Step 3: Get REAL FCM token from Firebase Cloud Messaging
           try {
+            const messaging = firebase.messaging();
+            const token = await messaging.getToken({
+              vapidKey: process.env.REACT_APP_VAPID_KEY || localStorage.getItem('vapid_key') || 'BO3iqQnxhSTHsDZLVpyL9rMEg6YrVcLKAGwFEUWiDSpRWJkE87_FRaOE1y2J6xAO8AyYLTWCEjk1rKnHPhMXhFU'
+            });
+            
+            if (!token) {
+              throw new Error('Failed to generate FCM token. Service Worker may not be registered.');
+            }
+            
+            console.log('✅ REAL FCM token received:', token.substring(0, 50) + '...');
+            
+            // Step 4: Save to localStorage
+            localStorage.setItem('fcm_token', token);
+            localStorage.setItem('notificationBannerDismissed', 'true');
+            
+            // Step 5: Hide banner
+            const banner = document.getElementById('notificationBanner');
+            if (banner) {
+              banner.style.display = 'none';
+            }
+            
+            // Step 6: Save to Firebase
             const db = firebase.firestore();
             const user = firebase.auth().currentUser;
             
@@ -2407,9 +2423,10 @@ background-color: #000 !important;
               await db.collection('users').doc(user.uid).set({
                 fcmTokens: firebase.firestore.FieldValue.arrayUnion(token),
                 notificationsEnabled: true,
-                lastTokenUpdate: new Date()
+                lastTokenUpdate: new Date(),
+                email: user.email
               }, { merge: true });
-              console.log('✅ Token saved for logged-in user:', user.uid);
+              console.log('✅ Real FCM token saved for user:', user.uid);
             } else {
               // Guest user
               const deviceId = localStorage.getItem('device_id') || `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -2419,20 +2436,39 @@ background-color: #000 !important;
                 tokens: firebase.firestore.FieldValue.arrayUnion(token),
                 lastUpdate: new Date()
               }, { merge: true });
-              console.log('✅ Token saved for guest device:', deviceId);
+              console.log('✅ Real FCM token saved for guest:', deviceId);
             }
             
-            alert('✅ Notifications enabled! You\'ll receive updates about deals and new arrivals.');
+            alert('✅ Notifications ENABLED! You\'ll receive real push notifications about deals, restocks, and special offers.');
             
-          } catch (dbError) {
-            console.error('❌ Firebase save error:', dbError);
-            // Still show success as token is in localStorage
-            alert('✅ Notifications enabled!');
+          } catch (fcmError) {
+            console.error('❌ FCM token error:', fcmError);
+            alert('⚠️ Could not enable push notifications: ' + fcmError.message);
           }
           
         } catch (error) {
           console.error('❌ Notification error:', error);
           alert('Error enabling notifications. Please try again.');
+        }
+      }
+      
+      // Listen for incoming messages when app is in foreground
+      if (typeof firebase !== 'undefined' && firebase.messaging) {
+        try {
+          const messaging = firebase.messaging();
+          messaging.onMessage((payload) => {
+            console.log('📬 Message received in foreground:', payload);
+            // Show notification even when app is open
+            if (Notification.permission === 'granted') {
+              new Notification(payload.notification.title, {
+                body: payload.notification.body,
+                icon: '/images/logos/royalmeenakari.png',
+                badge: '/images/logos/royalmeenakari.png'
+              });
+            }
+          });
+        } catch (e) {
+          console.log('⚠️ Could not set up foreground message handler:', e);
         }
       }
 
