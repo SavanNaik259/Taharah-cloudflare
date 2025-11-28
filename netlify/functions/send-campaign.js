@@ -72,8 +72,8 @@ exports.handler = async (event, context) => {
 
   try {
     console.log('📝 Parsing request body...');
-    const { title, body, image, link } = JSON.parse(event.body);
-    console.log('✅ Parsed body:', { title, body, link });
+    const { title, body, image, link, buttonText } = JSON.parse(event.body);
+    console.log('✅ Parsed body:', { title, body, image, buttonText, link });
 
     if (!title || !body) {
       console.log('❌ Missing title or body');
@@ -176,6 +176,26 @@ exports.handler = async (event, context) => {
     for (const token of allTokens) {
       try {
         console.log(`📨 Sending to token: ${token.substring(0, 30)}...`);
+        
+        // Build webpush notification with image and button text
+        const webpushNotification = {
+          title: title,
+          body: body,
+          icon: '/images/logos/royalmeenakari.png',
+          badge: '/images/logos/royalmeenakari.png',
+          image: image || '/images/logos/royalmeenakari.png'
+        };
+        
+        // Add action button if buttonText is provided
+        if (buttonText) {
+          webpushNotification.actions = [
+            {
+              action: 'open',
+              title: buttonText
+            }
+          ];
+        }
+        
         const response = await admin.messaging().send({
           token: token,
           notification: {
@@ -184,15 +204,11 @@ exports.handler = async (event, context) => {
           },
           webpush: {
             fcmOptions: { link: link || '/' },
-            notification: {
-              title: title,
-              body: body,
-              icon: '/images/logos/royalmeenakari.png',
-              badge: '/images/logos/royalmeenakari.png'
-            },
+            notification: webpushNotification,
             data: {
               link: link || '/',
-              image: image || ''
+              image: image || '',
+              buttonText: buttonText || ''
             }
           }
         });
