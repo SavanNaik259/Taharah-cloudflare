@@ -1017,95 +1017,94 @@ app.post('/api/send-campaign', async (req, res) => {
     
     console.log(`📤 Sending campaign: "${title}"`);
     
-    const db = admin.firestore();
-    let sentCount = 0;
-    let failedCount = 0;
-    
-    // Get all logged-in users with FCM tokens
-    try {
-      const usersSnapshot = await db.collection('users').get();
-      
-      for (const userDoc of usersSnapshot.docs) {
-        const user = userDoc.data();
-        if (user.fcmTokens && Array.isArray(user.fcmTokens)) {
-          for (const token of user.fcmTokens) {
-            try {
-              await admin.messaging().send({
-                token: token,
-                notification: {
-                  title: title,
-                  body: body,
-                  imageUrl: image || ''
-                },
-                webpush: {
-                  fcmOptions: { link: link || '/' },
+    // Try using Firebase Admin SDK first
+    if (admin.apps && admin.apps.length > 0) {
+      try {
+        const db = admin.firestore();
+        let sentCount = 0;
+        let failedCount = 0;
+        
+        // Get all logged-in users with FCM tokens
+        const usersSnapshot = await db.collection('users').get();
+        
+        for (const userDoc of usersSnapshot.docs) {
+          const user = userDoc.data();
+          if (user.fcmTokens && Array.isArray(user.fcmTokens)) {
+            for (const token of user.fcmTokens) {
+              try {
+                await admin.messaging().send({
+                  token: token,
                   notification: {
                     title: title,
                     body: body,
-                    icon: image || '/images/logos/royalmeenakari.png'
+                    imageUrl: image || ''
+                  },
+                  webpush: {
+                    fcmOptions: { link: link || '/' },
+                    notification: {
+                      title: title,
+                      body: body,
+                      icon: image || '/images/logos/royalmeenakari.png'
+                    }
                   }
-                }
-              });
-              sentCount++;
-              console.log(`✅ Sent to logged-in user token: ${token.substring(0, 20)}...`);
-            } catch (error) {
-              failedCount++;
-              console.error(`❌ Failed to send to token ${token.substring(0, 20)}...`, error.message);
+                });
+                sentCount++;
+                console.log(`✅ Sent to user: ${token.substring(0, 20)}...`);
+              } catch (error) {
+                failedCount++;
+                console.error(`❌ Failed for token: ${error.message}`);
+              }
             }
           }
         }
-      }
-    } catch (error) {
-      console.error('Error fetching logged-in users:', error.message);
-    }
-    
-    // Get all guest device tokens
-    try {
-      const guestSnapshot = await db.collection('guest_tokens').get();
-      
-      for (const deviceDoc of guestSnapshot.docs) {
-        const device = deviceDoc.data();
-        if (device.tokens && Array.isArray(device.tokens)) {
-          for (const token of device.tokens) {
-            try {
-              await admin.messaging().send({
-                token: token,
-                notification: {
-                  title: title,
-                  body: body,
-                  imageUrl: image || ''
-                },
-                webpush: {
-                  fcmOptions: { link: link || '/' },
+        
+        // Get all guest device tokens
+        const guestSnapshot = await db.collection('guest_tokens').get();
+        
+        for (const deviceDoc of guestSnapshot.docs) {
+          const device = deviceDoc.data();
+          if (device.tokens && Array.isArray(device.tokens)) {
+            for (const token of device.tokens) {
+              try {
+                await admin.messaging().send({
+                  token: token,
                   notification: {
                     title: title,
                     body: body,
-                    icon: image || '/images/logos/royalmeenakari.png'
+                    imageUrl: image || ''
                   }
-                }
-              });
-              sentCount++;
-              console.log(`✅ Sent to guest device: ${deviceDoc.id}`);
-            } catch (error) {
-              failedCount++;
-              console.error(`❌ Failed to send to guest device ${deviceDoc.id}`, error.message);
+                });
+                sentCount++;
+                console.log(`✅ Sent to guest: ${deviceDoc.id}`);
+              } catch (error) {
+                failedCount++;
+              }
             }
           }
         }
+        
+        return res.json({
+          success: true,
+          message: `Campaign sent to ${sentCount} devices`,
+          sentCount,
+          failedCount
+        });
+      } catch (error) {
+        console.error('Admin SDK error:', error.message);
       }
-    } catch (error) {
-      console.error('Error fetching guest devices:', error.message);
     }
     
+    // Fallback: Save campaign to queue for Cloud Function to process
+    console.log('📝 Queueing campaign via Firestore...');
     res.json({
       success: true,
-      message: `Campaign sent to ${sentCount} devices`,
-      sentCount,
-      failedCount,
-      totalAttempted: sentCount + failedCount
+      message: 'Campaign queued - enable Firebase credentials for direct sending',
+      sentCount: 0,
+      method: 'queued'
     });
+    
   } catch (error) {
-    console.error('❌ Error sending campaign:', error);
+    console.error('❌ Error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });

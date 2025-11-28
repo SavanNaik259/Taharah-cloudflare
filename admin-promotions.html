@@ -485,9 +485,12 @@
 
         list.innerHTML = snapshot.docs.map(doc => {
           const c = doc.data();
+          const imageUrl = c.bannerUrl ? (c.bannerUrl.startsWith('http') ? c.bannerUrl : `/images/${c.bannerUrl}`) : '/images/placeholder.jpg';
           return `
             <div class="campaign-card">
-              <img src="${c.bannerUrl}" alt="${c.title}">
+              <div style="width: 100%; height: 200px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999; font-size: 14px;">
+                <img src="${imageUrl}" alt="${c.title}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='<span>📸 Banner Image</span>';">
+              </div>
               <div class="campaign-info">
                 <h5 class="campaign-title">${c.title}</h5>
                 <p class="campaign-desc">${c.description}</p>
