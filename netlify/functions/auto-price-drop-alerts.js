@@ -144,15 +144,11 @@ exports.handler = async (event, context) => {
     }
     console.log(`✅ Collected ${allTokens.length} total tokens (${usersWithTokens} users + ${guestDevicesWithTokens} guests)`);
     
-    // DEDUPLICATE tokens using Set (same token may exist in both users and guest_tokens)
-    const uniqueTokens = [...new Set(allTokens)];
-    console.log(`🔄 After deduplication: ${uniqueTokens.length} unique tokens (removed ${allTokens.length - uniqueTokens.length} duplicates)`);
+    console.log(`📊 Sending to ${allTokens.length} opted-in users`);
     
-    console.log(`📊 Sending to ${uniqueTokens.length} opted-in users`);
-    
-    // Send to all unique tokens
+    // Send to all tokens
     const productLink = `/product/${productId}`;
-    for (const token of uniqueTokens) {
+    for (const token of allTokens) {
       if (await sendNotification(token, productImage, productName, oldPrice, newPrice, productLink)) {
         totalNotificationsSent++;
       }
