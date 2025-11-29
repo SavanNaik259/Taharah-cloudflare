@@ -398,9 +398,23 @@
         targetSelect.innerHTML = '<option value="/shop">Shop All Products</option>';
       } else if (linkType === 'collection') {
         targetSelect.innerHTML = `
+          <option value="">-- Select Category --</option>
+          <option value="/shop">All Products</option>
           <option value="/shop?category=bridal">Bridal Collection</option>
           <option value="/shop?category=featured">Featured Collection</option>
           <option value="/shop?category=new">New Arrivals</option>
+          <option value="/shop?category=bangles">Bangles</option>
+          <option value="/shop?category=earrings">Earrings</option>
+          <option value="/shop?category=necklaces">Necklaces</option>
+          <option value="/shop?category=rings">Rings</option>
+          <option value="/shop?category=pendants">Pendants</option>
+          <option value="/shop?category=bracelets">Bracelets</option>
+          <option value="/shop?category=anklets">Anklets</option>
+          <option value="/shop?category=nose-pins">Nose Pins</option>
+          <option value="/shop?category=payal">Payal</option>
+          <option value="/shop?category=traditional">Traditional</option>
+          <option value="/shop?category=modern">Modern</option>
+          <option value="/shop?category=sale">Sale Items</option>
         `;
       } else if (linkType === 'product') {
         targetSelect.innerHTML = '<option value="">Select a product...</option><option value="/product/sample">Sample Product</option>';
