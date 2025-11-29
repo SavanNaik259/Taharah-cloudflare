@@ -185,7 +185,7 @@ exports.handler = async (event, context) => {
       try {
         console.log(`📨 Sending to token: ${token.substring(0, 30)}...`);
         
-        // Build webpush notification with image and button text
+        /* Build webpush notification with image and button text
         const webpushNotification = {
           title: title,
           body: body,
@@ -203,7 +203,7 @@ exports.handler = async (event, context) => {
             }
           ];
         }
-       /*
+       */
         // Send notification with all details displayed
         const response = await admin.messaging().send({
           token: token,
@@ -220,7 +220,7 @@ exports.handler = async (event, context) => {
               link: link || '/'
             }
           }
-        });*/
+        });
         sentCount++;
         console.log(`   ✅ Message sent. ID: ${response.substring(0, 50)}...`);
       } catch (error) {
