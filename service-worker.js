@@ -27,27 +27,10 @@ if (!firebase.apps.length) {
 // Get messaging instance
 const messaging = firebase.messaging();
 
-// Handle background messages - MANUALLY display notification with full details
+// Handle background messages
 messaging.onBackgroundMessage((payload) => {
   console.log('🔔 Background message received:', payload);
-  
-  // Extract notification details from webpush.notification field
-  const notificationData = payload.notification || {};
-  const title = notificationData.title || 'Auric';
-  const options = {
-    body: notificationData.body || 'New notification from Auric',
-    icon: notificationData.icon || '/images/logos/royalmeenakari.png',
-    badge: notificationData.badge || '/images/logos/royalmeenakari.png',
-    image: notificationData.image || '/images/logos/royalmeenakari.png',
-    tag: 'auric-notification',
-    requireInteraction: false,
-    data: {
-      link: (payload.data && payload.data.link) || notificationData.click_action || '/'
-    }
-  };
-  
-  // Manually show the notification with all details
-  self.registration.showNotification(title, options);
+  // Firebase auto-displays webpush.notification - service worker just logs
 });
 
 // Handle notification click

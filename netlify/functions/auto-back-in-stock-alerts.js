@@ -62,8 +62,7 @@ async function sendNotification(token, productImage, productName, productLink) {
           body: `Great news! The product you wanted is now available. Shop now!`,
           icon: '/images/logos/royalmeenakari.png',
           badge: '/images/logos/royalmeenakari.png',
-          image: productImage || '/images/logos/royalmeenakari.png',
-          click_action: productLink || '/shop'
+          image: productImage || '/images/logos/royalmeenakari.png'
         },
         data: {
           link: productLink || '/shop'
