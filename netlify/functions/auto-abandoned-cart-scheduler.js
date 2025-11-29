@@ -54,10 +54,6 @@ async function sendNotification(token, productImage, productName, productLink) {
   try {
     await admin.messaging().send({
       token: token,
-      notification: {
-        title: `Complete Your Order!`,
-        body: `Don't miss out on ${productName}. Complete your purchase now.`
-      },
       webpush: {
         fcmOptions: { link: productLink || '/cart' },
         notification: {

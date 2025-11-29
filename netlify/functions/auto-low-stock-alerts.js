@@ -55,10 +55,6 @@ async function sendNotification(token, productImage, productName, stockRemaining
     console.log(`📤 Sending FCM to token: ${token.substring(0, 20)}... (${stockRemaining} items left)`);
     const response = await admin.messaging().send({
       token: token,
-      notification: {
-        title: `⚡ Limited Stock!`,
-        body: `${productName} has only ${stockRemaining} item(s) left. Hurry!`
-      },
       webpush: {
         fcmOptions: { link: productLink || '/shop' },
         notification: {

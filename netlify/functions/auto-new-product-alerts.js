@@ -55,10 +55,6 @@ async function sendNotification(token, productImage, productName, productLink) {
     console.log(`📤 Sending FCM to token: ${token.substring(0, 20)}...`);
     const response = await admin.messaging().send({
       token: token,
-      notification: {
-        title: `✨ New Collection: ${productName}`,
-        body: `Discover our latest exclusive jewelry collection. Available now!`
-      },
       webpush: {
         fcmOptions: { link: productLink || '/shop' },
         notification: {
