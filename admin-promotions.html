@@ -399,25 +399,28 @@
       } else if (linkType === 'collection') {
         targetSelect.innerHTML = `
           <option value="">-- Select Category --</option>
-          <option value="/shop">All Products</option>
-          <option value="/shop?category=bridal">Bridal Collection</option>
-          <option value="/shop?category=featured">Featured Collection</option>
-          <option value="/shop?category=new">New Arrivals</option>
-          <option value="/shop?category=bangles">Bangles</option>
-          <option value="/shop?category=earrings">Earrings</option>
-          <option value="/shop?category=necklaces">Necklaces</option>
-          <option value="/shop?category=rings">Rings</option>
-          <option value="/shop?category=pendants">Pendants</option>
-          <option value="/shop?category=bracelets">Bracelets</option>
-          <option value="/shop?category=anklets">Anklets</option>
-          <option value="/shop?category=nose-pins">Nose Pins</option>
-          <option value="/shop?category=payal">Payal</option>
-          <option value="/shop?category=traditional">Traditional</option>
-          <option value="/shop?category=modern">Modern</option>
-          <option value="/shop?category=sale">Sale Items</option>
+          <option value="all-collection.html">All Collection</option>
+          <option value="featured-collection.html">Featured Collection</option>
+          <option value="new-arrivals.html">New Arrivals</option>
+          <option value="">-- NECKLACES --</option>
+          <option value="gold-necklace.html">Gold Necklace</option>
+          <option value="silver-necklace.html">Silver Necklace</option>
+          <option value="meenakari-necklace.html">Meenakari Necklace</option>
+          <option value="">-- EARRINGS --</option>
+          <option value="gold-earrings.html">Gold Earrings</option>
+          <option value="silver-earrings.html">Silver Earrings</option>
+          <option value="meenakari-earrings.html">Meenakari Earrings</option>
+          <option value="">-- BANGLES --</option>
+          <option value="gold-bangles.html">Gold Bangles</option>
+          <option value="silver-bangles.html">Silver Bangles</option>
+          <option value="meenakari-bangles.html">Meenakari Bangles</option>
+          <option value="">-- RINGS --</option>
+          <option value="gold-rings.html">Gold Rings</option>
+          <option value="silver-rings.html">Silver Rings</option>
+          <option value="meenakari-rings.html">Meenakari Rings</option>
         `;
       } else if (linkType === 'product') {
-        targetSelect.innerHTML = '<option value="">Select a product...</option><option value="/product/sample">Sample Product</option>';
+        targetSelect.innerHTML = '<option value="">Select a product...</option><option value="product-detail.html">Product Detail Page</option>';
       }
     }
 
