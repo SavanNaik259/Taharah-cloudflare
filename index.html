@@ -2499,9 +2499,10 @@ background-color: #000 !important;
         }
       }
       
-      // NOTE: Removed messaging.onMessage() - causes Firebase to NOT auto-display notifications
-      // Service worker's onBackgroundMessage() handles ALL notifications (foreground + background)
-      // This prevents the duplicate notification issue
+      // NOTE: Removed foreground message handler - Service Worker handles ALL notifications
+      // Both foreground and background messages are processed by service worker's onBackgroundMessage()
+      // Having a separate foreground handler in index.html was causing DUPLICATE notifications
+      // Firebase messaging automatically shows notifications through the service worker for all cases
 
       // Dismiss banner
       function dismissNotificationBanner() {
