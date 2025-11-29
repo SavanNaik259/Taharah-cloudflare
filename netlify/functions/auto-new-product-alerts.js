@@ -53,21 +53,19 @@ db = initializeFirebaseAdmin();
 async function sendNotification(token, productImage, productName, productLink) {
   try {
     console.log(`📤 Sending FCM to token: ${token.substring(0, 20)}...`);
+    // CRITICAL FIX: Remove notification field - only use data field so service worker handles display
     const response = await admin.messaging().send({
       token: token,
       webpush: {
         fcmOptions: { link: productLink || '/shop' },
-        notification: {
+        data: {
           title: `✨ New Collection: ${productName}`,
           body: `Discover our latest exclusive jewelry collection. Available now!`,
+          link: productLink || '/shop',
+          image: productImage || '/images/logos/royalmeenakari.png',
           icon: '/images/logos/royalmeenakari.png',
           badge: '/images/logos/royalmeenakari.png',
-          image: productImage || '/images/logos/royalmeenakari.png',
-          actions: [{ action: 'open', title: 'Explore Now' }]
-        },
-        data: {
-          link: productLink || '/shop',
-          image: productImage || ''
+          buttonText: 'Explore Now'
         }
       }
     });

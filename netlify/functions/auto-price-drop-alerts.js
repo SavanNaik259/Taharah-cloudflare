@@ -55,21 +55,19 @@ async function sendNotification(token, productImage, productName, oldPrice, newP
     const discountPercent = Math.round(((oldPrice - newPrice) / oldPrice) * 100);
     console.log(`📤 Sending FCM to token: ${token.substring(0, 20)}... (${discountPercent}% discount)`);
     
+    // CRITICAL FIX: Remove notification field - only use data field so service worker handles display
     const response = await admin.messaging().send({
       token: token,
       webpush: {
         fcmOptions: { link: productLink || '/shop' },
-        notification: {
+        data: {
           title: `Price Drop Alert!`,
           body: `${productName} is now ${discountPercent}% off! Was ₹${oldPrice}, now ₹${newPrice}`,
+          link: productLink || '/shop',
+          image: productImage || '/images/logos/royalmeenakari.png',
           icon: '/images/logos/royalmeenakari.png',
           badge: '/images/logos/royalmeenakari.png',
-          image: productImage || '/images/logos/royalmeenakari.png',
-          actions: [{ action: 'open', title: 'View Deal' }]
-        },
-        data: {
-          link: productLink || '/shop',
-          image: productImage || ''
+          buttonText: 'View Deal'
         }
       }
     });

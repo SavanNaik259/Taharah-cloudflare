@@ -31,16 +31,28 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
   console.log('🔔 Background message received:', payload);
 
-  const notificationTitle = payload.notification?.title || 'Auric';
+  // CRITICAL FIX: Read title/body/image/buttons from data field, not notification field
+  // This prevents duplicate notifications because we don't send a notification field in webpush
+  const notificationTitle = payload.data?.title || payload.notification?.title || 'Auric';
   const notificationOptions = {
-    body: payload.notification?.body || 'New notification from Auric',
-    icon: '/images/logos/royalmeenakari.png',
-    badge: '/images/logos/royalmeenakari.png',
-    image: payload.notification?.image || '/images/logos/royalmeenakari.png',
+    body: payload.data?.body || payload.notification?.body || 'New notification from Auric',
+    icon: payload.data?.icon || payload.notification?.icon || '/images/logos/royalmeenakari.png',
+    badge: payload.data?.badge || payload.notification?.badge || '/images/logos/royalmeenakari.png',
+    image: payload.data?.image || payload.notification?.image || '/images/logos/royalmeenakari.png',
     tag: payload.data?.tag || 'auric-notification',
     data: payload.data || {},
-    click_action: payload.data?.link || '/'
+    click_action: payload.data?.link || payload.notification?.click_action || '/'
   };
+
+  // Add action button if buttonText is provided
+  if (payload.data?.buttonText) {
+    notificationOptions.actions = [
+      {
+        action: 'open',
+        title: payload.data.buttonText
+      }
+    ];
+  }
 
   self.registration.showNotification(notificationTitle, notificationOptions);
 });

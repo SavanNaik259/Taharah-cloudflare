@@ -52,21 +52,19 @@ db = initializeFirebaseAdmin();
 
 async function sendNotification(token, productImage, productName, productLink) {
   try {
+    // CRITICAL FIX: Remove notification field - only use data field so service worker handles display
     await admin.messaging().send({
       token: token,
       webpush: {
         fcmOptions: { link: productLink || '/cart' },
-        notification: {
+        data: {
           title: `Complete Your Order!`,
           body: `Don't miss out on ${productName}. Complete your purchase now.`,
+          link: productLink || '/cart',
+          image: productImage || '/images/logos/royalmeenakari.png',
           icon: '/images/logos/royalmeenakari.png',
           badge: '/images/logos/royalmeenakari.png',
-          image: productImage || '/images/logos/royalmeenakari.png',
-          actions: [{ action: 'open', title: 'Continue Shopping' }]
-        },
-        data: {
-          link: productLink || '/cart',
-          image: productImage || ''
+          buttonText: 'Continue Shopping'
         }
       }
     });

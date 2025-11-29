@@ -204,15 +204,21 @@ exports.handler = async (event, context) => {
           ];
         }
         
+        // CRITICAL FIX: Remove notification field to prevent Firebase from auto-displaying a basic notification
+        // Only webpush.data is sent - service worker's onBackgroundMessage() reads this and displays ONE detailed notification
+        // This prevents duplicate notifications (one basic auto, one detailed manual)
         const response = await admin.messaging().send({
           token: token,
           webpush: {
             fcmOptions: { link: link || '/' },
-            notification: webpushNotification,
             data: {
+              title: title,
+              body: body,
               link: link || '/',
               image: image || '',
-              buttonText: buttonText || ''
+              buttonText: buttonText || '',
+              icon: '/images/logos/royalmeenakari.png',
+              badge: '/images/logos/royalmeenakari.png'
             }
           }
         });
