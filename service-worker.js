@@ -45,34 +45,9 @@ messaging.onBackgroundMessage((payload) => {
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// Handle push events (for non-Firebase push messages)
-self.addEventListener('push', (event) => {
-  console.log('🔔 Push notification received');
-
-  let notificationData = {
-    title: 'Auric Notifications',
-    body: 'New notification from Auric'
-  };
-
-  try {
-    notificationData = event.data.json();
-  } catch (error) {
-    notificationData.body = event.data.text();
-  }
-
-  const options = {
-    body: notificationData.body,
-    icon: '/images/logos/royalmeenakari.png',
-    badge: '/images/logos/royalmeenakari.png',
-    image: notificationData.image || '/images/logos/royalmeenakari.png',
-    tag: notificationData.tag || 'auric-notification',
-    data: notificationData.data || {}
-  };
-
-  event.waitUntil(
-    self.registration.showNotification(notificationData.title, options)
-  );
-});
+// NOTE: Generic 'push' event handler removed - Firebase messaging.onBackgroundMessage() handles all FCM notifications
+// Having both listeners caused DUPLICATE notifications because Firebase sends to both handlers
+// Keeping only messaging.onBackgroundMessage() ensures one notification per message
 
 // Handle notification click
 self.addEventListener('notificationclick', (event) => {
