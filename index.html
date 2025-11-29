@@ -2352,7 +2352,21 @@ background-color: #000 !important;
       let swRegistration = null;
       
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
+        // Unregister old firebase-messaging-sw.js if it exists
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          for (let registration of registrations) {
+            if (registration.active && registration.active.scriptURL.includes('firebase-messaging-sw.js')) {
+              registration.unregister();
+              console.log('🗑️ Unregistered old firebase-messaging-sw.js');
+            }
+          }
+        });
+        
+        // Register unified service-worker.js
+        navigator.serviceWorker.register('/service-worker.js', { 
+          scope: '/',
+          updateViaCache: 'none'
+        })
           .then(registration => {
             swRegistration = registration;
             console.log('✅ Service Worker registered:', registration);
