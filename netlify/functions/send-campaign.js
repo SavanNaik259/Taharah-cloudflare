@@ -155,8 +155,16 @@ exports.handler = async (event, context) => {
     }
 
     console.log(`\n📊 Total valid tokens collected: ${allTokens.length}`);
+    
+    // CRITICAL FIX: Remove DUPLICATE tokens (same token stored in both users and guest_tokens)
+    const uniqueTokensSet = new Set(allTokens);
+    const uniqueTokens = Array.from(uniqueTokensSet);
+    console.log(`🔍 Unique tokens after deduplication: ${uniqueTokens.length}`);
+    if (allTokens.length !== uniqueTokens.length) {
+      console.log(`⚠️ Removed ${allTokens.length - uniqueTokens.length} duplicate token(s) - prevents sending same notification twice!`);
+    }
 
-    if (allTokens.length === 0) {
+    if (uniqueTokens.length === 0) {
       console.warn('⚠️ NO TOKENS FOUND! Users may not have enabled notifications or tokens not saved correctly.');
       return {
         statusCode: 200,
@@ -171,9 +179,9 @@ exports.handler = async (event, context) => {
       };
     }
 
-    console.log(`\n📤 Sending notifications to ${allTokens.length} token(s)...`);
+    console.log(`\n📤 Sending notifications to ${uniqueTokens.length} unique token(s)...`);
 
-    for (const token of allTokens) {
+    for (const token of uniqueTokens) {
       try {
         console.log(`📨 Sending to token: ${token.substring(0, 30)}...`);
         
