@@ -189,8 +189,6 @@ exports.handler = async (event, context) => {
         const webpushNotification = {
           title: title,
           body: body,
-          icon: '/images/logos/royalmeenakari.png',
-          badge: '/images/logos/royalmeenakari.png',
           image: image || '/images/logos/royalmeenakari.png'
         };
         
@@ -208,12 +206,11 @@ exports.handler = async (event, context) => {
         const response = await admin.messaging().send({
           token: token,
           webpush: {
+        // Data-only payload - service worker displays from data field
             fcmOptions: { link: link || '/' },
-            notification: {
+            data: {
               title: title,
               body: body,
-              icon: '/images/logos/royalmeenakari.png',
-              badge: '/images/logos/royalmeenakari.png',
               image: image || '/images/logos/royalmeenakari.png'
             },
             data: {

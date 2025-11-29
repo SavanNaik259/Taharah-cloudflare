@@ -59,11 +59,9 @@ async function sendNotification(token, productImage, productName, oldPrice, newP
       token: token,
       webpush: {
         fcmOptions: { link: productLink || '/shop' },
-        notification: {
+        data: {
           title: `Price Drop Alert!`,
           body: `${productName} is now ${discountPercent}% off! Was ₹${oldPrice}, now ₹${newPrice}`,
-          icon: '/images/logos/royalmeenakari.png',
-          badge: '/images/logos/royalmeenakari.png',
           image: productImage || '/images/logos/royalmeenakari.png'
         },
         data: {
