@@ -27,11 +27,18 @@ if (!firebase.apps.length) {
 // Get messaging instance
 const messaging = firebase.messaging();
 
-// Handle background messages
+// Handle background messages - prevent duplicate notifications
 messaging.onBackgroundMessage((payload) => {
-  console.log('🔔 Background message received:', payload);
-  // NOTE: Notification display is handled by Firebase's auto-display of webpush.notification field
-  // Service worker only handles clicks/closes - don't show duplicate notification here
+  console.log('🔔 Background message received (background handler):', payload);
+  // Firebase auto-displays notification from webpush.notification field
+  // This handler just logs - DO NOT call showNotification() here to avoid duplicates
+});
+
+// Handle push events - prevent duplicate notifications
+self.addEventListener('push', (event) => {
+  console.log('📨 Push event received:', event);
+  // Let Firebase Cloud Messaging handle the notification display
+  // Do NOT prevent default or show notification here - Firebase will auto-display from webpush.notification
 });
 
 // NOTE: Generic 'push' event handler removed - Firebase messaging.onBackgroundMessage() handles all FCM notifications
