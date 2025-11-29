@@ -203,7 +203,7 @@ exports.handler = async (event, context) => {
             }
           ];
         }
-       / *
+       /*
         // Send notification with all details displayed
         const response = await admin.messaging().send({
           token: token,
