@@ -27,23 +27,26 @@ if (!firebase.apps.length) {
 // Get messaging instance
 const messaging = firebase.messaging();
 
-// Handle background messages - prevent duplicate notifications
+// Handle background messages - ONLY mechanism for displaying notifications
 messaging.onBackgroundMessage((payload) => {
-  console.log('🔔 Background message received (background handler):', payload);
-  // Firebase auto-displays notification from webpush.notification field
-  // This handler just logs - DO NOT call showNotification() here to avoid duplicates
+  console.log('🔔 Background message received:', payload);
+  
+  // Read ALL details from data field (NOT notification field)
+  const notificationTitle = payload.data?.title || 'Auric Notification';
+  const notificationOptions = {
+    body: payload.data?.body || payload.data?.message || 'New update from Auric',
+    icon: '/images/logos/royalmeenakari.png',
+    badge: '/images/logos/royalmeenakari.png',
+    image: payload.data?.image || '/images/logos/royalmeenakari.png',
+    tag: 'auric-notification',
+    data: {
+      link: payload.data?.link || '/'
+    }
+  };
+  
+  // Show ONE notification
+  self.registration.showNotification(notificationTitle, notificationOptions);
 });
-
-// Handle push events - prevent duplicate notifications
-self.addEventListener('push', (event) => {
-  console.log('📨 Push event received:', event);
-  // Let Firebase Cloud Messaging handle the notification display
-  // Do NOT prevent default or show notification here - Firebase will auto-display from webpush.notification
-});
-
-// NOTE: Generic 'push' event handler removed - Firebase messaging.onBackgroundMessage() handles all FCM notifications
-// Having both listeners caused DUPLICATE notifications because Firebase sends to both handlers
-// Keeping only messaging.onBackgroundMessage() ensures one notification per message
 
 // Handle notification click
 self.addEventListener('notificationclick', (event) => {
