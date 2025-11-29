@@ -198,10 +198,6 @@ exports.handler = async (event, context) => {
         
         const response = await admin.messaging().send({
           token: token,
-          notification: {
-            title: title,
-            body: body
-          },
           webpush: {
             fcmOptions: { link: link || '/' },
             notification: webpushNotification,

@@ -57,10 +57,6 @@ async function sendNotification(token, productImage, productName, oldPrice, newP
     
     const response = await admin.messaging().send({
       token: token,
-      notification: {
-        title: `Price Drop Alert!`,
-        body: `${productName} is now ${discountPercent}% off! Was ₹${oldPrice}, now ₹${newPrice}`
-      },
       webpush: {
         fcmOptions: { link: productLink || '/shop' },
         notification: {

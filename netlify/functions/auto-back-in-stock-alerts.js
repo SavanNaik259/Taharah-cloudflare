@@ -55,10 +55,6 @@ async function sendNotification(token, productImage, productName, productLink) {
     console.log(`📤 Sending FCM to token: ${token.substring(0, 20)}...`);
     const response = await admin.messaging().send({
       token: token,
-      notification: {
-        title: `${productName} is Back in Stock!`,
-        body: `Great news! The product you wanted is now available. Shop now!`
-      },
       webpush: {
         fcmOptions: { link: productLink || '/shop' },
         notification: {
