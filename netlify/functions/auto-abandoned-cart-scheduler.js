@@ -59,9 +59,7 @@ async function sendNotification(token, productImage, productName, productLink) {
         data: {
           title: `Complete Your Order!`,
           body: `Don't miss out on ${productName}. Complete your purchase now.`,
-          image: productImage || '/images/logos/royalmeenakari.png'
-        },
-        data: {
+          image: productImage || '/images/logos/royalmeenakari.png',
           link: productLink || '/cart'
         }
       }

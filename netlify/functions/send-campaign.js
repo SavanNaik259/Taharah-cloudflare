@@ -208,16 +208,16 @@ exports.handler = async (event, context) => {
           webpush: {
         // Data-only payload - service worker displays from data field
             fcmOptions: { link: link || '/' },
-            data: {
+ data: {
 
-              title: title,
-              body: body,
-              image: image || '/images/logos/royalmeenakari.png'
-            ,
+ title: title,
+ body: body,
+ image: image || '/images/logos/royalmeenakari.png'
+,
 
-              link: link || '/'
-            
-        }
+ link: link || '/'
+ 
+ }
           }
         });
         sentCount++;

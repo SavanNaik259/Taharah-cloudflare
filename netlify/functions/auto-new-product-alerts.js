@@ -60,9 +60,7 @@ async function sendNotification(token, productImage, productName, productLink) {
         data: {
           title: `✨ New Collection: ${productName}`,
           body: `Discover our latest exclusive jewelry collection. Available now!`,
-          image: productImage || '/images/logos/royalmeenakari.png'
-        },
-        data: {
+          image: productImage || '/images/logos/royalmeenakari.png',
           link: productLink || '/shop'
         }
       }

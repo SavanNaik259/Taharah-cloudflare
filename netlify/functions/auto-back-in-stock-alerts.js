@@ -60,9 +60,7 @@ async function sendNotification(token, productImage, productName, productLink) {
         data: {
           title: `${productName} is Back in Stock!`,
           body: `Great news! The product you wanted is now available. Shop now!`,
-          image: productImage || '/images/logos/royalmeenakari.png'
-        },
-        data: {
+          image: productImage || '/images/logos/royalmeenakari.png',
           link: productLink || '/shop'
         }
       }

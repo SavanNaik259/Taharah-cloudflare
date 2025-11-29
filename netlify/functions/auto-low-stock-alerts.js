@@ -60,9 +60,7 @@ async function sendNotification(token, productImage, productName, stockRemaining
         data: {
           title: `⚡ Limited Stock!`,
           body: `${productName} has only ${stockRemaining} item(s) left. Hurry!`,
-          image: productImage || '/images/logos/royalmeenakari.png'
-        },
-        data: {
+          image: productImage || '/images/logos/royalmeenakari.png',
           link: productLink || '/shop'
         }
       }

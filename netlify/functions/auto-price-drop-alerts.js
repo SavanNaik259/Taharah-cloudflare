@@ -62,9 +62,7 @@ async function sendNotification(token, productImage, productName, oldPrice, newP
         data: {
           title: `Price Drop Alert!`,
           body: `${productName} is now ${discountPercent}% off! Was ₹${oldPrice}, now ₹${newPrice}`,
-          image: productImage || '/images/logos/royalmeenakari.png'
-        },
-        data: {
+          image: productImage || '/images/logos/royalmeenakari.png',
           link: productLink || '/shop'
         }
       }
