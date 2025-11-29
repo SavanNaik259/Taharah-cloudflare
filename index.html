@@ -2348,20 +2348,7 @@ background-color: #000 !important;
 
     <!-- Notification Opt-in Script -->
     <script>
-      // Register service worker for push notifications - MUST be done early
       let swRegistration = null;
-      
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
-          .then(registration => {
-            swRegistration = registration;
-            console.log('✅ Service Worker registered:', registration);
-            console.log('✅ Service Worker scope:', registration.scope);
-          })
-          .catch(error => {
-            console.error('❌ Service Worker registration failed:', error);
-          });
-      }
 
       // Show notification banner if user hasn't dismissed it
       function showNotificationBanner() {
