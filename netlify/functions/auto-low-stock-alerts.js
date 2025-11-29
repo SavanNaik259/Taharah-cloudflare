@@ -53,19 +53,19 @@ db = initializeFirebaseAdmin();
 async function sendNotification(token, productImage, productName, stockRemaining, productLink) {
   try {
     console.log(`📤 Sending FCM to token: ${token.substring(0, 20)}... (${stockRemaining} items left)`);
-    // CRITICAL FIX: Remove notification field - only use data field so service worker handles display
     const response = await admin.messaging().send({
       token: token,
       webpush: {
         fcmOptions: { link: productLink || '/shop' },
-        data: {
+        notification: {
           title: `⚡ Limited Stock!`,
           body: `${productName} has only ${stockRemaining} item(s) left. Hurry!`,
-          link: productLink || '/shop',
-          image: productImage || '/images/logos/royalmeenakari.png',
           icon: '/images/logos/royalmeenakari.png',
           badge: '/images/logos/royalmeenakari.png',
-          buttonText: 'Buy Now'
+          image: productImage || '/images/logos/royalmeenakari.png'
+        },
+        data: {
+          link: productLink || '/shop'
         }
       }
     });

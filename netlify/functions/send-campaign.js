@@ -204,21 +204,23 @@ exports.handler = async (event, context) => {
           ];
         }
         
-        // CRITICAL FIX: Remove notification field to prevent Firebase from auto-displaying a basic notification
-        // Only webpush.data is sent - service worker's onBackgroundMessage() reads this and displays ONE detailed notification
-        // This prevents duplicate notifications (one basic auto, one detailed manual)
+        // CRITICAL FIX: Send notification with ALL details (image, buttons, etc) 
+        // Service worker won't re-display - just handles clicks
         const response = await admin.messaging().send({
           token: token,
           webpush: {
             fcmOptions: { link: link || '/' },
-            data: {
+            notification: {
               title: title,
               body: body,
+              icon: '/images/logos/royalmeenakari.png',
+              badge: '/images/logos/royalmeenakari.png',
+              image: image || '/images/logos/royalmeenakari.png'
+            },
+            data: {
               link: link || '/',
               image: image || '',
-              buttonText: buttonText || '',
-              icon: '/images/logos/royalmeenakari.png',
-              badge: '/images/logos/royalmeenakari.png'
+              buttonText: buttonText || ''
             }
           }
         });

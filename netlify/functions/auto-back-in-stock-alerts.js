@@ -53,19 +53,19 @@ db = initializeFirebaseAdmin();
 async function sendNotification(token, productImage, productName, productLink) {
   try {
     console.log(`📤 Sending FCM to token: ${token.substring(0, 20)}...`);
-    // CRITICAL FIX: Remove notification field - only use data field so service worker handles display
     const response = await admin.messaging().send({
       token: token,
       webpush: {
         fcmOptions: { link: productLink || '/shop' },
-        data: {
+        notification: {
           title: `${productName} is Back in Stock!`,
           body: `Great news! The product you wanted is now available. Shop now!`,
-          link: productLink || '/shop',
-          image: productImage || '/images/logos/royalmeenakari.png',
           icon: '/images/logos/royalmeenakari.png',
           badge: '/images/logos/royalmeenakari.png',
-          buttonText: 'Buy Now'
+          image: productImage || '/images/logos/royalmeenakari.png'
+        },
+        data: {
+          link: productLink || '/shop'
         }
       }
     });
