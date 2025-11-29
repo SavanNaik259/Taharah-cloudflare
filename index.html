@@ -2499,25 +2499,10 @@ background-color: #000 !important;
         }
       }
       
-      // Listen for incoming messages when app is in foreground
-      if (typeof firebase !== 'undefined' && firebase.messaging) {
-        try {
-          const messaging = firebase.messaging();
-          messaging.onMessage((payload) => {
-            console.log('📬 Message received in foreground:', payload);
-            // Show notification even when app is open
-            if (Notification.permission === 'granted') {
-              new Notification(payload.notification.title, {
-                body: payload.notification.body,
-                icon: '/images/logos/royalmeenakari.png',
-                badge: '/images/logos/royalmeenakari.png'
-              });
-            }
-          });
-        } catch (e) {
-          console.log('⚠️ Could not set up foreground message handler:', e);
-        }
-      }
+      // NOTE: Removed foreground message handler - Service Worker handles ALL notifications
+      // Both foreground and background messages are processed by service worker's onBackgroundMessage()
+      // Having a separate foreground handler in index.html was causing DUPLICATE notifications
+      // Firebase messaging automatically shows notifications through the service worker for all cases
 
       // Dismiss banner
       function dismissNotificationBanner() {
