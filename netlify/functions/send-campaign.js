@@ -189,7 +189,9 @@ exports.handler = async (event, context) => {
         const webpushNotification = {
           title: title,
           body: body,
-          image: image || '/images/logos/royalmeenakari.png'
+          image: image || '/images/logos/royalmeenakari.png',
+          badge: '/images/logos/royalmeenakari.png',
+          icon: '/images/logos/royalmeenakari.png'
         };
         
         // Add action button if buttonText is provided
@@ -202,23 +204,15 @@ exports.handler = async (event, context) => {
           ];
         }
        
-        // Send notification with all details displayed
+        // Send notification with all details displayed (SINGLE payload, not duplicated)
+        const webpushConfig = {
+          notification: webpushNotification,
+          fcmOptions: { link: link || '/' }
+        };
+        
         const response = await admin.messaging().send({
           token: token,
-          webpush: {
-        // Data-only payload - service worker displays from data field
-            fcmOptions: { link: link || '/' },
- data: {
-
- title: title,
- body: body,
- image: image || '/images/logos/royalmeenakari.png'
-,
-
- link: link || '/'
- 
- }
-          }
+          webpush: webpushConfig
         });
         sentCount++;
         console.log(`   ✅ Message sent. ID: ${response.substring(0, 50)}...`);
