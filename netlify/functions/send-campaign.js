@@ -209,13 +209,15 @@ exports.handler = async (event, context) => {
         // Data-only payload - service worker displays from data field
             fcmOptions: { link: link || '/' },
             data: {
+
               title: title,
               body: body,
               image: image || '/images/logos/royalmeenakari.png'
-            },
-            data: {
+            ,
+
               link: link || '/'
-            }
+            
+        }
           }
         });
         sentCount++;
