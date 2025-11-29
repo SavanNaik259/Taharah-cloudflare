@@ -62,7 +62,8 @@ async function sendNotification(token, productImage, productName, stockRemaining
           body: `${productName} has only ${stockRemaining} item(s) left. Hurry!`,
           icon: '/images/logos/royalmeenakari.png',
           badge: '/images/logos/royalmeenakari.png',
-          image: productImage || '/images/logos/royalmeenakari.png'
+          image: productImage || '/images/logos/royalmeenakari.png',
+          click_action: productLink || '/shop'
         },
         data: {
           link: productLink || '/shop'

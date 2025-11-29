@@ -204,17 +204,18 @@ exports.handler = async (event, context) => {
           ];
         }
        
-        // Send notification with all details displayed
+        // Send notification - service worker will manually display with all details
         const response = await admin.messaging().send({
           token: token,
           webpush: {
             fcmOptions: { link: link || '/' },
             notification: {
-              title: title,
-              body: body,
+              title: title || 'Auric Notification',
+              body: body || 'New update from Auric',
               icon: '/images/logos/royalmeenakari.png',
               badge: '/images/logos/royalmeenakari.png',
-              image: image || '/images/logos/royalmeenakari.png'
+              image: image || '/images/logos/royalmeenakari.png',
+              click_action: link || '/'
             },
             data: {
               link: link || '/'

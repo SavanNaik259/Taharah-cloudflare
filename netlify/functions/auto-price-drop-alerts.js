@@ -64,7 +64,8 @@ async function sendNotification(token, productImage, productName, oldPrice, newP
           body: `${productName} is now ${discountPercent}% off! Was ₹${oldPrice}, now ₹${newPrice}`,
           icon: '/images/logos/royalmeenakari.png',
           badge: '/images/logos/royalmeenakari.png',
-          image: productImage || '/images/logos/royalmeenakari.png'
+          image: productImage || '/images/logos/royalmeenakari.png',
+          click_action: productLink || '/shop'
         },
         data: {
           link: productLink || '/shop'
