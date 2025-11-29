@@ -57,11 +57,15 @@ async function sendNotification(token, productImage, productName, productLink) {
       token: token,
       webpush: {
         fcmOptions: { link: productLink || '/shop' },
-        data: {
+        notification: {
           title: `✨ New Collection: ${productName}`,
           body: `Discover our latest exclusive jewelry collection. Available now!`,
-          link: productLink || '/shop',
+          icon: '/images/logos/royalmeenakari.png',
+          badge: '/images/logos/royalmeenakari.png',
           image: productImage || '/images/logos/royalmeenakari.png'
+        },
+        data: {
+          link: productLink || '/shop'
         }
       }
     });

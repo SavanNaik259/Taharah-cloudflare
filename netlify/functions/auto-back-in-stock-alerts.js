@@ -57,11 +57,15 @@ async function sendNotification(token, productImage, productName, productLink) {
       token: token,
       webpush: {
         fcmOptions: { link: productLink || '/shop' },
-        data: {
+        notification: {
           title: `${productName} is Back in Stock!`,
           body: `Great news! The product you wanted is now available. Shop now!`,
-          link: productLink || '/shop',
+          icon: '/images/logos/royalmeenakari.png',
+          badge: '/images/logos/royalmeenakari.png',
           image: productImage || '/images/logos/royalmeenakari.png'
+        },
+        data: {
+          link: productLink || '/shop'
         }
       }
     });

@@ -57,11 +57,15 @@ async function sendNotification(token, productImage, productName, stockRemaining
       token: token,
       webpush: {
         fcmOptions: { link: productLink || '/shop' },
-        data: {
+        notification: {
           title: `⚡ Limited Stock!`,
           body: `${productName} has only ${stockRemaining} item(s) left. Hurry!`,
-          link: productLink || '/shop',
+          icon: '/images/logos/royalmeenakari.png',
+          badge: '/images/logos/royalmeenakari.png',
           image: productImage || '/images/logos/royalmeenakari.png'
+        },
+        data: {
+          link: productLink || '/shop'
         }
       }
     });

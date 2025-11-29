@@ -56,11 +56,15 @@ async function sendNotification(token, productImage, productName, productLink) {
       token: token,
       webpush: {
         fcmOptions: { link: productLink || '/cart' },
-        data: {
+        notification: {
           title: `Complete Your Order!`,
           body: `Don't miss out on ${productName}. Complete your purchase now.`,
-          link: productLink || '/cart',
+          icon: '/images/logos/royalmeenakari.png',
+          badge: '/images/logos/royalmeenakari.png',
           image: productImage || '/images/logos/royalmeenakari.png'
+        },
+        data: {
+          link: productLink || '/cart'
         }
       }
     });

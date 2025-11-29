@@ -204,17 +204,20 @@ exports.handler = async (event, context) => {
           ];
         }
         
-        // CRITICAL FIX: Send ONLY data field - service worker shows ONE notification
+        // Send notification with all details displayed
         const response = await admin.messaging().send({
           token: token,
           webpush: {
             fcmOptions: { link: link || '/' },
-            data: {
+            notification: {
               title: title,
               body: body,
-              link: link || '/',
-              image: image || '/images/logos/royalmeenakari.png',
-              buttonText: buttonText || ''
+              icon: '/images/logos/royalmeenakari.png',
+              badge: '/images/logos/royalmeenakari.png',
+              image: image || '/images/logos/royalmeenakari.png'
+            },
+            data: {
+              link: link || '/'
             }
           }
         });
