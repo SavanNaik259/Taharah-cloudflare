@@ -27,69 +27,6 @@ if (!firebase.apps.length) {
 // Get messaging instance
 const messaging = firebase.messaging();
 
-// Handle background messages - THIS IS THE ONLY PLACE NOTIFICATIONS ARE SHOWN
-messaging.onBackgroundMessage((payload) => {
-  console.log('[Service Worker] Received background message:', payload);
-
-  const notificationTitle = payload.notification?.title || 'Auric Notification';
-  const notificationOptions = {
-    body: payload.notification?.body || 'You have a new notification',
-    icon: '/images/logos/royalmeenakari.png',
-    badge: '/images/logos/royalmeenakari.png',
-    tag: 'auric-notification',
-    requireInteraction: false,
-    data: {
-      link: payload.data?.link || '/',
-      FCM_MSG: payload
-    }
-  };
-
-  // Add image if provided in data
-  if (payload.data?.image) {
-    notificationOptions.image = payload.data.image;
-  }
-
-  // Add action button if buttonText provided
-  if (payload.data?.buttonText) {
-    notificationOptions.actions = [
-      {
-        action: 'open',
-        title: payload.data.buttonText
-      }
-    ];
-  }
-
-  // Show notification
-  return self.registration.showNotification(notificationTitle, notificationOptions);
-});
-
-// Handle notification click
-self.addEventListener('notificationclick', (event) => {
-  console.log('[Service Worker] Notification clicked:', event.notification);
-  
-  event.notification.close();
-  
-  // Get the click action URL
-  const clickAction = event.notification.data?.link || '/';
-  
-  // Open or focus the window
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      // Check if window already exists
-      for (let client of clientList) {
-        if (client.url.includes(new URL(clickAction, self.location.origin).pathname) && 'focus' in client) {
-          return client.focus();
-        }
-      }
-      // Otherwise open new window
-      if (clients.openWindow) {
-        return clients.openWindow(clickAction);
-      }
-    })
-  );
-});
-const messaging = firebase.messaging();
-
 // Handle background messages
 messaging.onBackgroundMessage((payload) => {
   console.log('🔔 Background message received:', payload);
