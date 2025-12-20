@@ -270,6 +270,12 @@
             <!-- Campaign Details -->
             <div class="form-section">
               <h6>Campaign Details</h6>
+              <div class="mb-2" style="background: #e8f4f8; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                <small style="color: #0066cc;"><strong>💡 DEMO VALUES:</strong> Click button below to auto-fill test data</small><br>
+                <button type="button" class="btn btn-sm btn-outline-info mt-2" onclick="fillDemoValues()">
+                  <i class="fas fa-magic"></i> Fill Demo Data
+                </button>
+              </div>
               <div class="mb-3">
                 <label class="form-label">Campaign Title *</label>
                 <input type="text" id="campaignTitle" class="form-control" placeholder="e.g., Diwali Sale 2024" required>
@@ -281,6 +287,10 @@
               <div class="mb-3">
                 <label class="form-label">Banner Image *</label>
                 <input type="file" id="bannerImage" class="form-control" accept="image/*" required>
+                <small style="color: #666;">Or use demo image:</small>
+                <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="useDemoBannerImage()">
+                  <i class="fas fa-image"></i> Use Demo Banner
+                </button>
                 <div id="bannerPreview"></div>
               </div>
             </div>
@@ -291,6 +301,7 @@
               <div class="mb-3">
                 <label class="form-label">Button Text *</label>
                 <input type="text" id="buttonText" class="form-control" placeholder="e.g., Shop Now" required>
+                <small style="color: #666;">Demo: Try "SHOP COLLECTION"</small>
               </div>
               <div class="mb-3">
                 <label class="form-label">Link To *</label>
@@ -791,6 +802,37 @@
       });
       displayUsersList(filtered);
     });
+
+    // DEMO FUNCTIONS FOR EASY TESTING
+    function fillDemoValues() {
+      document.getElementById('campaignTitle').value = '✨ Exclusive Meenakari Collection - 50% OFF';
+      document.getElementById('campaignDescription').value = 'Limited time offer! Get 50% discount on our exquisite handcrafted Meenakari jewelry. Free shipping on orders above ₹5000. Offer valid for 7 days only!';
+      document.getElementById('buttonText').value = 'SHOP COLLECTION';
+      document.getElementById('linkType').value = 'collection';
+      updateLinkOptions();
+      document.getElementById('linkTarget').value = 'featured-collection.html';
+      alert('✅ Demo values filled! Now click "Use Demo Banner" to add an image, then send.');
+    }
+
+    function useDemoBannerImage() {
+      // Use a demo banner image
+      fetch('/images/logos/royalmeenakari.png')
+        .then(r => r.blob())
+        .then(blob => {
+          const dataTransfer = new DataTransfer();
+          const file = new File([blob], 'demo-banner.png', { type: 'image/png' });
+          dataTransfer.items.add(file);
+          document.getElementById('bannerImage').files = dataTransfer.files;
+          
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            document.getElementById('bannerPreview').innerHTML = `<img src="${event.target.result}" class="banner-preview" alt="Demo Banner">`;
+          };
+          reader.readAsDataURL(file);
+          alert('✅ Demo banner image loaded!');
+        })
+        .catch(e => alert('⚠️ Could not load demo image. Upload one manually.'));
+    }
 
     // Load on Page Load
     document.addEventListener('DOMContentLoaded', () => {

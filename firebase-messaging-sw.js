@@ -1,65 +1,71 @@
-// Firebase Cloud Messaging Service Worker
-// This MUST be at the root level for Firebase to find it
+/**
+ * Firebase Cloud Messaging Service Worker
+ * CRITICAL: This file MUST be at the root of your domain (/firebase-messaging-sw.js)
+ * Handles background push notifications
+ */
 
-importScripts('https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
 
-// Firebase Configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDw7bT_8Bv0dLxQnKi5-qF1JX7Uh2K_xxE",
+  apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
   authDomain: "auric-a0c92.firebaseapp.com",
   projectId: "auric-a0c92",
   storageBucket: "auric-a0c92.firebasestorage.app",
   messagingSenderId: "878979958342",
-  appId: "1:878979958342:web:e6092f7522488d21eaec47"
+  appId: "1:878979958342:web:e6092f7522488d21eaec47",
+  measurementId: "G-ZYZ750JHMB"
 };
 
-// Initialize Firebase
-if (!firebase.apps.length) {
+try {
   firebase.initializeApp(firebaseConfig);
+  console.log('✅ Firebase initialized in Service Worker');
+} catch (error) {
+  console.error('❌ Firebase init error:', error);
 }
 
 const messaging = firebase.messaging();
 
-// Handle background messages
 messaging.onBackgroundMessage((payload) => {
-  console.log('[Service Worker] Received background message:', payload);
-
-  const notificationTitle = payload.notification?.title || 'Auric Notification';
+  console.log('📬 Background message:', payload);
+  
+  const notificationTitle = payload.notification?.title || 'Royal Meenakari';
   const notificationOptions = {
-    body: payload.notification?.body || 'You have a new notification',
-    icon: '/favicon.ico',
-    badge: '/favicon.ico',
-    tag: 'notification',
+    body: payload.notification?.body || 'New notification from Royal Meenakari',
+    icon: payload.notification?.icon || '/images/logos/royalmeenakari.png',
+    badge: payload.notification?.badge || '/images/logos/royalmeenakari.png',
+    image: payload.notification?.image || undefined,
+    tag: 'fcm-notification',
     requireInteraction: false,
     data: payload.data || {}
   };
-
-  // Show notification
+  
+  if (!notificationOptions.image) {
+    delete notificationOptions.image;
+  }
+  
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// Handle notification click
 self.addEventListener('notificationclick', (event) => {
-  console.log('[Service Worker] Notification clicked:', event.notification);
-  
+  console.log('✅ Notification clicked:', event.notification.title);
   event.notification.close();
   
-  // Get the click action URL
-  const clickAction = event.notification.data?.link || '/';
+  const urlToOpen = event.notification.data?.link || '/';
   
-  // Open or focus the window
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      // Check if window already exists
-      for (let client of clientList) {
-        if (client.url === clickAction && 'focus' in client) {
+    clients.matchAll({
+      type: 'window',
+      includeUncontrolled: true
+    }).then((clientList) => {
+      for (let i = 0; i < clientList.length; i++) {
+        const client = clientList[i];
+        if (client.url === urlToOpen && 'focus' in client) {
           return client.focus();
         }
       }
-      // Otherwise open new window
       if (clients.openWindow) {
-        return clients.openWindow(clickAction);
+        return clients.openWindow(urlToOpen);
       }
     })
   );
