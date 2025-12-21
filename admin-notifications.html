@@ -429,7 +429,7 @@
             btnText.innerHTML = '<span class="loading"></span>Sending...';
 
             try {
-                const response = await fetch('/.netlify/functions/send-notifications', {
+                const response = await fetch('/api/send-notifications', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
