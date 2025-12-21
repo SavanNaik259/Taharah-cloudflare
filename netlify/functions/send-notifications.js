@@ -31,6 +31,11 @@ if (!admin.apps.length) {
       client_x509_cert_url: process.env.FIREBASE_CERT_URL
     };
 
+    // Validate all required fields
+    if (!serviceAccount.private_key || !serviceAccount.client_email) {
+      throw new Error('Missing critical Firebase credentials: private_key or client_email');
+    }
+
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
       storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "auric-a0c92.firebasestorage.app"
@@ -39,11 +44,20 @@ if (!admin.apps.length) {
     console.log('✅ Firebase Admin initialized for FCM push notifications');
   } catch (error) {
     console.error('❌ Firebase Admin initialization error:', error.message);
+    console.error('Stack:', error.stack);
+    throw error;
   }
 }
 
 const db = admin.firestore();
-const messaging = admin.messaging();
+let messaging;
+try {
+  messaging = admin.messaging();
+  console.log('✅ Firebase Messaging instance created');
+} catch (error) {
+  console.error('❌ Error creating Firebase Messaging instance:', error.message);
+  throw error;
+}
 
 exports.handler = async (event, context) => {
   const headers = {
@@ -148,29 +162,31 @@ exports.handler = async (event, context) => {
 
     // Prepare notification payload for WEB PUSH (critical: proper FCM format)
     // NOTE: For web browsers, use webpushConfig - NOT top-level notification
-    const fcmMessage = {
-      tokens: [],
-      webpushConfig: {
-        headers: {
-          'TTL': '86400'
-        },
-        data: {
-          link: link || '/',
-          category,
-          timestamp: new Date().toISOString()
-        },
-        notification: {
-          title,
-          body,
-          icon: '/images/logos/royalmeenakari.png',
-          badge: '/images/logos/royalmeenakari.png',
-          clickAction: link || '/',
-          tag: 'auric-notification'
-        },
-        fcmOptions: {
-          link: link || '/'
-        }
+    const webpushConfig = {
+      headers: {
+        'TTL': '86400'
+      },
+      notification: {
+        title,
+        body,
+        icon: '/images/logos/royalmeenakari.png',
+        badge: '/images/logos/royalmeenakari.png',
+        clickAction: link || '/',
+        tag: 'auric-notification'
+      },
+      fcmOptions: {
+        link: link || '/'
       }
+    };
+
+    // For web push, data goes at the top level alongside webpushConfig
+    const messagePayload = {
+      data: {
+        link: link || '/',
+        category,
+        timestamp: new Date().toISOString()
+      },
+      webpushConfig
     };
 
     // Send in batches (FCM limit is 500 tokens per call)
@@ -185,24 +201,48 @@ exports.handler = async (event, context) => {
       console.log(`📤 Sending batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(tokens.length / batchSize)} (${batch.length} tokens)...`);
 
       try {
+        console.log(`📢 Preparing to send batch with messaging instance:`, typeof messaging, messaging !== undefined);
+        console.log(`📄 Message payload:`, JSON.stringify({
+          tokenCount: batch.length,
+          hasData: !!messagePayload.data,
+          hasWebpushConfig: !!messagePayload.webpushConfig,
+          title: title.substring(0, 30)
+        }));
+        
         // CORRECTED: For web push, ONLY use webpushConfig, don't use top-level notification
+        if (!messaging) {
+          throw new Error('Firebase Messaging instance is not initialized');
+        }
+        
         const response = await messaging.sendMulticast({
           tokens: batch,
-          webpushConfig: fcmMessage.webpushConfig
+          data: messagePayload.data,
+          webpushConfig: messagePayload.webpushConfig
         });
 
         console.log(`✅ Batch result: ${response.successCount} sent, ${response.failureCount} failed`);
+        console.log(`📊 Full response:`, JSON.stringify({
+          successCount: response.successCount,
+          failureCount: response.failureCount,
+          responses: response.responses.length
+        }));
+        
         successCount += response.successCount;
         failureCount += response.failureCount;
 
         // Track failed tokens for cleanup
         if (response.failureCount > 0) {
+          console.log(`⚠️ FAILED RESPONSES DETAILED LOG:`);
           response.responses.forEach((resp, idx) => {
             if (!resp.success) {
               failedTokens.push(batch[idx]);
               const errorMsg = resp.error?.message || 'Unknown error';
               const errorCode = resp.error?.code || 'UNKNOWN';
-              console.warn(`❌ Failed token ${idx}: ${batch[idx]?.substring(0, 30)}... Code: ${errorCode}, Error: ${errorMsg}`);
+              const tokenPreview = batch[idx]?.substring(0, 40) + '...';
+              console.warn(`❌ [${idx}] Code: ${errorCode}`);
+              console.warn(`    Token: ${tokenPreview}`);
+              console.warn(`    Error: ${errorMsg}`);
+              console.warn(`    Full error obj:`, JSON.stringify(resp.error));
             }
           });
         }
