@@ -8,7 +8,7 @@ class FirebaseNotificationsManager {
   constructor() {
     this.fcmToken = null;
     this.isNotificationEnabled = false;
-    this.vapidKey = 'BIWRF2leB0T2HGDSKEhgevQlbmdaeoCaQUi88hdUw8N9k_d36JuImK8I7Nwj52Wi4_sd9G4QfFdLJWLcqU5akOQ'; // Actual Firebase VAPID key from Console
+    this.vapidKey = 'BI7QNUnZtwGorICnshlFewaFF86eBZ8FGsVs7Jzs4CF5l1jzL2kf4POMnmA2Ae0YB0wc1PvfsmrkICbpLS3OYHI'; // NEW VAPID key from Firebase Console
     this.registration = null;
     this.messaging = null;
   }
@@ -151,27 +151,30 @@ class FirebaseNotificationsManager {
         const deviceId = localStorage.getItem('device_id') || this.generateDeviceId();
         localStorage.setItem('device_id', deviceId);
         
+        // CRITICAL FIX: Replace tokens array instead of merging to prevent duplicates
         await db.collection('guest_tokens').doc(deviceId).set({
-          tokens: firebase.firestore.FieldValue.arrayUnion(this.fcmToken),
+          tokens: [this.fcmToken], // Only store the NEW token, remove old ones
           notificationsEnabled: true,
           lastUpdated: new Date(),
-          deviceId: deviceId
-        }, { merge: true });
+          deviceId: deviceId,
+          vapidKeyVersion: 'v2' // Track which VAPID key was used
+        }, { merge: false }); // merge: false ensures we overwrite old data
         
-        console.log('✅ FCM token saved to guest_tokens collection for device:', deviceId);
+        console.log('✅ FCM token REPLACED (not merged) in guest_tokens for device:', deviceId);
         return;
       }
 
       // For logged-in users
       const userId = firebase.auth().currentUser.uid;
       await db.collection('users').doc(userId).set({
-        fcmTokens: firebase.firestore.FieldValue.arrayUnion(this.fcmToken),
+        fcmTokens: [this.fcmToken], // Only store the NEW token
         notificationsEnabled: true,
         lastTokenUpdate: new Date(),
-        uid: userId
-      }, { merge: true });
+        uid: userId,
+        vapidKeyVersion: 'v2'
+      }, { merge: false });
 
-      console.log('✅ FCM token saved to users collection for user:', userId);
+      console.log('✅ FCM token REPLACED (not merged) in users collection for user:', userId);
     } catch (error) {
       console.error('❌ Error saving FCM token to Firestore:', error);
     }
