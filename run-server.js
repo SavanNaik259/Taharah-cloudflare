@@ -1022,6 +1022,50 @@ app.post('/.netlify/functions/send-order-email', async (req, res) => {
   }
 });
 
+// Proxy for send-campaign Netlify function
+app.post('/.netlify/functions/send-campaign', async (req, res) => {
+  try {
+    const netlifyFunction = require('./netlify/functions/send-campaign');
+
+    const event = {
+      body: JSON.stringify(req.body),
+      headers: req.headers,
+      httpMethod: 'POST',
+      path: '/.netlify/functions/send-campaign'
+    };
+
+    const context = {};
+    const result = await netlifyFunction.handler(event, context);
+
+    if (result.headers) {
+      Object.keys(result.headers).forEach(key => {
+        res.setHeader(key, result.headers[key]);
+      });
+    }
+
+    res.status(result.statusCode || 200);
+
+    if (result.body) {
+      try {
+        const body = JSON.parse(result.body);
+        res.json(body);
+      } catch (e) {
+        res.send(result.body);
+      }
+    } else {
+      res.end();
+    }
+
+  } catch (error) {
+    console.error('Error in send-campaign function:', error);
+    res.status(500).json({
+      success: false,
+      error: `Failed to send campaign: ${error.message}`,
+      sentCount: 0
+    });
+  }
+});
+
 // Handle all other routes by serving index.html
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
