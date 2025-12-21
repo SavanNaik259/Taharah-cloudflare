@@ -2466,22 +2466,44 @@ background-color: #000 !important;
             const user = firebase.auth().currentUser;
             
             if (user) {
-              // Logged-in user
+              // Logged-in user - CHECK if token already exists to prevent duplicates
+              const userDoc = await db.collection('users').doc(user.uid).get();
+              const existingTokens = userDoc.data()?.fcmTokens || [];
+              
+              let tokensToSave = [...existingTokens];
+              if (!tokensToSave.includes(token)) {
+                tokensToSave.push(token);
+                console.log('🆕 Adding new token (not a duplicate)');
+              } else {
+                console.log('⚠️ Token already exists - skipping to prevent duplicates');
+              }
+              
               await db.collection('users').doc(user.uid).set({
-                fcmTokens: firebase.firestore.FieldValue.arrayUnion(token),
+                fcmTokens: tokensToSave,
                 notificationsEnabled: true,
                 lastTokenUpdate: new Date(),
                 email: user.email
               }, { merge: true });
               console.log('✅ Real FCM token saved for user:', user.uid);
             } else {
-              // Guest user
+              // Guest user - CHECK if token already exists to prevent duplicates
               const deviceId = localStorage.getItem('device_id') || `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
               localStorage.setItem('device_id', deviceId);
               
+              const guestDoc = await db.collection('guest_tokens').doc(deviceId).get();
+              const existingTokens = guestDoc.data()?.tokens || [];
+              
+              let tokensToSave = [...existingTokens];
+              if (!tokensToSave.includes(token)) {
+                tokensToSave.push(token);
+                console.log('🆕 Adding new token (not a duplicate)');
+              } else {
+                console.log('⚠️ Token already exists - skipping to prevent duplicates');
+              }
+              
               console.log('👤 Saving FCM token for guest device:', deviceId);
               await db.collection('guest_tokens').doc(deviceId).set({
-                tokens: firebase.firestore.FieldValue.arrayUnion(token),
+                tokens: tokensToSave,
                 lastUpdate: new Date(),
                 notificationsEnabled: true
               }, { merge: true });

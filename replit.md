@@ -6,6 +6,61 @@ Auric is a premium e-commerce platform for jewelry, offering a seamless online s
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (Dec 21, 2025)
+
+### CRITICAL FIX: Duplicate Notifications - Token Deduplication (v4.0.1 ✅ COMPLETE)
+
+**Issue**: Users were receiving duplicate push notifications when campaigns were sent (same notification received 2-3 times)
+
+**Root Cause**: Firebase's `arrayUnion()` function adds tokens without checking duplicates. When users:
+- Refreshed the page
+- Opened app in multiple tabs
+- Re-enabled notifications
+The SAME FCM token was added to the array multiple times. Example: `fcmTokens: ["ABC123", "ABC123", "ABC123"]`
+When sending campaigns, the function looped through all tokens and sent to each one, causing duplicate notifications.
+
+**Solution Implemented**:
+1. **index.html** (lines 2471-2514): Added duplicate token checking before saving
+   - Fetches existing tokens from Firestore
+   - Only adds token if it doesn't already exist
+   - Prevents `arrayUnion()` from adding same token multiple times
+
+2. **firebase-token-manager.js**: Added duplicate token checking
+   - Checks if token exists before using `arrayUnion()`
+   - Only adds new tokens, skips duplicates
+   - Updates timestamp even if token exists
+
+3. **admin-promotions.html** (lines 378, 446-455, 579-586): Added button submission lock
+   - Prevents double-clicking the "Create Campaign" button
+   - Disables button while campaign is processing
+   - Shows "Creating & Sending..." loading state
+
+4. **send-campaign.js** (lines 68-80): Added production-only protection
+   - Blocks campaign sends from localhost
+   - Only allows sends from deployed Netlify production
+   - Prevents accidental duplicate sends during testing
+
+5. **update-product-stock.js** (lines 138-140, 162-164): Fixed duplicate conditions
+   - Removed duplicate `else if` statements
+   - Changed to single `else` to prevent double execution
+
+6. **auto-price-drop-alerts.js** (lines 64-72): Fixed webpush notification format
+   - Changed from `data` field to `notification` field
+   - Now displays properly in web notifications
+
+7. **auto-abandoned-cart-check.js** (lines 62-70): Fixed webpush notification format
+   - Changed from `data` field to `notification` field
+   - Notifications now display correctly
+
+**Impact**:
+- ✅ Users receive notifications EXACTLY ONCE per campaign
+- ✅ No duplicate FCM tokens in database
+- ✅ Tokens only saved when new/changed
+- ✅ Double-click protection on admin panel
+- ✅ Production-only campaign sending
+
+---
+
 ## Recent Changes (Nov 28, 2025)
 
 ### FEATURE: Push Notifications System - Complete FCM Implementation (v4.0.0 ✅ COMPLETE)
