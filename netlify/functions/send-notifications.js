@@ -1,6 +1,6 @@
 /**
  * Netlify Function: send-notifications
- * Sends push notifications and saves them to Firestore
+ * Sends Firebase Cloud Messaging (FCM) push notifications to users
  * 
  * POST /api/send-notifications
  * Body: {
@@ -15,7 +15,7 @@
 
 const admin = require('firebase-admin');
 
-// Initialize Firebase Admin with proper error handling
+// Initialize Firebase Admin
 if (!admin.apps.length) {
   try {
     const serviceAccount = {
@@ -36,16 +36,16 @@ if (!admin.apps.length) {
       storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "auric-a0c92.firebasestorage.app"
     });
 
-    console.log('✅ Firebase Admin initialized for send-notifications function');
+    console.log('✅ Firebase Admin initialized for FCM push notifications');
   } catch (error) {
     console.error('❌ Firebase Admin initialization error:', error.message);
   }
 }
 
 const db = admin.firestore();
+const messaging = admin.messaging();
 
 exports.handler = async (event, context) => {
-  // CORS headers
   const headers = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
@@ -53,28 +53,20 @@ exports.handler = async (event, context) => {
     'Access-Control-Allow-Headers': 'Content-Type'
   };
 
-  // Handle OPTIONS request
   if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({ ok: true })
-    };
+    return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
   }
 
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
       headers,
-      body: JSON.stringify({ 
-        success: false,
-        error: 'Method not allowed' 
-      })
+      body: JSON.stringify({ success: false, error: 'Method not allowed' })
     };
   }
 
   try {
-    console.log('📨 Incoming notification request...');
+    console.log('📨 Processing notification request...');
     
     const {
       title,
@@ -87,129 +79,215 @@ exports.handler = async (event, context) => {
 
     // Validate input
     if (!title || !body) {
-      console.warn('⚠️ Missing required fields: title or body');
+      console.warn('⚠️ Missing required fields');
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ 
-          success: false,
-          error: 'Title and body are required' 
-        })
+        body: JSON.stringify({ success: false, error: 'Title and body are required' })
       };
     }
 
     if (!sendToUsers && !sendToGuests) {
-      console.warn('⚠️ No target audience selected');
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ 
-          success: false,
-          error: 'At least one audience must be selected' 
-        })
+        body: JSON.stringify({ success: false, error: 'At least one audience must be selected' })
       };
     }
 
-    console.log(`📝 Notification Details:
-      Title: ${title}
-      Body: ${body}
-      Category: ${category}
-      Send to Users: ${sendToUsers}
-      Send to Guests: ${sendToGuests}`);
-
-    // Count tokens
+    const tokens = [];
     let userTokenCount = 0;
     let guestTokenCount = 0;
 
+    // Collect user tokens from users collection
     if (sendToUsers) {
       try {
         const usersSnapshot = await db.collection('users').get();
         usersSnapshot.forEach(doc => {
           const userTokens = doc.data().pushTokens || [];
+          tokens.push(...userTokens);
           userTokenCount += userTokens.length;
         });
         console.log(`👥 Found ${userTokenCount} user tokens`);
       } catch (error) {
-        console.error('❌ Error counting user tokens:', error.message);
+        console.error('❌ Error collecting user tokens:', error.message);
       }
     }
 
+    // Collect guest tokens
     if (sendToGuests) {
       try {
         const guestTokensSnapshot = await db.collection('guest_tokens').get();
-        guestTokenCount = guestTokensSnapshot.size;
+        guestTokensSnapshot.forEach(doc => {
+          const token = doc.data().token;
+          if (token) tokens.push(token);
+          guestTokenCount++;
+        });
         console.log(`👤 Found ${guestTokenCount} guest tokens`);
       } catch (error) {
-        console.error('❌ Error counting guest tokens:', error.message);
+        console.error('❌ Error collecting guest tokens:', error.message);
       }
     }
 
-    const totalTokens = userTokenCount + guestTokenCount;
-    console.log(`📊 Total recipients: ${totalTokens}`);
-
-    // Create notification record
-    const notificationRecord = {
-      id: Date.now().toString(),
-      title,
-      body,
-      link: link || null,
-      category,
-      sentToUsers: sendToUsers,
-      sentToGuests: sendToGuests,
-      userTokenCount,
-      guestTokenCount,
-      totalSent: totalTokens,
-      timestamp: new Date().toISOString(),
-      read: false,
-      status: 'sent'
-    };
-
-    // Save notification to Firestore
-    try {
-      console.log('💾 Saving notification to Firestore...');
-      
-      // Save to notifications collection
-      await db.collection('notifications').add(notificationRecord);
-      
-      // Also save to notification_logs for history
-      await db.collection('notification_logs').add({
-        ...notificationRecord,
-        sentAt: new Date()
-      });
-      
-      console.log('✅ Notification saved successfully');
-    } catch (error) {
-      console.error('❌ Error saving notification:', error.message);
-      throw new Error(`Failed to save notification: ${error.message}`);
+    if (tokens.length === 0) {
+      console.log('⚠️ No tokens found to send notifications');
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          success: true,
+          message: 'No tokens found',
+          stats: { userTokenCount: 0, guestTokenCount: 0, totalSent: 0 }
+        })
+      };
     }
 
-    console.log('✅ Notification sending completed');
+    console.log(`📊 Sending to ${tokens.length} total tokens`);
+
+    // Prepare notification payload
+    const notification = {
+      title,
+      body,
+      icon: '/images/logos/royalmeenakari.png'
+    };
+
+    const webpushConfig = {
+      data: {
+        link: link || '/',
+        category,
+        timestamp: new Date().toISOString()
+      },
+      notification: {
+        title,
+        body,
+        icon: '/images/logos/royalmeenakari.png',
+        badge: '/images/logos/royalmeenakari.png'
+      }
+    };
+
+    // Send in batches (FCM limit is 500 tokens per call)
+    const batchSize = 500;
+    let successCount = 0;
+    let failureCount = 0;
+    const failedTokens = [];
+    const results = [];
+
+    for (let i = 0; i < tokens.length; i += batchSize) {
+      const batch = tokens.slice(i, i + batchSize);
+      console.log(`📤 Sending batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(tokens.length / batchSize)}...`);
+
+      try {
+        const response = await messaging.sendMulticast({
+          tokens: batch,
+          notification,
+          webpushConfig,
+          android: {
+            priority: 'high',
+            notification: {
+              title,
+              body,
+              icon: 'stock_ticker_update',
+              defaultSound: true,
+              defaultVibrateTimings: true
+            }
+          },
+          apns: {
+            payload: {
+              aps: {
+                alert: {
+                  title,
+                  body
+                },
+                sound: 'default',
+                badge: 1
+              }
+            }
+          }
+        });
+
+        console.log(`✅ Batch result: ${response.successCount} sent, ${response.failureCount} failed`);
+        successCount += response.successCount;
+        failureCount += response.failureCount;
+
+        // Track failed tokens for cleanup
+        if (response.failureCount > 0) {
+          response.responses.forEach((resp, idx) => {
+            if (!resp.success) {
+              failedTokens.push(batch[idx]);
+              console.warn(`❌ Failed token: ${batch[idx]?.substring(0, 20)}... Error: ${resp.error?.message}`);
+            }
+          });
+        }
+
+        results.push(response);
+      } catch (batchError) {
+        console.error(`❌ Batch sending error:`, batchError.message);
+        failureCount += batch.length;
+      }
+    }
+
+    // Clean up failed tokens
+    if (failedTokens.length > 0) {
+      console.log(`🗑️  Cleaning up ${failedTokens.length} failed tokens...`);
+      for (const token of failedTokens) {
+        try {
+          // Delete from guest_tokens if exists
+          const guestDoc = await db.collection('guest_tokens').where('token', '==', token).get();
+          guestDoc.forEach(doc => doc.ref.delete());
+        } catch (error) {
+          console.warn(`Could not delete token: ${error.message}`);
+        }
+      }
+    }
+
+    // Log notification to database
+    try {
+      await db.collection('notification_logs').add({
+        title,
+        body,
+        link: link || null,
+        category,
+        userTokenCount,
+        guestTokenCount,
+        totalRequested: tokens.length,
+        successCount,
+        failureCount,
+        sentAt: new Date(),
+        status: 'sent'
+      });
+      console.log('💾 Notification logged to Firestore');
+    } catch (logError) {
+      console.error('⚠️ Error logging notification:', logError.message);
+    }
+
+    console.log(`✨ Notification sending complete: ${successCount} sent, ${failureCount} failed`);
 
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
         success: true,
-        message: 'Notification sent successfully',
+        message: 'Notifications sent successfully',
         stats: {
           userTokenCount,
           guestTokenCount,
-          totalSent: totalTokens
+          totalSent: successCount,
+          totalFailed: failureCount,
+          totalTokens: tokens.length
         }
       })
     };
 
   } catch (error) {
-    console.error('❌ Error in send-notifications function:', error.message);
+    console.error('❌ Fatal error in send-notifications:', error.message);
     console.error('Stack:', error.stack);
-    
+
     return {
       statusCode: 500,
       headers,
       body: JSON.stringify({
         success: false,
-        error: 'Failed to send notifications: ' + error.message,
-        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        error: 'Failed to send notifications: ' + error.message
       })
     };
   }
