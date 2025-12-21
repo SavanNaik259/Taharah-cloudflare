@@ -146,24 +146,30 @@ exports.handler = async (event, context) => {
 
     console.log(`📊 Sending to ${tokens.length} total tokens`);
 
-    // Prepare notification payload
-    const notification = {
-      title,
-      body,
-      icon: '/images/logos/royalmeenakari.png'
-    };
-
-    const webpushConfig = {
-      data: {
-        link: link || '/',
-        category,
-        timestamp: new Date().toISOString()
-      },
-      notification: {
-        title,
-        body,
-        icon: '/images/logos/royalmeenakari.png',
-        badge: '/images/logos/royalmeenakari.png'
+    // Prepare notification payload for WEB PUSH (critical: proper FCM format)
+    // NOTE: For web browsers, use webpushConfig - NOT top-level notification
+    const fcmMessage = {
+      tokens: [],
+      webpushConfig: {
+        headers: {
+          'TTL': '86400'
+        },
+        data: {
+          link: link || '/',
+          category,
+          timestamp: new Date().toISOString()
+        },
+        notification: {
+          title,
+          body,
+          icon: '/images/logos/royalmeenakari.png',
+          badge: '/images/logos/royalmeenakari.png',
+          clickAction: link || '/',
+          tag: 'auric-notification'
+        },
+        fcmOptions: {
+          link: link || '/'
+        }
       }
     };
 
@@ -176,35 +182,13 @@ exports.handler = async (event, context) => {
 
     for (let i = 0; i < tokens.length; i += batchSize) {
       const batch = tokens.slice(i, i + batchSize);
-      console.log(`📤 Sending batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(tokens.length / batchSize)}...`);
+      console.log(`📤 Sending batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(tokens.length / batchSize)} (${batch.length} tokens)...`);
 
       try {
+        // CORRECTED: For web push, ONLY use webpushConfig, don't use top-level notification
         const response = await messaging.sendMulticast({
           tokens: batch,
-          notification,
-          webpushConfig,
-          android: {
-            priority: 'high',
-            notification: {
-              title,
-              body,
-              icon: 'stock_ticker_update',
-              defaultSound: true,
-              defaultVibrateTimings: true
-            }
-          },
-          apns: {
-            payload: {
-              aps: {
-                alert: {
-                  title,
-                  body
-                },
-                sound: 'default',
-                badge: 1
-              }
-            }
-          }
+          webpushConfig: fcmMessage.webpushConfig
         });
 
         console.log(`✅ Batch result: ${response.successCount} sent, ${response.failureCount} failed`);
@@ -216,7 +200,9 @@ exports.handler = async (event, context) => {
           response.responses.forEach((resp, idx) => {
             if (!resp.success) {
               failedTokens.push(batch[idx]);
-              console.warn(`❌ Failed token: ${batch[idx]?.substring(0, 20)}... Error: ${resp.error?.message}`);
+              const errorMsg = resp.error?.message || 'Unknown error';
+              const errorCode = resp.error?.code || 'UNKNOWN';
+              console.warn(`❌ Failed token ${idx}: ${batch[idx]?.substring(0, 30)}... Code: ${errorCode}, Error: ${errorMsg}`);
             }
           });
         }
