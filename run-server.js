@@ -1031,3 +1031,30 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`Nazakat website server running on port ${PORT}`);
   console.log(`Visit: http://localhost:${PORT}`);
 });
+
+// Endpoint to send notifications (required by firebase-alert-triggers.js)
+app.post('/api/send-notification', async (req, res) => {
+  try {
+    const { fcmToken, title, body, image, link, data } = req.body;
+    
+    console.log('📤 Sending notification to token:', fcmToken);
+    
+    await admin.messaging().send({
+      token: fcmToken,
+      notification: {
+        title: title,
+        body: body,
+        imageUrl: image || ''
+      }
+    });
+    
+    res.json({
+      success: true,
+      message: 'Notification sent successfully',
+      token: fcmToken
+    });
+  } catch (error) {
+    console.error('❌ Error sending notification:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
