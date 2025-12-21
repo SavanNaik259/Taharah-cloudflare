@@ -1,39 +1,62 @@
 // Firebase Messaging Service Worker
 // Handles push notification display when app is in background
 
-importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js');
+try {
+  importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js');
+} catch (error) {
+  console.error('Failed to import Firebase App:', error);
+}
 
-// Initialize Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
-  authDomain: "auric-a0c92.firebaseapp.com",
-  projectId: "auric-a0c92",
-  storageBucket: "auric-a0c92.firebasestorage.app",
-  messagingSenderId: "878979958342",
-  appId: "1:878979958342:web:e6092f7522488d21eaec47",
-  measurementId: "G-ZYZ750JHMB"
-};
+try {
+  importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js');
+} catch (error) {
+  console.error('Failed to import Firebase Messaging:', error);
+}
 
-firebase.initializeApp(firebaseConfig);
+// Initialize Firebase with error handling
+let messaging = null;
 
-const messaging = firebase.messaging();
-
-// Handle background messages
-messaging.onBackgroundMessage((payload) => {
-  console.log('Received background message', payload);
-  
-  const notificationTitle = payload.notification?.title || 'New Promotion';
-  const notificationOptions = {
-    body: payload.notification?.body || 'Check out our latest offers!',
-    icon: '/images/logos/royalmeenakari.png',
-    badge: '/images/logos/royalmeenakari.png',
-    tag: 'auric-notification',
-    data: payload.data || {}
+try {
+  const firebaseConfig = {
+    apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
+    authDomain: "auric-a0c92.firebaseapp.com",
+    projectId: "auric-a0c92",
+    storageBucket: "auric-a0c92.firebasestorage.app",
+    messagingSenderId: "878979958342",
+    appId: "1:878979958342:web:e6092f7522488d21eaec47",
+    measurementId: "G-ZYZ750JHMB"
   };
 
-  self.registration.showNotification(notificationTitle, notificationOptions);
-});
+  if (typeof firebase !== 'undefined' && firebase.initializeApp) {
+    firebase.initializeApp(firebaseConfig);
+    messaging = firebase.messaging();
+    console.log('✅ Firebase Messaging initialized in Service Worker');
+  } else {
+    console.error('❌ Firebase not available in Service Worker');
+  }
+} catch (error) {
+  console.error('❌ Error initializing Firebase in Service Worker:', error);
+}
+
+// Handle background messages
+if (messaging) {
+  messaging.onBackgroundMessage((payload) => {
+    console.log('Received background message', payload);
+    
+    const notificationTitle = payload.notification?.title || 'New Promotion';
+    const notificationOptions = {
+      body: payload.notification?.body || 'Check out our latest offers!',
+      icon: '/images/logos/royalmeenakari.png',
+      badge: '/images/logos/royalmeenakari.png',
+      tag: 'auric-notification',
+      data: payload.data || {}
+    };
+
+    self.registration.showNotification(notificationTitle, notificationOptions);
+  });
+} else {
+  console.warn('⚠️ Firebase Messaging not available, background messages will not be handled');
+}
 
 // Handle notification click
 self.addEventListener('push', event => {

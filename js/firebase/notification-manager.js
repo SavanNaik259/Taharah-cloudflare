@@ -184,9 +184,8 @@ class NotificationManager {
     try {
       console.log('🔔 Requesting notification permission...');
       
-      // Request permission
+      // STEP 1: Request permission from browser
       const permission = await Notification.requestPermission();
-      
       console.log('📋 Permission result:', permission);
       
       if (permission !== 'granted') {
@@ -194,32 +193,60 @@ class NotificationManager {
         return null;
       }
 
-      console.log('✅ Permission granted, registering service worker...');
+      console.log('✅ Permission granted');
       
-      // Register service worker first
+      // STEP 2: Register service worker and WAIT for it to be ACTIVE
+      console.log('⏳ Registering and activating service worker...');
       const registration = await this.registerServiceWorker();
       
-      // CRITICAL FIX: Wait a moment for the service worker to be fully ready
-      // This ensures Firebase Messaging can properly subscribe to push
-      console.log('⏳ Waiting for service worker to be fully ready...');
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      console.log('🔑 Getting FCM token with VAPID key...');
+      // STEP 3: Add a small delay to ensure everything is ready
+      // This is critical - Firebase needs time to recognize the active service worker
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Get the token
-      const token = await this.messaging.getToken({
-        vapidKey: this.vapidKey
-      });
-
+      console.log('🔑 Getting FCM token...');
+      
+      // STEP 4: Now get the token - this should work because SW is active
+      let token = null;
+      let attempts = 0;
+      const maxAttempts = 3;
+      
+      while (!token && attempts < maxAttempts) {
+        try {
+          attempts++;
+          console.log(`📌 Token retrieval attempt ${attempts}/${maxAttempts}...`);
+          
+          token = await this.messaging.getToken({
+            vapidKey: this.vapidKey
+          });
+          
+          if (token) {
+            console.log('✅ FCM Token received:', token.substring(0, 20) + '...');
+            break;
+          } else {
+            console.warn(`⚠️ Attempt ${attempts}: No token received, retrying...`);
+            // Wait before retry
+            if (attempts < maxAttempts) {
+              await new Promise(resolve => setTimeout(resolve, 500));
+            }
+          }
+        } catch (tokenError) {
+          console.error(`❌ Token error on attempt ${attempts}:`, tokenError.message);
+          if (attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+          } else {
+            throw tokenError;
+          }
+        }
+      }
+      
       if (!token) {
-        console.error('❌ No token received from getToken()');
-        return null;
+        console.error('❌ Failed to get token after all attempts');
+        throw new Error('Could not obtain FCM token - service worker may not be properly activated');
       }
 
-      console.log('✅ FCM Token received:', token.substring(0, 20) + '...');
       return token;
     } catch (error) {
-      console.error('❌ Error getting notification token:', error);
+      console.error('❌ Error in requestPermissionAndGetToken:', error);
       console.error('   Error message:', error.message);
       console.error('   Error code:', error.code);
       throw error;
