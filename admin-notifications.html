@@ -255,6 +255,22 @@
             opacity: 0.9;
         }
 
+        .diagnostic-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 15px;
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+
+        .diagnostic-link:hover {
+            background: #5a6268;
+        }
+
         .loading {
             display: inline-block;
             width: 20px;
@@ -522,6 +538,15 @@
 
         // Load stats on page load
         window.addEventListener('load', loadTokenStats);
+
+        // Add diagnostic link
+        const content = document.querySelector('.content');
+        const diagnosticLink = document.createElement('a');
+        diagnosticLink.href = '/diagnose-notifications.html';
+        diagnosticLink.className = 'diagnostic-link';
+        diagnosticLink.textContent = '🔬 Advanced Diagnostic Tool';
+        diagnosticLink.target = '_blank';
+        content.appendChild(diagnosticLink);
     </script>
 </body>
 </html>

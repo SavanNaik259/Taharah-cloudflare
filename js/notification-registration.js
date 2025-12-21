@@ -126,10 +126,20 @@ const notificationManager = {
 
       console.log('💾 Preparing to save token to Firestore...');
       console.log('   Token length:', token.length);
+      console.log('   Token type:', typeof token);
+      console.log('   Token preview:', token.substring(0, 50) + '...');
       console.log('   Is guest:', isGuest);
 
       if (!firebase.apps || !firebase.apps.length) {
         console.error('❌ Firebase not initialized!');
+        return false;
+      }
+
+      // Validate token format
+      if (typeof token !== 'string' || token.length < 100) {
+        console.error('❌ INVALID TOKEN FORMAT!');
+        console.error('   Expected: string with length > 100');
+        console.error('   Got: type=' + typeof token + ', length=' + (token?.length || 0));
         return false;
       }
 

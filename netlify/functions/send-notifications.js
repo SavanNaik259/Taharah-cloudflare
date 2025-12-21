@@ -143,11 +143,17 @@ exports.handler = async (event, context) => {
         const usersSnapshot = await db.collection('users').get();
         usersSnapshot.forEach(doc => {
           const userTokens = doc.data().pushTokens || [];
-          const validTokens = userTokens.filter(t => typeof t === 'string' && t.length > 0);
+          const validTokens = userTokens.filter(t => {
+            const isValid = typeof t === 'string' && t && t.length > 100;
+            if (!isValid) {
+              console.warn(`⚠️ Skipping invalid user token: type=${typeof t}, length=${t?.length || 0}`);
+            }
+            return isValid;
+          });
           tokens.push(...validTokens);
           userTokenCount += validTokens.length;
         });
-        console.log(`👥 Found ${userTokenCount} user tokens`);
+        console.log(`👥 Found ${userTokenCount} valid user tokens`);
       } catch (error) {
         console.error('❌ Error collecting user tokens:', error.message);
       }
@@ -159,12 +165,14 @@ exports.handler = async (event, context) => {
         const guestTokensSnapshot = await db.collection('guest_tokens').get();
         guestTokensSnapshot.forEach(doc => {
           const token = doc.data().token;
-          if (token && typeof token === 'string' && token.length > 0) {
+          if (token && typeof token === 'string' && token.length > 100) {
             tokens.push(token);
             guestTokenCount++;
+          } else {
+            console.warn(`⚠️ Skipping invalid guest token in doc ${doc.id}: type=${typeof token}, length=${token?.length || 0}`);
           }
         });
-        console.log(`👤 Found ${guestTokenCount} guest tokens`);
+        console.log(`👤 Found ${guestTokenCount} valid guest tokens`);
       } catch (error) {
         console.error('❌ Error collecting guest tokens:', error.message);
       }
