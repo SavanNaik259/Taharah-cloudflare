@@ -1022,6 +1022,72 @@ app.post('/.netlify/functions/send-order-email', async (req, res) => {
   }
 });
 
+// CRITICAL: Send campaign notifications endpoint
+// This is the ONLY endpoint that sends campaign notifications (locally or deployed)
+app.post('/.netlify/functions/send-campaign', async (req, res) => {
+  try {
+    console.log('\n🎯 ========== LOCAL SEND-CAMPAIGN PROXY ==========');
+    console.log('📨 Proxying campaign notification request to Netlify function...');
+    
+    // Clear require cache to ensure fresh module load
+    const functionPath = './netlify/functions/send-campaign';
+    delete require.cache[require.resolve(functionPath)];
+
+    // Import the Netlify send-campaign function
+    const netlifyFunction = require(functionPath);
+
+    // Create mock Netlify event object
+    const event = {
+      body: JSON.stringify(req.body),
+      headers: req.headers,
+      httpMethod: 'POST',
+      path: '/.netlify/functions/send-campaign'
+    };
+
+    // Create mock context with environment variables
+    const context = {
+      env: process.env
+    };
+
+    console.log('📤 Calling send-campaign Netlify function...');
+    
+    // Call the Netlify function
+    const result = await netlifyFunction.handler(event, context);
+
+    console.log('✅ Send-campaign function completed');
+
+    // Set response headers
+    if (result.headers) {
+      Object.keys(result.headers).forEach(key => {
+        res.setHeader(key, result.headers[key]);
+      });
+    }
+
+    // Send response
+    res.status(result.statusCode || 200);
+
+    if (result.body) {
+      try {
+        const body = JSON.parse(result.body);
+        res.json(body);
+      } catch (e) {
+        res.send(result.body);
+      }
+    } else {
+      res.end();
+    }
+
+  } catch (error) {
+    console.error('❌ Error in send-campaign function:', error);
+    console.error('Stack:', error.stack);
+    res.status(500).json({
+      success: false,
+      error: `Failed to send campaign: ${error.message}`,
+      message: 'Please check configuration and try again'
+    });
+  }
+});
+
 // Handle all other routes by serving index.html
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
