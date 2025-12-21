@@ -56,13 +56,12 @@ async function sendNotification(token, productImage, productName, stockRemaining
     const response = await admin.messaging().send({
       token: token,
       webpush: {
-        fcmOptions: { link: productLink || '/shop' },
-        data: {
+        notification: {
           title: `⚡ Limited Stock!`,
           body: `${productName} has only ${stockRemaining} item(s) left. Hurry!`,
-          image: productImage || '/images/logos/royalmeenakari.png',
-          link: productLink || '/shop'
-        }
+          image: productImage || '/images/logos/royalmeenakari.png'
+        },
+        fcmOptions: { link: productLink || '/shop' }
       }
     });
     return true;

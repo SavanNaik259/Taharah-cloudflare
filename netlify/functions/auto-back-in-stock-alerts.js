@@ -56,13 +56,12 @@ async function sendNotification(token, productImage, productName, productLink) {
     const response = await admin.messaging().send({
       token: token,
       webpush: {
-        fcmOptions: { link: productLink || '/shop' },
-        data: {
+        notification: {
           title: `${productName} is Back in Stock!`,
           body: `Great news! The product you wanted is now available. Shop now!`,
-          image: productImage || '/images/logos/royalmeenakari.png',
-          link: productLink || '/shop'
-        }
+          image: productImage || '/images/logos/royalmeenakari.png'
+        },
+        fcmOptions: { link: productLink || '/shop' }
       }
     });
     console.log(`✅ FCM sent successfully. Response: ${response}`);

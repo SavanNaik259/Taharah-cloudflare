@@ -56,13 +56,12 @@ async function sendNotification(token, productImage, productName, productLink) {
     const response = await admin.messaging().send({
       token: token,
       webpush: {
-        fcmOptions: { link: productLink || '/shop' },
-        data: {
+        notification: {
           title: `✨ New Collection: ${productName}`,
           body: `Discover our latest exclusive jewelry collection. Available now!`,
-          image: productImage || '/images/logos/royalmeenakari.png',
-          link: productLink || '/shop'
-        }
+          image: productImage || '/images/logos/royalmeenakari.png'
+        },
+        fcmOptions: { link: productLink || '/shop' }
       }
     });
     return true;
