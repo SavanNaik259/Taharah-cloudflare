@@ -1078,10 +1078,6 @@ app.post('/api/send-campaign', async (req, res) => {
             try {
               const response = await admin.messaging().send({
                 token: token,
-                notification: {
-                  title: title,
-                  body: body
-                },
                 webpush: {
                   fcmOptions: { link: link || '/' },
                   notification: {
@@ -1120,10 +1116,6 @@ app.post('/api/send-campaign', async (req, res) => {
             try {
               const response = await admin.messaging().send({
                 token: token,
-                notification: {
-                  title: title,
-                  body: body
-                },
                 webpush: {
                   fcmOptions: { link: link || '/' },
                   notification: {

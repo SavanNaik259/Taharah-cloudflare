@@ -222,6 +222,9 @@ exports.handler = async (event, context) => {
           token: token,
           webpush: webpushConfig
         });
+        
+        // NOTE: Only webpush is used for web notifications to prevent duplicates
+        // Sending both 'notification' and 'webpush.notification' causes Firebase to deliver twice
         sentCount++;
         console.log(`   ✅ Message sent. ID: ${response.substring(0, 50)}...`);
       } catch (error) {
