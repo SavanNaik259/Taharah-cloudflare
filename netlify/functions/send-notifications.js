@@ -161,32 +161,32 @@ exports.handler = async (event, context) => {
     console.log(`📊 Sending to ${tokens.length} total tokens`);
 
     // Prepare notification payload for WEB PUSH (critical: proper FCM format)
-    // NOTE: For web browsers, use webpushConfig - NOT top-level notification
-    const webpushConfig = {
-      headers: {
-        'TTL': '86400'
-      },
+    // For browser notifications, use this exact structure
+    const messagePayload = {
       notification: {
         title,
-        body,
-        icon: '/images/logos/royalmeenakari.png',
-        badge: '/images/logos/royalmeenakari.png',
-        clickAction: link || '/',
-        tag: 'auric-notification'
+        body
       },
-      fcmOptions: {
-        link: link || '/'
-      }
-    };
-
-    // For web push, data goes at the top level alongside webpushConfig
-    const messagePayload = {
       data: {
         link: link || '/',
         category,
         timestamp: new Date().toISOString()
       },
-      webpushConfig
+      webpushConfig: {
+        headers: {
+          'TTL': '86400'
+        },
+        notification: {
+          title,
+          body,
+          icon: '/images/logos/royalmeenakari.png',
+          badge: '/images/logos/royalmeenakari.png',
+          tag: 'auric-notification'
+        },
+        fcmOptions: {
+          link: link || '/'
+        }
+      }
     };
 
     // Send in batches (FCM limit is 500 tokens per call)
@@ -216,6 +216,7 @@ exports.handler = async (event, context) => {
         
         const response = await messaging.sendMulticast({
           tokens: batch,
+          notification: messagePayload.notification,
           data: messagePayload.data,
           webpushConfig: messagePayload.webpushConfig
         });
