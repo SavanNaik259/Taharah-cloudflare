@@ -2494,23 +2494,32 @@ background-color: #000 !important;
                 // Enable Notifications button
                 document.getElementById('enableNotifications').addEventListener('click', async () => {
                     try {
+                        console.log('🔔 User clicked Enable Notifications button');
+                        
                         // Initialize notification manager
                         const initialized = await notificationManager.init();
                         
                         if (initialized === false) {
-                            alert('Unable to enable notifications. Please check your browser settings.');
+                            console.error('❌ Notification manager initialization failed');
+                            alert('Unable to enable notifications.\n\nPossible reasons:\n- Browser doesn\'t support notifications\n- Service Workers not available\n- VAPID key not configured\n\nPlease check browser settings and try again.');
                             return;
                         }
+
+                        console.log('✅ Notification manager initialized successfully');
 
                         // Request permission and get token
                         const token = await notificationManager.requestPermissionAndGetToken();
                         
                         if (token) {
+                            console.log('📍 Token received, saving to Firestore...');
+                            
                             // Save token to Firestore
                             await notificationManager.saveToken(token);
                             
+                            console.log('✅ Token saved successfully');
+                            
                             // Show success message
-                            alert('✓ Notifications enabled successfully! You will receive promotional updates.');
+                            alert('✓ Notifications enabled successfully!\n\nYou will receive:\n• Promotional offers\n• New collection announcements\n• Special deals and updates');
                             
                             // Hide banner
                             document.getElementById('notificationBanner').style.display = 'none';
@@ -2520,10 +2529,15 @@ background-color: #000 !important;
                             notificationManager.setupMessageListener((notification) => {
                                 console.log('Foreground notification received:', notification);
                             });
+                        } else {
+                            console.warn('⚠️ No token received');
+                            alert('Could not get notification token. Please try again.');
                         }
                     } catch (error) {
-                        console.error('Error enabling notifications:', error);
-                        alert('Error: ' + error.message);
+                        console.error('❌ Error enabling notifications:', error);
+                        console.error('   Message:', error.message);
+                        console.error('   Stack:', error.stack);
+                        alert('Error enabling notifications:\n\n' + error.message + '\n\nPlease check:\n1. Browser notifications are enabled\n2. HTTPS is being used\n3. No browser extensions blocking notifications');
                     }
                 });
 

@@ -7,7 +7,6 @@ class NotificationManager {
   constructor() {
     this.messaging = null;
     this.vapidKey = null;
-    this.tokensCollection = null;
   }
 
   /**
@@ -15,32 +14,50 @@ class NotificationManager {
    */
   async init() {
     try {
+      console.log('🔔 Notification Manager: Initializing...');
+      
       // Wait for Firebase to be initialized
       await this.waitForFirebase();
       
-      // Get VAPID key from environment
-      const response = await fetch('/.netlify/functions/get-vapid-key');
-      const data = await response.json();
-      this.vapidKey = data.vapidKey;
-
-      // Initialize Firebase Messaging
-      this.messaging = firebase.messaging();
-      
-      // Request permission if not already granted
-      const permission = Notification.permission;
-      if (permission === 'denied') {
-        console.log('Notification permission denied by user');
+      // Check browser support
+      if (!('serviceWorker' in navigator)) {
+        console.warn('🚫 Service Workers not supported');
         return false;
       }
 
-      if (permission === 'granted') {
-        await this.registerServiceWorker();
-        return true;
+      if (!('Notification' in window)) {
+        console.warn('🚫 Notifications API not supported');
+        return false;
       }
 
-      return null; // Permission not yet decided
+      // Get VAPID key from environment
+      try {
+        const response = await fetch('/.netlify/functions/get-vapid-key');
+        const data = await response.json();
+        this.vapidKey = data.vapidKey;
+        console.log('✅ VAPID key retrieved');
+      } catch (error) {
+        console.warn('⚠️ Could not fetch VAPID key:', error.message);
+        return false;
+      }
+
+      if (!this.vapidKey) {
+        console.warn('🚫 VAPID key is empty');
+        return false;
+      }
+
+      // Initialize Firebase Messaging
+      try {
+        this.messaging = firebase.messaging();
+        console.log('✅ Firebase Messaging initialized');
+      } catch (error) {
+        console.error('❌ Error initializing Firebase Messaging:', error);
+        return false;
+      }
+
+      return true;
     } catch (error) {
-      console.error('Error initializing notifications:', error);
+      console.error('❌ Notification Manager initialization error:', error);
       return false;
     }
   }
@@ -50,18 +67,19 @@ class NotificationManager {
    */
   waitForFirebase() {
     return new Promise((resolve) => {
-      if (window.firebase && window.firebase.app()) {
+      if (window.firebase && window.firebase.messaging) {
         resolve();
       } else {
         let attempts = 0;
         const interval = setInterval(() => {
-          if (window.firebase && window.firebase.app()) {
+          if (window.firebase && window.firebase.messaging) {
             clearInterval(interval);
             resolve();
           }
           attempts++;
-          if (attempts > 50) {
+          if (attempts > 100) {
             clearInterval(interval);
+            console.warn('⚠️ Firebase not available after 100 attempts');
             resolve();
           }
         }, 100);
@@ -78,11 +96,11 @@ class NotificationManager {
         const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
           scope: '/'
         });
-        console.log('Service Worker registered successfully:', registration);
+        console.log('✅ Service Worker registered:', registration.scope);
         return registration;
       }
     } catch (error) {
-      console.error('Service Worker registration failed:', error);
+      console.error('❌ Service Worker registration failed:', error.message);
       throw error;
     }
   }
@@ -92,25 +110,41 @@ class NotificationManager {
    */
   async requestPermissionAndGetToken() {
     try {
+      console.log('🔔 Requesting notification permission...');
+      
+      // Request permission
       const permission = await Notification.requestPermission();
       
+      console.log('📋 Permission result:', permission);
+      
       if (permission !== 'granted') {
-        console.log('Notification permission not granted');
+        console.log('⚠️ Notification permission denied');
         return null;
       }
 
+      console.log('✅ Permission granted, registering service worker...');
+      
       // Register service worker first
       await this.registerServiceWorker();
 
+      console.log('🔑 Getting FCM token with VAPID key...');
+      
       // Get the token
       const token = await this.messaging.getToken({
         vapidKey: this.vapidKey
       });
 
-      console.log('FCM Token:', token);
+      if (!token) {
+        console.error('❌ No token received from getToken()');
+        return null;
+      }
+
+      console.log('✅ FCM Token received:', token.substring(0, 20) + '...');
       return token;
     } catch (error) {
-      console.error('Error getting notification token:', error);
+      console.error('❌ Error getting notification token:', error);
+      console.error('   Error message:', error.message);
+      console.error('   Error code:', error.code);
       throw error;
     }
   }
@@ -126,48 +160,37 @@ class NotificationManager {
 
       if (currentUser) {
         // Logged-in user - save to user document
-        await db.collection('users').doc(currentUser.uid).update({
-          pushTokens: firebase.firestore.FieldValue.arrayUnion(token),
-          lastTokenUpdate: new Date()
-        });
-        console.log('Token saved to user document');
+        console.log('💾 Saving token for logged-in user:', currentUser.uid);
+        
+        // Check if token already exists
+        const userDoc = await db.collection('users').doc(currentUser.uid).get();
+        const existingTokens = userDoc.data()?.pushTokens || [];
+        
+        if (!existingTokens.includes(token)) {
+          await db.collection('users').doc(currentUser.uid).update({
+            pushTokens: firebase.firestore.FieldValue.arrayUnion(token),
+            lastTokenUpdate: new Date()
+          });
+          console.log('✅ Token saved to user document');
+        } else {
+          console.log('⚠️ Token already exists for this user');
+        }
       } else {
         // Guest user - save to guest_tokens collection
+        console.log('💾 Saving token for guest user');
+        
         await db.collection('guest_tokens').add({
           token: token,
           createdAt: new Date(),
           userAgent: navigator.userAgent
         });
-        console.log('Token saved to guest_tokens collection');
+        console.log('✅ Token saved to guest_tokens collection');
       }
 
       return true;
     } catch (error) {
-      console.error('Error saving token:', error);
+      console.error('❌ Error saving token:', error);
       throw error;
-    }
-  }
-
-  /**
-   * Check if token already exists
-   */
-  async tokenExists(token) {
-    try {
-      const db = firebase.firestore();
-      const auth = firebase.auth();
-      const currentUser = auth.currentUser;
-
-      if (currentUser) {
-        const userDoc = await db.collection('users').doc(currentUser.uid).get();
-        if (userDoc.exists) {
-          const tokens = userDoc.data().pushTokens || [];
-          return tokens.includes(token);
-        }
-      }
-      return false;
-    } catch (error) {
-      console.error('Error checking token:', error);
-      return false;
     }
   }
 
@@ -176,8 +199,10 @@ class NotificationManager {
    */
   setupMessageListener(callback) {
     if (this.messaging) {
+      console.log('👂 Setting up message listener...');
+      
       this.messaging.onMessage((payload) => {
-        console.log('Message received:', payload);
+        console.log('📬 Message received in foreground:', payload);
         
         const notificationData = {
           title: payload.notification?.title || 'New Promotion',
@@ -208,11 +233,11 @@ class NotificationManager {
     try {
       if (this.messaging) {
         await this.messaging.deleteToken();
-        console.log('Token deleted');
+        console.log('✅ Token deleted');
         return true;
       }
     } catch (error) {
-      console.error('Error deleting token:', error);
+      console.error('❌ Error deleting token:', error);
       return false;
     }
   }
