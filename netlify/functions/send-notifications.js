@@ -143,8 +143,9 @@ exports.handler = async (event, context) => {
         const usersSnapshot = await db.collection('users').get();
         usersSnapshot.forEach(doc => {
           const userTokens = doc.data().pushTokens || [];
-          tokens.push(...userTokens);
-          userTokenCount += userTokens.length;
+          const validTokens = userTokens.filter(t => typeof t === 'string' && t.length > 0);
+          tokens.push(...validTokens);
+          userTokenCount += validTokens.length;
         });
         console.log(`👥 Found ${userTokenCount} user tokens`);
       } catch (error) {
@@ -158,7 +159,7 @@ exports.handler = async (event, context) => {
         const guestTokensSnapshot = await db.collection('guest_tokens').get();
         guestTokensSnapshot.forEach(doc => {
           const token = doc.data().token;
-          if (token) {
+          if (token && typeof token === 'string' && token.length > 0) {
             tokens.push(token);
             guestTokenCount++;
           }

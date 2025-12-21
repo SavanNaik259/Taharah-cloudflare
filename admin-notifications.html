@@ -190,6 +190,16 @@
             background: #e0e0e0;
         }
 
+        .btn-test {
+            background: #28a745 !important;
+        }
+
+        .btn-test:hover:not(:disabled) {
+            background: #218838 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.3);
+        }
+
         .alert {
             padding: 15px;
             border-radius: 4px;
@@ -360,6 +370,9 @@
                         <span id="btnText">Send Notification</span>
                     </button>
                     <button type="reset" class="btn-reset">Clear Form</button>
+                    <button type="button" class="btn-send" id="testBtn" style="background: #28a745;">
+                        <span id="testBtnText">📧 Test Send</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -474,6 +487,38 @@
                 alert.classList.remove('show');
             }, 5000);
         }
+
+        // Test notification sending
+        document.getElementById('testBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const testBtn = document.getElementById('testBtn');
+            const testBtnText = document.getElementById('testBtnText');
+            
+            testBtn.disabled = true;
+            testBtnText.innerHTML = '<span class="loading"></span>Testing...';
+
+            try {
+                const response = await fetch('/api/test-send-notification', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert(`✅ TEST SUCCESSFUL!\nSent to: ${result.summary.successCount} users\nFailed: ${result.summary.failureCount}`, 'success');
+                } else if (result.status === 'NO_TOKENS_FOUND') {
+                    showAlert(`⚠️ No tokens found!\n${result.instructions}`, 'error');
+                } else {
+                    showAlert(`Test result: ${result.status}\n${result.message}`, 'error');
+                }
+            } catch (error) {
+                showAlert('Error running test: ' + error.message, 'error');
+            } finally {
+                testBtn.disabled = false;
+                testBtnText.textContent = '📧 Test Send';
+            }
+        });
 
         // Load stats on page load
         window.addEventListener('load', loadTokenStats);
