@@ -15,8 +15,26 @@
 
 const admin = require('firebase-admin');
 
+// CORS headers - CRITICAL: Include in EVERY response
+const corsHeaders = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, DELETE',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Max-Age': '86400'
+};
+
 // Initialize Firebase Admin
-if (!admin.apps.length) {
+let db = null;
+let messaging = null;
+
+function initializeFirebase() {
+  if (admin.apps.length > 0) {
+    db = admin.firestore();
+    messaging = admin.messaging();
+    return true;
+  }
+
   try {
     const serviceAccount = {
       type: "service_account",
@@ -32,8 +50,11 @@ if (!admin.apps.length) {
     };
 
     // Validate all required fields
-    if (!serviceAccount.private_key || !serviceAccount.client_email) {
-      throw new Error('Missing critical Firebase credentials: private_key or client_email');
+    if (!serviceAccount.private_key) {
+      throw new Error('Missing FIREBASE_PRIVATE_KEY environment variable');
+    }
+    if (!serviceAccount.client_email) {
+      throw new Error('Missing FIREBASE_CLIENT_EMAIL environment variable');
     }
 
     admin.initializeApp({
@@ -41,46 +62,49 @@ if (!admin.apps.length) {
       storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "auric-a0c92.firebasestorage.app"
     });
 
-    console.log('✅ Firebase Admin initialized for FCM push notifications');
+    db = admin.firestore();
+    messaging = admin.messaging();
+    
+    console.log('✅ Firebase Admin initialized successfully');
+    return true;
   } catch (error) {
-    console.error('❌ Firebase Admin initialization error:', error.message);
-    console.error('Stack:', error.stack);
+    console.error('❌ Firebase initialization failed:', error.message);
     throw error;
   }
 }
 
-const db = admin.firestore();
-let messaging;
-try {
-  messaging = admin.messaging();
-  console.log('✅ Firebase Messaging instance created');
-} catch (error) {
-  console.error('❌ Error creating Firebase Messaging instance:', error.message);
-  throw error;
-}
-
 exports.handler = async (event, context) => {
-  const headers = {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type'
-  };
+  // CRITICAL: Always return CORS headers, even on errors
+  const headers = corsHeaders;
 
+  // Handle CORS preflight
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
+    console.log('✓ CORS preflight request');
+    return { 
+      statusCode: 200, 
+      headers, 
+      body: JSON.stringify({ ok: true }) 
+    };
   }
 
+  // Only allow POST
   if (event.httpMethod !== 'POST') {
+    console.warn(`⚠️ Invalid method: ${event.httpMethod}`);
     return {
       statusCode: 405,
       headers,
-      body: JSON.stringify({ success: false, error: 'Method not allowed' })
+      body: JSON.stringify({ 
+        success: false, 
+        error: 'Only POST method is allowed' 
+      })
     };
   }
 
   try {
-    console.log('📨 Processing notification request...');
+    console.log('📨 Processing notification request from:', event.headers.origin || 'unknown');
+    
+    // Initialize Firebase
+    initializeFirebase();
     
     const {
       title,
@@ -335,15 +359,17 @@ exports.handler = async (event, context) => {
     };
 
   } catch (error) {
-    console.error('❌ Fatal error in send-notifications:', error.message);
-    console.error('Stack:', error.stack);
+    console.error('❌ FATAL ERROR in send-notifications handler:', error.message);
+    console.error('Stack trace:', error.stack);
 
+    // CRITICAL: Even in error, return CORS headers so browser can read response
     return {
       statusCode: 500,
-      headers,
+      headers, // This includes CORS headers
       body: JSON.stringify({
         success: false,
-        error: 'Failed to send notifications: ' + error.message
+        error: 'Failed to send notifications: ' + error.message,
+        timestamp: new Date().toISOString()
       })
     };
   }
