@@ -41,7 +41,7 @@ try {
 // Handle background messages
 if (messaging) {
   messaging.onBackgroundMessage((payload) => {
-    console.log('Received background message', payload);
+    console.log('📨 Received background message', payload);
     
     const notificationTitle = payload.notification?.title || 'New Promotion';
     const notificationOptions = {
@@ -49,18 +49,43 @@ if (messaging) {
       icon: '/images/logos/royalmeenakari.png',
       badge: '/images/logos/royalmeenakari.png',
       tag: 'auric-notification',
-      data: payload.data || {}
+      data: payload.data || {},
+      requireInteraction: false
     };
 
+    console.log('🔔 Displaying notification:', notificationTitle);
     self.registration.showNotification(notificationTitle, notificationOptions);
   });
+  console.log('✅ Background message handler registered');
 } else {
   console.warn('⚠️ Firebase Messaging not available, background messages will not be handled');
 }
 
-// Handle notification click
+// Handle push events (backup for cases where onBackgroundMessage might not work)
 self.addEventListener('push', event => {
-  console.log('Push notification received', event);
+  console.log('📬 Push event received:', event);
+  
+  if (event.data) {
+    try {
+      const payload = event.data.json();
+      console.log('📄 Push payload:', payload);
+      
+      const title = payload.notification?.title || 'New Update';
+      const options = {
+        body: payload.notification?.body || 'Check your notifications',
+        icon: '/images/logos/royalmeenakari.png',
+        badge: '/images/logos/royalmeenakari.png',
+        tag: 'auric-notification',
+        data: payload.data || {}
+      };
+      
+      event.waitUntil(
+        self.registration.showNotification(title, options)
+      );
+    } catch (err) {
+      console.error('Error parsing push payload:', err);
+    }
+  }
 });
 
 self.addEventListener('notificationclick', event => {

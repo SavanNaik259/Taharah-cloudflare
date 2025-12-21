@@ -48,6 +48,17 @@ service cloud.firestore {
       allow write: if true; // For admin panel
     }
     
+    // Guest tokens collection - for push notification subscriptions
+    // Both guests and backend can write, backend can read for sending notifications
+    match /guest_tokens/{tokenId} {
+      allow read, write: if true;
+    }
+    
+    // Notification logs collection - backend logs notification sends
+    match /notification_logs/{logId} {
+      allow read, write: if true;
+    }
+    
     // Admin collections - allow all for admin dashboard
     match /admin/{document=**} {
       allow read, write: if true;

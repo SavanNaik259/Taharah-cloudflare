@@ -120,8 +120,10 @@ exports.handler = async (event, context) => {
         const guestTokensSnapshot = await db.collection('guest_tokens').get();
         guestTokensSnapshot.forEach(doc => {
           const token = doc.data().token;
-          if (token) tokens.push(token);
-          guestTokenCount++;
+          if (token) {
+            tokens.push(token);
+            guestTokenCount++;
+          }
         });
         console.log(`👤 Found ${guestTokenCount} guest tokens`);
       } catch (error) {
