@@ -215,14 +215,17 @@ class FirebaseNotificationsManager {
 window.FirebaseNotificationsManager = FirebaseNotificationsManager;
 const notificationsManager = new FirebaseNotificationsManager();
 
-// Auto-initialize when page loads
+// DISABLED: Auto-initialize is disabled because index.html handles it via enableNotifications() function
+// This prevents duplicate service worker registration and duplicate notifications
+// DO NOT uncomment - it causes duplicate notification bug
+/*
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', async () => {
     console.log('📋 Page loaded, initializing notifications...');
     await notificationsManager.init();
   });
 } else {
-  // Page already loaded
   console.log('📋 Initializing notifications immediately...');
   notificationsManager.init().catch(e => console.error('❌ Init error:', e));
 }
+*/

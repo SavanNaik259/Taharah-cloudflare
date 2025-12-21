@@ -104,7 +104,12 @@ class NotificationDisplay {
   }
 }
 
-// Initialize when DOM is ready
+// DISABLED: Initialization disabled to prevent duplicate notifications
+// The service worker (service-worker.js) now handles ALL notifications
+// Having both service worker notifications AND DOM notifications causes duplicates
+// DO NOT enable this - it causes duplicate notification bug
+
+/*
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     NotificationDisplay.init();
@@ -112,5 +117,6 @@ if (document.readyState === 'loading') {
 } else {
   NotificationDisplay.init();
 }
+*/
 
 window.NotificationDisplay = NotificationDisplay;
