@@ -8,7 +8,7 @@ class FirebaseNotificationsManager {
   constructor() {
     this.fcmToken = null;
     this.isNotificationEnabled = false;
-    this.vapidKey = 'BELANpJ6QmIyMNkc37hTR7F3Z4EY9KLjPqW8X5VqM1z9YnO2PqRsT3VuW4XxYyZ5A'; // Firebase generated VAPID key
+    this.vapidKey = 'BIWRF2leB0T2HGDSKEhgevQlbmdaeoCaQUi88hdUw8N9k_d36JuImK8I7Nwj52Wi4_sd9G4QfFdLJWLcqU5akOQ'; // Actual Firebase VAPID key from Console
     this.registration = null;
     this.messaging = null;
   }
