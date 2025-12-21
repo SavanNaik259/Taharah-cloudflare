@@ -103,7 +103,73 @@ class NotificationManager {
           scope: '/'
         });
         console.log('✅ Service Worker registered:', registration.scope);
-        return registration;
+        
+        // CRITICAL FIX: Wait for the service worker to be active
+        // Registration alone is not enough - we need to wait for it to be in 'active' state
+        if (registration.active) {
+          console.log('✅ Service Worker is already active');
+          return registration;
+        }
+        
+        // If not active yet, wait for it with a timeout and retry mechanism
+        console.log('⏳ Waiting for Service Worker to become active...');
+        
+        return new Promise((resolve, reject) => {
+          let timeoutId;
+          let resolved = false;
+          
+          const cleanup = () => {
+            if (timeoutId) clearTimeout(timeoutId);
+            resolved = true;
+          };
+          
+          const checkAndResolve = () => {
+            if (!resolved && registration.active) {
+              console.log('✅ Service Worker is now active');
+              cleanup();
+              resolve(registration);
+            }
+          };
+          
+          // Check every 500ms if service worker became active
+          const checkInterval = setInterval(() => {
+            if (registration.active) {
+              clearInterval(checkInterval);
+              cleanup();
+              resolve(registration);
+            }
+          }, 500);
+          
+          // Timeout after 30 seconds
+          timeoutId = setTimeout(() => {
+            clearInterval(checkInterval);
+            if (!resolved) {
+              resolved = true;
+              console.error('⚠️ Service Worker did not become active within 30 seconds, proceeding anyway');
+              // Don't reject - proceed anyway as sometimes the worker is ready despite not being in 'active' state yet
+              resolve(registration);
+            }
+          }, 30000);
+          
+          // Listen for state changes
+          if (registration.installing) {
+            console.log('📍 Service Worker is installing...');
+            registration.installing.addEventListener('statechange', checkAndResolve);
+          }
+          
+          if (registration.waiting) {
+            console.log('📍 Service Worker is waiting...');
+            registration.waiting.addEventListener('statechange', checkAndResolve);
+          }
+          
+          registration.addEventListener('updatefound', () => {
+            console.log('📍 Service Worker update found');
+            const newWorker = registration.installing;
+            if (newWorker) {
+              newWorker.addEventListener('statechange', checkAndResolve);
+            }
+          });
+        });
       }
     } catch (error) {
       console.error('❌ Service Worker registration failed:', error.message);
@@ -131,7 +197,12 @@ class NotificationManager {
       console.log('✅ Permission granted, registering service worker...');
       
       // Register service worker first
-      await this.registerServiceWorker();
+      const registration = await this.registerServiceWorker();
+      
+      // CRITICAL FIX: Wait a moment for the service worker to be fully ready
+      // This ensures Firebase Messaging can properly subscribe to push
+      console.log('⏳ Waiting for service worker to be fully ready...');
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       console.log('🔑 Getting FCM token with VAPID key...');
       
