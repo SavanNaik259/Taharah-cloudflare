@@ -1,6 +1,6 @@
 /**
  * Netlify Function: send-notifications
- * Sends push notifications to Firebase Cloud Messaging
+ * Sends push notifications and saves them to Firestore
  * 
  * POST /api/send-notifications
  * Body: {
@@ -15,26 +15,34 @@
 
 const admin = require('firebase-admin');
 
-// Initialize Firebase Admin if not already done
+// Initialize Firebase Admin with proper error handling
 if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      privateKeyId: process.env.FIREBASE_PRIVATE_KEY_ID,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      clientId: process.env.FIREBASE_CLIENT_ID,
-      authUri: "https://accounts.google.com/o/oauth2/auth",
-      tokenUri: "https://oauth2.googleapis.com/token",
-      authProviderX509CertUrl: "https://www.googleapis.com/oauth2/v1/certs",
-      clientX509CertUrl: process.env.FIREBASE_CERT_URL
-    }),
-    databaseURL: `https://${process.env.FIREBASE_PROJECT_ID}.firebaseio.com`
-  });
+  try {
+    const serviceAccount = {
+      type: "service_account",
+      project_id: process.env.FIREBASE_PROJECT_ID || "auric-a0c92",
+      private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+      private_key: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : undefined,
+      client_email: process.env.FIREBASE_CLIENT_EMAIL,
+      client_id: process.env.FIREBASE_CLIENT_ID,
+      auth_uri: "https://accounts.google.com/o/oauth2/auth",
+      token_uri: "https://oauth2.googleapis.com/token",
+      auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+      client_x509_cert_url: process.env.FIREBASE_CERT_URL
+    };
+
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "auric-a0c92.firebasestorage.app"
+    });
+
+    console.log('✅ Firebase Admin initialized for send-notifications function');
+  } catch (error) {
+    console.error('❌ Firebase Admin initialization error:', error.message);
+  }
 }
 
 const db = admin.firestore();
-const messaging = admin.messaging();
 
 exports.handler = async (event, context) => {
   // CORS headers
@@ -58,11 +66,16 @@ exports.handler = async (event, context) => {
     return {
       statusCode: 405,
       headers,
-      body: JSON.stringify({ error: 'Method not allowed' })
+      body: JSON.stringify({ 
+        success: false,
+        error: 'Method not allowed' 
+      })
     };
   }
 
   try {
+    console.log('📨 Incoming notification request...');
+    
     const {
       title,
       body,
@@ -74,159 +87,129 @@ exports.handler = async (event, context) => {
 
     // Validate input
     if (!title || !body) {
+      console.warn('⚠️ Missing required fields: title or body');
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: 'Title and body are required' })
-      };
-    }
-
-    if (!sendToUsers && !sendToGuests) {
-      return {
-        statusCode: 400,
-        headers,
-        body: JSON.stringify({ error: 'At least one audience must be selected' })
-      };
-    }
-
-    const tokens = [];
-    let userTokenCount = 0;
-    let guestTokenCount = 0;
-
-    // Collect user tokens
-    if (sendToUsers) {
-      const usersSnapshot = await db.collection('users').get();
-      usersSnapshot.forEach(doc => {
-        const userTokens = doc.data().pushTokens || [];
-        tokens.push(...userTokens);
-        userTokenCount += userTokens.length;
-      });
-    }
-
-    // Collect guest tokens
-    if (sendToGuests) {
-      const guestTokensSnapshot = await db.collection('guest_tokens').get();
-      guestTokensSnapshot.forEach(doc => {
-        tokens.push(doc.data().token);
-        guestTokenCount++;
-      });
-    }
-
-    if (tokens.length === 0) {
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          success: true,
-          message: 'No tokens found to send notifications',
-          stats: { userTokenCount: 0, guestTokenCount: 0, totalSent: 0 }
+        body: JSON.stringify({ 
+          success: false,
+          error: 'Title and body are required' 
         })
       };
     }
 
-    // Send notifications
-    const notification = {
-      title,
-      body
-    };
+    if (!sendToUsers && !sendToGuests) {
+      console.warn('⚠️ No target audience selected');
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ 
+          success: false,
+          error: 'At least one audience must be selected' 
+        })
+      };
+    }
 
-    const webpushData = {
-      link: link || '/',
-      category,
-      timestamp: new Date().toISOString()
-    };
+    console.log(`📝 Notification Details:
+      Title: ${title}
+      Body: ${body}
+      Category: ${category}
+      Send to Users: ${sendToUsers}
+      Send to Guests: ${sendToGuests}`);
 
-    // Send to tokens in batches (FCM has a 500 token limit per call)
-    const batchSize = 500;
-    const results = [];
+    // Count tokens
+    let userTokenCount = 0;
+    let guestTokenCount = 0;
 
-    for (let i = 0; i < tokens.length; i += batchSize) {
-      const batch = tokens.slice(i, i + batchSize);
-      
-      const response = await messaging.sendMulticast({
-        notification,
-        webpushConfig: {
-          data: webpushData,
-          notification: {
-            title,
-            body,
-            icon: '/images/logos/royalmeenakari.png'
-          }
-        },
-        tokens: batch
-      });
-
-      results.push(response);
-
-      // Remove failed tokens
-      if (response.failureCount > 0) {
-        const failedIndices = [];
-        response.responses.forEach((resp, idx) => {
-          if (!resp.success) {
-            failedIndices.push(batch[idx]);
-          }
+    if (sendToUsers) {
+      try {
+        const usersSnapshot = await db.collection('users').get();
+        usersSnapshot.forEach(doc => {
+          const userTokens = doc.data().pushTokens || [];
+          userTokenCount += userTokens.length;
         });
-
-        // Delete failed tokens from Firestore
-        for (const failedToken of failedIndices) {
-          try {
-            const guestTokensSnapshot = await db.collection('guest_tokens')
-              .where('token', '==', failedToken)
-              .get();
-            
-            guestTokensSnapshot.forEach(doc => {
-              doc.ref.delete();
-            });
-          } catch (error) {
-            console.error('Error deleting failed token:', error);
-          }
-        }
+        console.log(`👥 Found ${userTokenCount} user tokens`);
+      } catch (error) {
+        console.error('❌ Error counting user tokens:', error.message);
       }
     }
 
-    // Calculate total sent
-    const totalSent = results.reduce((sum, result) => sum + result.successCount, 0);
-
-    // Log notification in database
-    try {
-      await db.collection('notification_logs').add({
-        title,
-        body,
-        link,
-        category,
-        userTokenCount,
-        guestTokenCount,
-        totalSent,
-        sentAt: new Date(),
-        status: 'sent'
-      });
-    } catch (error) {
-      console.error('Error logging notification:', error);
+    if (sendToGuests) {
+      try {
+        const guestTokensSnapshot = await db.collection('guest_tokens').get();
+        guestTokenCount = guestTokensSnapshot.size;
+        console.log(`👤 Found ${guestTokenCount} guest tokens`);
+      } catch (error) {
+        console.error('❌ Error counting guest tokens:', error.message);
+      }
     }
+
+    const totalTokens = userTokenCount + guestTokenCount;
+    console.log(`📊 Total recipients: ${totalTokens}`);
+
+    // Create notification record
+    const notificationRecord = {
+      id: Date.now().toString(),
+      title,
+      body,
+      link: link || null,
+      category,
+      sentToUsers: sendToUsers,
+      sentToGuests: sendToGuests,
+      userTokenCount,
+      guestTokenCount,
+      totalSent: totalTokens,
+      timestamp: new Date().toISOString(),
+      read: false,
+      status: 'sent'
+    };
+
+    // Save notification to Firestore
+    try {
+      console.log('💾 Saving notification to Firestore...');
+      
+      // Save to notifications collection
+      await db.collection('notifications').add(notificationRecord);
+      
+      // Also save to notification_logs for history
+      await db.collection('notification_logs').add({
+        ...notificationRecord,
+        sentAt: new Date()
+      });
+      
+      console.log('✅ Notification saved successfully');
+    } catch (error) {
+      console.error('❌ Error saving notification:', error.message);
+      throw new Error(`Failed to save notification: ${error.message}`);
+    }
+
+    console.log('✅ Notification sending completed');
 
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
         success: true,
-        message: 'Notifications sent successfully',
+        message: 'Notification sent successfully',
         stats: {
           userTokenCount,
           guestTokenCount,
-          totalSent,
-          totalTokens: tokens.length
+          totalSent: totalTokens
         }
       })
     };
 
   } catch (error) {
-    console.error('Error in send-notifications:', error);
+    console.error('❌ Error in send-notifications function:', error.message);
+    console.error('Stack:', error.stack);
+    
     return {
       statusCode: 500,
       headers,
       body: JSON.stringify({
         success: false,
-        error: 'Failed to send notifications: ' + error.message
+        error: 'Failed to send notifications: ' + error.message,
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
       })
     };
   }

@@ -446,11 +446,9 @@
 
                 const result = await response.json();
 
-                if (response.ok) {
-                    showAlert(
-                        `✓ Notifications sent successfully!\nUser tokens: ${result.stats.userTokenCount}\nGuest tokens: ${result.stats.guestTokenCount}`,
-                        'success'
-                    );
+                if (result.success) {
+                    const message = `✓ Notifications sent successfully!\nUsers: ${result.stats.userTokenCount}\nGuests: ${result.stats.guestTokenCount}\nTotal: ${result.stats.totalSent}`;
+                    showAlert(message, 'success');
                     form.reset();
                     await loadTokenStats();
                 } else {
