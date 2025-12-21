@@ -5,18 +5,26 @@
  */
 
 const notificationManager = {
+  // VAPID Public Key (can be public)
+  VAPID_KEY: 'BENFZQbE3p9n6YnjBdDwOySmVUao9Y9ryEH4_PJhsAKUMcUUfYDZV_c3BlZai6G77Rojwy2f0Ab540bfo5w2Mys',
+
   // Check if notifications are supported
   isSupported: () => {
-    return 'serviceWorker' in navigator && 'messaging' in firebase;
+    const hasServiceWorker = 'serviceWorker' in navigator;
+    const hasMessaging = typeof firebase !== 'undefined' && 'messaging' in firebase;
+    const hasNotifications = 'Notification' in window;
+    
+    console.log('🔍 Support check:', { hasServiceWorker, hasMessaging, hasNotifications });
+    return hasServiceWorker && hasMessaging && hasNotifications;
   },
 
   // Register service worker
   async registerServiceWorker() {
     try {
-      console.log('📋 Registering service worker...');
+      console.log('📋 Registering service worker from /firebase-messaging-sw.js...');
       
       if (!('serviceWorker' in navigator)) {
-        console.warn('⚠️ Service Workers not supported');
+        console.warn('⚠️ Service Workers not supported in this browser');
         return false;
       }
 
@@ -24,10 +32,11 @@ const notificationManager = {
         scope: '/'
       });
       
-      console.log('✅ Service Worker registered:', registration);
+      console.log('✅ Service Worker registered successfully:', registration.scope);
       return registration;
     } catch (error) {
-      console.error('❌ Service Worker registration failed:', error);
+      console.error('❌ Service Worker registration failed:', error.message);
+      console.error('   Check that firebase-messaging-sw.js exists at root level');
       return null;
     }
   },
@@ -71,24 +80,38 @@ const notificationManager = {
   // Get FCM token
   async getToken(vapidKey) {
     try {
-      console.log('🔑 Requesting FCM token...');
+      console.log('🔑 Requesting FCM token with VAPID key...');
+      
+      if (!vapidKey) {
+        vapidKey = this.VAPID_KEY;
+        console.log('   Using built-in VAPID key');
+      }
+      
+      if (!firebase.apps || !firebase.apps.length) {
+        console.error('❌ Firebase not initialized!');
+        return null;
+      }
       
       const messaging = firebase.messaging();
+      console.log('   Firebase messaging instance:', typeof messaging);
+      
       const token = await messaging.getToken({
-        vapidKey: vapidKey || process.env.FIREBASE_VAPID_KEY || 'BENFZQbE3p9n6YnjBdDwOySmVUao9Y9ryEH4_PJhsAKUMcUUfYDZV_c3BlZai6G77Rojwy2f0Ab540bfo5w2Mys'
+        vapidKey: vapidKey
       });
       
       if (token) {
-        console.log('✅ FCM Token obtained:', token.substring(0, 50) + '...');
+        console.log('✅ FCM Token obtained successfully');
+        console.log('   Token preview:', token.substring(0, 50) + '...');
+        console.log('   Token length:', token.length);
         return token;
       } else {
-        console.warn('⚠️ No FCM token received');
+        console.warn('⚠️ No FCM token received (token is null/undefined)');
         return null;
       }
     } catch (error) {
-      console.error('❌ Error getting FCM token:', error);
-      console.error('Error code:', error.code);
-      console.error('Error message:', error.message);
+      console.error('❌ Error getting FCM token:', error.message);
+      console.error('   Code:', error.code);
+      console.error('   Full error:', JSON.stringify(error));
       return null;
     }
   },
@@ -97,7 +120,16 @@ const notificationManager = {
   async saveTokenToFirestore(token, isGuest = true) {
     try {
       if (!token) {
-        console.warn('⚠️ No token to save');
+        console.warn('⚠️ No token to save - token is empty');
+        return false;
+      }
+
+      console.log('💾 Preparing to save token to Firestore...');
+      console.log('   Token length:', token.length);
+      console.log('   Is guest:', isGuest);
+
+      if (!firebase.apps || !firebase.apps.length) {
+        console.error('❌ Firebase not initialized!');
         return false;
       }
 
@@ -105,24 +137,26 @@ const notificationManager = {
       
       if (isGuest) {
         // Save as guest token
-        console.log('💾 Saving token to guest_tokens collection...');
-        await db.collection('guest_tokens').add({
+        console.log('💾 Saving to guest_tokens collection...');
+        const docRef = await db.collection('guest_tokens').add({
           token: token,
           createdAt: new Date(),
           userAgent: navigator.userAgent,
-          isActive: true
+          isActive: true,
+          platform: 'web',
+          browserInfo: navigator.userAgent.substring(0, 100)
         });
-        console.log('✅ Token saved to guest_tokens');
+        console.log('✅ Token saved to guest_tokens with ID:', docRef.id);
         return true;
       } else {
         // Save to logged-in user's profile
         const user = firebase.auth().currentUser;
         if (!user) {
-          console.warn('⚠️ No logged-in user to save token to');
+          console.warn('⚠️ No logged-in user - cannot save to user profile');
           return false;
         }
 
-        console.log('💾 Saving token to user profile...');
+        console.log('💾 Saving token to user profile for user:', user.uid);
         const userRef = db.collection('users').doc(user.uid);
         const userDoc = await userRef.get();
 
@@ -150,7 +184,9 @@ const notificationManager = {
         return true;
       }
     } catch (error) {
-      console.error('❌ Error saving token to Firestore:', error);
+      console.error('❌ Error saving token to Firestore:', error.message);
+      console.error('   Code:', error.code);
+      console.error('   Details:', error);
       return false;
     }
   },
@@ -189,16 +225,23 @@ const notificationManager = {
   // Complete registration flow
   async requestPermissionAndGetToken(vapidKey = null) {
     try {
-      console.log('🚀 Starting notification registration process...');
+      console.log('\n🚀=== STARTING NOTIFICATION REGISTRATION ===');
+      console.log('   Time:', new Date().toLocaleTimeString());
 
       // Check support
       if (!this.isSupported()) {
-        console.error('❌ Notifications not supported in this browser');
+        console.error('❌ Notifications not supported - missing serviceWorker, messaging, or Notification API');
         return null;
       }
+      console.log('✅ Browser support verified');
 
       // Register service worker
-      await this.registerServiceWorker();
+      const swRegistration = await this.registerServiceWorker();
+      if (!swRegistration) {
+        console.error('❌ Failed to register service worker');
+        return null;
+      }
+      console.log('✅ Service worker registered');
 
       // Request permission
       const permissionGranted = await this.requestPermission();
@@ -206,17 +249,20 @@ const notificationManager = {
         console.warn('⚠️ User denied notification permission');
         return null;
       }
+      console.log('✅ Notification permission granted');
 
       // Get token
       const token = await this.getToken(vapidKey);
       if (!token) {
-        console.error('❌ Failed to get FCM token');
+        console.error('❌ Failed to get FCM token - check browser console for details');
         return null;
       }
+      console.log('✅ FCM token obtained');
 
       // Check if user is logged in
       const user = firebase.auth().currentUser;
       const isGuest = !user;
+      console.log('   User type:', isGuest ? 'guest' : 'authenticated');
 
       // Save token
       const saved = await this.saveTokenToFirestore(token, isGuest);
@@ -224,14 +270,17 @@ const notificationManager = {
         console.error('❌ Failed to save token to Firestore');
         return null;
       }
+      console.log('✅ Token saved to Firestore');
 
       // Setup message handler
       this.setupMessageHandler();
+      console.log('✅ Message handler setup');
 
-      console.log('✨ Notification registration complete!');
+      console.log('✨=== NOTIFICATION REGISTRATION COMPLETE ===\n');
       return token;
     } catch (error) {
-      console.error('❌ Notification registration failed:', error);
+      console.error('❌ FATAL ERROR in notification registration:', error.message);
+      console.error('   Stack:', error.stack);
       return null;
     }
   }
