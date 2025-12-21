@@ -429,10 +429,8 @@
             btnText.innerHTML = '<span class="loading"></span>Sending...';
 
             try {
-                // Use the Firebase Cloud Function endpoint
-                const functionUrl = 'https://us-central1-auric-a0c92.cloudfunctions.net/sendNotifications';
-                
-                const response = await fetch(functionUrl, {
+                // Use the local Netlify Function endpoint (redirected by netlify.toml)
+                const response = await fetch('/api/send-notifications', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
