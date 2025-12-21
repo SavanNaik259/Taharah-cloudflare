@@ -67,19 +67,25 @@ class NotificationManager {
    */
   waitForFirebase() {
     return new Promise((resolve) => {
-      if (window.firebase && window.firebase.messaging) {
+      // Check if Firebase SDK is loaded (not just messaging module)
+      if (window.firebase && typeof window.firebase.app === 'function') {
+        console.log('✅ Firebase SDK is available');
         resolve();
       } else {
+        console.log('⏳ Waiting for Firebase SDK to load...');
         let attempts = 0;
         const interval = setInterval(() => {
-          if (window.firebase && window.firebase.messaging) {
+          // Firebase app() function is the reliable indicator that Firebase is ready
+          if (window.firebase && typeof window.firebase.app === 'function') {
             clearInterval(interval);
+            console.log('✅ Firebase SDK became available');
             resolve();
           }
           attempts++;
           if (attempts > 100) {
             clearInterval(interval);
-            console.warn('⚠️ Firebase not available after 100 attempts');
+            console.warn('⚠️ Firebase not available after 10 seconds (100 attempts)');
+            // Still resolve to let it try initialization anyway
             resolve();
           }
         }, 100);
