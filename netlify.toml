@@ -61,6 +61,11 @@
   to = "/profile.html"
   status = 200
 
+[[redirects]]
+  from = "/admin-notifications.html"
+  to = "/admin-notifications.html"
+  status = 200
+
 # Handle direct navigation for SPA as fallback
 [[redirects]]
   from = "/*"

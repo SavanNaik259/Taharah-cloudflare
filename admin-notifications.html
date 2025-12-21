@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Push Notifications - Auric Admin</title>
+    <link rel="icon" type="image/png" href="images/logos/royalmeenakari.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .auth-check {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .auth-check.show {
+            display: block;
+        }
+
+        .auth-check.error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .options {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .options h3 {
+            font-size: 14px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-send {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-send:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-send:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-reset {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-reset:hover {
+            background: #e0e0e0;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Send Push Notifications</h1>
+            <p>Send promotional notifications to all subscribed users</p>
+        </div>
+
+        <div class="content">
+            <div class="auth-check" id="authCheck">
+                <strong>⚠️ Admin Access Required:</strong> Please log in with an admin account to send notifications.
+            </div>
+
+            <div id="successAlert" class="alert alert-success"></div>
+            <div id="errorAlert" class="alert alert-error"></div>
+            <div id="infoAlert" class="alert alert-info"></div>
+
+            <div class="stats" id="statsContainer" style="display: none;">
+                <div class="stat-card">
+                    <div class="number" id="userTokenCount">-</div>
+                    <div class="label">User Tokens</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="guestTokenCount">-</div>
+                    <div class="label">Guest Tokens</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="totalTokenCount">-</div>
+                    <div class="label">Total Recipients</div>
+                </div>
+            </div>
+
+            <form id="notificationForm">
+                <div class="form-group">
+                    <label for="title">Notification Title *</label>
+                    <input type="text" id="title" name="title" placeholder="e.g., New Collection Launch" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="body">Notification Message *</label>
+                    <textarea id="body" name="body" placeholder="e.g., Check out our new winter collection with 30% off!" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="link">Link (Optional)</label>
+                    <input type="text" id="link" name="link" placeholder="e.g., /shop.html or https://example.com">
+                </div>
+
+                <div class="options">
+                    <h3>Target Audience</h3>
+                    <div class="option-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="sendToUsers" name="sendToUsers" checked>
+                            <label for="sendToUsers">Send to Logged-in Users</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="sendToGuests" name="sendToGuests" checked>
+                            <label for="sendToGuests">Send to Guest Users</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Campaign Category (Optional)</label>
+                    <select id="category" name="category">
+                        <option value="">-- Select Category --</option>
+                        <option value="promotion">Promotion</option>
+                        <option value="new-arrival">New Arrival</option>
+                        <option value="flash-sale">Flash Sale</option>
+                        <option value="announcement">Announcement</option>
+                        <option value="reminder">Reminder</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="buttons">
+                    <button type="submit" class="btn-send" id="sendBtn">
+                        <span id="btnText">Send Notification</span>
+                    </button>
+                    <button type="reset" class="btn-reset">Clear Form</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const form = document.getElementById('notificationForm');
+        const sendBtn = document.getElementById('sendBtn');
+
+        // Auth state listener
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                document.getElementById('authCheck').classList.add('show', 'error');
+                form.style.opacity = '0.5';
+                form.style.pointerEvents = 'none';
+                sendBtn.disabled = true;
+            } else {
+                document.getElementById('authCheck').classList.remove('show', 'error');
+                form.style.opacity = '1';
+                form.style.pointerEvents = 'auto';
+                sendBtn.disabled = false;
+                await loadTokenStats();
+            }
+        });
+
+        // Load token statistics
+        async function loadTokenStats() {
+            try {
+                // Count user tokens (from users collection)
+                const usersSnapshot = await db.collection('users').get();
+                let userTokenCount = 0;
+                usersSnapshot.forEach(doc => {
+                    const tokens = doc.data().pushTokens || [];
+                    userTokenCount += tokens.length;
+                });
+
+                // Count guest tokens
+                const guestTokensSnapshot = await db.collection('guest_tokens').get();
+                const guestTokenCount = guestTokensSnapshot.size;
+
+                const totalCount = userTokenCount + guestTokenCount;
+
+                document.getElementById('userTokenCount').textContent = userTokenCount;
+                document.getElementById('guestTokenCount').textContent = guestTokenCount;
+                document.getElementById('totalTokenCount').textContent = totalCount;
+                document.getElementById('statsContainer').style.display = 'grid';
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const user = auth.currentUser;
+            if (!user) {
+                showAlert('Please log in to send notifications', 'error');
+                return;
+            }
+
+            const title = document.getElementById('title').value;
+            const body = document.getElementById('body').value;
+            const link = document.getElementById('link').value || '';
+            const sendToUsers = document.getElementById('sendToUsers').checked;
+            const sendToGuests = document.getElementById('sendToGuests').checked;
+            const category = document.getElementById('category').value;
+
+            if (!title || !body) {
+                showAlert('Please fill in all required fields', 'error');
+                return;
+            }
+
+            if (!sendToUsers && !sendToGuests) {
+                showAlert('Please select at least one target audience', 'error');
+                return;
+            }
+
+            sendBtn.disabled = true;
+            const btnText = document.getElementById('btnText');
+            btnText.innerHTML = '<span class="loading"></span>Sending...';
+
+            try {
+                const response = await fetch('/.netlify/functions/send-notifications', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title,
+                        body,
+                        link,
+                        category,
+                        sendToUsers,
+                        sendToGuests
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert(
+                        `✓ Notifications sent successfully!\nUser tokens: ${result.stats.userTokenCount}\nGuest tokens: ${result.stats.guestTokenCount}`,
+                        'success'
+                    );
+                    form.reset();
+                    await loadTokenStats();
+                } else {
+                    showAlert(result.error || 'Failed to send notifications', 'error');
+                }
+            } catch (error) {
+                console.error('Error sending notifications:', error);
+                showAlert('Error sending notifications: ' + error.message, 'error');
+            } finally {
+                sendBtn.disabled = false;
+                btnText.textContent = 'Send Notification';
+            }
+        });
+
+        function showAlert(message, type) {
+            const alertId = type === 'success' ? 'successAlert' : type === 'error' ? 'errorAlert' : 'infoAlert';
+            const alert = document.getElementById(alertId);
+            alert.textContent = message;
+            alert.classList.add('show');
+
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 5000);
+        }
+
+        // Load stats on page load
+        window.addEventListener('load', loadTokenStats);
+    </script>
+</body>
+</html>
