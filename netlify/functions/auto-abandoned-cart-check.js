@@ -56,15 +56,15 @@ async function sendNotification(token, productImage, productName, productLink) {
     const response = await admin.messaging().send({
       token: token,
       webpush: {
-        fcmOptions: { link: productLink || '/cart' },
-        data: {
+        notification: {
           title: `Complete Your Order!`,
           body: `Don't miss out on ${productName}. Complete your purchase now.`,
-          image: productImage || '/images/logos/royalmeenakari.png',
-          link: productLink || '/cart'
-        }
+          image: productImage || '/images/logos/royalmeenakari.png'
+        },
+        fcmOptions: { link: productLink || '/cart' }
       }
     });
+    console.log(`✅ FCM sent successfully. Response: ${response}`);
     return true;
   } catch (error) {
     console.error('Failed to send notification:', error.message);

@@ -62,6 +62,20 @@ exports.handler = async (event, context) => {
   console.log('🔍 Event method:', event.httpMethod);
   console.log('🔍 Event path:', event.path);
   
+  // SECURITY: Only allow calls from deployed Netlify production, NOT from localhost/local development
+  const isProduction = process.env.CONTEXT === 'production' || process.env.NETLIFY === 'true';
+  const clientHost = event.headers?.host || event.headers?.referer || '';
+  const isLocalhost = clientHost.includes('localhost') || clientHost.includes('127.0.0.1');
+  
+  if (isLocalhost && !isProduction) {
+    console.warn('⚠️ BLOCKED: Campaign function called from localhost. Notifications must be sent from production only.');
+    return { 
+      statusCode: 403, 
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'Campaign notifications can only be sent from production deployment', success: false }) 
+    };
+  }
+  
   if (event.httpMethod !== 'POST') {
     return { 
       statusCode: 405, 

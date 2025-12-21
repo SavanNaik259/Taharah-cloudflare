@@ -132,7 +132,7 @@ exports.handler = async (event, context) => {
           } catch (notifError) {
             console.error('❌ Error sending back-in-stock notification:', notifError.message);
           }
-        } else if (previousStock === 0 && newStock > 0) {
+        } else {
           console.log(`❌ BACK-IN-STOCK condition NOT met (previousStock: ${previousStock}, newStock: ${newStock})`);
         }
         
@@ -156,7 +156,7 @@ exports.handler = async (event, context) => {
           } catch (notifError) {
             console.error('❌ Error sending low-stock notification:', notifError.message);
           }
-        } else if (newStock <= 3 && newStock > 0) {
+        } else {
           console.log(`❌ LOW-STOCK condition NOT met (stock: ${newStock})`);
         }
       } else {

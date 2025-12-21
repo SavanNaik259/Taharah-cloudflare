@@ -58,15 +58,15 @@ async function sendNotification(token, productImage, productName, oldPrice, newP
     const response = await admin.messaging().send({
       token: token,
       webpush: {
-        fcmOptions: { link: productLink || '/shop' },
-        data: {
+        notification: {
           title: `Price Drop Alert!`,
           body: `${productName} is now ${discountPercent}% off! Was ₹${oldPrice}, now ₹${newPrice}`,
-          image: productImage || '/images/logos/royalmeenakari.png',
-          link: productLink || '/shop'
-        }
+          image: productImage || '/images/logos/royalmeenakari.png'
+        },
+        fcmOptions: { link: productLink || '/shop' }
       }
     });
+    console.log(`✅ FCM sent successfully. Response: ${response}`);
     return true;
   } catch (error) {
     console.error('Failed to send notification:', error.message);
