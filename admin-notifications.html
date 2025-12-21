@@ -293,18 +293,14 @@
         </div>
 
         <div class="content">
-            <div class="auth-check" id="authCheck">
-                <strong>⚠️ Admin Access Required:</strong> Please log in with an admin account to send notifications.
-            </div>
-
             <div id="successAlert" class="alert alert-success"></div>
             <div id="errorAlert" class="alert alert-error"></div>
             <div id="infoAlert" class="alert alert-info"></div>
 
-            <div class="stats" id="statsContainer" style="display: none;">
+            <div class="stats" id="statsContainer">
                 <div class="stat-card">
                     <div class="number" id="userTokenCount">-</div>
-                    <div class="label">User Tokens</div>
+                    <div class="label">Subscribed Users</div>
                 </div>
                 <div class="stat-card">
                     <div class="number" id="guestTokenCount">-</div>
@@ -378,26 +374,9 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
 
-        const auth = firebase.auth();
         const db = firebase.firestore();
         const form = document.getElementById('notificationForm');
         const sendBtn = document.getElementById('sendBtn');
-
-        // Auth state listener
-        auth.onAuthStateChanged(async (user) => {
-            if (!user) {
-                document.getElementById('authCheck').classList.add('show', 'error');
-                form.style.opacity = '0.5';
-                form.style.pointerEvents = 'none';
-                sendBtn.disabled = true;
-            } else {
-                document.getElementById('authCheck').classList.remove('show', 'error');
-                form.style.opacity = '1';
-                form.style.pointerEvents = 'auto';
-                sendBtn.disabled = false;
-                await loadTokenStats();
-            }
-        });
 
         // Load token statistics
         async function loadTokenStats() {
@@ -419,7 +398,6 @@
                 document.getElementById('userTokenCount').textContent = userTokenCount;
                 document.getElementById('guestTokenCount').textContent = guestTokenCount;
                 document.getElementById('totalTokenCount').textContent = totalCount;
-                document.getElementById('statsContainer').style.display = 'grid';
             } catch (error) {
                 console.error('Error loading stats:', error);
             }
@@ -428,12 +406,6 @@
         // Form submission
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            const user = auth.currentUser;
-            if (!user) {
-                showAlert('Please log in to send notifications', 'error');
-                return;
-            }
 
             const title = document.getElementById('title').value;
             const body = document.getElementById('body').value;
