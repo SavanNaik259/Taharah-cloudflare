@@ -1,6 +1,6 @@
 /**
  * SINGLE Service Worker for Firebase Cloud Messaging
- * NO DUPLICATES - Only one SW should be registered
+ * MUST have install/activate handlers to become "active"
  * Uses Firebase SDK v10.7.1
  */
 
@@ -26,7 +26,47 @@ try {
 
 const messaging = firebase.messaging();
 
-// SINGLE background message handler - prevents duplicates with tag
+// ============================================================================
+// INSTALL EVENT - CRITICAL: Must complete to allow activation
+// ============================================================================
+self.addEventListener('install', (event) => {
+  console.log('⚙️ Service Worker: INSTALLING');
+  
+  event.waitUntil(
+    (async () => {
+      try {
+        // This forces the SW to activate immediately (skips waiting)
+        await self.skipWaiting();
+        console.log('✅ Service Worker: INSTALL complete, skipping wait');
+      } catch (error) {
+        console.error('❌ Install error:', error);
+      }
+    })()
+  );
+});
+
+// ============================================================================
+// ACTIVATE EVENT - CRITICAL: Must complete to become "active"
+// ============================================================================
+self.addEventListener('activate', (event) => {
+  console.log('⚙️ Service Worker: ACTIVATING');
+  
+  event.waitUntil(
+    (async () => {
+      try {
+        // Claim all clients immediately (don't wait for page reload)
+        await self.clients.claim();
+        console.log('✅ Service Worker: ACTIVATED and claimed all clients');
+      } catch (error) {
+        console.error('❌ Activate error:', error);
+      }
+    })()
+  );
+});
+
+// ============================================================================
+// BACKGROUND MESSAGE HANDLER
+// ============================================================================
 messaging.onBackgroundMessage((payload) => {
   console.log('📬 Background message received:', payload);
   
@@ -36,11 +76,12 @@ messaging.onBackgroundMessage((payload) => {
     icon: payload.notification?.icon || '/images/logos/royalmeenakari.png',
     badge: payload.notification?.badge || '/images/logos/royalmeenakari.png',
     image: payload.notification?.image || undefined,
-    tag: 'royal-meenakari-notification', // CRITICAL: Prevents duplicate notifications with same tag
+    tag: 'royal-meenakari-notification', // CRITICAL: Prevents duplicate notifications
     requireInteraction: false,
     data: payload.data || {}
   };
   
+  // Remove undefined image property
   if (!notificationOptions.image) {
     delete notificationOptions.image;
   }
@@ -48,7 +89,9 @@ messaging.onBackgroundMessage((payload) => {
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// Handle notification click
+// ============================================================================
+// NOTIFICATION CLICK HANDLER
+// ============================================================================
 self.addEventListener('notificationclick', (event) => {
   console.log('✅ Notification clicked:', event.notification.title);
   event.notification.close();
@@ -60,12 +103,14 @@ self.addEventListener('notificationclick', (event) => {
       type: 'window',
       includeUncontrolled: true
     }).then((clientList) => {
+      // Try to focus existing window
       for (let i = 0; i < clientList.length; i++) {
         const client = clientList[i];
         if (client.url === urlToOpen && 'focus' in client) {
           return client.focus();
         }
       }
+      // Open new window if not found
       if (clients.openWindow) {
         return clients.openWindow(urlToOpen);
       }
@@ -73,4 +118,4 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-console.log('✅ Service Worker loaded successfully');
+console.log('✅ Service Worker loaded successfully with install/activate handlers');
