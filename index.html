@@ -2508,10 +2508,9 @@ background-color: #000 !important;
         }
       }
       
-      // NOTE: Removed foreground message handler - Service Worker handles ALL notifications
-      // Both foreground and background messages are processed by service worker's onBackgroundMessage()
-      // Having a separate foreground handler in index.html was causing DUPLICATE notifications
-      // Firebase messaging automatically shows notifications through the service worker for all cases
+      // ✅ Service Worker handles ALL notifications automatically
+      // No foreground handler needed - prevents duplicates
+      console.log('📱 Firebase Messaging ready - Service Worker handles all notifications');
 
       // Dismiss banner
       function dismissNotificationBanner() {

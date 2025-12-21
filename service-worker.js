@@ -1,7 +1,7 @@
 /**
- * SINGLE Service Worker for Firebase Cloud Messaging
- * MUST have install/activate handlers to become "active"
- * Uses Firebase SDK v10.7.1
+ * UNIFIED Service Worker for Firebase Cloud Messaging
+ * Handles ALL notifications (foreground + background)
+ * Uses notification tags to prevent duplicates
  */
 
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
@@ -26,96 +26,66 @@ try {
 
 const messaging = firebase.messaging();
 
-// ============================================================================
-// INSTALL EVENT - CRITICAL: Must complete to allow activation
-// ============================================================================
 self.addEventListener('install', (event) => {
   console.log('⚙️ Service Worker: INSTALLING');
-  
-  event.waitUntil(
-    (async () => {
-      try {
-        // This forces the SW to activate immediately (skips waiting)
-        await self.skipWaiting();
-        console.log('✅ Service Worker: INSTALL complete, skipping wait');
-      } catch (error) {
-        console.error('❌ Install error:', error);
-      }
-    })()
-  );
+  event.waitUntil(self.skipWaiting());
 });
 
-// ============================================================================
-// ACTIVATE EVENT - CRITICAL: Must complete to become "active"
-// ============================================================================
 self.addEventListener('activate', (event) => {
   console.log('⚙️ Service Worker: ACTIVATING');
-  
-  event.waitUntil(
-    (async () => {
-      try {
-        // Claim all clients immediately (don't wait for page reload)
-        await self.clients.claim();
-        console.log('✅ Service Worker: ACTIVATED and claimed all clients');
-      } catch (error) {
-        console.error('❌ Activate error:', error);
-      }
-    })()
-  );
+  event.waitUntil(self.clients.claim());
 });
 
-// ============================================================================
-// BACKGROUND MESSAGE HANDLER
-// ============================================================================
+// SINGLE notification handler for ALL messages (foreground + background)
 messaging.onBackgroundMessage((payload) => {
-  console.log('📬 Background message received:', payload);
-  
+  console.log('📬 FCM message received:', payload);
+
   const notificationTitle = payload.notification?.title || 'Royal Meenakari';
+
+  // CRITICAL: Use unique tag from message ID to prevent duplicates
+  const messageId = payload.messageId || payload.fcmMessageId || Date.now();
+  const notificationTag = `fcm-${messageId}`;
+
   const notificationOptions = {
     body: payload.notification?.body || 'New notification',
     icon: payload.notification?.icon || '/images/logos/royalmeenakari.png',
     badge: payload.notification?.badge || '/images/logos/royalmeenakari.png',
-    image: payload.notification?.image || undefined,
-    tag: 'royal-meenakari-notification', // CRITICAL: Prevents duplicate notifications
+    image: payload.notification?.image,
+    tag: notificationTag, // PREVENTS DUPLICATES - same tag replaces previous notification
+    renotify: false, // Don't re-alert for same tag
     requireInteraction: false,
-    data: payload.data || {}
+    data: payload.data || {},
+    timestamp: Date.now()
   };
-  
-  // Remove undefined image property
+
   if (!notificationOptions.image) {
     delete notificationOptions.image;
   }
-  
+
+  console.log(`✅ Showing notification with tag: ${notificationTag}`);
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// ============================================================================
-// NOTIFICATION CLICK HANDLER
-// ============================================================================
 self.addEventListener('notificationclick', (event) => {
-  console.log('✅ Notification clicked:', event.notification.title);
+  console.log('✅ Notification clicked:', event.notification.tag);
   event.notification.close();
-  
+
   const urlToOpen = event.notification.data?.link || '/';
-  
+
   event.waitUntil(
-    clients.matchAll({
-      type: 'window',
-      includeUncontrolled: true
-    }).then((clientList) => {
-      // Try to focus existing window
-      for (let i = 0; i < clientList.length; i++) {
-        const client = clientList[i];
-        if (client.url === urlToOpen && 'focus' in client) {
-          return client.focus();
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        for (let i = 0; i < clientList.length; i++) {
+          const client = clientList[i];
+          if (client.url === urlToOpen && 'focus' in client) {
+            return client.focus();
+          }
         }
-      }
-      // Open new window if not found
-      if (clients.openWindow) {
-        return clients.openWindow(urlToOpen);
-      }
-    })
+        if (clients.openWindow) {
+          return clients.openWindow(urlToOpen);
+        }
+      })
   );
 });
 
-console.log('✅ Service Worker loaded successfully with install/activate handlers');
+console.log('✅ Unified Service Worker loaded');

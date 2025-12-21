@@ -181,7 +181,11 @@ exports.handler = async (event, context) => {
 
     console.log(`\n📤 Sending notifications to ${uniqueTokens.length} unique token(s)...`);
 
-    for (const token of uniqueTokens) {
+    // Generate unique campaign ID to prevent duplicate notifications
+      const campaignId = `campaign_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      console.log(`📋 Campaign ID: ${campaignId}`);
+      
+      for (const token of uniqueTokens) {
       try {
         console.log(`📨 Sending to token: ${token.substring(0, 30)}...`);
         
@@ -204,10 +208,14 @@ exports.handler = async (event, context) => {
           ];
         }
        
-        // Send notification with all details displayed (SINGLE payload, not duplicated)
+        // Send notification with unique campaign ID in data
         const webpushConfig = {
           notification: webpushNotification,
-          fcmOptions: { link: link || '/' }
+          fcmOptions: { link: link || '/' },
+          data: {
+            campaignId: campaignId,
+            timestamp: Date.now().toString()
+          }
         };
         
         const response = await admin.messaging().send({

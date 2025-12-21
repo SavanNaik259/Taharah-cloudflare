@@ -185,29 +185,9 @@ class FirebaseNotificationsManager {
   }
 
   setupForegroundHandlers() {
-    if (!this.messaging) return;
-    
-    // Handle foreground messages
-    firebase.messaging().onMessage((payload) => {
-      console.log('📬 Foreground message received:', payload);
-      
-      const notificationTitle = payload.notification?.title || 'Royal Meenakari';
-      const notificationOptions = {
-        body: payload.notification?.body || 'New notification',
-        icon: '/images/logos/royalmeenakari.png',
-        badge: '/images/logos/royalmeenakari.png',
-        image: payload.notification?.image,
-        data: payload.data || {}
-      };
-      
-      if (!notificationOptions.image) {
-        delete notificationOptions.image;
-      }
-      
-      if (this.registration) {
-        this.registration.showNotification(notificationTitle, notificationOptions);
-      }
-    });
+    // REMOVED: Service Worker now handles ALL notifications (foreground + background)
+    // This prevents duplicate notifications
+    console.log('✅ Foreground notifications delegated to Service Worker');
   }
 
   async showNotification(title, options = {}) {
