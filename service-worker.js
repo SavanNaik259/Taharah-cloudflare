@@ -1,14 +1,12 @@
 /**
- * Unified Service Worker for:
- * 1. Firebase Cloud Messaging - Push notifications
- * 2. Background event handling
+ * SINGLE Service Worker for Firebase Cloud Messaging
+ * NO DUPLICATES - Only one SW should be registered
+ * Uses Firebase SDK v10.7.1
  */
 
-// Import Firebase for messaging
-importScripts('https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/9.6.10/firebase-messaging-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
 
-// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
   authDomain: "auric-a0c92.firebaseapp.com",
@@ -19,62 +17,60 @@ const firebaseConfig = {
   measurementId: "G-ZYZ750JHMB"
 };
 
-// Initialize Firebase in Service Worker
-if (!firebase.apps.length) {
+try {
   firebase.initializeApp(firebaseConfig);
+  console.log('✅ Firebase initialized in Service Worker');
+} catch (error) {
+  console.error('❌ Firebase init error:', error);
 }
 
-// Get messaging instance
 const messaging = firebase.messaging();
 
-// Handle background messages - manually display notifications from data field
+// SINGLE background message handler - prevents duplicates with tag
 messaging.onBackgroundMessage((payload) => {
-  console.log('🔔 Background message received:', payload);
+  console.log('📬 Background message received:', payload);
   
-  // Extract notification details from data field (sent by all notification functions)
-  const data = payload.data || {};
-  const title = data.title || 'Auric Notification';
-  const body = data.body || 'New update from Auric';
-  const image = data.image || '/images/logos/royalmeenakari.png';
-  const link = data.link || '/';
-  
+  const notificationTitle = payload.notification?.title || 'Royal Meenakari';
   const notificationOptions = {
-    body: body,
-    icon: '/images/logos/royalmeenakari.png',
-    badge: '/images/logos/royalmeenakari.png',
-    image: image,
-    tag: 'auric-notification',
+    body: payload.notification?.body || 'New notification',
+    icon: payload.notification?.icon || '/images/logos/royalmeenakari.png',
+    badge: payload.notification?.badge || '/images/logos/royalmeenakari.png',
+    image: payload.notification?.image || undefined,
+    tag: 'royal-meenakari-notification', // CRITICAL: Prevents duplicate notifications with same tag
     requireInteraction: false,
-    data: { link: link }
+    data: payload.data || {}
   };
   
-  // Manually display the notification
-  self.registration.showNotification(title, notificationOptions);
+  if (!notificationOptions.image) {
+    delete notificationOptions.image;
+  }
+  
+  self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
 // Handle notification click
 self.addEventListener('notificationclick', (event) => {
-  console.log('📬 Notification clicked');
+  console.log('✅ Notification clicked:', event.notification.title);
   event.notification.close();
-
-  const notificationData = event.notification.data;
-  const link = notificationData.link || '/';
-
+  
+  const urlToOpen = event.notification.data?.link || '/';
+  
   event.waitUntil(
-    clients.matchAll({ type: 'window' }).then((clientList) => {
+    clients.matchAll({
+      type: 'window',
+      includeUncontrolled: true
+    }).then((clientList) => {
       for (let i = 0; i < clientList.length; i++) {
-        if (clientList[i].url === link && 'focus' in clientList[i]) {
-          return clientList[i].focus();
+        const client = clientList[i];
+        if (client.url === urlToOpen && 'focus' in client) {
+          return client.focus();
         }
       }
       if (clients.openWindow) {
-        return clients.openWindow(link);
+        return clients.openWindow(urlToOpen);
       }
     })
   );
 });
 
-// Handle notification close
-self.addEventListener('notificationclose', (event) => {
-  console.log('🚫 Notification closed');
-});
+console.log('✅ Service Worker loaded successfully');

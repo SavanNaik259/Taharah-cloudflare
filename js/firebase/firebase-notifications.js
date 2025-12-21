@@ -28,11 +28,11 @@ class FirebaseNotificationsManager {
     }
 
     try {
-      // Register Firebase service worker at ROOT level - CRITICAL!
-      this.registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+      // Register SINGLE service worker at root - prevents duplicates!
+      this.registration = await navigator.serviceWorker.register('/service-worker.js', {
         scope: '/'
       });
-      console.log('✅ Service Worker registered at /firebase-messaging-sw.js');
+      console.log('✅ Service Worker registered at /service-worker.js');
 
       // Wait for service worker to be ready
       await navigator.serviceWorker.ready;
