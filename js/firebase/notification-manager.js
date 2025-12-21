@@ -104,69 +104,52 @@ class NotificationManager {
         });
         console.log('✅ Service Worker registered:', registration.scope);
         
-        // CRITICAL FIX: Wait for the service worker to be active
-        // Registration alone is not enough - we need to wait for it to be in 'active' state
-        if (registration.active) {
-          console.log('✅ Service Worker is already active');
-          return registration;
-        }
-        
-        // If not active yet, wait for it with a timeout and retry mechanism
-        console.log('⏳ Waiting for Service Worker to become active...');
-        
+        // CRITICAL FIX: Wait until the Service Worker is ACTIVE AND CONTROLLING THE PAGE
+        // This is essential for Firebase Messaging to work properly
         return new Promise((resolve, reject) => {
           let timeoutId;
           let resolved = false;
           
-          const cleanup = () => {
-            if (timeoutId) clearTimeout(timeoutId);
-            resolved = true;
+          const checkReady = () => {
+            if (resolved) return;
+            
+            // Check if SW is active AND is controlling this page
+            if (registration.active && navigator.serviceWorker.controller) {
+              console.log('✅ Service Worker is active AND controlling this page');
+              resolved = true;
+              clearTimeout(timeoutId);
+              resolve(registration);
+              return true;
+            }
+            return false;
           };
           
-          const checkAndResolve = () => {
-            if (!resolved && registration.active) {
-              console.log('✅ Service Worker is now active');
-              cleanup();
-              resolve(registration);
-            }
-          };
+          // Immediate check
+          if (checkReady()) return;
           
-          // Check every 500ms if service worker became active
-          const checkInterval = setInterval(() => {
-            if (registration.active) {
-              clearInterval(checkInterval);
-              cleanup();
-              resolve(registration);
+          // Poll every 100ms for faster detection
+          const pollInterval = setInterval(() => {
+            if (checkReady()) {
+              clearInterval(pollInterval);
             }
-          }, 500);
+          }, 100);
           
-          // Timeout after 30 seconds
+          // Timeout after 10 seconds (should not take this long)
           timeoutId = setTimeout(() => {
-            clearInterval(checkInterval);
             if (!resolved) {
               resolved = true;
-              console.error('⚠️ Service Worker did not become active within 30 seconds, proceeding anyway');
-              // Don't reject - proceed anyway as sometimes the worker is ready despite not being in 'active' state yet
+              clearInterval(pollInterval);
+              console.warn('⚠️ Service Worker registration timed out, but proceeding...');
+              // Still resolve because in some cases the SW might be ready even without controller
               resolve(registration);
             }
-          }, 30000);
+          }, 10000);
           
-          // Listen for state changes
-          if (registration.installing) {
-            console.log('📍 Service Worker is installing...');
-            registration.installing.addEventListener('statechange', checkAndResolve);
-          }
-          
-          if (registration.waiting) {
-            console.log('📍 Service Worker is waiting...');
-            registration.waiting.addEventListener('statechange', checkAndResolve);
-          }
-          
-          registration.addEventListener('updatefound', () => {
-            console.log('📍 Service Worker update found');
-            const newWorker = registration.installing;
-            if (newWorker) {
-              newWorker.addEventListener('statechange', checkAndResolve);
+          // Also listen for controller change events
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            console.log('📍 Controller change detected');
+            if (checkReady()) {
+              clearInterval(pollInterval);
             }
           });
         });
@@ -199,9 +182,8 @@ class NotificationManager {
       console.log('⏳ Registering and activating service worker...');
       const registration = await this.registerServiceWorker();
       
-      // STEP 3: Add a small delay to ensure everything is ready
-      // This is critical - Firebase needs time to recognize the active service worker
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // STEP 3: Brief delay for Firebase to recognize the active service worker controller
+      await new Promise(resolve => setTimeout(resolve, 200));
       
       console.log('🔑 Getting FCM token...');
       
