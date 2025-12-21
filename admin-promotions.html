@@ -372,6 +372,7 @@
     const db = firebase.firestore();
     const storage = firebase.storage();
     let bannerFile = null;
+    let isSubmittingCampaign = false;  // CRITICAL: Prevent duplicate submissions
 
     // Banner Preview
     document.getElementById('bannerImage').addEventListener('change', (e) => {
@@ -438,6 +439,18 @@
     // Create Campaign
     async function createCampaign() {
       try {
+        // CRITICAL: Prevent duplicate submissions from double-clicking
+        if (isSubmittingCampaign) {
+          console.warn('⚠️ Campaign submission already in progress. Ignoring duplicate click.');
+          alert('Campaign is already being sent. Please wait...');
+          return;
+        }
+        
+        isSubmittingCampaign = true;
+        const submitButton = event.target;
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating & Sending...';
+
         const title = document.getElementById('campaignTitle').value;
         const description = document.getElementById('campaignDescription').value;
         const buttonText = document.getElementById('buttonText').value;
@@ -446,6 +459,9 @@
 
         if (!title || !description || !buttonText || !linkTarget || !bannerFile) {
           alert('Please fill all required fields');
+          isSubmittingCampaign = false;
+          submitButton.disabled = false;
+          submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> Create Campaign';
           return;
         }
 
@@ -557,6 +573,13 @@
       } catch (error) {
         console.error('Error:', error);
         alert('Error creating campaign. Check console.');
+      } finally {
+        // CRITICAL: Always reset the submission lock and button state
+        isSubmittingCampaign = false;
+        if (event && event.target) {
+          event.target.disabled = false;
+          event.target.innerHTML = '<i class="fas fa-paper-plane"></i> Create Campaign';
+        }
       }
     }
 
