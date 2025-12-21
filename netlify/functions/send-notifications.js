@@ -234,6 +234,33 @@ exports.handler = async (event, context) => {
           // Delete from guest_tokens if exists
           const guestDoc = await db.collection('guest_tokens').where('token', '==', token).get();
           guestDoc.forEach(doc => doc.ref.delete());
+          
+          // CRITICAL FIX: Also delete from user documents
+          // Search through all users and remove this token from their pushTokens array
+          const usersSnapshot = await db.collection('users').get();
+          const updatePromises = [];
+          
+          usersSnapshot.forEach((doc) => {
+            const userTokens = doc.data().pushTokens || [];
+            const updatedTokens = userTokens.filter(t => t !== token);
+            
+            if (updatedTokens.length !== userTokens.length) {
+              // Token was found and removed
+              updatePromises.push(
+                doc.ref.update({
+                  pushTokens: updatedTokens,
+                  lastTokenCleanup: new Date()
+                }).then(() => {
+                  console.log(`✅ Removed failed token from user: ${doc.id}`);
+                })
+              );
+            }
+          });
+          
+          // Wait for all user updates to complete
+          if (updatePromises.length > 0) {
+            await Promise.all(updatePromises);
+          }
         } catch (error) {
           console.warn(`Could not delete token: ${error.message}`);
         }
