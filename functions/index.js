@@ -4,11 +4,18 @@
  * This file provides serverless functions to replace the Express server:
  * 1. Email sending functionality for order confirmations
  * 2. Razorpay payment integration
- * 3. Health check endpoint
+ * 3. Push notifications to users
+ * 4. Health check endpoint
  */
 
 const functions = require('firebase-functions');
 const cors = require('cors')({origin: true});
+const admin = require('firebase-admin');
+
+// Initialize Firebase Admin
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
 
 // Import email service
 const emailService = require('./email/service');
@@ -161,6 +168,198 @@ exports.verifyRazorpayPayment = functions.https.onRequest((req, res) => {
         success: false,
         message: 'Server error while verifying payment',
         error: error.message
+      });
+    }
+  });
+});
+
+/**
+ * Send Push Notifications
+ * Sends push notifications to subscribed users and guest users
+ * This is the core notification function that was missing!
+ */
+exports.sendNotifications = functions.https.onRequest((req, res) => {
+  cors(req, res, async () => {
+    try {
+      // Extract data from request
+      const { title, body, link = '', category = '', sendToUsers = true, sendToGuests = true } = req.body;
+
+      // Validate required data
+      if (!title || !body) {
+        return res.status(400).json({
+          success: false,
+          error: 'Missing required fields: title and body'
+        });
+      }
+
+      if (!sendToUsers && !sendToGuests) {
+        return res.status(400).json({
+          success: false,
+          error: 'Must send to at least one audience (users or guests)'
+        });
+      }
+
+      const db = admin.firestore();
+      const messaging = admin.messaging();
+      
+      const stats = {
+        userTokenCount: 0,
+        guestTokenCount: 0,
+        totalSent: 0,
+        userSuccess: 0,
+        guestSuccess: 0,
+        failedTokens: []
+      };
+
+      // Collect all tokens
+      const allTokens = [];
+
+      // Get user tokens
+      if (sendToUsers) {
+        try {
+          const usersSnapshot = await db.collection('users').get();
+          usersSnapshot.forEach(doc => {
+            const userData = doc.data();
+            const tokens = userData.pushTokens || [];
+            tokens.forEach(token => {
+              allTokens.push({
+                token,
+                type: 'user',
+                userId: doc.id
+              });
+            });
+          });
+          stats.userTokenCount = allTokens.filter(t => t.type === 'user').length;
+        } catch (error) {
+          console.error('Error fetching user tokens:', error);
+        }
+      }
+
+      // Get guest tokens
+      if (sendToGuests) {
+        try {
+          const guestTokensSnapshot = await db.collection('guest_tokens').get();
+          guestTokensSnapshot.forEach(doc => {
+            const guestData = doc.data();
+            const token = guestData.token;
+            if (token) {
+              allTokens.push({
+                token,
+                type: 'guest',
+                guestId: doc.id
+              });
+            }
+          });
+          stats.guestTokenCount = allTokens.filter(t => t.type === 'guest').length;
+        } catch (error) {
+          console.error('Error fetching guest tokens:', error);
+        }
+      }
+
+      stats.totalSent = allTokens.length;
+
+      // If no tokens found, return success with 0 sent
+      if (allTokens.length === 0) {
+        return res.status(200).json({
+          success: true,
+          message: 'No tokens to send to',
+          stats
+        });
+      }
+
+      // Prepare notification payload
+      const notification = {
+        title: title,
+        body: body
+      };
+
+      const data = {
+        category: category || 'general',
+        timestamp: Date.now().toString(),
+        link: link
+      };
+
+      // Send notifications to all tokens
+      const sendPromises = allTokens.map(async (tokenObj) => {
+        try {
+          const messagePayload = {
+            notification,
+            data,
+            token: tokenObj.token
+          };
+
+          // Send the message
+          const response = await messaging.send(messagePayload);
+          
+          if (tokenObj.type === 'user') {
+            stats.userSuccess++;
+          } else {
+            stats.guestSuccess++;
+          }
+
+          console.log(`Notification sent to ${tokenObj.type}:`, response);
+          return { success: true, token: tokenObj.token };
+        } catch (error) {
+          console.error(`Failed to send to ${tokenObj.type} token:`, error.message);
+          stats.failedTokens.push({
+            token: tokenObj.token,
+            error: error.message,
+            type: tokenObj.type
+          });
+          
+          // If token is invalid, remove it from database
+          if (error.code === 'messaging/invalid-registration-token' || 
+              error.code === 'messaging/registration-token-not-registered') {
+            try {
+              if (tokenObj.type === 'user') {
+                await db.collection('users').doc(tokenObj.userId).update({
+                  pushTokens: admin.firestore.FieldValue.arrayRemove(tokenObj.token)
+                });
+              } else {
+                await db.collection('guest_tokens').doc(tokenObj.guestId).delete();
+              }
+              console.log(`Removed invalid token: ${tokenObj.token}`);
+            } catch (deleteError) {
+              console.error('Error removing invalid token:', deleteError);
+            }
+          }
+
+          return { success: false, token: tokenObj.token, error: error.message };
+        }
+      });
+
+      // Wait for all sends
+      await Promise.all(sendPromises);
+
+      // Log the notification to history
+      try {
+        await db.collection('notification_history').add({
+          title,
+          body,
+          link,
+          category,
+          sentAt: new Date(),
+          stats: {
+            userTokenCount: stats.userTokenCount,
+            guestTokenCount: stats.guestTokenCount,
+            userSuccess: stats.userSuccess,
+            guestSuccess: stats.guestSuccess
+          }
+        });
+      } catch (error) {
+        console.error('Error logging notification history:', error);
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: 'Notifications sent successfully',
+        stats
+      });
+    } catch (error) {
+      console.error('Error in sendNotifications function:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Server error: ' + error.message
       });
     }
   });

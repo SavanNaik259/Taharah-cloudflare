@@ -429,7 +429,10 @@
             btnText.innerHTML = '<span class="loading"></span>Sending...';
 
             try {
-                const response = await fetch('/api/send-notifications', {
+                // Use the Firebase Cloud Function endpoint
+                const functionUrl = 'https://us-central1-auric-a0c92.cloudfunctions.net/sendNotifications';
+                
+                const response = await fetch(functionUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
