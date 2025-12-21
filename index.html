@@ -2378,7 +2378,7 @@ background-color: #000 !important;
         location.reload();
       }
 
-      // Enable notifications - REAL FCM TOKENS
+      // Enable notifications - REAL FCM TOKENS with proper Service Worker activation
       async function enableNotifications() {
         try {
           console.log('📱 Starting REAL FCM token request...');
@@ -2401,48 +2401,69 @@ background-color: #000 !important;
             return;
           }
           
-          // Step 3: REGISTER Service Worker and wait for activation
+          // Step 3: ENSURE Service Worker is FULLY ACTIVATED before proceeding
           try {
-            if ('serviceWorker' in navigator) {
-              console.log('📝 Registering Service Worker...');
-              // IMPORTANT: Must register the service worker first!
-              const registration = await navigator.serviceWorker.register('/service-worker.js', { 
-                scope: '/',
-                updateViaCache: 'none' // Ensure we always get fresh service worker
-              });
-              console.log('✅ Service Worker registered:', registration.scope);
-              
-              console.log('⏳ Waiting for Service Worker to be fully activated...');
-              await navigator.serviceWorker.ready;
-              console.log('✅ Service Worker is now ACTIVE');
-              
-              // Give the service worker an extra moment to initialize
-              await new Promise(resolve => setTimeout(resolve, 500));
+            if (!('serviceWorker' in navigator)) {
+              throw new Error('Service Workers are not supported in this browser');
             }
             
+            console.log('📝 Checking Service Worker status...');
+            
+            // Check if service worker is already registered and active
+            let registration = await navigator.serviceWorker.getRegistration('/');
+            
+            if (!registration || !registration.active) {
+              console.log('📝 Registering new Service Worker...');
+              registration = await navigator.serviceWorker.register('/service-worker.js', { 
+                scope: '/',
+                updateViaCache: 'none'
+              });
+              console.log('✅ Service Worker registered:', registration.scope);
+            } else {
+              console.log('✅ Service Worker already registered and active');
+            }
+            
+            // CRITICAL: Wait for service worker to be in "activated" state
+            console.log('⏳ Waiting for Service Worker activation...');
+            await navigator.serviceWorker.ready;
+            
+            // Additional check: Ensure we have an active service worker
+            const activeWorker = registration.active || (await navigator.serviceWorker.ready).active;
+            if (!activeWorker) {
+              throw new Error('Service Worker failed to activate');
+            }
+            
+            console.log('✅ Service Worker is ACTIVATED and ready:', activeWorker.state);
+            
+            // Extra safety: Wait for service worker to fully initialize
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Step 4: Get FCM token with the activated service worker
             const messaging = firebase.messaging();
-            console.log('🔑 Requesting FCM token...');
+            console.log('🔑 Requesting FCM token from activated Service Worker...');
+            
             const token = await messaging.getToken({
-              vapidKey: 'BIWRF2leB0T2HGDSKEhgevQlbmdaeoCaQUi88hdUw8N9k_d36JuImK8I7Nwj52Wi4_sd9G4QfFdLJWLcqU5akOQ'
+              vapidKey: 'BIWRF2leB0T2HGDSKEhgevQlbmdaeoCaQUi88hdUw8N9k_d36JuImK8I7Nwj52Wi4_sd9G4QfFdLJWLcqU5akOQ',
+              serviceWorkerRegistration: registration
             });
             
             if (!token) {
-              throw new Error('Failed to generate FCM token. Service Worker may not be registered.');
+              throw new Error('Failed to generate FCM token');
             }
             
             console.log('✅ REAL FCM token received:', token.substring(0, 50) + '...');
             
-            // Step 4: Save to localStorage
+            // Step 5: Save to localStorage
             localStorage.setItem('fcm_token', token);
             localStorage.setItem('notificationBannerDismissed', 'true');
             
-            // Step 5: Hide banner
+            // Step 6: Hide banner
             const banner = document.getElementById('notificationBanner');
             if (banner) {
               banner.style.display = 'none';
             }
             
-            // Step 6: Save to Firebase
+            // Step 7: Save to Firebase
             const db = firebase.firestore();
             const user = firebase.auth().currentUser;
             
@@ -2467,22 +2488,23 @@ background-color: #000 !important;
                 notificationsEnabled: true
               }, { merge: true });
               console.log('✅ Real FCM token saved for guest:', deviceId);
-              
-              // Verify it was saved
-              const verifyDoc = await db.collection('guest_tokens').doc(deviceId).get();
-              console.log('✅ Verified guest token document:', verifyDoc.data());
             }
             
-            alert('✅ Notifications ENABLED! You\'ll receive real push notifications about deals, restocks, and special offers.');
+            alert('✅ Notifications ENABLED! You\'ll receive push notifications about deals, restocks, and special offers.');
             
           } catch (fcmError) {
             console.error('❌ FCM token error:', fcmError);
-            alert('⚠️ Could not enable push notifications: ' + fcmError.message);
+            console.error('Error details:', {
+              message: fcmError.message,
+              code: fcmError.code,
+              stack: fcmError.stack
+            });
+            alert('⚠️ Could not enable push notifications: ' + fcmError.message + '\n\nPlease try refreshing the page.');
           }
           
         } catch (error) {
           console.error('❌ Notification error:', error);
-          alert('Error enabling notifications. Please try again.');
+          alert('Error enabling notifications. Please try again or refresh the page.');
         }
       }
       
