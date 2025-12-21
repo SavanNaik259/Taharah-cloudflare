@@ -28,6 +28,19 @@ class FirebaseNotificationsManager {
     }
 
     try {
+      // CRITICAL: Wait for Firebase to be available (it loads async from script tag)
+      let retries = 0;
+      while (typeof firebase === 'undefined' && retries < 50) {
+        await new Promise(r => setTimeout(r, 100));
+        retries++;
+      }
+      
+      if (typeof firebase === 'undefined') {
+        throw new Error('Firebase SDK failed to load - check your internet connection');
+      }
+
+      console.log('✅ Firebase SDK is available');
+
       // Register SINGLE service worker at root - prevents duplicates!
       this.registration = await navigator.serviceWorker.register('/service-worker.js', {
         scope: '/'
@@ -50,8 +63,10 @@ class FirebaseNotificationsManager {
 
       console.log('✅ Notifications Manager initialized successfully');
     } catch (error) {
-      console.error('❌ Error initializing notifications:', error);
-      console.error('Stack:', error.stack);
+      const errorMsg = (error?.message || String(error) || 'unknown error').trim();
+      console.error('❌ Error initializing notifications:', errorMsg);
+      console.error('Stack:', error?.stack);
+      console.error('Full error object:', error);
     }
   }
 
@@ -81,7 +96,8 @@ class FirebaseNotificationsManager {
         console.warn('⚠️ User denied notification permission');
       }
     } catch (error) {
-      console.error('❌ Error requesting permission:', error);
+      console.error('❌ Error requesting permission:', error?.message || String(error));
+      throw error; // Re-throw to be caught by caller
     }
   }
 
@@ -119,9 +135,10 @@ class FirebaseNotificationsManager {
         console.error('❌ Failed to get FCM token');
       }
     } catch (error) {
-      console.error('❌ Error getting FCM token:', error);
-      console.error('Error code:', error.code);
-      console.error('Error message:', error.message);
+      console.error('❌ Error getting FCM token:', error?.message || String(error));
+      console.error('Error code:', error?.code);
+      console.error('Full error:', error);
+      throw error; // Re-throw to show user
     }
   }
 
@@ -214,3 +231,15 @@ class FirebaseNotificationsManager {
 // Initialize globally
 window.FirebaseNotificationsManager = FirebaseNotificationsManager;
 const notificationsManager = new FirebaseNotificationsManager();
+
+// Auto-initialize when page loads
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', async () => {
+    console.log('📋 Page loaded, initializing notifications...');
+    await notificationsManager.init();
+  });
+} else {
+  // Page already loaded
+  console.log('📋 Initializing notifications immediately...');
+  notificationsManager.init().catch(e => console.error('❌ Init error:', e));
+}
