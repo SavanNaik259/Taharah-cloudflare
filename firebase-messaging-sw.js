@@ -113,8 +113,15 @@ self.addEventListener('notificationclick', (event) => {
     }
     
     // Get the target URL from notification data
+    // We check for data.link which is where we store it in displayNotification
     let targetUrl = event.notification.data?.link || '/';
-    console.log('[firebase-messaging-sw.js] Target URL before check:', targetUrl);
+    console.log('[firebase-messaging-sw.js] Target URL from notification data:', targetUrl);
+    
+    // If no link in data, check the notification itself (some browsers might put it there)
+    if (!targetUrl || targetUrl === '/') {
+        targetUrl = event.notification.link || '/';
+        console.log('[firebase-messaging-sw.js] Target URL from notification.link:', targetUrl);
+    }
     
     // Ensure relative links work by prepending current origin
     if (targetUrl.startsWith('/') && !targetUrl.startsWith('//')) {
