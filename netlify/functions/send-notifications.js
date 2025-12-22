@@ -27,33 +27,72 @@ exports.handler = async (event) => {
     
     try {
         initAdmin();
-        const { title, body, link } = JSON.parse(event.body);
+        const { title, body, link, sendToUsers, sendToGuests, category } = JSON.parse(event.body);
         const db = admin.firestore();
         const messaging = admin.messaging();
 
-        // Collect tokens
+        // Collect tokens based on selected audience
         const tokens = new Set();
-        const guestSnap = await db.collection('guest_tokens').get();
-        guestSnap.forEach(doc => tokens.add(doc.data().token));
+        let userTokenCount = 0;
+        let guestTokenCount = 0;
+
+        // Collect guest tokens if sendToGuests is true
+        if (sendToGuests) {
+            const guestSnap = await db.collection('guest_tokens').get();
+            guestSnap.forEach(doc => {
+                const token = doc.data().token;
+                if (token) {
+                    tokens.add(token);
+                    guestTokenCount++;
+                }
+            });
+        }
         
-        const userSnap = await db.collection('users').get();
-        userSnap.forEach(doc => {
-            (doc.data().pushTokens || []).forEach(t => tokens.add(t));
-        });
+        // Collect user tokens if sendToUsers is true
+        if (sendToUsers) {
+            const userSnap = await db.collection('users').get();
+            userSnap.forEach(doc => {
+                (doc.data().pushTokens || []).forEach(t => {
+                    if (t) {
+                        tokens.add(t);
+                        userTokenCount++;
+                    }
+                });
+            });
+        }
 
         const tokenList = Array.from(tokens).filter(t => typeof t === 'string' && t.length > 100);
-        if (tokenList.length === 0) return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true, count: 0 }) };
+        if (tokenList.length === 0) {
+            return { 
+                statusCode: 200, 
+                headers: corsHeaders, 
+                body: JSON.stringify({ 
+                    success: true, 
+                    stats: { userTokenCount: 0, guestTokenCount: 0, totalSent: 0 },
+                    message: 'No tokens found to send notifications' 
+                }) 
+            };
+        }
 
-        // For Web Push, including both 'notification' AND 'webpush.notification' (or manual SW handling)
-        // often causes duplicates. We'll use 'data' for our custom SW logic to avoid double-display.
+        // Create message with both data and notification properties for better compatibility
         const message = {
+            notification: {
+                title: title,
+                body: body
+            },
             data: { 
                 title, 
                 body, 
                 link: link || '/',
-                icon: '/images/logos/royalmeenakari.png'
+                icon: '/images/logos/royalmeenakari.png',
+                category: category || 'general'
             },
             webpush: {
+                notification: {
+                    title: title,
+                    body: body,
+                    icon: '/images/logos/royalmeenakari.png'
+                },
                 fcmOptions: { link: link || '/' }
             }
         };
@@ -63,17 +102,34 @@ exports.handler = async (event) => {
             ...message
         });
 
+        console.log(`Notification sent successfully. Success: ${response.successCount}, Failed: ${response.failureCount}`);
+
         return {
             statusCode: 200,
             headers: corsHeaders,
             body: JSON.stringify({
                 success: true,
-                sent: response.successCount,
-                failed: response.failureCount
+                stats: {
+                    userTokenCount: userTokenCount,
+                    guestTokenCount: guestTokenCount,
+                    totalSent: response.successCount
+                },
+                message: `Successfully sent to ${response.successCount} devices`,
+                details: {
+                    successCount: response.successCount,
+                    failureCount: response.failureCount
+                }
             })
         };
     } catch (error) {
         console.error('Send error:', error);
-        return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: error.message }) };
+        return { 
+            statusCode: 500, 
+            headers: corsHeaders, 
+            body: JSON.stringify({ 
+                success: false,
+                error: error.message 
+            }) 
+        };
     }
 };
