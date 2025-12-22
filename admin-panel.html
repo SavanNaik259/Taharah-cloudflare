@@ -5425,30 +5425,187 @@
         }
 
         // Navigation functions
-        function showSection(sectionName) {
-            console.log(`Switching to section: ${sectionName}`);
+        // Notification System Logic
+        const notificationDb = firebase.firestore();
+        const notificationStorage = firebase.storage();
+        let uploadedImageUrl = "";
 
-            // Update navigation
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
+        document.getElementById("imageFile")?.addEventListener("change", async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const preview = document.getElementById("imagePreview");
+                const container = document.getElementById("imagePreviewContainer");
+                if(preview) preview.src = event.target.result;
+                if(container) container.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+            const statusEl = document.getElementById("uploadStatus");
+            if(statusEl) {
+                statusEl.textContent = "⏳ Uploading...";
+                statusEl.style.display = "block";
+                statusEl.style.color = "#2563eb";
+            }
+            try {
+                const timestamp = Date.now();
+                const filename = `notifications/${timestamp}_${file.name}`;
+                const storageRef = notificationStorage.ref(filename);
+                const uploadTask = storageRef.put(file);
+                uploadTask.on("state_changed",
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        if(statusEl) statusEl.textContent = `⏳ Uploading... ${Math.round(progress)}%`;
+                    },
+                    (error) => {
+                        if(statusEl) {
+                            statusEl.textContent = "❌ Upload failed: " + error.message;
+                            statusEl.style.color = "#dc2626";
+                        }
+                    },
+                    async () => {
+                        uploadedImageUrl = await uploadTask.snapshot.ref.getDownloadURL();
+                        const urlInput = document.getElementById("imageUrl");
+                        if(urlInput) urlInput.value = uploadedImageUrl;
+                        if(statusEl) {
+                            statusEl.textContent = "✅ Image uploaded successfully!";
+                            statusEl.style.color = "#059669";
+                        }
+                    }
+                );
+            } catch (error) {
+                if(statusEl) {
+                    statusEl.textContent = "❌ Error: " + error.message;
+                    statusEl.style.color = "#dc2626";
+                }
+            }
+        });
+
+        window.loadTokenStats = async function() {
+            try {
+                const usersSnapshot = await notificationDb.collection("users").get();
+                let userTokenCount = 0;
+                usersSnapshot.forEach(doc => {
+                    const tokens = doc.data().pushTokens || [];
+                    userTokenCount += tokens.length;
+                });
+                const guestTokensSnapshot = await notificationDb.collection("guest_tokens").get();
+                const guestTokenCount = guestTokensSnapshot.size;
+                const totalCount = userTokenCount + guestTokenCount;
+                const uCount = document.getElementById("userTokenCount");
+                const gCount = document.getElementById("guestTokenCount");
+                const tCount = document.getElementById("totalTokenCount");
+                if(uCount) uCount.textContent = userTokenCount;
+                if(gCount) gCount.textContent = guestTokenCount;
+                if(tCount) tCount.textContent = totalCount;
+            } catch (error) {
+                console.error("Error loading notification stats:", error);
+            }
+        };
+
+        document.getElementById("notificationForm")?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const title = document.getElementById("title").value;
+            const body = document.getElementById("body").value;
+            const link = document.getElementById("link").value || "";
+            const imageUrl = document.getElementById("imageUrl").value || "";
+            const buttonText = document.getElementById("buttonText").value || "View";
+            const sendToUsers = document.getElementById("sendToUsers").checked;
+            const sendToGuests = document.getElementById("sendToGuests").checked;
+            if (!title || !body) {
+                showNotificationAlert("Please fill in title and message", "error");
+                return;
+            }
+            const sendBtn = document.getElementById("sendBtn");
+            const btnText = document.getElementById("btnText");
+            if(sendBtn) sendBtn.disabled = true;
+            if(btnText) btnText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            try {
+                const response = await fetch("/api/send-notifications", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ title, body, link, imageUrl, buttonText, sendToUsers, sendToGuests })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showNotificationAlert(`✓ Sent successfully! Total: ${result.stats.totalSent}`, "success");
+                    e.target.reset();
+                    const preview = document.getElementById("imagePreviewContainer");
+                    if(preview) preview.style.display = "none";
+                    loadTokenStats();
+                } else {
+                    showNotificationAlert(result.error || "Failed to send", "error");
+                }
+            } catch (error) {
+                showNotificationAlert("Error: " + error.message, "error");
+            } finally {
+                if(sendBtn) sendBtn.disabled = false;
+                if(btnText) btnText.textContent = "Send Notification";
+            }
+        });
+
+        document.getElementById("testBtn")?.addEventListener("click", async (e) => {
+            const testBtn = document.getElementById("testBtn");
+            const testBtnText = document.getElementById("testBtnText");
+            if(testBtn) testBtn.disabled = true;
+            if(testBtnText) testBtnText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+            try {
+                const response = await fetch("/api/test-send-notification", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showNotificationAlert(`✅ Test Success! Sent to: ${result.summary.successCount}`, "success");
+                } else {
+                    showNotificationAlert(result.error || "Test failed", "error");
+                }
+            } catch (error) { showNotificationAlert("Error: " + error.message, "error"); }
+            finally {
+                if(testBtn) testBtn.disabled = false;
+                if(testBtnText) testBtnText.textContent = "📧 Test Send";
+            }
+        });
+
+        function showNotificationAlert(message, type) {
+            const alertId = type === "success" ? "successAlert" : "errorAlert";
+            const alert = document.getElementById(alertId);
+            if(alert) {
+                alert.textContent = message;
+                alert.style.display = "block";
+                setTimeout(() => alert.style.display = "none", 5000);
+            }
+        }
+
+        function showSection(sectionId) {
+            console.log("Showing section:", sectionId);
+            const sections = document.querySelectorAll(".content-section");
+            sections.forEach(section => {
+                section.classList.remove("active");
             });
 
-            // Find and activate the clicked nav item
-            const clickedItem = event ? event.target.closest('.nav-item') :
-                document.querySelector(`.nav-item[onclick*="${sectionName}"]`);
-            if (clickedItem) {
-                clickedItem.classList.add('active');
-                console.log(`Activated nav item for: ${sectionName}`);
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add("active");
             }
 
-            // Update content sections
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.classList.remove('active');
+            const navItems = document.querySelectorAll(".nav-item");
+            navItems.forEach(item => {
+                item.classList.remove("active");
+                const onclickAttr = item.getAttribute("onclick");
+                if (onclickAttr && onclickAttr.includes(`showSection('${sectionId}')`)) {
+                    item.classList.add("active");
+                }
             });
 
-            const targetSection = document.getElementById(sectionName);
-            if (targetSection) {
-                targetSection.classList.add('active');
+            if (sectionId === "push-notifications") {
+                if (typeof loadTokenStats === "function") loadTokenStats();
+            }
+
+            if (window.innerWidth <= 1024) {
+                closeSidebar();
+            }
+        }
                 console.log(`Activated content section: ${sectionName}`);
             } else {
                 console.error(`Section not found: ${sectionName}`);
@@ -5480,6 +5637,8 @@
                 }, 100);
             } else if (sectionName === 'notifications') {
                 loadNotifications(); // Load notifications when the section is shown
+            } else if (sectionName === 'push-notifications') {
+                if (typeof loadTokenStats === 'function') loadTokenStats();
             }
         }
 
