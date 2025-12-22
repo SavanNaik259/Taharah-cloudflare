@@ -474,6 +474,11 @@
                     })
                 });
 
+                // Log raw response for debugging
+                const responseClone = response.clone();
+                const text = await responseClone.text();
+                console.log('Raw response:', text);
+
                 const result = await response.json();
 
                 if (result.success) {
