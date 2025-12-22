@@ -16,30 +16,54 @@ firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
 self.addEventListener('notificationclick', (event) => {
+    console.log('[SW] Notification click received. Action:', event.action);
+    
+    // CRITICAL: Close notification manually first. 
+    // On Android, notifications don't auto-close when clicking action buttons.
     event.notification.close();
 
-    // Dismiss action
+    // Handle explicit dismiss
     if (event.action === 'close') {
+        console.log('[SW] User clicked Dismiss.');
         return;
     }
 
+    // Prepare target URL
     let targetUrl = '/';
-
     try {
         targetUrl = event.notification?.data?.link || '/';
-    } catch (e) {}
+    } catch (e) {
+        console.error('[SW] Error parsing notification data:', e);
+    }
 
-    // Make absolute
+    // Ensure absolute URL
     if (targetUrl.startsWith('/')) {
         targetUrl = self.location.origin + targetUrl;
     }
 
+    console.log('[SW] Target URL:', targetUrl);
+
+    // Use event.waitUntil to keep the worker alive
     event.waitUntil(
-        new Promise((resolve) => {
-            clients.openWindow(targetUrl)
-                .then(() => resolve())
-                .catch(() => resolve());
-        })
+        clients.matchAll({ type: 'window', includeUncontrolled: true })
+            .then((clientList) => {
+                // 1. Try to focus an existing window if it's already on the target URL
+                for (const client of clientList) {
+                    if (client.url === targetUrl && 'focus' in client) {
+                        console.log('[SW] Focusing existing window.');
+                        return client.focus();
+                    }
+                }
+
+                // 2. If no window exists, or it's not the right URL, open a new one
+                if (clients.openWindow) {
+                    console.log('[SW] Opening new window.');
+                    return clients.openWindow(targetUrl);
+                }
+            })
+            .catch((error) => {
+                console.error('[SW] Failed to handle notification click:', error);
+            })
     );
 });
 
