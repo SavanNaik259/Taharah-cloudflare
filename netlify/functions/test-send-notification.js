@@ -33,8 +33,57 @@ if (!admin.apps.length) {
   }
 }
 
-const db = admin.firestore();
-const messaging = admin.messaging();
+let db = null;
+let messaging = null;
+let isInitialized = false;
+
+function initializeFirebase() {
+  if (isInitialized && admin.apps.length > 0) {
+    return true;
+  }
+
+  try {
+    const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+    const projectId = process.env.FIREBASE_PROJECT_ID || "auric-a0c92";
+    
+    if (!privateKey || !clientEmail) {
+      console.error('❌ Missing Firebase credentials in test endpoint');
+      return false;
+    }
+
+    const serviceAccount = {
+      type: "service_account",
+      project_id: projectId,
+      private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID || "",
+      private_key: privateKey.includes('\\n') ? privateKey.replace(/\\n/g, '\n') : privateKey,
+      client_email: clientEmail,
+      client_id: process.env.FIREBASE_CLIENT_ID || "",
+      auth_uri: "https://accounts.google.com/o/oauth2/auth",
+      token_uri: "https://oauth2.googleapis.com/token",
+      auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+      client_x509_cert_url: process.env.FIREBASE_CERT_URL || ""
+    };
+
+    if (admin.apps.length === 0) {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "auric-a0c92.firebasestorage.app"
+      });
+    }
+
+    db = admin.firestore();
+    messaging = admin.messaging();
+    isInitialized = true;
+    
+    console.log(`✅ Firebase test endpoint initialized`);
+    return true;
+  } catch (error) {
+    console.error('❌ Firebase test init failed:', error.message);
+    isInitialized = false;
+    return false;
+  }
+}
 
 exports.handler = async (event, context) => {
   const headers = {
@@ -50,6 +99,14 @@ exports.handler = async (event, context) => {
 
   try {
     console.log('\n🧪 MANUAL TEST NOTIFICATION STARTING...\n');
+
+    if (!initializeFirebase()) {
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ success: false, error: 'Firebase initialization failed' })
+      };
+    }
 
     // Get all tokens
     const usersSnapshot = await db.collection('users').get();
