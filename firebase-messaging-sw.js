@@ -18,31 +18,29 @@ const messaging = firebase.messaging();
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
 
-    // Handle dismiss
+    // Dismiss action
     if (event.action === 'close') {
         return;
     }
 
-    // Handle BOTH:
-    // 1. Notification body click (event.action === '')
-    // 2. Action button click (event.action === 'open')
-    if (event.action === '' || event.action === 'open') {
+    let targetUrl = '/';
 
-        let targetUrl = '/';
+    try {
+        targetUrl = event.notification?.data?.link || '/';
+    } catch (e) {}
 
-        try {
-            targetUrl = event.notification?.data?.link || '/';
-        } catch (e) {}
-
-        // Convert relative URL to absolute
-        if (targetUrl.startsWith('/')) {
-            targetUrl = self.location.origin + targetUrl;
-        }
-
-        event.waitUntil(
-            clients.openWindow(targetUrl)
-        );
+    // Make absolute
+    if (targetUrl.startsWith('/')) {
+        targetUrl = self.location.origin + targetUrl;
     }
+
+    event.waitUntil(
+        new Promise((resolve) => {
+            clients.openWindow(targetUrl)
+                .then(() => resolve())
+                .catch(() => resolve());
+        })
+    );
 });
 
 // Function to display notification with image and button
