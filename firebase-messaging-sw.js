@@ -29,7 +29,7 @@ messaging.onBackgroundMessage((payload) => {
     const notificationTitle = payload.data?.title || 'New Notification';
     const notificationOptions = {
         body: payload.data?.body || 'Check out the latest update!',
-        icon: payload.data?.icon || '/images/logos/royalmeenakari.png',
+        icon: payload.data?.icon || '/images/logos/royalmeenakari-icon.svg',
         tag: 'royal-meenakari-notification',
         requireInteraction: false,
         data: {
