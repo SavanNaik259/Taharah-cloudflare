@@ -2349,24 +2349,24 @@
                         <div id="errorAlert" class="alert alert-error" style="display:none; padding: 15px; margin-bottom: 20px; border-radius: 4px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;"></div>
 
                         <div class="stats-grid" style="margin-bottom: 30px;">
-                            <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; text-align: center;">
-                                <div class="stat-value" id="userTokenCount" style="color: white;">-</div>
-                                <div class="stat-change" style="color: rgba(255,255,255,0.8);">Subscribed Users</div>
+                            <div class="stat-card" style="background: #ffffff; color: #1e293b; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; text-align: center;">
+                                <div class="stat-value" id="userTokenCount" style="color: #1e293b;">-</div>
+                                <div class="stat-change" style="color: #64748b;">Subscribed Users</div>
                             </div>
-                            <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; text-align: center;">
-                                <div class="stat-value" id="guestTokenCount" style="color: white;">-</div>
-                                <div class="stat-change" style="color: rgba(255,255,255,0.8);">Guest Tokens</div>
+                            <div class="stat-card" style="background: #ffffff; color: #1e293b; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; text-align: center;">
+                                <div class="stat-value" id="guestTokenCount" style="color: #1e293b;">-</div>
+                                <div class="stat-change" style="color: #64748b;">Guest Tokens</div>
                             </div>
-                            <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; text-align: center;">
-                                <div class="stat-value" id="totalTokenCount" style="color: white;">-</div>
-                                <div class="stat-change" style="color: rgba(255,255,255,0.8);">Total Recipients</div>
+                            <div class="stat-card" style="background: #ffffff; color: #1e293b; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; text-align: center;">
+                                <div class="stat-value" id="totalTokenCount" style="color: #1e293b;">-</div>
+                                <div class="stat-change" style="color: #64748b;">Total Recipients</div>
                             </div>
                         </div>
 
                         <form id="notificationForm" style="max-width: 800px; margin: 0 auto;">
                             <div style="margin-bottom: 20px;">
                                 <label style="display: block; margin-bottom: 8px; font-weight: 600;">Notification Title *</label>
-                                <input type="text" id="title" name="title" placeholder="e.g., New Collection Launch" value="🎉 New Winter Collection Arrived!" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px;">
+                                <input type="text" id="title" name="title" placeholder="e.g., New Collection Launch" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px;">
                             </div>
 
                             <div style="margin-bottom: 20px;">
@@ -2379,7 +2379,7 @@
                                 <input type="file" id="imageFile" name="imageFile" accept="image/*" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                                 <input type="hidden" id="imageUrl" name="imageUrl" value="">
                                 <div id="imagePreviewContainer" style="display:none; margin-top: 10px;">
-                                    <img id="imagePreview" src="" alt="Preview" style="max-width: 300px; border-radius: 6px; border: 2px solid #667eea;">
+                                    <img id="imagePreview" src="" alt="Preview" style="max-width: 300px; border-radius: 6px; border: 2px solid #e2e8f0;">
                                 </div>
                                 <div id="uploadStatus" class="image-upload-status" style="display:none; font-size: 12px; margin-top: 5px;"></div>
                             </div>
@@ -2416,9 +2416,6 @@
                             <div style="display: flex; gap: 15px; margin-top: 30px;">
                                 <button type="submit" class="btn btn-primary" id="sendBtn" style="flex: 1; justify-content: center; padding: 12px;">
                                     <span id="btnText">Send Notification</span>
-                                </button>
-                                <button type="button" class="btn btn-success" id="testBtn" style="flex: 1; justify-content: center; padding: 12px;">
-                                    <span id="testBtnText">📧 Test Send</span>
                                 </button>
                                 <button type="reset" class="btn btn-outline" style="padding: 12px;">Clear</button>
                             </div>
