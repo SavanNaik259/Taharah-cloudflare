@@ -102,7 +102,7 @@ exports.handler = async (event) => {
 
         console.log('[send-notifications] Building message payload...');
         
-        /* Build data object - must be stringified for Firebase Admin SDK
+        // Build data object - must be stringified for Firebase Admin SDK
         const dataPayload = {
             title: String(title),
             body: String(body),
