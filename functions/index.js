@@ -182,7 +182,7 @@ exports.sendNotifications = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
     try {
       // Extract data from request
-      const { title, body, link = '', category = '', sendToUsers = true, sendToGuests = true } = req.body;
+      const { title, body, link = '', imageUrl = '', buttonText = '', category = '', sendToUsers = true, sendToGuests = true } = req.body;
 
       // Validate required data
       if (!title || !body) {
@@ -276,7 +276,9 @@ exports.sendNotifications = functions.https.onRequest((req, res) => {
       const data = {
         category: category || 'general',
         timestamp: Date.now().toString(),
-        link: link
+        link: link,
+        imageUrl: imageUrl,
+        buttonText: buttonText || 'View'
       };
 
       // Send notifications to all tokens
@@ -337,6 +339,8 @@ exports.sendNotifications = functions.https.onRequest((req, res) => {
           title,
           body,
           link,
+          imageUrl,
+          buttonText,
           category,
           sentAt: new Date(),
           stats: {
