@@ -103,6 +103,7 @@ exports.handler = async (event) => {
         console.log('[send-notifications] Building message payload...');
         
         // Build data object - must be stringified for Firebase Admin SDK
+        // IMPORTANT: FCM data fields must be strings
         const dataPayload = {
             title: String(title),
             body: String(body),
@@ -116,14 +117,16 @@ exports.handler = async (event) => {
         
         console.log('[send-notifications] Data payload:', JSON.stringify(dataPayload, null, 2));
 
-        // Message structure for Firebase Admin SDK - NO fcmOptions (that's web SDK only)
-        // Use webpush configuration for web browsers
+        // Message structure for Firebase Admin SDK
+        // We only send data to let the service worker handle the display
         const message = {
             data: dataPayload,
             webpush: {
-                data: dataPayload,
                 headers: {
                     'TTL': '86400'
+                },
+                fcm_options: {
+                    link: String(link || '/')
                 }
             }
         };

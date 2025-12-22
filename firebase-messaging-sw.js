@@ -30,61 +30,36 @@ function extractData(obj) {
 
 // Function to display notification with image and button
 function displayNotification(payload) {
-    console.log('[firebase-messaging-sw.js] ='.repeat(50));
     console.log('[firebase-messaging-sw.js] DISPLAYING NOTIFICATION');
+    console.log('[firebase-messaging-sw.js] Full payload:', JSON.stringify(payload, null, 2));
     
-    const dataObj = extractData(payload.data) || {};
-    const webpushData = extractData(payload.webpush?.data) || {};
+    // Extract data from all possible FCM structures
+    const data = payload.data || (payload.webpush && payload.webpush.data) || payload.notification || {};
     
-    // Check if we've already shown this notification to prevent duplicates
-    const notificationId = dataObj.timestamp || webpushData.timestamp || Date.now().toString();
-    const lastShownId = self.lastShownNotificationId;
-    if (lastShownId === notificationId) {
-        console.log('[firebase-messaging-sw.js] 🛑 Duplicate notification detected, skipping');
+    // Check if we've already shown this notification
+    const notificationId = data.timestamp || data.tag || Date.now().toString();
+    if (self.lastShownNotificationId === notificationId) {
+        console.log('[firebase-messaging-sw.js] 🛑 Duplicate detected');
         return Promise.resolve();
     }
     self.lastShownNotificationId = notificationId;
     
-    // Get title - check all possible sources
-    const notificationTitle = dataObj.title || webpushData.title || 'Royal Meenakari';
-    
-    // Get body - check all possible sources  
-    const notificationBody = dataObj.body || webpushData.body || 'New update';
-    
-    // Get image - CRITICAL - check all sources
-    const imageUrl = dataObj.imageUrl || webpushData.imageUrl || '';
-    
-    // Get button text
-    const buttonText = dataObj.buttonText || webpushData.buttonText || 'View';
-    
-    // Get link from data
-    const link = dataObj.link || webpushData.link || '/';
-    
-    // Get icon
-    const icon = dataObj.icon || webpushData.icon || '/images/logos/royalmeenakari.png';
-    
-    console.log('[firebase-messaging-sw.js] EXTRACTED VALUES:');
-    console.log('  - Title:', notificationTitle);
-    console.log('  - Body:', notificationBody);
-    console.log('  - Image URL:', imageUrl, '(type:', typeof imageUrl, ', length:', imageUrl ? imageUrl.length : 0, ')');
-    console.log('  - Button:', buttonText);
-    console.log('  - Link:', link);
-    console.log('  - Icon:', icon);
-    
-    const notificationOptions = {
-        body: notificationBody,
-        icon: icon,
+    const title = data.title || 'Royal Meenakari';
+    const options = {
+        body: data.body || 'New update from Royal Meenakari',
+        icon: data.icon || '/images/logos/royalmeenakari.png',
+        badge: data.badge || '/images/logos/royalmeenakari.png',
+        image: data.imageUrl || data.image || '',
         tag: 'royal-meenakari-notification',
-        requireInteraction: false,
-        badge: icon,
+        requireInteraction: true,
         data: {
-            link: link,
-            category: dataObj.category || webpushData.category || 'general'
+            link: data.link || '/',
+            category: data.category || 'general'
         },
         actions: [
             { 
                 action: 'open', 
-                title: buttonText
+                title: data.buttonText || 'View'
             },
             {
                 action: 'close',
@@ -93,25 +68,8 @@ function displayNotification(payload) {
         ]
     };
     
-    // Add image ONLY if it has actual content
-    if (imageUrl && typeof imageUrl === 'string' && imageUrl.trim().length > 5) {
-        notificationOptions.image = imageUrl;
-        console.log('[firebase-messaging-sw.js] ✅ IMAGE ADDED:', imageUrl.substring(0, 50) + '...');
-    } else {
-        console.log('[firebase-messaging-sw.js] ❌ IMAGE NOT ADDED - imageUrl:', imageUrl);
-    }
-
-    console.log('[firebase-messaging-sw.js] FINAL OPTIONS:', JSON.stringify(notificationOptions, null, 2));
-    
-    try {
-        console.log('[firebase-messaging-sw.js] 🔔 Calling showNotification...');
-        const notifPromise = self.registration.showNotification(notificationTitle, notificationOptions);
-        console.log('[firebase-messaging-sw.js] ✅ NOTIFICATION DISPLAYED SUCCESSFULLY');
-        return notifPromise;
-    } catch (error) {
-        console.error('[firebase-messaging-sw.js] ❌ ERROR:', error.message);
-        return Promise.reject(error);
-    }
+    console.log('[firebase-messaging-sw.js] Final Options:', JSON.stringify(options, null, 2));
+    return self.registration.showNotification(title, options);
 }
 
 // Handle background messages (app is closed/not in focus)
