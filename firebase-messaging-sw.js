@@ -17,27 +17,43 @@ const messaging = firebase.messaging();
 
 // Handle background messages
 messaging.onBackgroundMessage((payload) => {
-    console.log('[firebase-messaging-sw.js] Received background message ', payload);
+    console.log('[firebase-messaging-sw.js] Received background message', JSON.stringify(payload, null, 2));
+    console.log('[firebase-messaging-sw.js] Payload data:', payload.data);
+    console.log('[firebase-messaging-sw.js] Payload notification:', payload.notification);
+    console.log('[firebase-messaging-sw.js] Payload webpush:', payload.webpush);
     
-    // If webpush notification is present, FCM will handle it automatically - don't show manually
-    if (payload.webpush?.notification) {
-        console.log('FCM will auto-display webpush notification - skipping manual display');
-        return;
-    }
-
-    // Only manually show notification for data-only messages
-    const notificationTitle = payload.data?.title || 'New Notification';
-    const notificationBody = payload.data?.body || 'Check out the latest update!';
-    const buttonText = payload.data?.buttonText || 'View';
-    const imageUrl = payload.data?.imageUrl || '';
+    // Extract data from payload - check both data and notification structures
+    const dataObj = payload.data || {};
+    const notificationObj = payload.notification || {};
+    
+    // Get title from data first, then notification, then default
+    const notificationTitle = dataObj.title || notificationObj.title || 'New Notification';
+    
+    // Get body from data first, then notification, then default
+    const notificationBody = dataObj.body || notificationObj.body || 'Check out the latest update!';
+    
+    // Get button text from data
+    const buttonText = dataObj.buttonText || 'View';
+    
+    // Get image URL from data
+    const imageUrl = dataObj.imageUrl || '';
+    
+    // Get link from data
+    const link = dataObj.link || '/';
+    
+    // Get icon from data or use default
+    const icon = dataObj.icon || notificationObj.icon || '/images/logos/royalmeenakari-icon.svg';
+    
+    console.log(`[firebase-messaging-sw.js] Displaying notification: ${notificationTitle} - Image: ${imageUrl} - Button: ${buttonText}`);
     
     const notificationOptions = {
         body: notificationBody,
-        icon: payload.data?.icon || '/images/logos/royalmeenakari-icon.svg',
+        icon: icon,
         tag: 'royal-meenakari-notification',
         requireInteraction: false,
         data: {
-            link: payload.data?.link || '/'
+            link: link,
+            category: dataObj.category || 'general'
         },
         actions: [
             { 
@@ -51,36 +67,66 @@ messaging.onBackgroundMessage((payload) => {
         ]
     };
     
-    // Add image if provided
-    if (imageUrl) {
+    // Add image if provided - this is critical for showing the image
+    if (imageUrl && imageUrl.length > 0) {
         notificationOptions.image = imageUrl;
+        console.log(`[firebase-messaging-sw.js] Added image to notification: ${imageUrl}`);
+    }
+    
+    // Add badge if provided
+    if (notificationObj.badge || dataObj.badge) {
+        notificationOptions.badge = notificationObj.badge || dataObj.badge;
     }
 
-    return self.registration.showNotification(notificationTitle, notificationOptions);
+    console.log('[firebase-messaging-sw.js] Final notification options:', JSON.stringify(notificationOptions, null, 2));
+    
+    try {
+        const notifPromise = self.registration.showNotification(notificationTitle, notificationOptions);
+        console.log('[firebase-messaging-sw.js] Notification displayed successfully');
+        return notifPromise;
+    } catch (error) {
+        console.error('[firebase-messaging-sw.js] Error displaying notification:', error);
+        return null;
+    }
 });
 
 // Handle notification click and action buttons
 self.addEventListener('notificationclick', (event) => {
+    console.log('[firebase-messaging-sw.js] Notification clicked - action:', event.action);
     event.notification.close();
     
     // Handle action button clicks
     if (event.action === 'close') {
-        return; // Just close the notification
+        console.log('[firebase-messaging-sw.js] User dismissed notification');
+        return;
     }
     
-    // Default action or 'open' action button
+    // Get the target URL from notification data
     const targetUrl = event.notification.data?.link || '/';
+    console.log('[firebase-messaging-sw.js] Opening URL:', targetUrl);
     
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+            console.log('[firebase-messaging-sw.js] Found', clientList.length, 'windows');
+            
+            // Try to focus existing window with the target URL
             for (const client of clientList) {
-                if (client.url === targetUrl && 'focus' in client) {
+                if (client.url.includes(targetUrl) || client.url === targetUrl) {
+                    console.log('[firebase-messaging-sw.js] Focusing existing window');
                     return client.focus();
                 }
             }
+            
+            // If no matching window, open a new one
             if (clients.openWindow) {
+                console.log('[firebase-messaging-sw.js] Opening new window with URL:', targetUrl);
                 return clients.openWindow(targetUrl);
             }
         })
     );
+});
+
+// Handle notification close
+self.addEventListener('notificationclose', (event) => {
+    console.log('[firebase-messaging-sw.js] Notification closed by user');
 });

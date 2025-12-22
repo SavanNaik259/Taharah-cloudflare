@@ -27,7 +27,25 @@ exports.handler = async (event) => {
     
     try {
         initAdmin();
-        const { title, body, link, imageUrl, buttonText, sendToUsers, sendToGuests, category } = JSON.parse(event.body);
+        
+        // Log the raw request
+        console.log('[send-notifications] Raw event.body:', event.body);
+        
+        const requestData = JSON.parse(event.body);
+        console.log('[send-notifications] Parsed request data:', JSON.stringify(requestData, null, 2));
+        
+        const { title, body, link, imageUrl, buttonText, sendToUsers, sendToGuests, category } = requestData;
+        
+        console.log('[send-notifications] Extracted fields:');
+        console.log('  - title:', title);
+        console.log('  - body:', body);
+        console.log('  - link:', link);
+        console.log('  - imageUrl:', imageUrl, '(length:', imageUrl ? imageUrl.length : 0, ')');
+        console.log('  - buttonText:', buttonText);
+        console.log('  - sendToUsers:', sendToUsers);
+        console.log('  - sendToGuests:', sendToGuests);
+        console.log('  - category:', category);
+        
         const db = admin.firestore();
         const messaging = admin.messaging();
 
@@ -74,26 +92,71 @@ exports.handler = async (event) => {
             };
         }
 
-        // Create message - use data only, let service worker handle display
-        // This prevents FCM from auto-displaying and causing duplicates
+        // Validate data
+        if (!title || title.trim() === '') {
+            throw new Error('Title is required');
+        }
+        if (!body || body.trim() === '') {
+            throw new Error('Body is required');
+        }
+
+        console.log('[send-notifications] Building message payload...');
+        
+        // Include BOTH notification and data fields
+        // notification field: FCM will show the notification
+        // data field: Service worker will use this for rich display with image and button
         const message = {
-            data: { 
-                title, 
-                body, 
-                link: link || '/',
-                imageUrl: imageUrl || '',
-                buttonText: buttonText || 'View',
+            notification: {
+                title: String(title).substring(0, 150),  // Firebase limit is ~150 chars
+                body: String(body).substring(0, 240)      // Firebase limit is ~240 chars
+            },
+            data: {
+                title: String(title),
+                body: String(body),
+                link: String(link || '/'),
+                imageUrl: String(imageUrl || ''),
+                buttonText: String(buttonText || 'View'),
                 icon: '/images/logos/royalmeenakari.png',
-                category: category || 'general'
+                category: String(category || 'general'),
+                timestamp: Date.now().toString()
+            },
+            // FCM options
+            apns: {
+                payload: {
+                    aps: {
+                        sound: 'default',
+                        'content-available': 1
+                    }
+                }
+            },
+            android: {
+                priority: 'high'
+            },
+            webpush: {
+                headers: {
+                    TTL: '86400' // 1 day
+                }
             }
         };
+
+        console.log('[send-notifications] Message payload:', JSON.stringify(message, null, 2));
+        console.log('[send-notifications] Sending to', tokenList.length, 'tokens');
 
         const response = await messaging.sendEachForMulticast({
             tokens: tokenList,
             ...message
         });
 
-        console.log(`Notification sent successfully. Success: ${response.successCount}, Failed: ${response.failureCount}`);
+        console.log(`[send-notifications] Notification sent successfully. Success: ${response.successCount}, Failed: ${response.failureCount}`);
+        
+        // Log failures for debugging
+        if (response.failureCount > 0) {
+            response.responses.forEach((resp, idx) => {
+                if (!resp.success) {
+                    console.error(`[send-notifications] Failed to send to token ${idx}:`, resp.error.message);
+                }
+            });
+        }
 
         return {
             statusCode: 200,
