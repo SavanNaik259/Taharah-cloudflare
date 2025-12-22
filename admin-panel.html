@@ -5524,13 +5524,20 @@
                     body: JSON.stringify({ title, body, link, imageUrl, buttonText, sendToUsers, sendToGuests })
                 });
                 const result = await response.json();
-                if (result.success) {
-                    showNotificationAlert(`✓ Sent successfully! Total: ${result.stats.totalSent}`, "success");
-                    e.target.reset();
-                    const preview = document.getElementById("imagePreviewContainer");
-                    if(preview) preview.style.display = "none";
-                    loadTokenStats();
-                } else {
+                    if (result.success) {
+                        showNotificationAlert(`✓ Sent successfully! Total: ${result.stats.totalSent}`, "success");
+                        e.target.reset();
+                        uploadedImageUrl = '';
+                        const preview = document.getElementById("imagePreviewContainer");
+                        if(preview) preview.style.display = "none";
+                        const previewImg = document.getElementById("imagePreview");
+                        if(previewImg) previewImg.src = "";
+                        const urlInput = document.getElementById("imageUrl");
+                        if(urlInput) urlInput.value = "";
+                        const statusEl = document.getElementById("uploadStatus");
+                        if(statusEl) statusEl.style.display = "none";
+                        loadTokenStats();
+                    } else {
                     showNotificationAlert(result.error || "Failed to send", "error");
                 }
             } catch (error) {
