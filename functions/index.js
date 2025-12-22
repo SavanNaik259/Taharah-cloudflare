@@ -267,13 +267,11 @@ exports.sendNotifications = functions.https.onRequest((req, res) => {
         });
       }
 
-      // Prepare notification payload
-      const notification = {
-        title: title,
-        body: body
-      };
-
+      // Prepare notification payload - send ONLY data payload
+      // This allows the service worker to handle the complete display with image and button
       const data = {
+        title: title,
+        body: body,
         category: category || 'general',
         timestamp: Date.now().toString(),
         link: link,
@@ -285,7 +283,6 @@ exports.sendNotifications = functions.https.onRequest((req, res) => {
       const sendPromises = allTokens.map(async (tokenObj) => {
         try {
           const messagePayload = {
-            notification,
             data,
             token: tokenObj.token
           };

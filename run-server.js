@@ -1022,6 +1022,269 @@ app.post('/.netlify/functions/send-order-email', async (req, res) => {
   }
 });
 
+// Send Push Notifications endpoint
+app.post('/api/send-notifications', async (req, res) => {
+  try {
+    const { title, body, link = '', imageUrl = '', buttonText = '', category = '', sendToUsers = true, sendToGuests = true } = req.body;
+
+    if (!title || !body) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: title and body'
+      });
+    }
+
+    if (!sendToUsers && !sendToGuests) {
+      return res.status(400).json({
+        success: false,
+        error: 'Must send to at least one audience (users or guests)'
+      });
+    }
+
+    const db = admin.firestore();
+    const messaging = admin.messaging();
+
+    const stats = {
+      userTokenCount: 0,
+      guestTokenCount: 0,
+      totalSent: 0,
+      userSuccess: 0,
+      guestSuccess: 0,
+      failedTokens: []
+    };
+
+    const allTokens = [];
+
+    // Get user tokens
+    if (sendToUsers) {
+      try {
+        const usersSnapshot = await db.collection('users').get();
+        usersSnapshot.forEach(doc => {
+          const userData = doc.data();
+          const tokens = userData.pushTokens || [];
+          tokens.forEach(token => {
+            allTokens.push({
+              token,
+              type: 'user',
+              userId: doc.id
+            });
+          });
+        });
+        stats.userTokenCount = allTokens.filter(t => t.type === 'user').length;
+      } catch (error) {
+        console.error('Error fetching user tokens:', error);
+      }
+    }
+
+    // Get guest tokens
+    if (sendToGuests) {
+      try {
+        const guestTokensSnapshot = await db.collection('guest_tokens').get();
+        guestTokensSnapshot.forEach(doc => {
+          const guestData = doc.data();
+          const token = guestData.token;
+          if (token) {
+            allTokens.push({
+              token,
+              type: 'guest',
+              guestId: doc.id
+            });
+          }
+        });
+        stats.guestTokenCount = allTokens.filter(t => t.type === 'guest').length;
+      } catch (error) {
+        console.error('Error fetching guest tokens:', error);
+      }
+    }
+
+    stats.totalSent = allTokens.length;
+
+    if (allTokens.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: 'No tokens to send to',
+        stats
+      });
+    }
+
+    // Send with DATA ONLY payload - no notification payload
+    // This allows the service worker to handle image and button display
+    const data = {
+      title: title,
+      body: body,
+      category: category || 'general',
+      timestamp: Date.now().toString(),
+      link: link,
+      imageUrl: imageUrl,
+      buttonText: buttonText || 'View'
+    };
+
+    const sendPromises = allTokens.map(async (tokenObj) => {
+      try {
+        const messagePayload = {
+          data,
+          token: tokenObj.token
+        };
+
+        const response = await messaging.send(messagePayload);
+        
+        if (tokenObj.type === 'user') {
+          stats.userSuccess++;
+        } else {
+          stats.guestSuccess++;
+        }
+
+        console.log(`Notification sent to ${tokenObj.type}:`, response);
+        return { success: true, token: tokenObj.token };
+      } catch (error) {
+        console.error(`Failed to send to ${tokenObj.type} token:`, error.message);
+        stats.failedTokens.push({
+          token: tokenObj.token,
+          error: error.message,
+          type: tokenObj.type
+        });
+        
+        if (error.code === 'messaging/invalid-registration-token' || 
+            error.code === 'messaging/registration-token-not-registered') {
+          try {
+            if (tokenObj.type === 'user') {
+              await db.collection('users').doc(tokenObj.userId).update({
+                pushTokens: admin.firestore.FieldValue.arrayRemove(tokenObj.token)
+              });
+            } else {
+              await db.collection('guest_tokens').doc(tokenObj.guestId).delete();
+            }
+            console.log(`Removed invalid token: ${tokenObj.token}`);
+          } catch (deleteError) {
+            console.error('Error removing invalid token:', deleteError);
+          }
+        }
+
+        return { success: false, token: tokenObj.token, error: error.message };
+      }
+    });
+
+    await Promise.all(sendPromises);
+
+    try {
+      await db.collection('notification_history').add({
+        title,
+        body,
+        link,
+        imageUrl,
+        buttonText,
+        category,
+        sentAt: new Date(),
+        stats: {
+          userTokenCount: stats.userTokenCount,
+          guestTokenCount: stats.guestTokenCount,
+          userSuccess: stats.userSuccess,
+          guestSuccess: stats.guestSuccess
+        }
+      });
+    } catch (error) {
+      console.error('Error logging notification history:', error);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Notifications sent successfully',
+      stats
+    });
+  } catch (error) {
+    console.error('Error in send-notifications:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Server error: ' + error.message
+    });
+  }
+});
+
+// Test Send Notification endpoint
+app.post('/api/test-send-notification', async (req, res) => {
+  try {
+    const db = admin.firestore();
+    const messaging = admin.messaging();
+
+    const data = {
+      title: '🎉 Test Notification',
+      body: 'This is a test notification with image and action button',
+      category: 'test',
+      timestamp: Date.now().toString(),
+      link: '/',
+      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/auric-a0c92.firebasestorage.app/o/productData%2Ftest-image.png?alt=media',
+      buttonText: 'View More'
+    };
+
+    let testTokenCount = 0;
+    let successCount = 0;
+    let failureCount = 0;
+
+    // Get first few user tokens for testing
+    const usersSnapshot = await db.collection('users').limit(1).get();
+    
+    if (usersSnapshot.empty) {
+      return res.status(200).json({
+        success: false,
+        status: 'NO_TOKENS_FOUND',
+        message: 'No user tokens found for testing'
+      });
+    }
+
+    const testTokens = [];
+    usersSnapshot.forEach(doc => {
+      const tokens = doc.data().pushTokens || [];
+      tokens.forEach(token => {
+        testTokens.push(token);
+      });
+    });
+
+    testTokenCount = testTokens.length;
+
+    if (testTokenCount === 0) {
+      return res.status(200).json({
+        success: false,
+        status: 'NO_TOKENS_FOUND',
+        message: 'No tokens found in selected users'
+      });
+    }
+
+    const testPromises = testTokens.map(async (token) => {
+      try {
+        const messagePayload = {
+          data,
+          token
+        };
+
+        await messaging.send(messagePayload);
+        successCount++;
+        console.log('Test notification sent to:', token);
+      } catch (error) {
+        failureCount++;
+        console.error('Test notification failed:', error.message);
+      }
+    });
+
+    await Promise.all(testPromises);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Test notification sent',
+      summary: {
+        testTokenCount,
+        successCount,
+        failureCount
+      }
+    });
+  } catch (error) {
+    console.error('Error in test-send-notification:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Server error: ' + error.message
+    });
+  }
+});
+
 // Handle all other routes by serving index.html
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
