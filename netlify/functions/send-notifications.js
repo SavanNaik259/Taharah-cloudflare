@@ -119,33 +119,14 @@ exports.handler = async (event) => {
         
         console.log('[send-notifications] Data payload:', JSON.stringify(dataPayload, null, 2));
 
-        // Message structure for Firebase Admin SDK
-        // We send BOTH data and notification, but we use a TAG to prevent duplicates
-        // and we ensure the Service Worker handles the display logic
         const message = {
             data: dataPayload,
-            notification: {
-                title: String(title),
-                body: String(body),
-                image: String(imageUrl || '')
-            },
             webpush: {
                 headers: {
                     'TTL': '86400'
                 },
-                notification: {
-                    title: String(title),
-                    body: String(body),
-                    icon: '/images/logos/royalmeenakari.png',
-                    badge: '/images/logos/royalmeenakari.png',
-                    image: String(imageUrl || ''),
-                    tag: 'royal-meenakari-notification',
-                    actions: [
-                        {
-                            action: 'open',
-                            title: String(buttonText || 'View')
-                        }
-                    ]
+                fcm_options: {
+                    link: String(link || '/')
                 }
             }
         };

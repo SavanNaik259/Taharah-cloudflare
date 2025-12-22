@@ -86,7 +86,10 @@ messaging.onBackgroundMessage((payload) => {
     console.log('[firebase-messaging-sw.js] ======================================');
     console.log('[firebase-messaging-sw.js] Payload:', JSON.stringify(payload, null, 2));
     
-    // Call our display function
+    // We strictly use data-only messages from the server.
+    // This allows the Service Worker to display the notification exactly as we want
+    // with images and buttons, while preventing the browser from showing a default one.
+    
     return displayNotification(payload);
 });
 
