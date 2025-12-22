@@ -15,48 +15,73 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
+// Function to safely extract data - Firebase sends as strings or objects
+function extractData(obj) {
+    if (!obj) return {};
+    if (typeof obj === 'string') {
+        try {
+            return JSON.parse(obj);
+        } catch (e) {
+            return obj;
+        }
+    }
+    return obj;
+}
+
 // Function to display notification with image and button
 function displayNotification(payload) {
-    console.log('[firebase-messaging-sw.js] displayNotification() called with payload:', JSON.stringify(payload, null, 2));
+    console.log('[firebase-messaging-sw.js] ='.repeat(50));
+    console.log('[firebase-messaging-sw.js] DISPLAYING NOTIFICATION');
+    console.log('[firebase-messaging-sw.js] Payload structure:', Object.keys(payload));
+    console.log('[firebase-messaging-sw.js] Full payload:', JSON.stringify(payload, null, 2));
     
-    // Extract data from payload - data field is where all our custom fields are
-    const dataObj = payload.data || {};
+    // Extract data - handle BOTH webpush notification and data fields
+    const webpushNotif = payload.webpush?.notification || {};
+    const webpushData = payload.webpush?.data || {};
+    const dataObj = extractData(payload.data) || {};
     const notificationObj = payload.notification || {};
     
-    // Get title from data (preferred) or notification
-    const notificationTitle = dataObj.title || notificationObj.title || 'Royal Meenakari';
+    console.log('[firebase-messaging-sw.js] Extracted sources:');
+    console.log('  - webpushNotif keys:', Object.keys(webpushNotif));
+    console.log('  - webpushData keys:', Object.keys(webpushData));
+    console.log('  - dataObj keys:', Object.keys(dataObj));
+    console.log('  - notificationObj keys:', Object.keys(notificationObj));
     
-    // Get body from data (preferred) or notification
-    const notificationBody = dataObj.body || notificationObj.body || 'Check out the latest update!';
+    // Get title - check all possible sources
+    const notificationTitle = webpushNotif.title || notificationObj.title || dataObj.title || 'Royal Meenakari';
     
-    // Get button text from data
-    const buttonText = dataObj.buttonText || 'View';
+    // Get body - check all possible sources  
+    const notificationBody = webpushNotif.body || notificationObj.body || dataObj.body || 'New update';
     
-    // Get image URL from data - CRITICAL
-    const imageUrl = dataObj.imageUrl || '';
+    // Get image - CRITICAL - check all sources
+    const imageUrl = webpushNotif.image || dataObj.imageUrl || webpushData.imageUrl || '';
+    
+    // Get button text
+    const buttonText = webpushNotif.actions?.[0]?.title || dataObj.buttonText || webpushData.buttonText || 'View';
     
     // Get link from data
-    const link = dataObj.link || '/';
+    const link = dataObj.link || webpushData.link || '/';
     
-    // Get icon from data or use default
-    const icon = dataObj.icon || notificationObj.icon || '/images/logos/royalmeenakari.png';
+    // Get icon
+    const icon = webpushNotif.icon || dataObj.icon || '/images/logos/royalmeenakari.png';
     
-    console.log('[firebase-messaging-sw.js] Building notification:');
+    console.log('[firebase-messaging-sw.js] EXTRACTED VALUES:');
     console.log('  - Title:', notificationTitle);
     console.log('  - Body:', notificationBody);
-    console.log('  - Image URL:', imageUrl);
+    console.log('  - Image URL:', imageUrl, '(type:', typeof imageUrl, ', length:', imageUrl ? imageUrl.length : 0, ')');
     console.log('  - Button:', buttonText);
     console.log('  - Link:', link);
+    console.log('  - Icon:', icon);
     
     const notificationOptions = {
         body: notificationBody,
         icon: icon,
         tag: 'royal-meenakari-notification',
         requireInteraction: false,
-        badge: '/images/logos/royalmeenakari.png',
+        badge: icon,
         data: {
             link: link,
-            category: dataObj.category || 'general'
+            category: dataObj.category || webpushData.category || 'general'
         },
         actions: [
             { 
@@ -70,23 +95,23 @@ function displayNotification(payload) {
         ]
     };
     
-    // Add image if provided - CRITICAL for rich notifications
-    if (imageUrl && imageUrl.trim().length > 0) {
+    // Add image ONLY if it has actual content
+    if (imageUrl && typeof imageUrl === 'string' && imageUrl.trim().length > 5) {
         notificationOptions.image = imageUrl;
-        console.log('[firebase-messaging-sw.js] ✅ Image added to notification:', imageUrl);
+        console.log('[firebase-messaging-sw.js] ✅ IMAGE ADDED:', imageUrl.substring(0, 50) + '...');
     } else {
-        console.log('[firebase-messaging-sw.js] ⚠️ No image URL provided');
+        console.log('[firebase-messaging-sw.js] ❌ IMAGE NOT ADDED - imageUrl:', imageUrl);
     }
 
-    console.log('[firebase-messaging-sw.js] Final notification options:', JSON.stringify(notificationOptions, null, 2));
+    console.log('[firebase-messaging-sw.js] FINAL OPTIONS:', JSON.stringify(notificationOptions, null, 2));
     
     try {
-        console.log('[firebase-messaging-sw.js] Calling self.registration.showNotification()...');
+        console.log('[firebase-messaging-sw.js] 🔔 Calling showNotification...');
         const notifPromise = self.registration.showNotification(notificationTitle, notificationOptions);
-        console.log('[firebase-messaging-sw.js] ✅ Notification displayed successfully');
+        console.log('[firebase-messaging-sw.js] ✅ NOTIFICATION DISPLAYED SUCCESSFULLY');
         return notifPromise;
     } catch (error) {
-        console.error('[firebase-messaging-sw.js] ❌ Error displaying notification:', error);
+        console.error('[firebase-messaging-sw.js] ❌ ERROR:', error.message);
         return Promise.reject(error);
     }
 }

@@ -102,24 +102,48 @@ exports.handler = async (event) => {
 
         console.log('[send-notifications] Building message payload...');
         
-        // IMPORTANT: Send ONLY data field (NO notification field)
-        // This prevents Firebase from auto-displaying the notification
-        // The service worker will handle ALL display with image and button
-        // This avoids duplicate notifications and ensures rich content displays
+        // Build data object - must be stringified for Firebase Admin SDK
+        const dataPayload = {
+            title: String(title),
+            body: String(body),
+            link: String(link || '/'),
+            imageUrl: String(imageUrl || ''),
+            buttonText: String(buttonText || 'View'),
+            icon: '/images/logos/royalmeenakari.png',
+            category: String(category || 'general'),
+            timestamp: Date.now().toString()
+        };
+        
+        console.log('[send-notifications] Data payload:', JSON.stringify(dataPayload, null, 2));
+
+        // Message structure for Firebase Admin SDK - NO fcmOptions (that's web SDK only)
+        // Use webpush configuration for web browsers
         const message = {
-            data: {
-                title: String(title),
-                body: String(body),
-                link: String(link || '/'),
-                imageUrl: String(imageUrl || ''),
-                buttonText: String(buttonText || 'View'),
-                icon: '/images/logos/royalmeenakari.png',
-                category: String(category || 'general'),
-                timestamp: Date.now().toString()
-            },
-            // FCM options for background message handling
-            fcmOptions: {
-                analyticsLabel: 'notification_send'
+            data: dataPayload,
+            webpush: {
+                notification: {
+                    title: String(title),
+                    body: String(body),
+                    icon: '/images/logos/royalmeenakari.png',
+                    badge: '/images/logos/royalmeenakari.png',
+                    image: String(imageUrl || ''),
+                    actions: [
+                        {
+                            action: 'open',
+                            title: String(buttonText || 'View')
+                        },
+                        {
+                            action: 'close',
+                            title: 'Dismiss'
+                        }
+                    ],
+                    requireInteraction: false,
+                    tag: 'royal-meenakari-notification'
+                },
+                data: dataPayload,
+                headers: {
+                    'TTL': '86400'
+                }
             }
         };
 
