@@ -103,32 +103,21 @@ exports.handler = async (event) => {
         console.log('[send-notifications] Building message payload...');
         
         // Build data object - must be stringified for Firebase Admin SDK
-        // IMPORTANT: FCM data fields must be strings
+        // We use a "data-only" payload for standard Web Push compliance
         const dataPayload = {
             title: String(title),
             body: String(body),
             link: String(link || '/'),
             imageUrl: String(imageUrl || ''),
-            image: String(imageUrl || ''), // Duplicate for compatibility
             buttonText: String(buttonText || 'View'),
             icon: '/images/logos/royalmeenakari.png',
-            badge: '/images/logos/royalmeenakari.png',
-            category: String(category || 'general'),
             timestamp: Date.now().toString()
         };
         
         console.log('[send-notifications] Data payload:', JSON.stringify(dataPayload, null, 2));
 
-        // Message structure for Firebase Admin SDK
-        // We send BOTH data and notification, but we use a TAG to prevent duplicates
-        // and we ensure the Service Worker handles the display logic
         const message = {
             data: dataPayload,
-            notification: {
-                title: String(title),
-                body: String(body),
-                image: String(imageUrl || '')
-            },
             webpush: {
                 headers: {
                     'TTL': '86400'
@@ -139,7 +128,7 @@ exports.handler = async (event) => {
                     icon: '/images/logos/royalmeenakari.png',
                     badge: '/images/logos/royalmeenakari.png',
                     image: String(imageUrl || ''),
-                    tag: 'royal-meenakari-notification',
+                    requireInteraction: true,
                     actions: [
                         {
                             action: 'open',
