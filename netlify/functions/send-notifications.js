@@ -109,8 +109,10 @@ exports.handler = async (event) => {
             body: String(body),
             link: String(link || '/'),
             imageUrl: String(imageUrl || ''),
+            image: String(imageUrl || ''), // Duplicate for compatibility
             buttonText: String(buttonText || 'View'),
             icon: '/images/logos/royalmeenakari.png',
+            badge: '/images/logos/royalmeenakari.png',
             category: String(category || 'general'),
             timestamp: Date.now().toString()
         };
@@ -118,15 +120,32 @@ exports.handler = async (event) => {
         console.log('[send-notifications] Data payload:', JSON.stringify(dataPayload, null, 2));
 
         // Message structure for Firebase Admin SDK
-        // We only send data to let the service worker handle the display
+        // We send BOTH data and notification, but we use a TAG to prevent duplicates
+        // and we ensure the Service Worker handles the display logic
         const message = {
             data: dataPayload,
+            notification: {
+                title: String(title),
+                body: String(body),
+                image: String(imageUrl || '')
+            },
             webpush: {
                 headers: {
                     'TTL': '86400'
                 },
-                fcm_options: {
-                    link: String(link || '/')
+                notification: {
+                    title: String(title),
+                    body: String(body),
+                    icon: '/images/logos/royalmeenakari.png',
+                    badge: '/images/logos/royalmeenakari.png',
+                    image: String(imageUrl || ''),
+                    tag: 'royal-meenakari-notification',
+                    actions: [
+                        {
+                            action: 'open',
+                            title: String(buttonText || 'View')
+                        }
+                    ]
                 }
             }
         };

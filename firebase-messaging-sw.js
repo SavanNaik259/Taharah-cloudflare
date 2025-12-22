@@ -34,23 +34,30 @@ function displayNotification(payload) {
     console.log('[firebase-messaging-sw.js] Full payload:', JSON.stringify(payload, null, 2));
     
     // Extract data from all possible FCM structures
-    const data = payload.data || (payload.webpush && payload.webpush.data) || payload.notification || {};
+    const data = payload.data || {};
+    const notification = payload.notification || {};
+    const webpush = (payload.webpush && payload.webpush.notification) || {};
     
     // Check if we've already shown this notification
-    const notificationId = data.timestamp || data.tag || Date.now().toString();
+    const notificationId = data.timestamp || data.tag || webpush.tag || Date.now().toString();
     if (self.lastShownNotificationId === notificationId) {
         console.log('[firebase-messaging-sw.js] 🛑 Duplicate detected');
         return Promise.resolve();
     }
     self.lastShownNotificationId = notificationId;
     
-    const title = data.title || 'Royal Meenakari';
+    const title = data.title || webpush.title || notification.title || 'Royal Meenakari';
+    const body = data.body || webpush.body || notification.body || 'New update';
+    const imageUrl = data.imageUrl || data.image || webpush.image || notification.image || '';
+    const buttonText = data.buttonText || (webpush.actions && webpush.actions[0] && webpush.actions[0].title) || 'View';
+    
     const options = {
-        body: data.body || 'New update from Royal Meenakari',
-        icon: data.icon || '/images/logos/royalmeenakari.png',
-        badge: data.badge || '/images/logos/royalmeenakari.png',
-        image: data.imageUrl || data.image || '',
+        body: body,
+        icon: data.icon || webpush.icon || '/images/logos/royalmeenakari.png',
+        badge: data.badge || webpush.badge || '/images/logos/royalmeenakari.png',
+        image: imageUrl,
         tag: 'royal-meenakari-notification',
+        renotify: true,
         requireInteraction: true,
         data: {
             link: data.link || '/',
@@ -59,7 +66,7 @@ function displayNotification(payload) {
         actions: [
             { 
                 action: 'open', 
-                title: data.buttonText || 'View'
+                title: buttonText
             },
             {
                 action: 'close',
