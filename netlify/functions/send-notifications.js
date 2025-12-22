@@ -74,8 +74,8 @@ exports.handler = async (event) => {
             };
         }
 
-        // Create message - use data + webpush only to avoid duplicate notifications
-        // The service worker will handle showing the notification from the data payload
+        // Create message - use data only, let service worker handle display
+        // This prevents FCM from auto-displaying and causing duplicates
         const message = {
             data: { 
                 title, 
@@ -83,14 +83,6 @@ exports.handler = async (event) => {
                 link: link || '/',
                 icon: '/images/logos/royalmeenakari.png',
                 category: category || 'general'
-            },
-            webpush: {
-                notification: {
-                    title: title,
-                    body: body,
-                    icon: '/images/logos/royalmeenakari.png'
-                },
-                fcmOptions: { link: link || '/' }
             }
         };
 
