@@ -32,38 +32,35 @@ function extractData(obj) {
 function displayNotification(payload) {
     console.log('[firebase-messaging-sw.js] ='.repeat(50));
     console.log('[firebase-messaging-sw.js] DISPLAYING NOTIFICATION');
-    console.log('[firebase-messaging-sw.js] Payload structure:', Object.keys(payload));
-    console.log('[firebase-messaging-sw.js] Full payload:', JSON.stringify(payload, null, 2));
     
-    // Extract data - handle BOTH webpush notification and data fields
-    const webpushNotif = payload.webpush?.notification || {};
-    const webpushData = payload.webpush?.data || {};
     const dataObj = extractData(payload.data) || {};
-    const notificationObj = payload.notification || {};
     
-    console.log('[firebase-messaging-sw.js] Extracted sources:');
-    console.log('  - webpushNotif keys:', Object.keys(webpushNotif));
-    console.log('  - webpushData keys:', Object.keys(webpushData));
-    console.log('  - dataObj keys:', Object.keys(dataObj));
-    console.log('  - notificationObj keys:', Object.keys(notificationObj));
+    // Check if we've already shown this notification to prevent duplicates
+    const notificationId = dataObj.timestamp || Date.now().toString();
+    const lastShownId = self.lastShownNotificationId;
+    if (lastShownId === notificationId) {
+        console.log('[firebase-messaging-sw.js] 🛑 Duplicate notification detected, skipping');
+        return Promise.resolve();
+    }
+    self.lastShownNotificationId = notificationId;
     
     // Get title - check all possible sources
-    const notificationTitle = webpushNotif.title || notificationObj.title || dataObj.title || 'Royal Meenakari';
+    const notificationTitle = dataObj.title || 'Royal Meenakari';
     
     // Get body - check all possible sources  
-    const notificationBody = webpushNotif.body || notificationObj.body || dataObj.body || 'New update';
+    const notificationBody = dataObj.body || 'New update';
     
     // Get image - CRITICAL - check all sources
-    const imageUrl = webpushNotif.image || dataObj.imageUrl || webpushData.imageUrl || '';
+    const imageUrl = dataObj.imageUrl || '';
     
     // Get button text
-    const buttonText = webpushNotif.actions?.[0]?.title || dataObj.buttonText || webpushData.buttonText || 'View';
+    const buttonText = dataObj.buttonText || 'View';
     
     // Get link from data
-    const link = dataObj.link || webpushData.link || '/';
+    const link = dataObj.link || '/';
     
     // Get icon
-    const icon = webpushNotif.icon || dataObj.icon || '/images/logos/royalmeenakari.png';
+    const icon = dataObj.icon || '/images/logos/royalmeenakari.png';
     
     console.log('[firebase-messaging-sw.js] EXTRACTED VALUES:');
     console.log('  - Title:', notificationTitle);

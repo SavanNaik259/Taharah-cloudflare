@@ -114,32 +114,13 @@ exports.handler = async (event) => {
             timestamp: Date.now().toString()
         };
         
-        console.log('[send-notifications] Data payload:', JSON.stringify(dataPayload, null, 2));*/
+        console.log('[send-notifications] Data payload:', JSON.stringify(dataPayload, null, 2));
 
         // Message structure for Firebase Admin SDK - NO fcmOptions (that's web SDK only)
         // Use webpush configuration for web browsers
         const message = {
             data: dataPayload,
             webpush: {
-                notification: {
-                    title: String(title),
-                    body: String(body),
-                    icon: '/images/logos/royalmeenakari.png',
-                    badge: '/images/logos/royalmeenakari.png',
-                    image: String(imageUrl || ''),
-                    actions: [
-                        {
-                            action: 'open',
-                            title: String(buttonText || 'View')
-                        },
-                        {
-                            action: 'close',
-                            title: 'Dismiss'
-                        }
-                    ],
-                    requireInteraction: false,
-                    tag: 'royal-meenakari-notification'
-                },
                 data: dataPayload,
                 headers: {
                     'TTL': '86400'
