@@ -82,6 +82,7 @@
 
         input[type="text"],
         input[type="email"],
+        input[type="file"],
         textarea,
         select {
             width: 100%;
@@ -91,6 +92,38 @@
             font-family: 'Segoe UI', sans-serif;
             font-size: 14px;
             transition: border-color 0.3s;
+        }
+        
+        input[type="file"] {
+            padding: 8px;
+        }
+
+        .image-preview-container {
+            margin-top: 10px;
+            max-width: 300px;
+        }
+
+        .image-preview-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 6px;
+            border: 2px solid #667eea;
+            max-height: 200px;
+            object-fit: cover;
+        }
+
+        .image-upload-status {
+            font-size: 12px;
+            margin-top: 5px;
+            color: #28a745;
+        }
+
+        .image-upload-status.uploading {
+            color: #667eea;
+        }
+
+        .image-upload-status.error {
+            color: #dc3545;
         }
 
         input[type="text"]:focus,
@@ -351,8 +384,13 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="imageUrl">Notification Image (Optional)</label>
-                    <input type="text" id="imageUrl" name="imageUrl" placeholder="e.g., https://example.com/banner.jpg or /images/banner.jpg" value="">
+                    <label for="imageFile">Notification Image (Optional)</label>
+                    <input type="file" id="imageFile" name="imageFile" accept="image/*">
+                    <input type="hidden" id="imageUrl" name="imageUrl" value="">
+                    <div id="imagePreviewContainer" class="image-preview-container" style="display:none;">
+                        <img id="imagePreview" src="" alt="Preview">
+                    </div>
+                    <div id="uploadStatus" class="image-upload-status" style="display:none;"></div>
                 </div>
 
                 <div class="form-group">
@@ -425,14 +463,65 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
 
     <script>
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
 
         const db = firebase.firestore();
+        const storage = firebase.storage();
         const form = document.getElementById('notificationForm');
         const sendBtn = document.getElementById('sendBtn');
+        let uploadedImageUrl = '';
+
+        // Handle image file upload
+        document.getElementById('imageFile').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                document.getElementById('imagePreview').src = event.target.result;
+                document.getElementById('imagePreviewContainer').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+
+            // Upload to Firebase Storage
+            const statusEl = document.getElementById('uploadStatus');
+            statusEl.textContent = '⏳ Uploading...';
+            statusEl.className = 'image-upload-status uploading';
+            statusEl.style.display = 'block';
+
+            try {
+                const timestamp = Date.now();
+                const filename = `notifications/${timestamp}_${file.name}`;
+                const storageRef = storage.ref(filename);
+                const uploadTask = storageRef.put(file);
+
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        statusEl.textContent = `⏳ Uploading... ${Math.round(progress)}%`;
+                    },
+                    (error) => {
+                        statusEl.textContent = '❌ Upload failed: ' + error.message;
+                        statusEl.className = 'image-upload-status error';
+                    },
+                    async () => {
+                        uploadedImageUrl = await uploadTask.snapshot.ref.getDownloadURL();
+                        document.getElementById('imageUrl').value = uploadedImageUrl;
+                        statusEl.textContent = '✅ Image uploaded successfully!';
+                        statusEl.className = 'image-upload-status';
+                        console.log('Image URL:', uploadedImageUrl);
+                    }
+                );
+            } catch (error) {
+                statusEl.textContent = '❌ Error: ' + error.message;
+                statusEl.className = 'image-upload-status error';
+            }
+        });
 
         // Load token statistics
         async function loadTokenStats() {
