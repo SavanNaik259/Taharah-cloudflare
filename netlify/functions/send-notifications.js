@@ -74,12 +74,9 @@ exports.handler = async (event) => {
             };
         }
 
-        // Create message with both data and notification properties for better compatibility
+        // Create message - use data + webpush only to avoid duplicate notifications
+        // The service worker will handle showing the notification from the data payload
         const message = {
-            notification: {
-                title: title,
-                body: body
-            },
             data: { 
                 title, 
                 body, 
