@@ -102,14 +102,11 @@ exports.handler = async (event) => {
 
         console.log('[send-notifications] Building message payload...');
         
-        // Include BOTH notification and data fields
-        // notification field: FCM will show the notification
-        // data field: Service worker will use this for rich display with image and button
+        // IMPORTANT: Send ONLY data field (NO notification field)
+        // This prevents Firebase from auto-displaying the notification
+        // The service worker will handle ALL display with image and button
+        // This avoids duplicate notifications and ensures rich content displays
         const message = {
-            notification: {
-                title: String(title).substring(0, 150),  // Firebase limit is ~150 chars
-                body: String(body).substring(0, 240)      // Firebase limit is ~240 chars
-            },
             data: {
                 title: String(title),
                 body: String(body),
@@ -120,22 +117,9 @@ exports.handler = async (event) => {
                 category: String(category || 'general'),
                 timestamp: Date.now().toString()
             },
-            // FCM options
-            apns: {
-                payload: {
-                    aps: {
-                        sound: 'default',
-                        'content-available': 1
-                    }
-                }
-            },
-            android: {
-                priority: 'high'
-            },
-            webpush: {
-                headers: {
-                    TTL: '86400' // 1 day
-                }
+            // FCM options for background message handling
+            fcmOptions: {
+                analyticsLabel: 'notification_send'
             }
         };
 
