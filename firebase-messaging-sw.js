@@ -27,22 +27,48 @@ messaging.onBackgroundMessage((payload) => {
 
     // Only manually show notification for data-only messages
     const notificationTitle = payload.data?.title || 'New Notification';
+    const notificationBody = payload.data?.body || 'Check out the latest update!';
+    const buttonText = payload.data?.buttonText || 'View';
+    const imageUrl = payload.data?.imageUrl || '';
+    
     const notificationOptions = {
-        body: payload.data?.body || 'Check out the latest update!',
+        body: notificationBody,
         icon: payload.data?.icon || '/images/logos/royalmeenakari-icon.svg',
         tag: 'royal-meenakari-notification',
         requireInteraction: false,
         data: {
             link: payload.data?.link || '/'
-        }
+        },
+        actions: [
+            { 
+                action: 'open', 
+                title: buttonText
+            },
+            {
+                action: 'close',
+                title: 'Dismiss'
+            }
+        ]
     };
+    
+    // Add image if provided
+    if (imageUrl) {
+        notificationOptions.image = imageUrl;
+    }
 
     return self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// Handle notification click
+// Handle notification click and action buttons
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
+    
+    // Handle action button clicks
+    if (event.action === 'close') {
+        return; // Just close the notification
+    }
+    
+    // Default action or 'open' action button
     const targetUrl = event.notification.data?.link || '/';
     
     event.waitUntil(

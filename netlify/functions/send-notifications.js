@@ -27,7 +27,7 @@ exports.handler = async (event) => {
     
     try {
         initAdmin();
-        const { title, body, link, sendToUsers, sendToGuests, category } = JSON.parse(event.body);
+        const { title, body, link, imageUrl, buttonText, sendToUsers, sendToGuests, category } = JSON.parse(event.body);
         const db = admin.firestore();
         const messaging = admin.messaging();
 
@@ -81,6 +81,8 @@ exports.handler = async (event) => {
                 title, 
                 body, 
                 link: link || '/',
+                imageUrl: imageUrl || '',
+                buttonText: buttonText || 'View',
                 icon: '/images/logos/royalmeenakari.png',
                 category: category || 'general'
             }

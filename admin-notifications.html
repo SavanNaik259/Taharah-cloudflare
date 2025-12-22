@@ -351,8 +351,34 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="imageUrl">Notification Image (Optional)</label>
+                    <input type="text" id="imageUrl" name="imageUrl" placeholder="e.g., https://example.com/banner.jpg or /images/banner.jpg" value="">
+                </div>
+
+                <div class="form-group">
                     <label for="link">Link (Optional)</label>
-                    <input type="text" id="link" name="link" placeholder="e.g., /shop.html or https://example.com" value="/featured-collection.html">
+                    <select id="link" name="link">
+                        <option value="">-- Select Page --</option>
+                        <option value="/">Home</option>
+                        <option value="/shop.html">Shop</option>
+                        <option value="/featured-collection.html">Featured Collection</option>
+                        <option value="/new-arrivals.html">New Arrivals</option>
+                        <option value="/meenakari-necklace.html">Meenakari Necklace</option>
+                        <option value="/gold-necklace.html">Gold Necklace</option>
+                        <option value="/meenakari-earrings.html">Meenakari Earrings</option>
+                        <option value="/gold-earrings.html">Gold Earrings</option>
+                        <option value="/meenakari-bangles.html">Meenakari Bangles</option>
+                        <option value="/gold-bangles.html">Gold Bangles</option>
+                        <option value="/meenakari-rings.html">Meenakari Rings</option>
+                        <option value="/gold-rings.html">Gold Rings</option>
+                        <option value="/cart-panel-template.html">Cart</option>
+                        <option value="/about-us.html">About Us</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="buttonText">Action Button Text (Optional)</label>
+                    <input type="text" id="buttonText" name="buttonText" placeholder="e.g., Shop Now, Explore, Learn More" value="Shop Now">
                 </div>
 
                 <div class="options">
@@ -440,6 +466,8 @@
             const title = document.getElementById('title').value;
             const body = document.getElementById('body').value;
             const link = document.getElementById('link').value || '';
+            const imageUrl = document.getElementById('imageUrl').value || '';
+            const buttonText = document.getElementById('buttonText').value || 'View';
             const sendToUsers = document.getElementById('sendToUsers').checked;
             const sendToGuests = document.getElementById('sendToGuests').checked;
             const category = document.getElementById('category').value;
@@ -469,6 +497,8 @@
                         title,
                         body,
                         link,
+                        imageUrl,
+                        buttonText,
                         category,
                         sendToUsers,
                         sendToGuests
