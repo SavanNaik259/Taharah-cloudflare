@@ -113,8 +113,14 @@ self.addEventListener('notificationclick', (event) => {
     }
     
     // Get the target URL from notification data
-    const targetUrl = event.notification.data?.link || '/';
-    console.log('[firebase-messaging-sw.js] Opening URL:', targetUrl);
+    let targetUrl = event.notification.data?.link || '/';
+    console.log('[firebase-messaging-sw.js] Target URL before check:', targetUrl);
+    
+    // Ensure relative links work by prepending current origin
+    if (targetUrl.startsWith('/') && !targetUrl.startsWith('//')) {
+        targetUrl = self.location.origin + targetUrl;
+        console.log('[firebase-messaging-sw.js] Converted to absolute URL:', targetUrl);
+    }
     
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
@@ -122,13 +128,21 @@ self.addEventListener('notificationclick', (event) => {
             
             // Try to focus existing window with the target URL
             for (const client of clientList) {
-                if (client.url.includes(targetUrl) || client.url === targetUrl) {
+                if (client.url === targetUrl || client.url + '/' === targetUrl || targetUrl + '/' === client.url) {
                     console.log('[firebase-messaging-sw.js] Focusing existing window');
                     return client.focus();
                 }
             }
             
-            // If no matching window, open a new one
+            // If no exact match, try to find a window on the same origin and navigate it
+            for (const client of clientList) {
+                if (new URL(client.url).origin === self.location.origin) {
+                    console.log('[firebase-messaging-sw.js] Navigating existing window to:', targetUrl);
+                    return client.navigate(targetUrl).then(c => c.focus());
+                }
+            }
+            
+            // If no matching window or same-origin window, open a new one
             if (clients.openWindow) {
                 console.log('[firebase-messaging-sw.js] Opening new window with URL:', targetUrl);
                 return clients.openWindow(targetUrl);
