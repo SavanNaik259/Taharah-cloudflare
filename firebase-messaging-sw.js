@@ -15,53 +15,40 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
-// Handle notification click and action buttons
-// Registering this BEFORE onBackgroundMessage to ensure it's captured
 self.addEventListener('notificationclick', (event) => {
-    console.log('[firebase-messaging-sw.js] Notification clicked - action:', event.action);
+    console.log('[SW] Notification click:', event.action);
     event.notification.close();
-    
-    // Handle action button clicks
+
+    // Ignore dismiss
     if (event.action === 'close') {
-        console.log('[firebase-messaging-sw.js] User dismissed notification');
         return;
     }
-    
-    // Get the target URL from notification data
+
+    // Get link safely
     let targetUrl = '/';
-    
-    if (event.notification.data && event.notification.data.link) {
+
+    if (event.notification?.data?.link) {
         targetUrl = event.notification.data.link;
-    } else if (event.notification.link) {
-        targetUrl = event.notification.link;
     }
-    
-    console.log('[firebase-messaging-sw.js] Target URL:', targetUrl);
-    
-    // Ensure relative links work by prepending current origin
-    if (targetUrl.startsWith('/') && !targetUrl.startsWith('//')) {
+
+    // Convert relative URL to absolute
+    if (targetUrl.startsWith('/')) {
         targetUrl = self.location.origin + targetUrl;
-        console.log('[firebase-messaging-sw.js] Converted to absolute URL:', targetUrl);
     }
-    
+
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-            console.log('[firebase-messaging-sw.js] Found', clientList.length, 'windows');
-            
-            // Try to find a window on the same origin and navigate it or focus it
+
             for (const client of clientList) {
-                const url = new URL(client.url);
-                if (url.origin === self.location.origin) {
-                    console.log('[firebase-messaging-sw.js] Navigating/Focusing existing window to:', targetUrl);
-                    return client.navigate(targetUrl).then(c => c.focus());
+                // Reuse existing tab
+                if ('navigate' in client) {
+                    client.navigate(targetUrl);
+                    return client.focus();
                 }
             }
-            
-            // If no matching window or same-origin window, open a new one
-            if (clients.openWindow) {
-                console.log('[firebase-messaging-sw.js] Opening new window with URL:', targetUrl);
-                return clients.openWindow(targetUrl);
-            }
+
+            // Open new tab if none found
+            return clients.openWindow(targetUrl);
         })
     );
 });
