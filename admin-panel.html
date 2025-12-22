@@ -5577,68 +5577,67 @@
             }
         }
 
-        function showSection(sectionId) {
-            console.log("Showing section:", sectionId);
-            const sections = document.querySelectorAll(".content-section");
-            sections.forEach(section => {
+        function showSection(sectionName) {
+            console.log(`Switching to section: ${sectionName}`);
+
+            // Update navigation
+            document.querySelectorAll(".nav-item").forEach(item => {
+                item.classList.remove("active");
+            });
+
+            // Find and activate the clicked nav item
+            const clickedItem = event ? event.target.closest(".nav-item") :
+                document.querySelector(`.nav-item[onclick*="${sectionName}"]`);
+            if (clickedItem) {
+                clickedItem.classList.add("active");
+                console.log(`Activated nav item for: ${sectionName}`);
+            }
+
+            // Update content sections
+            document.querySelectorAll(".content-section").forEach(section => {
                 section.classList.remove("active");
             });
 
-            const targetSection = document.getElementById(sectionId);
+            const targetSection = document.getElementById(sectionName);
             if (targetSection) {
                 targetSection.classList.add("active");
-            }
-
-            const navItems = document.querySelectorAll(".nav-item");
-            navItems.forEach(item => {
-                item.classList.remove("active");
-                const onclickAttr = item.getAttribute("onclick");
-                if (onclickAttr && onclickAttr.includes(`showSection('${sectionId}')`)) {
-                    item.classList.add("active");
-                }
-            });
-
-            if (sectionId === "push-notifications") {
-                if (typeof loadTokenStats === "function") loadTokenStats();
-            }
-
-            if (window.innerWidth <= 1024) {
-                closeSidebar();
-            }
-        }
                 console.log(`Activated content section: ${sectionName}`);
             } else {
                 console.error(`Section not found: ${sectionName}`);
             }
 
             // Load section-specific data
-            if (sectionName === 'orders') {
+            if (sectionName === "orders") {
                 updateOrdersSectionDisplay();
-            } else if (sectionName === 'products') {
+            } else if (sectionName === "products") {
                 loadProducts();
-            } else if (sectionName === 'inventory') {
+            } else if (sectionName === "inventory") {
                 loadInventorySummary();
-                showInventoryTab('out-of-stock'); // Show default tab
-            } else if (sectionName === 'customers') {
+                showInventoryTab("out-of-stock"); // Show default tab
+            } else if (sectionName === "customers") {
                 // Customers data is already loaded, just refresh display
                 updateCustomersDisplay();
-            } else if (sectionName === 'analytics') {
+            } else if (sectionName === "analytics") {
                 loadAnalyticsData(currentAnalyticsPeriod); // Ensure analytics data is loaded
-                loadLocationAnalytics(currentAnalyticsPeriod); // Ensure location analytics are loaded
-                loadNotifications(); // Load notifications when the section is shown
+                loadLocationAnalytics(currentAnalyticsPeriod);
+                loadNotifications();
 
-                // Fix chart rendering issues when section becomes visible
+                // Fix chart rendering issues
                 setTimeout(() => {
-                    window.dispatchEvent(new Event('resize'));
-                    if (typeof trafficSourcesChart !== 'undefined' && trafficSourcesChart) {
+                    window.dispatchEvent(new Event("resize"));
+                    if (typeof trafficSourcesChart !== "undefined" && trafficSourcesChart) {
                         trafficSourcesChart.resize();
                         trafficSourcesChart.update();
                     }
                 }, 100);
-            } else if (sectionName === 'notifications') {
-                loadNotifications(); // Load notifications when the section is shown
-            } else if (sectionName === 'push-notifications') {
-                if (typeof loadTokenStats === 'function') loadTokenStats();
+            } else if (sectionName === "notifications") {
+                loadNotifications();
+            } else if (sectionName === "push-notifications") {
+                if (typeof loadTokenStats === "function") loadTokenStats();
+            }
+
+            if (window.innerWidth <= 1024) {
+                closeSidebar();
             }
         }
 
