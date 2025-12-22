@@ -16,40 +16,24 @@ firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
 self.addEventListener('notificationclick', (event) => {
-    console.log('[SW] Notification click:', event.action);
     event.notification.close();
 
     // Ignore dismiss
-    if (event.action === 'close') {
-        return;
-    }
+    if (event.action === 'close') return;
 
-    // Get link safely
     let targetUrl = '/';
 
-    if (event.notification?.data?.link) {
-        targetUrl = event.notification.data.link;
-    }
+    try {
+        targetUrl = event.notification?.data?.link || '/';
+    } catch (e) {}
 
-    // Convert relative URL to absolute
+    // Absolute URL
     if (targetUrl.startsWith('/')) {
         targetUrl = self.location.origin + targetUrl;
     }
 
     event.waitUntil(
-        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-
-            for (const client of clientList) {
-                // Reuse existing tab
-                if ('navigate' in client) {
-                    client.navigate(targetUrl);
-                    return client.focus();
-                }
-            }
-
-            // Open new tab if none found
-            return clients.openWindow(targetUrl);
-        })
+        clients.openWindow(targetUrl)
     );
 });
 
@@ -61,12 +45,7 @@ function displayNotification(payload) {
     // In FCM v1, data arrives in payload.data
     const data = payload.data || {};
     
-    const notificationId = data.timestamp || data.tag || Date.now().toString();
-    if (self.lastShownNotificationId === notificationId) {
-        console.log('[firebase-messaging-sw.js] Duplicate detected, skipping');
-        return Promise.resolve();
-    }
-    self.lastShownNotificationId = notificationId;
+    const notificationId = data.timestamp || Date.now().toString();
     
     const title = data.title || 'Royal Meenakari';
     const body = data.body || 'New update from Royal Meenakari';
@@ -80,8 +59,7 @@ function displayNotification(payload) {
         icon: icon,
         badge: icon,
         image: image,
-        tag: 'royal-meenakari-notification',
-        requireInteraction: true,
+        tag: notificationId,
         data: {
             link: link
         },

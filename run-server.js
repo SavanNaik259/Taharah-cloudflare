@@ -1114,7 +1114,8 @@ app.post('/api/send-notifications', async (req, res) => {
       body: body,
       category: category || 'general',
       timestamp: Date.now().toString(),
-      link: link,
+      link: link || '/',
+      click_action: link || '/',
       imageUrl: imageUrl,
       buttonText: buttonText || 'View'
     };
