@@ -33,35 +33,35 @@ function displayNotification(payload) {
     console.log('[firebase-messaging-sw.js] DISPLAYING NOTIFICATION');
     console.log('[firebase-messaging-sw.js] Full payload:', JSON.stringify(payload, null, 2));
     
-    // Extract data from all possible FCM structures
+    // In FCM v1, data arrives in payload.data
     const data = payload.data || {};
-    const notification = payload.notification || {};
-    const webpush = (payload.webpush && payload.webpush.notification) || {};
     
-    // Check if we've already shown this notification
-    const notificationId = data.timestamp || data.tag || webpush.tag || Date.now().toString();
+    // Use the custom timestamp or tag for deduplication
+    const notificationId = data.timestamp || data.tag || Date.now().toString();
     if (self.lastShownNotificationId === notificationId) {
-        console.log('[firebase-messaging-sw.js] 🛑 Duplicate detected');
+        console.log('[firebase-messaging-sw.js] Duplicate detected, skipping');
         return Promise.resolve();
     }
     self.lastShownNotificationId = notificationId;
     
-    const title = data.title || webpush.title || notification.title || 'Royal Meenakari';
-    const body = data.body || webpush.body || notification.body || 'New update';
-    const imageUrl = data.imageUrl || data.image || webpush.image || notification.image || '';
-    const buttonText = data.buttonText || (webpush.actions && webpush.actions[0] && webpush.actions[0].title) || 'View';
+    const title = data.title || 'Royal Meenakari';
+    const body = data.body || 'New update from Royal Meenakari';
+    
+    // Use the same domain for relative images if needed, or absolute URLs
+    const image = data.imageUrl || data.image || '';
+    const buttonText = data.buttonText || 'View';
+    const icon = data.icon || '/images/logos/royalmeenakari.png';
+    const link = data.link || '/';
     
     const options = {
         body: body,
-        icon: data.icon || webpush.icon || '/images/logos/royalmeenakari.png',
-        badge: data.badge || webpush.badge || '/images/logos/royalmeenakari.png',
-        image: imageUrl,
+        icon: icon,
+        badge: icon,
+        image: image,
         tag: 'royal-meenakari-notification',
-        renotify: true,
         requireInteraction: true,
         data: {
-            link: data.link || '/',
-            category: data.category || 'general'
+            link: link
         },
         actions: [
             { 
@@ -76,7 +76,15 @@ function displayNotification(payload) {
     };
     
     console.log('[firebase-messaging-sw.js] Final Options:', JSON.stringify(options, null, 2));
-    return self.registration.showNotification(title, options);
+    
+    // Use self.registration.showNotification to ensure background notifications show up
+    return self.registration.showNotification(title, options)
+        .then(() => {
+            console.log('[firebase-messaging-sw.js] Notification shown successfully');
+        })
+        .catch(err => {
+            console.error('[firebase-messaging-sw.js] Error showing notification:', err);
+        });
 }
 
 // Handle background messages (app is closed/not in focus)
