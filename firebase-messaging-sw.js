@@ -31,6 +31,8 @@ messaging.onBackgroundMessage((payload) => {
         body: payload.data?.body || 'Check out the latest update!',
         icon: payload.data?.icon || '/images/logos/royalmeenakari.png',
         badge: '/images/logos/royalmeenakari.png',
+        tag: 'royal-meenakari-notification',
+        requireInteraction: false,
         data: {
             link: payload.data?.link || '/'
         }
