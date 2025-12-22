@@ -26,9 +26,11 @@ const notificationManager = {
             // Handle foreground messages
             messaging.onMessage((payload) => {
                 console.log('Foreground message:', payload);
-                const title = payload.notification?.title || 'New Message';
+                // Only show if we haven't already shown it
+                const title = payload.notification?.title || payload.data?.title || 'New Message';
+                const body = payload.notification?.body || payload.data?.body;
                 const options = {
-                    body: payload.notification?.body,
+                    body: body,
                     icon: '/images/logos/royalmeenakari.png',
                     data: { link: payload.data?.link || '/' }
                 };

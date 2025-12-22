@@ -44,9 +44,15 @@ exports.handler = async (event) => {
         const tokenList = Array.from(tokens).filter(t => typeof t === 'string' && t.length > 100);
         if (tokenList.length === 0) return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true, count: 0 }) };
 
+        // For Web Push, including both 'notification' AND 'webpush.notification' (or manual SW handling)
+        // often causes duplicates. We'll use 'data' for our custom SW logic to avoid double-display.
         const message = {
-            notification: { title, body },
-            data: { link: link || '/' },
+            data: { 
+                title, 
+                body, 
+                link: link || '/',
+                icon: '/images/logos/royalmeenakari.png'
+            },
             webpush: {
                 fcmOptions: { link: link || '/' }
             }
