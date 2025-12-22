@@ -34,9 +34,10 @@ function displayNotification(payload) {
     console.log('[firebase-messaging-sw.js] DISPLAYING NOTIFICATION');
     
     const dataObj = extractData(payload.data) || {};
+    const webpushData = extractData(payload.webpush?.data) || {};
     
     // Check if we've already shown this notification to prevent duplicates
-    const notificationId = dataObj.timestamp || Date.now().toString();
+    const notificationId = dataObj.timestamp || webpushData.timestamp || Date.now().toString();
     const lastShownId = self.lastShownNotificationId;
     if (lastShownId === notificationId) {
         console.log('[firebase-messaging-sw.js] 🛑 Duplicate notification detected, skipping');
@@ -45,22 +46,22 @@ function displayNotification(payload) {
     self.lastShownNotificationId = notificationId;
     
     // Get title - check all possible sources
-    const notificationTitle = dataObj.title || 'Royal Meenakari';
+    const notificationTitle = dataObj.title || webpushData.title || 'Royal Meenakari';
     
     // Get body - check all possible sources  
-    const notificationBody = dataObj.body || 'New update';
+    const notificationBody = dataObj.body || webpushData.body || 'New update';
     
     // Get image - CRITICAL - check all sources
-    const imageUrl = dataObj.imageUrl || '';
+    const imageUrl = dataObj.imageUrl || webpushData.imageUrl || '';
     
     // Get button text
-    const buttonText = dataObj.buttonText || 'View';
+    const buttonText = dataObj.buttonText || webpushData.buttonText || 'View';
     
     // Get link from data
-    const link = dataObj.link || '/';
+    const link = dataObj.link || webpushData.link || '/';
     
     // Get icon
-    const icon = dataObj.icon || '/images/logos/royalmeenakari.png';
+    const icon = dataObj.icon || webpushData.icon || '/images/logos/royalmeenakari.png';
     
     console.log('[firebase-messaging-sw.js] EXTRACTED VALUES:');
     console.log('  - Title:', notificationTitle);
