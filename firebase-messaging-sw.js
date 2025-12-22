@@ -30,7 +30,6 @@ messaging.onBackgroundMessage((payload) => {
     const notificationOptions = {
         body: payload.data?.body || 'Check out the latest update!',
         icon: payload.data?.icon || '/images/logos/royalmeenakari.png',
-        badge: '/images/logos/royalmeenakari-badge.png', // Small monochrome icon for Android/Windows
         tag: 'royal-meenakari-notification',
         requireInteraction: false,
         data: {
