@@ -695,6 +695,24 @@ const NewArrivalsProductsLoader = (function() {
     }
 
     /**
+     * Monitor for cache invalidation flag set by admin panel
+     */
+    function watchForCacheInvalidation() {
+        setInterval(() => {
+            const lastProductUpdate = localStorage.getItem('lastProductUpdate');
+            if (lastProductUpdate) {
+                const updateTime = parseInt(lastProductUpdate);
+                const now = Date.now();
+                // If flag was set recently (within last 10 seconds), reload products
+                if (now - updateTime < 10000) {
+                    console.log('🔄 Detected cache invalidation, reloading products...');
+                    updateNewArrivalsSection();
+                }
+            }
+        }, 1000); // Check every second
+    }
+
+    /**
      * Clear cached products (useful after adding/editing products)
      */
     function clearCache() {
@@ -721,7 +739,8 @@ const NewArrivalsProductsLoader = (function() {
         clearCache,
         setupSortUI,
         displayAllProducts,
-        sortProducts
+        sortProducts,
+        watchForCacheInvalidation
     };
 })();
 
@@ -740,6 +759,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 NewArrivalsProductsLoader.updateNewArrivalsSection(); // Still update section even if initial load fails
                 NewArrivalsProductsLoader.setupSortUI(); // Setup sort UI even if initial load fails
             });
+            NewArrivalsProductsLoader.watchForCacheInvalidation();
         }
     }, 1000);
 });

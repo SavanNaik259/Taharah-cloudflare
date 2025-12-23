@@ -624,12 +624,31 @@ const BridalProductsLoader = (function() {
         console.log('All bridal products cache cleared');
     }
 
+    /**
+     * Monitor for cache invalidation flag set by admin panel
+     */
+    function watchForCacheInvalidation() {
+        setInterval(() => {
+            const lastProductUpdate = localStorage.getItem('lastProductUpdate');
+            if (lastProductUpdate) {
+                const updateTime = parseInt(lastProductUpdate);
+                const now = Date.now();
+                // If flag was set recently (within last 10 seconds), reload products
+                if (now - updateTime < 10000) {
+                    console.log('🔄 Detected cache invalidation, reloading products...');
+                    BridalProductsLoader.updateProductsGrid();
+                }
+            }
+        }, 1000); // Check every second
+    }
+
     // Public API
     return {
         init,
         loadBridalProducts,
         updateProductsGrid,
-        setupSortUI
+        setupSortUI,
+        watchForCacheInvalidation
     };
 })();
 
@@ -639,6 +658,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (BridalProductsLoader.init()) {
             BridalProductsLoader.updateProductsGrid();
             BridalProductsLoader.setupSortUI();
+            BridalProductsLoader.watchForCacheInvalidation();
         }
     }, 1000);
 });

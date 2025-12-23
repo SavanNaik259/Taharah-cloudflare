@@ -509,12 +509,31 @@ const JewelrySubcategoriesLoader = (function() {
         }
     }
 
+    /**
+     * Monitor for cache invalidation flag set by admin panel
+     */
+    function watchForCacheInvalidation() {
+        setInterval(() => {
+            const lastProductUpdate = localStorage.getItem('lastProductUpdate');
+            if (lastProductUpdate) {
+                const updateTime = parseInt(lastProductUpdate);
+                const now = Date.now();
+                // If flag was set recently (within last 10 seconds), reload products
+                if (now - updateTime < 10000) {
+                    console.log('🔄 Detected cache invalidation, reloading products...');
+                    updateJewelrySection();
+                }
+            }
+        }, 1000); // Check every second
+    }
+
     // Public API
     return {
         init,
         loadJewelryProducts,
         updateJewelrySection,
-        clearCache
+        clearCache,
+        watchForCacheInvalidation
     };
 })();
 
@@ -529,6 +548,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Initial jewelry load failed:', error);
                 JewelrySubcategoriesLoader.updateJewelrySection();
             });
+            JewelrySubcategoriesLoader.watchForCacheInvalidation();
         }
     }, 1000);
 });
