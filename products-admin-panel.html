@@ -2477,7 +2477,12 @@
                     // 🔔 TRIGGER NEW PRODUCT NOTIFICATION
                     try {
                       console.log('⭐ Triggering new-product notification...');
-                      await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-new-product-alerts', {
+                      const isProduction = !window.location.hostname.includes('localhost');
+                      const notificationUrl = isProduction 
+                        ? 'https://royalmeenakari.netlify.app/.netlify/functions/auto-new-product-alerts'
+                        : '/api/new-product-notification';
+                      
+                      const response = await fetch(notificationUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -2486,10 +2491,10 @@
                           productImage: productData.mainImage || ''
                         })
                       });
-                      console.log('✅ New-product notification triggered');
+                      const result = await response.json();
+                      console.log('✅ New-product notification result:', result);
                     } catch (notifError) {
                       console.error('⚠️ Error triggering new product notification:', notifError.message);
-                      // Don't fail the creation if notification fails
                     }
                     
                     showSuccess('Product created successfully!');

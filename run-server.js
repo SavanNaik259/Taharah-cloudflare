@@ -74,6 +74,107 @@ app.use(express.json());
 // Serve static files from the current directory
 app.use(express.static('.'));
 
+// API route for new product notifications
+app.post('/api/new-product-notification', async (req, res) => {
+    try {
+        const { productId, productName, productImage } = req.body;
+        console.log('[API] New product notification received:', { productId, productName });
+
+        if (!productId || !productName) {
+            return res.status(400).json({ error: 'Missing productId or productName' });
+        }
+
+        // Get automatic notification preferences
+        const db = admin.firestore();
+        const settingsDoc = await db.collection('settings').doc('notifications').get();
+        const settings = settingsDoc.data() || {};
+        
+        if (settings.autoNotifyNewProduct === false) {
+            console.log('[API] New product notifications are disabled');
+            return res.json({ message: 'New product notifications are disabled', sent: 0 });
+        }
+
+        // Fetch FCM tokens
+        const userTokens = [];
+        const guestTokens = [];
+
+        const usersSnapshot = await db.collection('users').get();
+        usersSnapshot.forEach(doc => {
+            const fcmTokens = doc.data().fcmTokens || [];
+            if (Array.isArray(fcmTokens) && fcmTokens.length > 0) {
+                userTokens.push(...fcmTokens);
+            }
+        });
+
+        const guestSnapshot = await db.collection('guest_tokens').get();
+        guestSnapshot.forEach(doc => {
+            const tokens = doc.data().tokens || [];
+            if (Array.isArray(tokens) && tokens.length > 0) {
+                guestTokens.push(...tokens);
+            }
+        });
+
+        const allTokens = [...userTokens, ...guestTokens];
+        console.log(`[API] Found ${allTokens.length} tokens (${userTokens.length} users, ${guestTokens.length} guests)`);
+
+        if (allTokens.length === 0) {
+            return res.json({ message: 'No tokens found', sent: 0, failed: 0 });
+        }
+
+        // Send notifications
+        let sentCount = 0;
+        let failedCount = 0;
+
+        for (const token of allTokens) {
+            try {
+                await admin.messaging().send({
+                    notification: {
+                        title: '✨ New Product Added!',
+                        body: `Check out our latest: ${productName}`
+                    },
+                    data: {
+                        link: '/shop.html',
+                        productId: productId,
+                        notificationType: 'newProduct'
+                    },
+                    webpush: {
+                        fcmOptions: { link: '/shop.html' }
+                    },
+                    token: token
+                });
+                sentCount++;
+                console.log(`[API] Sent to token: ${token.substring(0, 10)}...`);
+            } catch (error) {
+                failedCount++;
+                console.error(`[API] Failed to send to token: ${error.message}`);
+                
+                // Remove invalid tokens
+                if (error.code === 'messaging/invalid-registration-token') {
+                    try {
+                        const userQuery = await db.collection('users').where('fcmTokens', 'array-contains', token).get();
+                        userQuery.forEach(doc => {
+                            doc.ref.update({ fcmTokens: admin.firestore.FieldValue.arrayRemove(token) });
+                        });
+                    } catch (e) {
+                        console.error('[API] Error removing invalid token:', e);
+                    }
+                }
+            }
+        }
+
+        console.log(`[API] Notification complete. Sent: ${sentCount}, Failed: ${failedCount}`);
+        res.json({ 
+            message: 'Notifications sent',
+            sent: sentCount, 
+            failed: failedCount,
+            total: allTokens.length
+        });
+    } catch (error) {
+        console.error('[API] Error:', error);
+        res.status(500).json({ error: 'Failed to send notifications', details: error.message });
+    }
+});
+
 // Netlify functions compatibility endpoint
 app.get('/.netlify/functions/load-products', async (req, res) => {
   try {
