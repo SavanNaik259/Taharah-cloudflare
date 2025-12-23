@@ -120,7 +120,7 @@ function displayNotification(payload) {
         },
         actions: [
             { 
-                action: 'open', 
+                action: 'view', 
                 title: buttonText
             },
             {
