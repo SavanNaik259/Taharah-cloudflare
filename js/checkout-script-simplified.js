@@ -2568,7 +2568,20 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (updateResult.success) {
                             console.log('Order payment status updated in Firebase successfully');
 
-                            // Stock already updated during initial order placement, no need to update again
+                            // Update stock for all products in the order
+                            if (window.StockManager && window.StockManager.updateStockAfterOrder) {
+                                try {
+                                    console.log('Updating stock after Razorpay payment for logged-in user...');
+                                    const stockResult = await window.StockManager.updateStockAfterOrder(orderData.products);
+                                    if (stockResult.success) {
+                                        console.log('Stock updated successfully after Razorpay payment:', stockResult.updates);
+                                    } else {
+                                        console.error('Stock update failed for Razorpay order:', stockResult.error);
+                                    }
+                                } catch (stockError) {
+                                    console.error('Error updating stock for Razorpay payment:', stockError);
+                                }
+                            }
                         } else {
                             console.warn('Failed to update order in Firebase:', updateResult.error);
                         }
@@ -2581,7 +2594,20 @@ document.addEventListener('DOMContentLoaded', function() {
                             console.log('Order saved to Firebase with ID:', firebaseSaveResult.orderId);
                             updatedOrderData.firebaseOrderId = firebaseSaveResult.orderId; // Update local data
 
-                            // Stock already updated during initial order placement, no need to update again
+                            // Update stock for all products in the order
+                            if (window.StockManager && window.StockManager.updateStockAfterOrder) {
+                                try {
+                                    console.log('Updating stock after Razorpay payment for new order...');
+                                    const stockResult = await window.StockManager.updateStockAfterOrder(updatedOrderData.products);
+                                    if (stockResult.success) {
+                                        console.log('Stock updated successfully after Razorpay payment:', stockResult.updates);
+                                    } else {
+                                        console.error('Stock update failed for Razorpay order:', stockResult.error);
+                                    }
+                                } catch (stockError) {
+                                    console.error('Error updating stock for Razorpay payment:', stockError);
+                                }
+                            }
 
                             // Create shipment automatically after Razorpay payment
                             await createShipmentAfterOrder(updatedOrderData);
@@ -2605,7 +2631,19 @@ document.addEventListener('DOMContentLoaded', function() {
                         updatedOrderData.firebaseOrderId = firebaseSaveResult.orderId;
 
                         // Update stock for all products in the order (Razorpay guest order)
-                        await updateStockAfterOrder(updatedOrderData.products);
+                        if (window.StockManager && window.StockManager.updateStockAfterOrder) {
+                            try {
+                                console.log('Updating stock after Razorpay payment for guest order...');
+                                const stockResult = await window.StockManager.updateStockAfterOrder(updatedOrderData.products);
+                                if (stockResult.success) {
+                                    console.log('Stock updated successfully after Razorpay payment (guest):', stockResult.updates);
+                                } else {
+                                    console.error('Stock update failed for Razorpay guest order:', stockResult.error);
+                                }
+                            } catch (stockError) {
+                                console.error('Error updating stock for Razorpay guest payment:', stockError);
+                            }
+                        }
 
                         // Create shipment automatically for guest orders
                         await createShipmentAfterOrder(updatedOrderData);
