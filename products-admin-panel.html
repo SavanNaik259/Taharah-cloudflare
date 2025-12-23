@@ -2354,6 +2354,15 @@
                 if (isEditMode && editProductId && originalProductData) {
                     console.log('Updating existing product:', editProductId);
 
+                    // Track which fields were actually changed by the user
+                    const fieldsChanged = {
+                        name: false,
+                        price: false,
+                        stock: false,
+                        description: false,
+                        category: false
+                    };
+
                     // For edit mode, only validate fields that are actually being changed
                     // Build updated product data with only changed values
                     const updatedProductData = {
@@ -2365,18 +2374,23 @@
                     // Only update fields that have values (allowing partial updates)
                     if (productData.name && productData.name.trim()) {
                         updatedProductData.name = productData.name.trim();
+                        fieldsChanged.name = true;
                     }
                     if (productData.price && productData.price > 0) {
                         updatedProductData.price = productData.price;
+                        fieldsChanged.price = true;
                     }
                     if (productData.stock !== null && productData.stock >= 0) {
                         updatedProductData.stock = productData.stock;
+                        fieldsChanged.stock = true;
                     }
                     if (productData.description && productData.description.trim()) {
                         updatedProductData.description = productData.description.trim();
+                        fieldsChanged.description = true;
                     }
                     if (productData.category) {
                         updatedProductData.category = productData.category;
+                        fieldsChanged.category = true;
                     }
 
                     // Handle images - only update if there are selected images
@@ -2398,11 +2412,11 @@
 
                     await updateProductData(updatedProductData, editCategory);
                     
-                    // 🔔 TRIGGER NOTIFICATIONS FOR STOCK/PRICE CHANGES
+                    // 🔔 TRIGGER NOTIFICATIONS ONLY FOR FIELDS THAT WERE ACTUALLY CHANGED
                     try {
-                      // Back-in-stock: Stock went from 0 to available
-                      if (originalProductData.stock === 0 && updatedProductData.stock > 0) {
-                        console.log('📦 Triggering back-in-stock notification...');
+                      // Back-in-stock: ONLY if stock field was edited and stock went from 0 to available
+                      if (fieldsChanged.stock && originalProductData.stock === 0 && updatedProductData.stock > 0) {
+                        console.log('📦 Triggering back-in-stock notification (stock field was edited)...');
                         await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-back-in-stock-alerts', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
@@ -2415,9 +2429,9 @@
                         console.log('✅ Back-in-stock notification triggered');
                       }
                       
-                      // Low-stock: Stock dropped to 3 or below
-                      if (updatedProductData.stock <= 3 && updatedProductData.stock > 0) {
-                        console.log('⚡ Triggering low-stock notification...');
+                      // Low-stock: ONLY if stock field was edited and stock changed to 3 or below
+                      if (fieldsChanged.stock && updatedProductData.stock <= 3 && updatedProductData.stock > 0) {
+                        console.log('⚡ Triggering low-stock notification (stock field was edited)...');
                         await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-low-stock-alerts', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
@@ -2432,9 +2446,9 @@
                         console.log('✅ Low-stock notification triggered');
                       }
                       
-                      // Price-drop: Price decreased
-                      if (originalProductData.price > updatedProductData.price) {
-                        console.log('📉 Triggering price-drop notification...');
+                      // Price-drop: ONLY if price field was edited and price decreased
+                      if (fieldsChanged.price && originalProductData.price > updatedProductData.price) {
+                        console.log('📉 Triggering price-drop notification (price field was edited)...');
                         await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-price-drop-alerts', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
