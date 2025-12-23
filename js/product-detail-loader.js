@@ -114,7 +114,14 @@ const ProductDetailLoader = (function() {
         for (const category of searchCategories) {
             try {
                 console.log(`🔍 Searching category: ${category} for SKU: ${productId}`);
-                const response = await fetch(`/.netlify/functions/load-products?category=${category}`);
+                // Add cache-busting to ensure we get fresh product data
+                const cacheBustParam = `cacheBust=${Date.now()}`;
+                const response = await fetch(`/.netlify/functions/load-products?category=${category}&${cacheBustParam}`, {
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache'
+                    }
+                });
 
                 if (!response.ok) {
                     console.warn(`⚠️ Failed to load category ${category}:`, response.status);
