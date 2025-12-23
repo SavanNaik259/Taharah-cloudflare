@@ -1,21 +1,5 @@
 const admin = require('firebase-admin');
 
-// Initialize Firebase Admin SDK from environment variables
-const serviceAccount = {
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL
-};
-
-if (!admin.apps.length) {
-    admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount)
-    });
-}
-
-const db = admin.firestore();
-const messaging = admin.messaging();
-
 const corsHeaders = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
@@ -23,153 +7,169 @@ const corsHeaders = {
     'Access-Control-Allow-Headers': 'Content-Type'
 };
 
-exports.handler = async (event) => {
-    // Handle CORS preflight
-    if (event.httpMethod === 'OPTIONS') {
-        return { statusCode: 200, headers: corsHeaders, body: '' };
-    }
+function initAdmin() {
+    if (admin.apps.length > 0) return;
+    
+    const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+    if (!privateKey) throw new Error('Missing FIREBASE_PRIVATE_KEY');
 
-    console.log('[auto-new-product-alerts] New product notification triggered');
+    admin.initializeApp({
+        credential: admin.credential.cert({
+            projectId: process.env.FIREBASE_PROJECT_ID,
+            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+            privateKey: privateKey.replace(/\\n/g, '\n')
+        })
+    });
+}
+
+exports.handler = async (event) => {
+    if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: corsHeaders, body: '' };
     
     try {
-        // Parse request body
-        const { productId, productName, productImage } = JSON.parse(event.body || '{}');
-
-        if (!productId || !productName) {
-            return {
-                statusCode: 400,
-                headers: corsHeaders,
-                body: JSON.stringify({ error: 'Missing productId or productName' })
-            };
-        }
-
-        // Get automatic notification preferences
-        const settingsDoc = await db.collection('settings').doc('notifications').get();
-        const settings = settingsDoc.data() || {};
+        initAdmin();
         
-        if (settings.autoNotifyNewProduct === false) {
-            console.log('[auto-new-product-alerts] New product notifications are disabled');
-            return {
-                statusCode: 200,
-                headers: corsHeaders,
-                body: JSON.stringify({ message: 'New product notifications are disabled' })
-            };
+        console.log('[auto-new-product-alerts] New product notification triggered');
+        
+        const requestData = JSON.parse(event.body || '{}');
+        console.log('[auto-new-product-alerts] Parsed request data:', JSON.stringify(requestData, null, 2));
+        
+        const { productId, productName, productImage } = requestData;
+        
+        console.log('[auto-new-product-alerts] Extracted fields:');
+        console.log('  - productId:', productId);
+        console.log('  - productName:', productName);
+        console.log('  - productImage:', productImage);
+        
+        // Validate data
+        if (!productId || productId.trim() === '') {
+            throw new Error('Product ID is required');
+        }
+        if (!productName || productName.trim() === '') {
+            throw new Error('Product name is required');
         }
 
-        // Fetch FCM tokens from both logged-in users and guests
-        const userTokens = [];
-        const guestTokens = [];
+        const db = admin.firestore();
+        const messaging = admin.messaging();
 
-        // Get tokens from logged-in users (field name is 'pushTokens')
-        const usersSnapshot = await db.collection('users').get();
-        usersSnapshot.forEach(doc => {
-            const pushTokens = doc.data().pushTokens || [];
-            if (Array.isArray(pushTokens)) {
-                userTokens.push(...pushTokens);
-            }
-        });
+        // Collect tokens based on audience (use a Set to avoid duplicates)
+        const tokens = new Set();
+        let userTokenCount = 0;
+        let guestTokenCount = 0;
 
-        // Get tokens from guest devices (field name is 'token' - singular)
-        const guestSnapshot = await db.collection('guest_tokens').get();
-        guestSnapshot.forEach(doc => {
+        // Collect guest tokens
+        const guestSnap = await db.collection('guest_tokens').get();
+        guestSnap.forEach(doc => {
             const token = doc.data().token;
-            if (token && typeof token === 'string') {
-                guestTokens.push(token);
+            if (token) {
+                tokens.add(token);
+                guestTokenCount++;
             }
         });
+        
+        // Collect user tokens
+        const userSnap = await db.collection('users').get();
+        userSnap.forEach(doc => {
+            (doc.data().pushTokens || []).forEach(t => {
+                if (t) {
+                    tokens.add(t);
+                    userTokenCount++;
+                }
+            });
+        });
 
-        const allTokens = [...userTokens, ...guestTokens];
-        console.log(`[auto-new-product-alerts] Found ${allTokens.length} tokens (${userTokens.length} users, ${guestTokens.length} guests)`);
-
-        if (allTokens.length === 0) {
-            return {
-                statusCode: 200,
-                headers: corsHeaders,
-                body: JSON.stringify({ message: 'No tokens to send to', sent: 0, failed: 0 })
+        const tokenList = Array.from(tokens).filter(t => typeof t === 'string' && t.length > 100);
+        
+        console.log('[auto-new-product-alerts] Found', tokenList.length, 'unique tokens (users:', userTokenCount, ', guests:', guestTokenCount, ')');
+        
+        if (tokenList.length === 0) {
+            return { 
+                statusCode: 200, 
+                headers: corsHeaders, 
+                body: JSON.stringify({ 
+                    success: true, 
+                    stats: { userTokenCount: 0, guestTokenCount: 0, totalSent: 0 },
+                    message: 'No tokens found to send notifications' 
+                }) 
             };
         }
 
-        // Prepare notification message
+        console.log('[auto-new-product-alerts] Building message payload...');
+        
+        // Build data object - EXACTLY matching the manual push notification format
+        // This is a data-only payload that the service worker will display
+        const dataPayload = {
+            title: '✨ New Product Added!',
+            body: `Check out our latest: ${String(productName)}`,
+            link: `/product-detail.html?id=${encodeURIComponent(String(productId))}`,
+            imageUrl: String(productImage || ''),
+            buttonText: 'View Product',
+            icon: '/images/logos/royalmeenakari.png',
+            tag: 'royal-meenakari-notification',
+            timestamp: Date.now().toString()
+        };
+        
+        console.log('[auto-new-product-alerts] Data payload:', JSON.stringify(dataPayload, null, 2));
+
+        // Use the SAME message format as send-notifications.js (data-only payload)
         const message = {
-            notification: {
-                title: '✨ New Product Added!',
-                body: `Check out our latest: ${productName}`
-            },
-            data: {
-                link: '/shop.html',
-                productId: productId,
-                notificationType: 'newProduct'
-            },
+            data: dataPayload,
             webpush: {
-                fcmOptions: { link: '/shop.html' }
+                headers: {
+                    'TTL': '86400',
+                    'Urgency': 'high'
+                },
+                fcm_options: {
+                    link: dataPayload.link
+                }
             }
         };
 
-        // Send notifications to all tokens
-        let sentCount = 0;
-        let failedCount = 0;
+        console.log('[auto-new-product-alerts] Message payload:', JSON.stringify(message, null, 2));
+        console.log('[auto-new-product-alerts] Sending to', tokenList.length, 'tokens');
 
-        for (const token of allTokens) {
-            try {
-                await messaging.send({
-                    ...message,
-                    token: token
-                });
-                sentCount++;
-            } catch (error) {
-                console.error(`Failed to send to token ${token.substring(0, 10)}...`, error.message);
-                failedCount++;
-                
-                // Remove invalid tokens
-                if (error.code === 'messaging/invalid-registration-token' || 
-                    error.code === 'messaging/registration-token-not-registered') {
-                    try {
-                        // Remove from users (correct field name: pushTokens)
-                        const userQuery = await db.collection('users')
-                            .where('pushTokens', 'array-contains', token)
-                            .get();
-                        userQuery.forEach(doc => {
-                            doc.ref.update({
-                                pushTokens: admin.firestore.FieldValue.arrayRemove(token)
-                            });
-                        });
+        // Use sendEachForMulticast like the working implementation
+        const response = await messaging.sendEachForMulticast({
+            tokens: tokenList,
+            ...message
+        });
 
-                        // Remove from guests (correct field name: token - singular)
-                        const guestQuery = await db.collection('guest_tokens').get();
-                        guestQuery.forEach(doc => {
-                            if (doc.data().token === token) {
-                                doc.ref.delete();
-                            }
-                        });
-                    } catch (e) {
-                        console.error('Error removing invalid token:', e);
-                    }
+        console.log(`[auto-new-product-alerts] Notification sent successfully. Success: ${response.successCount}, Failed: ${response.failureCount}`);
+        
+        // Log failures for debugging
+        if (response.failureCount > 0) {
+            response.responses.forEach((resp, idx) => {
+                if (!resp.success) {
+                    console.error(`[auto-new-product-alerts] Failed to send to token ${idx}:`, resp.error.message);
                 }
-            }
+            });
         }
-
-        console.log(`[auto-new-product-alerts] Sent: ${sentCount}, Failed: ${failedCount}`);
 
         return {
             statusCode: 200,
             headers: corsHeaders,
             body: JSON.stringify({
-                message: 'New product notifications sent',
-                sent: sentCount,
-                failed: failedCount,
-                total: allTokens.length
+                success: true,
+                stats: {
+                    userTokenCount: userTokenCount,
+                    guestTokenCount: guestTokenCount,
+                    totalSent: response.successCount
+                },
+                message: `Successfully sent to ${response.successCount} devices`,
+                details: {
+                    successCount: response.successCount,
+                    failureCount: response.failureCount
+                }
             })
         };
-
     } catch (error) {
-        console.error('[auto-new-product-alerts] Error:', error);
-        return {
-            statusCode: 500,
-            headers: corsHeaders,
+        console.error('[auto-new-product-alerts] Send error:', error);
+        return { 
+            statusCode: 500, 
+            headers: corsHeaders, 
             body: JSON.stringify({ 
-                error: 'Failed to send notifications',
-                details: error.message 
-            })
+                success: false,
+                error: error.message 
+            }) 
         };
     }
 };
