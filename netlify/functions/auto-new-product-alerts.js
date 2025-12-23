@@ -16,7 +16,19 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 const messaging = admin.messaging();
 
+const corsHeaders = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type'
+};
+
 exports.handler = async (event) => {
+    // Handle CORS preflight
+    if (event.httpMethod === 'OPTIONS') {
+        return { statusCode: 200, headers: corsHeaders, body: '' };
+    }
+
     console.log('[auto-new-product-alerts] New product notification triggered');
     
     try {
@@ -26,6 +38,7 @@ exports.handler = async (event) => {
         if (!productId || !productName) {
             return {
                 statusCode: 400,
+                headers: corsHeaders,
                 body: JSON.stringify({ error: 'Missing productId or productName' })
             };
         }
@@ -38,6 +51,7 @@ exports.handler = async (event) => {
             console.log('[auto-new-product-alerts] New product notifications are disabled');
             return {
                 statusCode: 200,
+                headers: corsHeaders,
                 body: JSON.stringify({ message: 'New product notifications are disabled' })
             };
         }
@@ -46,21 +60,21 @@ exports.handler = async (event) => {
         const userTokens = [];
         const guestTokens = [];
 
-        // Get tokens from logged-in users
+        // Get tokens from logged-in users (field name is 'pushTokens')
         const usersSnapshot = await db.collection('users').get();
         usersSnapshot.forEach(doc => {
-            const fcmTokens = doc.data().fcmTokens || [];
-            if (Array.isArray(fcmTokens)) {
-                userTokens.push(...fcmTokens);
+            const pushTokens = doc.data().pushTokens || [];
+            if (Array.isArray(pushTokens)) {
+                userTokens.push(...pushTokens);
             }
         });
 
-        // Get tokens from guest devices
+        // Get tokens from guest devices (field name is 'token' - singular)
         const guestSnapshot = await db.collection('guest_tokens').get();
         guestSnapshot.forEach(doc => {
-            const tokens = doc.data().tokens || [];
-            if (Array.isArray(tokens)) {
-                guestTokens.push(...tokens);
+            const token = doc.data().token;
+            if (token && typeof token === 'string') {
+                guestTokens.push(token);
             }
         });
 
@@ -70,6 +84,7 @@ exports.handler = async (event) => {
         if (allTokens.length === 0) {
             return {
                 statusCode: 200,
+                headers: corsHeaders,
                 body: JSON.stringify({ message: 'No tokens to send to', sent: 0, failed: 0 })
             };
         }
@@ -109,24 +124,22 @@ exports.handler = async (event) => {
                 if (error.code === 'messaging/invalid-registration-token' || 
                     error.code === 'messaging/registration-token-not-registered') {
                     try {
-                        // Remove from users
+                        // Remove from users (correct field name: pushTokens)
                         const userQuery = await db.collection('users')
-                            .where('fcmTokens', 'array-contains', token)
+                            .where('pushTokens', 'array-contains', token)
                             .get();
                         userQuery.forEach(doc => {
                             doc.ref.update({
-                                fcmTokens: admin.firestore.FieldValue.arrayRemove(token)
+                                pushTokens: admin.firestore.FieldValue.arrayRemove(token)
                             });
                         });
 
-                        // Remove from guests
-                        const guestQuery = await db.collection('guest_tokens')
-                            .where('tokens', 'array-contains', token)
-                            .get();
+                        // Remove from guests (correct field name: token - singular)
+                        const guestQuery = await db.collection('guest_tokens').get();
                         guestQuery.forEach(doc => {
-                            doc.ref.update({
-                                tokens: admin.firestore.FieldValue.arrayRemove(token)
-                            });
+                            if (doc.data().token === token) {
+                                doc.ref.delete();
+                            }
                         });
                     } catch (e) {
                         console.error('Error removing invalid token:', e);
@@ -139,6 +152,7 @@ exports.handler = async (event) => {
 
         return {
             statusCode: 200,
+            headers: corsHeaders,
             body: JSON.stringify({
                 message: 'New product notifications sent',
                 sent: sentCount,
@@ -151,6 +165,7 @@ exports.handler = async (event) => {
         console.error('[auto-new-product-alerts] Error:', error);
         return {
             statusCode: 500,
+            headers: corsHeaders,
             body: JSON.stringify({ 
                 error: 'Failed to send notifications',
                 details: error.message 
