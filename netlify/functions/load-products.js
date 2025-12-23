@@ -241,10 +241,10 @@ exports.handler = async (event, context) => {
       responseHeaders['Pragma'] = 'no-cache';
       responseHeaders['Expires'] = '0';
     } else {
-      // For normal requests, set optimized CDN caching with proper ETag validation
-      // Use shorter max-age with stale-while-revalidate for better performance
-      responseHeaders['Cache-Control'] = 'public, max-age=86400, stale-while-revalidate=31536000, stale-if-error=31536000'; // 1 day cache, 1 year stale
-      responseHeaders['Netlify-CDN-Cache-Control'] = 'public, max-age=31536000, durable, stale-while-revalidate=31536000'; // Netlify CDN specific with longer cache
+      // For normal requests, use shorter cache to catch product updates faster
+      // This ensures new products appear within 1 hour instead of 24 hours
+      responseHeaders['Cache-Control'] = 'public, max-age=3600, stale-while-revalidate=86400'; // 1 hour cache, 1 day stale
+      responseHeaders['Netlify-CDN-Cache-Control'] = 'public, max-age=3600, durable, stale-while-revalidate=86400'; // Netlify CDN specific
       
       // Generate consistent ETag based on product data to ensure proper cache validation
       if (etag) {
@@ -256,9 +256,6 @@ exports.handler = async (event, context) => {
         responseHeaders['ETag'] = `"${productHash}"`;
         console.log(`Generated fallback ETag: ${responseHeaders['ETag']}`);
       }
-      
-      // Add immutable directive for better CDN caching
-      responseHeaders['Cache-Control'] += ', immutable';
     }
 
     return {

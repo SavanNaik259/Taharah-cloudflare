@@ -88,11 +88,12 @@ const SubcategoryProductsLoader = (function() {
         try {
             console.log(`Loading ${category} products from Cloud Storage...`);
 
-            let netlifyEndpoint = `/.netlify/functions/load-products?category=${category}`;
+            // ALWAYS add cache busting to ensure fresh product data
+            const cacheBustTimestamp = Date.now();
+            let netlifyEndpoint = `/.netlify/functions/load-products?category=${category}&cacheBust=${cacheBustTimestamp}`;
 
             if (forceRefresh || cacheInvalidated) {
-                const timestamp = Date.now();
-                netlifyEndpoint += `&cacheBust=${timestamp}`;
+                console.log('Force refresh enabled with timestamp:', cacheBustTimestamp);
             }
 
             const netlifyHeaders = {
