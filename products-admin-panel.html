@@ -2372,25 +2372,38 @@
                     };
 
                     // Only update fields that have values (allowing partial updates)
+                    // AND check if the value ACTUALLY CHANGED from the original
                     if (productData.name && productData.name.trim()) {
-                        updatedProductData.name = productData.name.trim();
-                        fieldsChanged.name = true;
+                        const trimmedName = productData.name.trim();
+                        if (trimmedName !== originalProductData.name) {
+                            updatedProductData.name = trimmedName;
+                            fieldsChanged.name = true;
+                        }
                     }
                     if (productData.price && productData.price > 0) {
-                        updatedProductData.price = productData.price;
-                        fieldsChanged.price = true;
+                        if (productData.price !== originalProductData.price) {
+                            updatedProductData.price = productData.price;
+                            fieldsChanged.price = true;
+                        }
                     }
                     if (productData.stock !== null && productData.stock >= 0) {
-                        updatedProductData.stock = productData.stock;
-                        fieldsChanged.stock = true;
+                        if (productData.stock !== originalProductData.stock) {
+                            updatedProductData.stock = productData.stock;
+                            fieldsChanged.stock = true;
+                        }
                     }
                     if (productData.description && productData.description.trim()) {
-                        updatedProductData.description = productData.description.trim();
-                        fieldsChanged.description = true;
+                        const trimmedDescription = productData.description.trim();
+                        if (trimmedDescription !== originalProductData.description) {
+                            updatedProductData.description = trimmedDescription;
+                            fieldsChanged.description = true;
+                        }
                     }
                     if (productData.category) {
-                        updatedProductData.category = productData.category;
-                        fieldsChanged.category = true;
+                        if (productData.category !== originalProductData.category) {
+                            updatedProductData.category = productData.category;
+                            fieldsChanged.category = true;
+                        }
                     }
 
                     // Handle images - only update if there are selected images
