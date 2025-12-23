@@ -2453,6 +2453,69 @@
                         </form>
                     </div>
                 </div>
+
+                <!-- Automatic Notifications Section -->
+                <div class="card" style="margin-top: 30px;">
+                    <div class="card-header">
+                        <h2 class="card-title">Automatic Notifications</h2>
+                    </div>
+                    <div class="card-content">
+                        <div style="background: #f0f9ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                            <p style="color: #1e40af; font-size: 14px; margin: 0;">Automatically send push notifications when products are added, prices drop, or stock changes.</p>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                            <!-- New Product Notifications -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                                    <h3 style="margin: 0; font-size: 16px; font-weight: 600;">New Products</h3>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="autoNotifyNewProduct" checked style="width: 20px; height: 20px; cursor: pointer;">
+                                    </label>
+                                </div>
+                                <p style="color: #64748b; font-size: 13px; margin: 0; line-height: 1.5;">Send notifications when new products are added to the store.</p>
+                                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0;">
+                                    <small style="color: #94a3b8;">Status: <span id="newProductStatus" style="color: #10b981;">Enabled</span></small>
+                                </div>
+                            </div>
+
+                            <!-- Price Drop Notifications -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                                    <h3 style="margin: 0; font-size: 16px; font-weight: 600;">Price Drops</h3>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="autoNotifyPriceDrop" checked style="width: 20px; height: 20px; cursor: pointer;">
+                                    </label>
+                                </div>
+                                <p style="color: #64748b; font-size: 13px; margin: 0; line-height: 1.5;">Alert users when product prices decrease.</p>
+                                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0;">
+                                    <small style="color: #94a3b8;">Status: <span id="priceDropStatus" style="color: #10b981;">Enabled</span></small>
+                                </div>
+                            </div>
+
+                            <!-- Back-in-Stock Notifications -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                                    <h3 style="margin: 0; font-size: 16px; font-weight: 600;">Back in Stock</h3>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="autoNotifyBackInStock" checked style="width: 20px; height: 20px; cursor: pointer;">
+                                    </label>
+                                </div>
+                                <p style="color: #64748b; font-size: 13px; margin: 0; line-height: 1.5;">Notify users when out-of-stock items are available again.</p>
+                                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0;">
+                                    <small style="color: #94a3b8;">Status: <span id="backInStockStatus" style="color: #10b981;">Enabled</span></small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+                            <button type="button" class="btn btn-primary" id="saveAutoNotifyBtn" onclick="saveAutomaticNotificationPreferences()" style="padding: 12px 24px;">
+                                <i class="fas fa-save"></i> Save Preferences
+                            </button>
+                            <span id="autoNotifyMessage" style="margin-left: 16px; font-size: 14px; display: none;"></span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Dashboard Section -->
@@ -11149,6 +11212,80 @@
             // Load stats on initialization
             loadTokenStats();
         }
+
+        // Load automatic notification preferences
+        async function loadAutomaticNotificationPreferences() {
+            try {
+                const settingsDoc = await db.collection('settings').doc('notifications').get();
+                const settings = settingsDoc.data() || {};
+
+                document.getElementById('autoNotifyNewProduct').checked = settings.autoNotifyNewProduct !== false;
+                document.getElementById('autoNotifyPriceDrop').checked = settings.autoNotifyPriceDrop !== false;
+                document.getElementById('autoNotifyBackInStock').checked = settings.autoNotifyBackInStock !== false;
+
+                updateStatusBadges();
+            } catch (error) {
+                console.error('Error loading notification preferences:', error);
+            }
+        }
+
+        // Save automatic notification preferences
+        async function saveAutomaticNotificationPreferences() {
+            const btn = document.getElementById('saveAutoNotifyBtn');
+            const msg = document.getElementById('autoNotifyMessage');
+            btn.disabled = true;
+
+            try {
+                const preferences = {
+                    autoNotifyNewProduct: document.getElementById('autoNotifyNewProduct').checked,
+                    autoNotifyPriceDrop: document.getElementById('autoNotifyPriceDrop').checked,
+                    autoNotifyBackInStock: document.getElementById('autoNotifyBackInStock').checked,
+                    updatedAt: new Date().toISOString()
+                };
+
+                await db.collection('settings').doc('notifications').set(preferences, { merge: true });
+                
+                msg.textContent = '✅ Preferences saved successfully!';
+                msg.style.color = '#10b981';
+                msg.style.display = 'inline';
+
+                updateStatusBadges();
+
+                setTimeout(() => {
+                    msg.style.display = 'none';
+                }, 3000);
+            } catch (error) {
+                console.error('Error saving preferences:', error);
+                msg.textContent = '❌ Error saving preferences: ' + error.message;
+                msg.style.color = '#ef4444';
+                msg.style.display = 'inline';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // Update status badges based on checkbox states
+        function updateStatusBadges() {
+            const newProductStatus = document.getElementById('autoNotifyNewProduct').checked ? 'Enabled' : 'Disabled';
+            const priceDropStatus = document.getElementById('autoNotifyPriceDrop').checked ? 'Enabled' : 'Disabled';
+            const backInStockStatus = document.getElementById('autoNotifyBackInStock').checked ? 'Enabled' : 'Disabled';
+
+            document.getElementById('newProductStatus').textContent = newProductStatus;
+            document.getElementById('priceDropStatus').textContent = priceDropStatus;
+            document.getElementById('backInStockStatus').textContent = backInStockStatus;
+
+            document.getElementById('newProductStatus').style.color = newProductStatus === 'Enabled' ? '#10b981' : '#ef4444';
+            document.getElementById('priceDropStatus').style.color = priceDropStatus === 'Enabled' ? '#10b981' : '#ef4444';
+            document.getElementById('backInStockStatus').style.color = backInStockStatus === 'Enabled' ? '#10b981' : '#ef4444';
+        }
+
+        // Add checkbox event listeners to update status in real-time
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('autoNotifyNewProduct')?.addEventListener('change', updateStatusBadges);
+            document.getElementById('autoNotifyPriceDrop')?.addEventListener('change', updateStatusBadges);
+            document.getElementById('autoNotifyBackInStock')?.addEventListener('change', updateStatusBadges);
+            loadAutomaticNotificationPreferences();
+        });
 
     </script>
 </body>
