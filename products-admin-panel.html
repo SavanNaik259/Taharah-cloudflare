@@ -2290,47 +2290,6 @@
 
                 console.log('Products JSON file updated successfully with', existingProducts.length, 'products');
 
-                // CRITICAL FIX: Also add new products to 'new-arrivals' category for user visibility
-                if (!isEditMode) {
-                    console.log('🔔 Adding new product to new-arrivals collection for immediate user visibility...');
-                    try {
-                        // Load existing new-arrivals
-                        let newArrivalsProducts = [];
-                        try {
-                            const newArrivalsRef = storage.ref('productData/new-arrivals-products.json');
-                            const url = await newArrivalsRef.getDownloadURL();
-                            const response = await fetch(url);
-                            if (response.ok) {
-                                newArrivalsProducts = await response.json();
-                                if (!Array.isArray(newArrivalsProducts)) newArrivalsProducts = [];
-                            }
-                        } catch (e) {
-                            console.log('new-arrivals collection not found, creating new one');
-                            newArrivalsProducts = [];
-                        }
-
-                        // Add product to new-arrivals (avoid duplicates)
-                        if (!newArrivalsProducts.find(p => p.id === productData.id)) {
-                            newArrivalsProducts.unshift(productData);
-                            // Keep only latest 30 products in new-arrivals
-                            if (newArrivalsProducts.length > 30) {
-                                newArrivalsProducts = newArrivalsProducts.slice(0, 30);
-                            }
-
-                            // Save to new-arrivals
-                            const newArrivalsJSON = JSON.stringify(newArrivalsProducts, null, 2);
-                            const newArrivalsBlob = new Blob([newArrivalsJSON], { type: 'application/json' });
-                            await storage.ref('productData/new-arrivals-products.json').put(newArrivalsBlob, {
-                                contentType: 'application/json',
-                                cacheControl: 'public, max-age=0, must-revalidate'
-                            });
-                            console.log('✅ Product also added to new-arrivals collection');
-                        }
-                    } catch (newArrivalsError) {
-                        console.warn('⚠️ Could not add to new-arrivals, but product was saved to category:', newArrivalsError.message);
-                    }
-                }
-
                 // Invalidate cache for this category to force fresh load on category pages
                 try {
                     const cacheKeys = [
