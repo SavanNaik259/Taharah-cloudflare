@@ -100,9 +100,9 @@ exports.handler = async (event) => {
         const dataPayload = {
             title: '✨ New Product Added!',
             body: `Check out our latest: ${String(productName)}`,
-            link: '/shop.html',
+            link: `/product-detail.html?id=${encodeURIComponent(String(productId))}`,
             imageUrl: String(productImage || ''),
-            buttonText: 'Shop Now',
+            buttonText: 'View Product',
             icon: '/images/logos/royalmeenakari.png',
             tag: 'royal-meenakari-notification',
             timestamp: Date.now().toString()
