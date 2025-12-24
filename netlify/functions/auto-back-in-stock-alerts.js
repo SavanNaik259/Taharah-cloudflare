@@ -47,6 +47,13 @@ exports.handler = async (event) => {
         if (!productName || productName.trim() === '') {
             throw new Error('Product name is required');
         }
+        
+        // Ensure image URL is absolute (add domain if relative)
+        let imageUrl = productImage || '';
+        if (imageUrl && !imageUrl.startsWith('http')) {
+            imageUrl = 'https://royalmeenakari.netlify.app' + (imageUrl.startsWith('/') ? '' : '/') + imageUrl;
+            console.log('[auto-back-in-stock-alerts] Converted relative image URL to absolute:', imageUrl.substring(0, 80) + '...');
+        }
 
         const db = admin.firestore();
         const messaging = admin.messaging();
@@ -100,7 +107,7 @@ exports.handler = async (event) => {
             title: '📦 Back in Stock!',
             body: `${String(productName)} is available again. Don't miss out!`,
             link: `/product-detail.html?id=${encodeURIComponent(String(productId))}`,
-            imageUrl: String(productImage || ''),
+            imageUrl: imageUrl,
             buttonText: 'Shop Now',
             icon: '/images/logos/royalmeenakari.png',
             tag: 'royal-meenakari-back-in-stock',
@@ -115,6 +122,21 @@ exports.handler = async (event) => {
                 headers: {
                     'TTL': '86400',
                     'Urgency': 'high'
+                },
+                notification: {
+                    title: dataPayload.title,
+                    body: dataPayload.body,
+                    icon: dataPayload.icon,
+                    badge: dataPayload.icon,
+                    image: imageUrl,
+                    tag: dataPayload.tag,
+                    requireInteraction: false,
+                    actions: [
+                        {
+                            action: 'open',
+                            title: dataPayload.buttonText
+                        }
+                    ]
                 },
                 fcm_options: {
                     link: dataPayload.link

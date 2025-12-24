@@ -111,21 +111,27 @@ exports.handler = async (event, context) => {
       console.log(`   Product details found:`, !!updatedProduct);
       
       if (updatedProduct) {
-        console.log(`   Product name: ${updatedProduct.name || updatedProduct.productName}`);
-        console.log(`   Product image: ${(updatedProduct.image || updatedProduct.productImage)?.substring(0, 50)}...`);
+        const productName = updatedProduct.name || updatedProduct.productName || 'Unknown Product';
+        const productImage = updatedProduct.image || updatedProduct.productImage || '';
+        
+        console.log(`   Product name: ${productName}`);
+        console.log(`   Product image URL: ${productImage ? productImage.substring(0, 80) + '...' : 'NO IMAGE FOUND'}`);
+        console.log(`   Product object keys:`, Object.keys(updatedProduct).join(', '));
         
         // BACK-IN-STOCK: If stock went from 0 to available
         if (previousStock === 0 && newStock > 0) {
           console.log(`\n📦 BACK-IN-STOCK CONDITION MET - Calling automation function...`);
           try {
+            const backInStockBody = {
+              productId: productId,
+              productName: productName,
+              productImage: productImage
+            };
+            console.log(`   Sending back-in-stock notification with image:`, productImage ? 'YES' : 'NO');
             const backInStockResponse = await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-back-in-stock-alerts', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                productId: productId,
-                productName: updatedProduct.name || updatedProduct.productName,
-                productImage: updatedProduct.image || updatedProduct.productImage || ''
-              })
+              body: JSON.stringify(backInStockBody)
             });
             const backInStockData = await backInStockResponse.json();
             console.log(`✅ Back-in-stock function response:`, backInStockData);
@@ -140,16 +146,18 @@ exports.handler = async (event, context) => {
         if (previousStock > 3 && newStock <= 3 && newStock > 0) {
           console.log(`\n⚡ LOW-STOCK CONDITION MET - Calling automation function...`);
           try {
+            const lowStockBody = {
+              productId: productId,
+              productName: productName,
+              productImage: productImage,
+              stockRemaining: newStock,
+              threshold: 3
+            };
+            console.log(`   Sending low-stock notification with image:`, productImage ? 'YES' : 'NO');
             const lowStockResponse = await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-low-stock-alerts', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                productId: productId,
-                productName: updatedProduct.name || updatedProduct.productName,
-                productImage: updatedProduct.image || updatedProduct.productImage || '',
-                stockRemaining: newStock,
-                threshold: 3
-              })
+              body: JSON.stringify(lowStockBody)
             });
             const lowStockData = await lowStockResponse.json();
             console.log(`✅ Low-stock function response:`, lowStockData);
