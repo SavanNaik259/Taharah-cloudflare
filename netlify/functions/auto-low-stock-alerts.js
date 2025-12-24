@@ -38,7 +38,7 @@ exports.handler = async (event) => {
         console.log('[auto-low-stock-alerts] Extracted fields:');
         console.log('  - productId:', productId);
         console.log('  - productName:', productName);
-        console.log('  - productImage:', productImage ? productImage.substring(0, 80) + '...' : 'EMPTY');
+        console.log('  - productImage:', productImage);
         console.log('  - stockRemaining:', stockRemaining);
         console.log('  - threshold:', threshold);
         
@@ -51,13 +51,6 @@ exports.handler = async (event) => {
         }
         if (stockRemaining === null || stockRemaining === undefined) {
             throw new Error('Stock remaining is required');
-        }
-        
-        // Ensure image URL is absolute (add domain if relative)
-        let imageUrl = productImage || '';
-        if (imageUrl && !imageUrl.startsWith('http')) {
-            imageUrl = 'https://royalmeenakari.netlify.app' + (imageUrl.startsWith('/') ? '' : '/') + imageUrl;
-            console.log('[auto-low-stock-alerts] Converted relative image URL to absolute:', imageUrl.substring(0, 80) + '...');
         }
 
         const db = admin.firestore();
@@ -112,7 +105,7 @@ exports.handler = async (event) => {
             title: '⚡ Limited Stock!',
             body: `Only ${stockRemaining} item(s) left of ${String(productName)}. Order now before they're gone!`,
             link: `/product-detail.html?id=${encodeURIComponent(String(productId))}`,
-            imageUrl: imageUrl,
+            imageUrl: String(productImage || ''),
             buttonText: 'Order Now',
             icon: '/images/logos/royalmeenakari.png',
             tag: 'royal-meenakari-low-stock',
@@ -127,21 +120,6 @@ exports.handler = async (event) => {
                 headers: {
                     'TTL': '86400',
                     'Urgency': 'high'
-                },
-                notification: {
-                    title: dataPayload.title,
-                    body: dataPayload.body,
-                    icon: dataPayload.icon,
-                    badge: dataPayload.icon,
-                    image: imageUrl,
-                    tag: dataPayload.tag,
-                    requireInteraction: false,
-                    actions: [
-                        {
-                            action: 'open',
-                            title: dataPayload.buttonText
-                        }
-                    ]
                 },
                 fcm_options: {
                     link: dataPayload.link
