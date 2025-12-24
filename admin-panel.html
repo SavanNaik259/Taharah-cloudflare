@@ -7322,10 +7322,8 @@
             // Clear existing list
             notificationsContainer.innerHTML = '';
 
-            // Display latest notifications (limit to 10)
-            const recentNotifications = notifications.slice(0, 10);
-
-            recentNotifications.forEach(notification => {
+            // Display all notifications
+            notifications.forEach(notification => {
                 const notificationElement = document.createElement('div');
                 notificationElement.className = `notification-item ${notification.read ? 'read' : 'unread'}`;
                 notificationElement.style.cursor = 'pointer';
