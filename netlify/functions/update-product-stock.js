@@ -62,7 +62,7 @@ exports.handler = async (event, context) => {
 
   try {
     const requestData = JSON.parse(event.body);
-    const { category, products, productId, previousStock, newStock, quantityReduced } = requestData;
+    const { category, products, productId, previousStock, newStock, quantityReduced, cartProductImage, cartProductName } = requestData;
 
     if (!category || !products || !productId) {
       return {
@@ -111,8 +111,13 @@ exports.handler = async (event, context) => {
       console.log(`   Product details found:`, !!updatedProduct);
       
       if (updatedProduct) {
-        console.log(`   Product name: ${updatedProduct.name || updatedProduct.productName}`);
-        console.log(`   Product image: ${(updatedProduct.image || updatedProduct.productImage)?.substring(0, 50)}...`);
+        const productName = updatedProduct.name || updatedProduct.productName || cartProductName || 'Unknown Product';
+        // Use cart product image as fallback if not found in products array
+        const productImage = updatedProduct.image || updatedProduct.productImage || cartProductImage || '';
+        
+        console.log(`   Product name: ${productName}`);
+        console.log(`   Product image: ${productImage ? productImage.substring(0, 50) + '...' : 'NO IMAGE FOUND'}`);
+        console.log(`   Image source: ${updatedProduct.image || updatedProduct.productImage ? 'product data' : cartProductImage ? 'cart' : 'NONE'}`);
         
         // BACK-IN-STOCK: If stock went from 0 to available
         if (previousStock === 0 && newStock > 0) {
@@ -123,8 +128,8 @@ exports.handler = async (event, context) => {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 productId: productId,
-                productName: updatedProduct.name || updatedProduct.productName,
-                productImage: updatedProduct.image || updatedProduct.productImage || ''
+                productName: productName,
+                productImage: productImage
               })
             });
             const backInStockData = await backInStockResponse.json();
@@ -145,8 +150,8 @@ exports.handler = async (event, context) => {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 productId: productId,
-                productName: updatedProduct.name || updatedProduct.productName,
-                productImage: updatedProduct.image || updatedProduct.productImage || '',
+                productName: productName,
+                productImage: productImage,
                 stockRemaining: newStock,
                 threshold: 3
               })

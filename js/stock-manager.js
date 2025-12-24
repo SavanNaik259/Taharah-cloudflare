@@ -26,7 +26,7 @@ window.StockManager = (function() {
             // Process each order item
             for (const item of orderItems) {
                 try {
-                    const result = await updateProductStock(item.id, item.quantity);
+                    const result = await updateProductStock(item.id, item.quantity, item.image, item.name);
                     if (result.success) {
                         stockUpdates.push({
                             productId: item.id,
@@ -87,9 +87,11 @@ window.StockManager = (function() {
      * Update stock for a single product
      * @param {string} productId - Product ID
      * @param {number} quantity - Quantity to subtract from stock
+     * @param {string} productImage - Product image URL from cart (fallback)
+     * @param {string} productName - Product name from cart (fallback)
      * @returns {Promise<Object>} Result with success status and stock info
      */
-    async function updateProductStock(productId, quantity) {
+    async function updateProductStock(productId, quantity, productImage = '', productName = '') {
         try {
             // Get all possible categories to search (matching product-detail-loader.js logic)
             const categoriesToSearch = getCategoriesForProduct(productId);
@@ -151,7 +153,9 @@ window.StockManager = (function() {
                     productId,
                     previousStock,
                     newStock,
-                    quantityReduced: quantity
+                    quantityReduced: quantity,
+                    cartProductImage: productImage,
+                    cartProductName: productName
                 })
             });
 
