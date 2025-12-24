@@ -168,9 +168,28 @@ window.StockManager = (function() {
      * @returns {string} Category name
      */
     function getProductCategory(productId) {
+        // Main categories
         if (productId.startsWith('FEA-')) return 'featured-collection';
         if (productId.startsWith('NEW-')) return 'new-arrivals';
         if (productId.startsWith('SAR-')) return 'saree-collection';
+        
+        // Subcategories - Gold
+        if (productId.startsWith('GN-')) return 'gold-necklace';
+        if (productId.startsWith('GE-')) return 'gold-earrings';
+        if (productId.startsWith('GB-')) return 'gold-bangles';
+        if (productId.startsWith('GR-')) return 'gold-rings';
+        
+        // Subcategories - Silver
+        if (productId.startsWith('SN-')) return 'silver-necklace';
+        if (productId.startsWith('SE-')) return 'silver-earrings';
+        if (productId.startsWith('SB-')) return 'silver-bangles';
+        if (productId.startsWith('SR-')) return 'silver-rings';
+        
+        // Subcategories - Meenakari
+        if (productId.startsWith('MN-')) return 'meenakari-necklace';
+        if (productId.startsWith('ME-')) return 'meenakari-earrings';
+        if (productId.startsWith('MB-')) return 'meenakari-bangles';
+        if (productId.startsWith('MR-')) return 'meenakari-rings';
         
         // Fallback - try to determine from other patterns
         console.warn(`Unknown product ID pattern: ${productId}, defaulting to new-arrivals`);
