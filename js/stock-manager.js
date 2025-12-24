@@ -91,31 +91,49 @@ window.StockManager = (function() {
      */
     async function updateProductStock(productId, quantity) {
         try {
-            // Determine category from product ID prefix
-            const category = getProductCategory(productId);
-            console.log(`Updating stock for product ${productId} in category ${category}`);
+            // Get all possible categories to search (matching product-detail-loader.js logic)
+            const categoriesToSearch = getCategoriesForProduct(productId);
+            console.log(`Updating stock for product ${productId}. Searching categories:`, categoriesToSearch);
 
-            // Load current products from Firebase
-            const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
-            
-            if (!response.ok) {
-                throw new Error(`Failed to load products: ${response.status}`);
+            let products = [];
+            let foundCategory = null;
+            let productIndex = -1;
+
+            // Try each category until we find the product
+            for (const category of categoriesToSearch) {
+                try {
+                    const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
+                    
+                    if (!response.ok) {
+                        console.log(`Category ${category} not available (${response.status})`);
+                        continue;
+                    }
+
+                    const data = await response.json();
+                    products = data.products || [];
+
+                    // Try to find the product in this category
+                    productIndex = products.findIndex(p => p.id === productId);
+                    if (productIndex !== -1) {
+                        foundCategory = category;
+                        console.log(`✅ Found product ${productId} in category: ${category}`);
+                        break;
+                    }
+                } catch (error) {
+                    console.log(`Error searching category ${category}:`, error.message);
+                    continue;
+                }
             }
 
-            const data = await response.json();
-            const products = data.products || [];
-
-            // Find the product to update
-            const productIndex = products.findIndex(p => p.id === productId);
             if (productIndex === -1) {
-                throw new Error(`Product ${productId} not found in category ${category}`);
+                throw new Error(`Product ${productId} not found in any category. Searched: ${categoriesToSearch.join(', ')}`);
             }
 
             const product = products[productIndex];
             const previousStock = product.stock || 0;
             const newStock = Math.max(0, previousStock - quantity);
 
-            console.log(`Product ${productId}: ${previousStock} -> ${newStock} (reduced by ${quantity})`);
+            console.log(`Product ${productId}: ${previousStock} -> ${newStock} (reduced by ${quantity}) in category: ${foundCategory}`);
 
             // Update product stock
             products[productIndex].stock = newStock;
@@ -128,7 +146,7 @@ window.StockManager = (function() {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    category,
+                    category: foundCategory,
                     products,
                     productId,
                     previousStock,
@@ -163,37 +181,66 @@ window.StockManager = (function() {
     }
 
     /**
-     * Get product category from product ID prefix
+     * Get all possible categories to search for a product (matching product-detail-loader.js)
      * @param {string} productId - Product ID
-     * @returns {string} Category name
+     * @returns {Array} Array of category names to search, ordered by priority
      */
-    function getProductCategory(productId) {
-        // Main categories
-        if (productId.startsWith('FEA-')) return 'featured-collection';
-        if (productId.startsWith('NEW-')) return 'new-arrivals';
-        if (productId.startsWith('SAR-')) return 'saree-collection';
-        
-        // Subcategories - Gold
-        if (productId.startsWith('GN-')) return 'gold-necklace';
-        if (productId.startsWith('GE-')) return 'gold-earrings';
-        if (productId.startsWith('GB-')) return 'gold-bangles';
-        if (productId.startsWith('GR-')) return 'gold-rings';
-        
-        // Subcategories - Silver
-        if (productId.startsWith('SN-')) return 'silver-necklace';
-        if (productId.startsWith('SE-')) return 'silver-earrings';
-        if (productId.startsWith('SB-')) return 'silver-bangles';
-        if (productId.startsWith('SR-')) return 'silver-rings';
-        
-        // Subcategories - Meenakari
-        if (productId.startsWith('MN-')) return 'meenakari-necklace';
-        if (productId.startsWith('ME-')) return 'meenakari-earrings';
-        if (productId.startsWith('MB-')) return 'meenakari-bangles';
-        if (productId.startsWith('MR-')) return 'meenakari-rings';
-        
-        // Fallback - try to determine from other patterns
-        console.warn(`Unknown product ID pattern: ${productId}, defaulting to new-arrivals`);
-        return 'new-arrivals';
+    function getCategoriesForProduct(productId) {
+        // Define all possible categories including subcategories
+        const allCategories = [
+            'featured-collection',
+            'new-arrivals',
+            'saree-collection',
+            'gold-necklace',
+            'silver-necklace',
+            'meenakari-necklace',
+            'gold-earrings',
+            'silver-earrings',
+            'meenakari-earrings',
+            'gold-bangles',
+            'silver-bangles',
+            'meenakari-bangles',
+            'gold-rings',
+            'silver-rings',
+            'meenakari-rings'
+        ];
+
+        if (!productId) return allCategories;
+
+        console.log('🔍 Determining search categories for product ID:', productId);
+
+        // Check product ID prefix to prioritize search order (ACTUAL prefixes used in Firebase data)
+        if (productId.startsWith('FEA-')) {
+            console.log('📂 Product is from Featured Collection');
+            return ['featured-collection', ...allCategories.filter(c => c !== 'featured-collection')];
+        }
+        if (productId.startsWith('NEW-')) {
+            console.log('📂 Product is from New Arrivals');
+            return ['new-arrivals', ...allCategories.filter(c => c !== 'new-arrivals')];
+        }
+        if (productId.startsWith('SAR-')) {
+            console.log('📂 Product is from Saree Collection');
+            return ['saree-collection', ...allCategories.filter(c => c !== 'saree-collection')];
+        }
+        if (productId.startsWith('GOL-')) {
+            // Gold products - prioritize gold categories
+            console.log('📂 Product is Gold category');
+            return ['gold-necklace', 'gold-earrings', 'gold-bangles', 'gold-rings', ...allCategories.filter(c => !c.startsWith('gold'))];
+        }
+        if (productId.startsWith('SIL-')) {
+            // Silver products - prioritize silver categories
+            console.log('📂 Product is Silver category');
+            return ['silver-necklace', 'silver-earrings', 'silver-bangles', 'silver-rings', ...allCategories.filter(c => !c.startsWith('silver'))];
+        }
+        if (productId.startsWith('MEE-')) {
+            // Meenakari products - prioritize meenakari categories
+            console.log('📂 Product is Meenakari category');
+            return ['meenakari-necklace', 'meenakari-earrings', 'meenakari-bangles', 'meenakari-rings', ...allCategories.filter(c => !c.startsWith('meenakari'))];
+        }
+
+        // If no prefix match, search all categories
+        console.log('📂 No prefix match, searching all categories');
+        return allCategories;
     }
 
     /**
@@ -247,33 +294,43 @@ window.StockManager = (function() {
      */
     async function checkProductAvailability(productId, requestedQuantity) {
         try {
-            const category = getProductCategory(productId);
-            const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
+            const categoriesToSearch = getCategoriesForProduct(productId);
             
-            if (!response.ok) {
-                throw new Error(`Failed to load products: ${response.status}`);
+            // Try each category until we find the product
+            for (const category of categoriesToSearch) {
+                try {
+                    const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
+                    
+                    if (!response.ok) {
+                        continue;
+                    }
+
+                    const data = await response.json();
+                    const products = data.products || [];
+                    const product = products.find(p => p.id === productId);
+
+                    if (product) {
+                        const currentStock = product.stock || 0;
+                        const available = currentStock >= requestedQuantity;
+
+                        return {
+                            available,
+                            stock: currentStock,
+                            requestedQuantity,
+                            productName: product.name,
+                            category: category
+                        };
+                    }
+                } catch (error) {
+                    continue;
+                }
             }
 
-            const data = await response.json();
-            const products = data.products || [];
-            const product = products.find(p => p.id === productId);
-
-            if (!product) {
-                return {
-                    available: false,
-                    error: 'Product not found',
-                    stock: 0
-                };
-            }
-
-            const currentStock = product.stock || 0;
-            const available = currentStock >= requestedQuantity;
-
+            // Product not found in any category
             return {
-                available,
-                stock: currentStock,
-                requestedQuantity,
-                productName: product.name
+                available: false,
+                error: 'Product not found in any category',
+                stock: 0
             };
 
         } catch (error) {
