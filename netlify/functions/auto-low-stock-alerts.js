@@ -121,21 +121,6 @@ exports.handler = async (event) => {
                     'TTL': '86400',
                     'Urgency': 'high'
                 },
-                notification: {
-                    title: dataPayload.title,
-                    body: dataPayload.body,
-                    icon: dataPayload.icon,
-                    badge: dataPayload.icon,
-                    image: String(productImage || ''),
-                    tag: dataPayload.tag,
-                    requireInteraction: false,
-                    actions: [
-                        {
-                            action: 'open',
-                            title: dataPayload.buttonText
-                        }
-                    ]
-                },
                 fcm_options: {
                     link: dataPayload.link
                 }
