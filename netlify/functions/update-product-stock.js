@@ -136,8 +136,8 @@ exports.handler = async (event, context) => {
           console.log(`❌ BACK-IN-STOCK condition NOT met (previousStock: ${previousStock}, newStock: ${newStock})`);
         }
         
-        // LOW-STOCK: If stock dropped to 3 or below
-        if (newStock <= 3 && newStock > 0) {
+        // LOW-STOCK: If stock dropped to 3 or below AND was above 3 before (triggering threshold)
+        if (previousStock > 3 && newStock <= 3 && newStock > 0) {
           console.log(`\n⚡ LOW-STOCK CONDITION MET - Calling automation function...`);
           try {
             const lowStockResponse = await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-low-stock-alerts', {
@@ -157,7 +157,7 @@ exports.handler = async (event, context) => {
             console.error('❌ Error sending low-stock notification:', notifError.message);
           }
         } else {
-          console.log(`❌ LOW-STOCK condition NOT met (stock: ${newStock})`);
+          console.log(`❌ LOW-STOCK condition NOT met (previousStock: ${previousStock}, newStock: ${newStock})`);
         }
       } else {
         console.log(`❌ CRITICAL: Product details not found in products array`);
