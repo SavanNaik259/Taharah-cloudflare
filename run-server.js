@@ -227,6 +227,57 @@ app.get('/.netlify/functions/load-products', async (req, res) => {
   }
 });
 
+// Update product stock endpoint
+app.post('/.netlify/functions/update-product-stock', async (req, res) => {
+  try {
+    // Import the Netlify function
+    const netlifyFunction = require('./netlify/functions/update-product-stock');
+
+    // Create mock Netlify event object
+    const event = {
+      body: JSON.stringify(req.body),
+      headers: req.headers,
+      httpMethod: 'POST',
+      path: '/.netlify/functions/update-product-stock'
+    };
+
+    // Create mock context
+    const context = {};
+
+    // Call the Netlify function
+    const result = await netlifyFunction.handler(event, context);
+
+    // Set response headers
+    if (result.headers) {
+      Object.keys(result.headers).forEach(key => {
+        res.setHeader(key, result.headers[key]);
+      });
+    }
+
+    // Send response
+    res.status(result.statusCode || 200);
+
+    if (result.body) {
+      try {
+        const body = JSON.parse(result.body);
+        res.json(body);
+      } catch (e) {
+        res.send(result.body);
+      }
+    } else {
+      res.end();
+    }
+
+  } catch (error) {
+    console.error('Error in update-product-stock function:', error);
+    res.status(500).json({
+      success: false,
+      error: `Failed to update product stock: ${error.message}`,
+      message: 'Please check configuration and try again'
+    });
+  }
+});
+
 // Delete product endpoint
 app.delete('/.netlify/functions/delete-product', async (req, res) => {
   try {
