@@ -7335,7 +7335,7 @@
                 };
 
                 // Format timestamp
-                const timeAgo = getTimeAgo(notification.timestamp);
+                const timeAgo = getTimeAgo(notification.timestamp.toDate ? notification.timestamp.toDate() : new Date(notification.timestamp));
 
                 // Add special styling for pending order notifications
                 let extraClass = '';
