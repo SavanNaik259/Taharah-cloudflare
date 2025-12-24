@@ -6289,7 +6289,7 @@
                         <div>Stock: <span class="stock-count ${stockType === 'out-of-stock' ? 'zero' : 'low'}">${product.stock || 0}</span></div>
                     </div>
                     <div class="product-actions">
-                        <button class="btn btn-sm btn-secondary" onclick="editProduct('${product.id}')">
+                        <button class="btn btn-sm btn-secondary" onclick="editProduct('${product.id}', '${product.category}')">
                             <i class="fas fa-edit"></i>
                             Edit Stock
                         </button>
@@ -6341,7 +6341,7 @@
                 </td>
                 <td>${lastUpdated}</td>
                 <td>
-                    <button class="btn btn-sm btn-secondary" onclick="editProduct('${product.id}')">
+                    <button class="btn btn-sm btn-secondary" onclick="editProduct('${product.id}', '${product.category}')">
                         <i class="fas fa-edit"></i>
                         Edit
                     </button>
