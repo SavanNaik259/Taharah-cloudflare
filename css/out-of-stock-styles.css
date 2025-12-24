@@ -14,6 +14,13 @@
     pointer-events: none !important;
 }
 
+/* Allow Edit Stock buttons to be clickable in out-of-stock items */
+.out-of-stock .product-actions button,
+.product-card.out-of-stock .product-actions button {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+}
+
 .out-of-stock a:hover,
 .out-of-stock button:hover {
     transform: none !important;
