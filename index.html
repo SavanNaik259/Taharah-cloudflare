@@ -2513,11 +2513,6 @@ background-color: #000 !important;
 
                 // Enable Notifications button
                 document.getElementById('enableNotifications').addEventListener('click', async () => {
-                    // Hide banner instantly
-                    const banner = document.getElementById('notificationBanner');
-                    banner.classList.add('hide');
-                    localStorage.setItem('notification-banner-dismissed', 'true');
-
                     try {
                         console.log('🔔 User clicked Enable Notifications button');
                         
@@ -2526,6 +2521,7 @@ background-color: #000 !important;
                         
                         if (initialized === false) {
                             console.error('❌ Notification manager initialization failed');
+                            alert('Unable to enable notifications.\n\nPossible reasons:\n- Browser doesn\'t support notifications\n- Service Workers not available\n- VAPID key not configured\n\nPlease check browser settings and try again.');
                             return;
                         }
 
@@ -2541,6 +2537,11 @@ background-color: #000 !important;
                             await notificationManager.saveToken(token);
                             
                             console.log('✅ Token saved successfully');
+                            
+                            // Hide banner instantly
+                            const banner = document.getElementById('notificationBanner');
+                            banner.classList.add('hide');
+                            localStorage.setItem('notification-banner-dismissed', 'true');
                             
                             // Setup listener for foreground messages
                             notificationManager.setupMessageListener((notification) => {
