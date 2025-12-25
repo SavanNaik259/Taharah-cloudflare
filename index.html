@@ -2530,6 +2530,11 @@ background-color: #000 !important;
                         // Request permission and get token
                         const token = await notificationManager.requestPermissionAndGetToken();
                         
+                        // Hide banner after browser permission dialog is resolved
+                        const banner = document.getElementById('notificationBanner');
+                        banner.classList.add('hide');
+                        localStorage.setItem('notification-banner-dismissed', 'true');
+                        
                         if (token) {
                             console.log('📍 Token received, saving to Firestore...');
                             
@@ -2537,11 +2542,6 @@ background-color: #000 !important;
                             await notificationManager.saveToken(token);
                             
                             console.log('✅ Token saved successfully');
-                            
-                            // Hide banner instantly
-                            const banner = document.getElementById('notificationBanner');
-                            banner.classList.add('hide');
-                            localStorage.setItem('notification-banner-dismissed', 'true');
                             
                             // Setup listener for foreground messages
                             notificationManager.setupMessageListener((notification) => {
