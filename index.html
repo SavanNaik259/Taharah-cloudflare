@@ -325,6 +325,12 @@ background-color: #000 !important;
             animation: slideUp 0.4s ease forwards;
         }
 
+        .notification-banner.hide {
+            transform: translateY(100%) !important;
+            opacity: 0 !important;
+            transition: none !important;
+        }
+
         .notification-banner-content {
             max-width: 1200px;
             margin: 0 auto;
@@ -2532,8 +2538,9 @@ background-color: #000 !important;
                             
                             console.log('✅ Token saved successfully');
                             
-                            // Hide banner
-                            document.getElementById('notificationBanner').classList.remove('show');
+                            // Hide banner instantly
+                            const banner = document.getElementById('notificationBanner');
+                            banner.classList.add('hide');
                             localStorage.setItem('notification-banner-dismissed', 'true');
                             
                             // Setup listener for foreground messages
@@ -2548,7 +2555,8 @@ background-color: #000 !important;
 
                 // Dismiss button
                 document.getElementById('dismissNotifications').addEventListener('click', () => {
-                    document.getElementById('notificationBanner').classList.remove('show');
+                    const banner = document.getElementById('notificationBanner');
+                    banner.classList.add('hide');
                     localStorage.setItem('notification-banner-dismissed', 'true');
                 });
 
