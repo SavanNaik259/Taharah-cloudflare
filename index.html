@@ -281,10 +281,10 @@ background-color: #000 !important;
   <body>
 
     <!-- Push Notification Permission Banner -->
-    <div id="notificationBanner" class="notification-banner" style="display: none;">
+    <div id="notificationBanner" class="notification-banner">
         <div class="notification-banner-content">
             <div class="notification-banner-text">
-                <h3>🔔 Stay Updated!</h3>
+                <div style="font-size: 16px; margin-bottom: 8px;">🔔 Stay Updated!</div>
                 <p>Enable notifications to get exclusive deals and new collection announcements directly on your device.</p>
             </div>
             <div class="notification-banner-buttons">
@@ -295,16 +295,34 @@ background-color: #000 !important;
     </div>
 
     <style>
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
         .notification-banner {
             position: fixed;
-            top: 0;
+            bottom: 0;
             left: 0;
             right: 0;
             z-index: 10000;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #2c3e50;
             color: white;
             padding: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
+            transform: translateY(100%);
+            opacity: 0;
+            transition: transform 0.4s ease, opacity 0.4s ease;
+        }
+
+        .notification-banner.show {
+            animation: slideUp 0.4s ease forwards;
         }
 
         .notification-banner-content {
@@ -316,16 +334,14 @@ background-color: #000 !important;
             gap: 20px;
         }
 
-        .notification-banner-text h3 {
-            margin: 0 0 5px 0;
-            font-size: 18px;
-            font-weight: 600;
+        .notification-banner-text {
+            flex: 1;
         }
 
         .notification-banner-text p {
             margin: 0;
             font-size: 14px;
-            opacity: 0.95;
+            color: #ecf0f1;
         }
 
         .notification-banner-buttons {
@@ -336,33 +352,33 @@ background-color: #000 !important;
 
         .btn-enable-notifications,
         .btn-dismiss-notifications {
-            padding: 10px 20px;
+            padding: 10px 18px;
             border: none;
-            border-radius: 4px;
-            font-size: 14px;
+            border-radius: 3px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
 
         .btn-enable-notifications {
-            background: white;
-            color: #667eea;
+            background: #3498db;
+            color: white;
         }
 
         .btn-enable-notifications:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            background: #2980b9;
         }
 
         .btn-dismiss-notifications {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: transparent;
+            color: #ecf0f1;
+            border: 1px solid #7f8c8d;
         }
 
         .btn-dismiss-notifications:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: white;
         }
 
         @media (max-width: 768px) {
@@ -373,10 +389,6 @@ background-color: #000 !important;
 
             .notification-banner {
                 padding: 15px;
-            }
-
-            .notification-banner-text h3 {
-                font-size: 16px;
             }
 
             .notification-banner-text p {
@@ -390,7 +402,7 @@ background-color: #000 !important;
             .btn-enable-notifications,
             .btn-dismiss-notifications {
                 flex: 1;
-                padding: 12px 16px;
+                padding: 10px 12px;
             }
         }
     </style>
@@ -2485,9 +2497,12 @@ background-color: #000 !important;
                 const hasPermission = Notification.permission === 'granted';
                 const hasDismissed = localStorage.getItem('notification-banner-dismissed');
 
-                // Show banner if notifications are not enabled and user hasn't dismissed
+                // Show banner after 5 seconds if notifications are not enabled and user hasn't dismissed
                 if (!hasPermission && !hasDismissed) {
-                    document.getElementById('notificationBanner').style.display = 'block';
+                    setTimeout(() => {
+                        const banner = document.getElementById('notificationBanner');
+                        banner.classList.add('show');
+                    }, 5000);
                 }
 
                 // Enable Notifications button
@@ -2521,7 +2536,7 @@ background-color: #000 !important;
                             alert('✓ Notifications enabled successfully!\n\nYou will receive:\n• Promotional offers\n• New collection announcements\n• Special deals and updates');
                             
                             // Hide banner
-                            document.getElementById('notificationBanner').style.display = 'none';
+                            document.getElementById('notificationBanner').classList.remove('show');
                             localStorage.setItem('notification-banner-dismissed', 'true');
                             
                             // Setup listener for foreground messages
@@ -2542,7 +2557,7 @@ background-color: #000 !important;
 
                 // Dismiss button
                 document.getElementById('dismissNotifications').addEventListener('click', () => {
-                    document.getElementById('notificationBanner').style.display = 'none';
+                    document.getElementById('notificationBanner').classList.remove('show');
                     localStorage.setItem('notification-banner-dismissed', 'true');
                 });
 
