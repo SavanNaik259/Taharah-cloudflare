@@ -11,6 +11,7 @@ try {
 } catch (error) {
   if (error.code === 'app/no-app') {
     try {
+      // Use environment variables for Firebase Admin credentials
       const serviceAccount = {
         type: 'service_account',
         project_id: process.env.FIREBASE_PROJECT_ID,
