@@ -13,7 +13,7 @@ function initializeFirebase() {
   try {
     const privateKey = process.env.FIREBASE_PRIVATE_KEY;
     const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-    const projectId = process.env.FIREBASE_PROJECT_ID || "auric-a0c92";
+    const projectId = process.env.FIREBASE_PROJECT_ID;
     
     if (!privateKey || !clientEmail) {
       console.error('❌ Missing Firebase credentials in diagnose endpoint');
@@ -35,7 +35,7 @@ function initializeFirebase() {
 
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
-      storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "auric-a0c92.firebasestorage.app"
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET
     });
     return true;
   } catch (error) {

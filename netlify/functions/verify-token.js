@@ -10,7 +10,7 @@ if (!admin.apps.length) {
   try {
     const serviceAccount = {
       type: "service_account",
-      project_id: process.env.FIREBASE_PROJECT_ID || "auric-a0c92",
+      project_id: process.env.FIREBASE_PROJECT_ID,
       private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
       private_key: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : undefined,
       client_email: process.env.FIREBASE_CLIENT_EMAIL,
@@ -23,7 +23,7 @@ if (!admin.apps.length) {
 
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
-      storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "auric-a0c92.firebasestorage.app"
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET
     });
   } catch (error) {
     console.error('Firebase init error:', error.message);

@@ -11,7 +11,7 @@ if (!admin.apps.length) {
   try {
     const serviceAccount = {
       type: "service_account",
-      project_id: process.env.FIREBASE_PROJECT_ID || "auric-a0c92",
+      project_id: process.env.FIREBASE_PROJECT_ID,
       private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
       private_key: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : undefined,
       client_email: process.env.FIREBASE_CLIENT_EMAIL,
@@ -24,7 +24,7 @@ if (!admin.apps.length) {
 
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
-      storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "auric-a0c92.firebasestorage.app"
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET
     });
 
     console.log('✅ Firebase Admin initialized for test');
@@ -45,7 +45,7 @@ function initializeFirebase() {
   try {
     const privateKey = process.env.FIREBASE_PRIVATE_KEY;
     const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-    const projectId = process.env.FIREBASE_PROJECT_ID || "auric-a0c92";
+    const projectId = process.env.FIREBASE_PROJECT_ID;
     
     if (!privateKey || !clientEmail) {
       console.error('❌ Missing Firebase credentials in test endpoint');
@@ -68,7 +68,7 @@ function initializeFirebase() {
     if (admin.apps.length === 0) {
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
-        storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "auric-a0c92.firebasestorage.app"
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET
       });
     }
 

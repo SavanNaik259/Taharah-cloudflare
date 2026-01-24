@@ -94,3 +94,5 @@ FIREBASE_CLIENT_EMAIL = "firebase-adminsdk-fbsvc@auric-a0c92.iam.gserviceaccount
 FIREBASE_CLIENT_ID = "112489649638932528471"
 FIREBASE_CERT_URL = "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40auric-a0c92.iam.gserviceaccount.com"
 FIREBASE_STORAGE_BUCKET = "auric-a0c92.firebasestorage.app"
+FIREBASE_API_KEY = "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI"
+FIREBASE_APP_ID = "1:878979958342:web:e6092f7522488d21eaec47"
