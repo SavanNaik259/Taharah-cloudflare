@@ -66,6 +66,13 @@
   to = "/admin-notifications.html"
   status = 200
 
+# CRITICAL: Netlify Functions must NOT be redirected - preserve function calls
+[[redirects]]
+  from = "/.netlify/functions/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+  force = true
+
 # Handle direct navigation for SPA as fallback
 [[redirects]]
   from = "/*"
