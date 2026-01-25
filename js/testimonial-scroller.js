@@ -9,107 +9,143 @@
 
 console.log('🎬 testimonial-scroller.js loaded');
 
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🎬 DOMContentLoaded fired in testimonial-scroller.js');
-    initBuyAndWatchVideos();
-    initCustomerTestimonialVideos();
-    
-    // Wait for Firebase to be ready with retry mechanism
-    let firebaseCheckAttempts = 0;
-    const maxFirebaseCheckAttempts = 20;
-    const firebaseCheckInterval = 200;
-    
-    function waitForFirebaseAndLoadProducts() {
-        firebaseCheckAttempts++;
-        
-        if (typeof firebase !== 'undefined' && typeof db !== 'undefined') {
-            console.log('🎬 Firebase and db are ready, loading Watch & Buy product links');
-            loadWatchBuyProductLinks();
-        } else if (firebaseCheckAttempts < maxFirebaseCheckAttempts) {
-            console.log(`🎬 Waiting for Firebase to initialize... (attempt ${firebaseCheckAttempts}/${maxFirebaseCheckAttempts})`);
-            setTimeout(waitForFirebaseAndLoadProducts, firebaseCheckInterval);
-        } else {
-            console.error('🎬 ❌ Firebase did not initialize after maximum attempts');
-            // Remove all placeholders since Firebase is not available
-            const placeholders = document.querySelectorAll('.video-product-link-placeholder');
-            placeholders.forEach(p => p.remove());
-        }
-    }
-    
-    waitForFirebaseAndLoadProducts();
-});
-
 /**
- * Load Watch & Buy video product links from Firestore
+ * Load Watch & Buy videos from Firestore (dynamic unlimited version)
  */
-async function loadWatchBuyProductLinks() {
-    console.log('=== Watch & Buy Product Links Loading Started ===');
-    
-    if (typeof firebase === 'undefined') {
-        console.error('❌ Firebase is not available! Make sure Firebase SDK is loaded.');
-        return;
-    }
-    
-    if (typeof db === 'undefined') {
-        console.error('❌ Firestore db is not available! Make sure Firestore is initialized.');
-        return;
-    }
+async function loadWatchBuyVideos() {
+    const videoContainer = document.getElementById('dynamic-watch-buy-videos');
+    if (!videoContainer) return;
 
     try {
-        console.log('✓ Firebase and Firestore are available');
-        console.log('📥 Loading Watch & Buy product links from Firestore...');
+        const snapshot = await db.collection('watch_buy_videos').orderBy('createdAt', 'desc').get();
+        const loadingSpinner = document.getElementById('watch-buy-loading-spinner');
+        if (loadingSpinner) loadingSpinner.remove();
 
-        const videoLinksDoc = await db.collection('settings').doc('watchBuyVideos').get();
-        console.log('📄 Firestore document fetch completed');
-
-        if (!videoLinksDoc.exists) {
-            console.warn('⚠️ No Watch & Buy video links configured yet in Firestore');
-            // Remove all placeholders since no configuration exists
-            const videoContainers = document.querySelectorAll('.testimonial-item');
-            videoContainers.forEach(container => {
-                const placeholder = container.querySelector('.video-product-link-placeholder');
-                if (placeholder) {
-                    placeholder.remove();
-                }
-            });
+        if (snapshot.empty) {
+            videoContainer.innerHTML = '<div style="width: 100%; text-align: center; padding: 20px;">Coming soon...</div>';
             return;
         }
 
-        const videoLinks = videoLinksDoc.data();
-        console.log('✓ Loaded Watch & Buy video links:', videoLinks);
+        snapshot.forEach((doc, index) => {
+            const videoData = doc.data();
+            const videoItem = document.createElement('div');
+            videoItem.className = 'testimonial-item';
+            videoItem.innerHTML = `
+                <div class="video-container">
+                    <div class="play-button-overlay">
+                        <div class="play-button">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M8 5.14v14l11-7-11-7z" fill="#ffffff"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <video class="testimonial-video" loop playsinline>
+                        <source src="${videoData.videoUrl}" type="video/mp4">
+                    </video>
+                    <div class="video-product-link-placeholder" style="position: absolute; bottom: 20px; left: 20px; background: rgba(255, 255, 255, 0.95); padding: 12px 16px; border-radius: 8px; min-width: 250px; z-index: 5;">
+                        <span style="font-size: 12px; color: #666;">⏳ Loading product link...</span>
+                    </div>
+                </div>
+            `;
+            videoContainer.appendChild(videoItem);
+            
+            // Link product after adding to DOM
+            updateDynamicVideoProductLink(videoItem, videoData.productSKU);
+        });
 
-        // Update each video's product link
-        for (let i = 1; i <= 6; i++) {
-            const videoData = videoLinks[`video${i}`];
-            if (videoData && videoData.productSKU) {
-                console.log(`🔄 Processing video ${i} with SKU: ${videoData.productSKU}`);
-                try {
-                    await updateVideoProductLink(i, videoData.productSKU, videoData.productName);
-                    console.log(`✅ Video ${i} product link updated`);
-                } catch (linkError) {
-                    console.error(`❌ Error updating video ${i}:`, linkError);
-                }
-            } else {
-                console.log(`⏭️ Video ${i} has no product link configured - removing placeholder`);
-                // Remove placeholder for videos without configured links
-                const videoContainers = document.querySelectorAll('.testimonial-item');
-                if (videoContainers[i - 1]) {
-                    const placeholder = videoContainers[i - 1].querySelector('.video-product-link-placeholder');
-                    if (placeholder) {
-                        placeholder.remove();
-                    }
+        // Re-initialize video controls for newly added elements
+        initBuyAndWatchVideos();
+
+    } catch (error) {
+        console.error('Error loading dynamic videos:', error);
+    }
+}
+
+async function updateDynamicVideoProductLink(container, sku) {
+    try {
+        const categories = [
+            'featured-collection', 'new-arrivals', 'saree-collection',
+            'gold-necklace', 'silver-necklace', 'meenakari-necklace',
+            'gold-earrings', 'silver-earrings', 'meenakari-earrings',
+            'gold-bangles', 'silver-bangles', 'meenakari-bangles',
+            'gold-rings', 'silver-rings', 'meenakari-rings'
+        ];
+        
+        let productDetails = null;
+
+        for (const category of categories) {
+            const response = await fetch(`/.netlify/functions/load-products?category=${category}`);
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.products) {
+                    productDetails = data.products.find(p => p.id === sku);
+                    if (productDetails) break;
                 }
             }
         }
 
-        console.log('✅ Watch & Buy product links updated successfully');
+        const placeholder = container.querySelector('.video-product-link-placeholder');
+        if (!placeholder) return;
+
+        const productLinkAnchor = document.createElement('a');
+        productLinkAnchor.className = 'video-product-link';
+        productLinkAnchor.href = `product-detail.html?id=${encodeURIComponent(sku)}`;
+        productLinkAnchor.style.cssText = `
+            position: absolute; bottom: 20px; left: 20px;
+            background: rgba(255, 255, 255, 0.95); padding: 12px 16px;
+            border-radius: 8px; cursor: pointer; transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 250px;
+            text-decoration: none; display: block; z-index: 10;
+        `;
+
+        if (productDetails) {
+            productLinkAnchor.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <img src="${productDetails.image || productDetails.mainImage || (productDetails.images && productDetails.images[0]?.url)}" 
+                         style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; font-size: 14px; color: #333; margin-bottom: 4px;">${productDetails.name}</div>
+                        <div style="font-size: 13px; color: #693208; font-weight: 500;">₹${productDetails.price.toLocaleString()}</div>
+                    </div>
+                </div>
+            `;
+        } else {
+            productLinkAnchor.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 50px; height: 50px; background: #667eea; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-gem" style="color: white;"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; font-size: 14px; color: #333;">View Product</div>
+                        <div style="font-size: 12px; color: #666;">SKU: ${sku}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        placeholder.replaceWith(productLinkAnchor);
 
     } catch (error) {
-        console.error('❌ Error loading Watch & Buy product links:', error);
-        console.error('Error details:', error.message);
-        console.error('Error stack:', error.stack);
+        console.error('Error updating product link:', error);
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    initBuyAndWatchVideos();
+    initCustomerTestimonialVideos();
+    
+    let firebaseCheckAttempts = 0;
+    function waitForFirebaseAndLoad() {
+        if (typeof firebase !== 'undefined' && typeof db !== 'undefined') {
+            loadWatchBuyVideos();
+        } else if (firebaseCheckAttempts < 20) {
+            firebaseCheckAttempts++;
+            setTimeout(waitForFirebaseAndLoad, 200);
+        }
+    }
+    waitForFirebaseAndLoad();
+});
+
 
 /**
  * Update a video's product link
