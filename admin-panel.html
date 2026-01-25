@@ -3381,160 +3381,110 @@
                 <div class="card">
                     <div class="card-header">
                         <h2 class="card-title">Watch & Buy Video Management</h2>
-                        <button class="btn btn-secondary" onclick="loadWatchBuyVideos()">
-                            <i class="fas fa-sync-alt"></i>
-                            Refresh
-                        </button>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="showUploadVideoModal()">
+                                <i class="fas fa-upload"></i>
+                                Upload Video
+                            </button>
+                            <button class="btn btn-secondary" onclick="loadWatchBuyVideosNew()">
+                                <i class="fas fa-sync-alt"></i>
+                                Refresh
+                            </button>
+                        </div>
                     </div>
                     <div class="card-content">
                         <div style="margin-bottom: 20px; padding: 16px; background: #f0f9ff; border-left: 4px solid #3b82f6; border-radius: 4px;">
                             <p style="margin: 0; color: #1e40af; font-size: 14px;">
                                 <i class="fas fa-info-circle"></i>
-                                <strong>How it works:</strong> Enter the Product SKU ID for each video. The product name will be automatically fetched and displayed as the link below the video.
+                                <strong>How it works:</strong> Upload videos to Firebase Storage. Link each video to a product using SKU ID. Videos will be displayed on the homepage in the "Watch & Buy" section.
                             </p>
                         </div>
 
                         <div id="watch-buy-loading" class="loading">
                             <i class="fas fa-spinner"></i>
-                            Loading video configurations...
+                            Loading videos...
                         </div>
 
                         <div id="watch-buy-content" style="display: none;">
-                            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-                                <!-- Video 1 -->
-                                <div class="card" style="padding: 20px;">
-                                    <h4 style="margin: 0 0 16px 0; color: #1e293b; display: flex; align-items: center; gap: 8px;">
-                                        <i class="fas fa-video" style="color: #3b82f6;"></i>
-                                        Video 1
-                                    </h4>
-                                    <div style="margin-bottom: 12px;">
-                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Product SKU ID:</label>
-                                        <input type="text" id="video1-sku" class="video-sku-input" placeholder="e.g., FEA-001" 
-                                               style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
-                                    </div>
-                                    <div style="margin-bottom: 12px;">
-                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Current Product:</label>
-                                        <div id="video1-product-name" style="padding: 10px; background: #f8fafc; border-radius: 4px; font-size: 13px; color: #475569; min-height: 40px;">
-                                            Not linked
-                                        </div>
-                                    </div>
-                                    <button class="btn btn-primary btn-sm" onclick="saveVideoLink(1)" style="width: 100%;">
-                                        <i class="fas fa-save"></i> Save Link
-                                    </button>
-                                </div>
-
-                                <!-- Video 2 -->
-                                <div class="card" style="padding: 20px;">
-                                    <h4 style="margin: 0 0 16px 0; color: #1e293b; display: flex; align-items: center; gap: 8px;">
-                                        <i class="fas fa-video" style="color: #3b82f6;"></i>
-                                        Video 2
-                                    </h4>
-                                    <div style="margin-bottom: 12px;">
-                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Product SKU ID:</label>
-                                        <input type="text" id="video2-sku" class="video-sku-input" placeholder="e.g., FEA-002"
-                                               style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
-                                    </div>
-                                    <div style="margin-bottom: 12px;">
-                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Current Product:</label>
-                                        <div id="video2-product-name" style="padding: 10px; background: #f8fafc; border-radius: 4px; font-size: 13px; color: #475569; min-height: 40px;">
-                                            Not linked
-                                        </div>
-                                    </div>
-                                    <button class="btn btn-primary btn-sm" onclick="saveVideoLink(2)" style="width: 100%;">
-                                        <i class="fas fa-save"></i> Save Link
-                                    </button>
-                                </div>
-
-                                <!-- Video 3 -->
-                                <div class="card" style="padding: 20px;">
-                                    <h4 style="margin: 0 0 16px 0; color: #1e293b; display: flex; align-items: center; gap: 8px;">
-                                        <i class="fas fa-video" style="color: #3b82f6;"></i>
-                                        Video 3
-                                    </h4>
-                                    <div style="margin-bottom: 12px;">
-                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Product SKU ID:</label>
-                                        <input type="text" id="video3-sku" class="video-sku-input" placeholder="e.g., FEA-003"
-                                               style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
-                                    </div>
-                                    <div style="margin-bottom: 12px;">
-                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Current Product:</label>
-                                        <div id="video3-product-name" style="padding: 10px; background: #f8fafc; border-radius: 4px; font-size: 13px; color: #475569; min-height: 40px;">
-                                            Not linked
-                                        </div>
-                                    </div>
-                                    <button class="btn btn-primary btn-sm" onclick="saveVideoLink(3)" style="width: 100%;">
-                                        <i class="fas fa-save"></i> Save Link
-                                    </button>
-                                </div>
-
-                                <!-- Video 4 -->
-                                <div class="card" style="padding: 20px;">
-                                    <h4 style="margin: 0 0 16px 0; color: #1e293b; display: flex; align-items: center; gap: 8px;">
-                                        <i class="fas fa-video" style="color: #3b82f6;"></i>
-                                        Video 4
-                                    </h4>
-                                    <div style="margin-bottom: 12px;">
-                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Product SKU ID:</label>
-                                        <input type="text" id="video4-sku" class="video-sku-input" placeholder="e.g., FEA-004"
-                                               style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
-                                    </div>
-                                    <div style="margin-bottom: 12px;">
-                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Current Product:</label>
-                                        <div id="video4-product-name" style="padding: 10px; background: #f8fafc; border-radius: 4px; font-size: 13px; color: #475569; min-height: 40px;">
-                                            Not linked
-                                        </div>
-                                    </div>
-                                    <button class="btn btn-primary btn-sm" onclick="saveVideoLink(4)" style="width: 100%;">
-                                        <i class="fas fa-save"></i> Save Link
-                                    </button>
-                                </div>
-
-                                <!-- Video 5 -->
-                                <div class="card" style="padding: 20px;">
-                                    <h4 style="margin: 0 0 16px 0; color: #1e293b; display: flex; align-items: center; gap: 8px;">
-                                        <i class="fas fa-video" style="color: #3b82f6;"></i>
-                                        Video 5
-                                    </h4>
-                                    <div style="margin-bottom: 12px;">
-                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Product SKU ID:</label>
-                                        <input type="text" id="video5-sku" class="video-sku-input" placeholder="e.g., FEA-005"
-                                               style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
-                                    </div>
-                                    <div style="margin-bottom: 12px;">
-                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Current Product:</label>
-                                        <div id="video5-product-name" style="padding: 10px; background: #f8fafc; border-radius: 4px; font-size: 13px; color: #475569; min-height: 40px;">
-                                            Not linked
-                                        </div>
-                                    </div>
-                                    <button class="btn btn-primary btn-sm" onclick="saveVideoLink(5)" style="width: 100%;">
-                                        <i class="fas fa-save"></i> Save Link
-                                    </button>
-                                </div>
-
-                                <!-- Video 6 -->
-                                <div class="card" style="padding: 20px;">
-                                    <h4 style="margin: 0 0 16px 0; color: #1e293b; display: flex; align-items: center; gap: 8px;">
-                                        <i class="fas fa-video" style="color: #3b82f6;"></i>
-                                        Video 6
-                                    </h4>
-                                    <div style="margin-bottom: 12px;">
-                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Product SKU ID:</label>
-                                        <input type="text" id="video6-sku" class="video-sku-input" placeholder="e.g., FEA-006"
-                                               style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
-                                    </div>
-                                    <div style="margin-bottom: 12px;">
-                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #64748b;">Current Product:</label>
-                                        <div id="video6-product-name" style="padding: 10px; background: #f8fafc; border-radius: 4px; font-size: 13px; color: #475569; min-height: 40px;">
-                                            Not linked
-                                        </div>
-                                    </div>
-                                    <button class="btn btn-primary btn-sm" onclick="saveVideoLink(6)" style="width: 100%;">
-                                        <i class="fas fa-save"></i> Save Link
-                                    </button>
-                                </div>
+                            <div id="videos-list" class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));">
+                            </div>
+                            <div id="no-videos-message" style="display: none; text-align: center; padding: 40px; color: #64748b;">
+                                <i class="fas fa-video-slash" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                                <p style="margin: 0;">No videos uploaded yet. Click "Upload Video" to add your first video.</p>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div id="uploadVideoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center;">
+                <div style="background: white; padding: 30px; border-radius: 12px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="margin: 0; color: #1e293b;">Upload New Video</h3>
+                        <button onclick="closeUploadVideoModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
+                    </div>
+                    <form id="uploadVideoForm" onsubmit="uploadVideo(event)">
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;">Video Title *</label>
+                            <input type="text" id="videoTitle" required style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;" placeholder="e.g., Royal Polki Necklace Collection">
+                        </div>
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;">Product SKU (Optional)</label>
+                            <input type="text" id="videoProductSKU" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;" placeholder="e.g., FEA-001">
+                            <small style="color: #64748b;">Link this video to a product by entering its SKU</small>
+                        </div>
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;">Description (Optional)</label>
+                            <textarea id="videoDescription" rows="3" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; resize: vertical;" placeholder="Brief description of the video"></textarea>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;">Video File *</label>
+                            <input type="file" id="videoFile" accept="video/*" required style="width: 100%; padding: 12px; border: 2px dashed #e2e8f0; border-radius: 8px; cursor: pointer;">
+                            <small style="color: #64748b;">Max file size: 100MB. Supported formats: MP4, MOV, WebM</small>
+                        </div>
+                        <div id="uploadProgress" style="display: none; margin-bottom: 16px;">
+                            <div style="background: #e2e8f0; border-radius: 8px; height: 8px; overflow: hidden;">
+                                <div id="uploadProgressBar" style="background: #3b82f6; height: 100%; width: 0%; transition: width 0.3s;"></div>
+                            </div>
+                            <p id="uploadProgressText" style="margin: 8px 0 0 0; font-size: 13px; color: #64748b;">Uploading...</p>
+                        </div>
+                        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                            <button type="button" onclick="closeUploadVideoModal()" class="btn btn-secondary">Cancel</button>
+                            <button type="submit" id="uploadVideoBtn" class="btn btn-primary">
+                                <i class="fas fa-upload"></i> Upload Video
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="editVideoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center;">
+                <div style="background: white; padding: 30px; border-radius: 12px; max-width: 500px; width: 90%;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="margin: 0; color: #1e293b;">Edit Video</h3>
+                        <button onclick="closeEditVideoModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
+                    </div>
+                    <form id="editVideoForm" onsubmit="saveVideoEdit(event)">
+                        <input type="hidden" id="editVideoId">
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;">Video Title *</label>
+                            <input type="text" id="editVideoTitle" required style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;">
+                        </div>
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;">Product SKU</label>
+                            <input type="text" id="editVideoProductSKU" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;">
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;">Description</label>
+                            <textarea id="editVideoDescription" rows="3" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; resize: vertical;"></textarea>
+                        </div>
+                        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                            <button type="button" onclick="closeEditVideoModal()" class="btn btn-secondary">Cancel</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </main>
@@ -5397,6 +5347,262 @@
                 alert(`Error saving video link: ${error.message}`);
             }
         }
+
+        // New Video Management Functions for Firebase Storage
+        function showUploadVideoModal() {
+            document.getElementById('uploadVideoModal').style.display = 'flex';
+            document.getElementById('uploadVideoForm').reset();
+            document.getElementById('uploadProgress').style.display = 'none';
+        }
+
+        function closeUploadVideoModal() {
+            document.getElementById('uploadVideoModal').style.display = 'none';
+        }
+
+        function showEditVideoModal(video) {
+            document.getElementById('editVideoModal').style.display = 'flex';
+            document.getElementById('editVideoId').value = video.id;
+            document.getElementById('editVideoTitle').value = video.title || '';
+            document.getElementById('editVideoProductSKU').value = video.productSKU || '';
+            document.getElementById('editVideoDescription').value = video.description || '';
+        }
+
+        function closeEditVideoModal() {
+            document.getElementById('editVideoModal').style.display = 'none';
+        }
+
+        async function uploadVideo(event) {
+            event.preventDefault();
+            
+            const title = document.getElementById('videoTitle').value.trim();
+            const productSKU = document.getElementById('videoProductSKU').value.trim();
+            const description = document.getElementById('videoDescription').value.trim();
+            const fileInput = document.getElementById('videoFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a video file');
+                return;
+            }
+            
+            if (file.size > 100 * 1024 * 1024) {
+                alert('File size exceeds 100MB limit');
+                return;
+            }
+            
+            const uploadBtn = document.getElementById('uploadVideoBtn');
+            const progressDiv = document.getElementById('uploadProgress');
+            const progressBar = document.getElementById('uploadProgressBar');
+            const progressText = document.getElementById('uploadProgressText');
+            
+            uploadBtn.disabled = true;
+            progressDiv.style.display = 'block';
+            progressBar.style.width = '0%';
+            progressText.textContent = 'Uploading...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('video', file);
+                formData.append('title', title);
+                formData.append('productSKU', productSKU);
+                formData.append('description', description);
+                
+                const xhr = new XMLHttpRequest();
+                
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const percent = Math.round((e.loaded / e.total) * 100);
+                        progressBar.style.width = percent + '%';
+                        progressText.textContent = `Uploading... ${percent}%`;
+                    }
+                });
+                
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.success) {
+                            closeUploadVideoModal();
+                            showSuccessModal({
+                                icon: '<i class="fas fa-check-circle"></i>',
+                                title: 'Video Uploaded!',
+                                message: 'Your video has been successfully uploaded and will appear in the Watch & Buy section.'
+                            });
+                            loadWatchBuyVideosNew();
+                        } else {
+                            alert('Upload failed: ' + response.error);
+                        }
+                    } else {
+                        alert('Upload failed. Please try again.');
+                    }
+                    uploadBtn.disabled = false;
+                };
+                
+                xhr.onerror = function() {
+                    alert('Upload failed. Please check your connection and try again.');
+                    uploadBtn.disabled = false;
+                };
+                
+                xhr.open('POST', '/api/videos/upload');
+                xhr.send(formData);
+                
+            } catch (error) {
+                console.error('Error uploading video:', error);
+                alert('Error uploading video: ' + error.message);
+                uploadBtn.disabled = false;
+            }
+        }
+
+        async function saveVideoEdit(event) {
+            event.preventDefault();
+            
+            const videoId = document.getElementById('editVideoId').value;
+            const title = document.getElementById('editVideoTitle').value.trim();
+            const productSKU = document.getElementById('editVideoProductSKU').value.trim();
+            const description = document.getElementById('editVideoDescription').value.trim();
+            
+            showGlobalLoader('Saving changes...');
+            
+            try {
+                const response = await fetch(`/api/videos/${videoId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, productSKU, description })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    closeEditVideoModal();
+                    hideGlobalLoader();
+                    showSuccessModal({
+                        icon: '<i class="fas fa-check-circle"></i>',
+                        title: 'Video Updated!',
+                        message: 'Video information has been successfully updated.'
+                    });
+                    loadWatchBuyVideosNew();
+                } else {
+                    hideGlobalLoader();
+                    alert('Failed to update video: ' + result.error);
+                }
+            } catch (error) {
+                hideGlobalLoader();
+                console.error('Error updating video:', error);
+                alert('Error updating video: ' + error.message);
+            }
+        }
+
+        async function deleteVideo(videoId, videoTitle) {
+            if (!confirm(`Are you sure you want to delete "${videoTitle}"? This action cannot be undone.`)) {
+                return;
+            }
+            
+            showGlobalLoader('Deleting video...');
+            
+            try {
+                const response = await fetch(`/api/videos/${videoId}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    hideGlobalLoader();
+                    showSuccessModal({
+                        icon: '<i class="fas fa-check-circle"></i>',
+                        title: 'Video Deleted!',
+                        message: 'The video has been successfully deleted.'
+                    });
+                    loadWatchBuyVideosNew();
+                } else {
+                    hideGlobalLoader();
+                    alert('Failed to delete video: ' + result.error);
+                }
+            } catch (error) {
+                hideGlobalLoader();
+                console.error('Error deleting video:', error);
+                alert('Error deleting video: ' + error.message);
+            }
+        }
+
+        async function loadWatchBuyVideosNew() {
+            console.log('Loading Watch & Buy videos from Firebase...');
+            
+            const loadingElement = document.getElementById('watch-buy-loading');
+            const contentElement = document.getElementById('watch-buy-content');
+            const videosList = document.getElementById('videos-list');
+            const noVideosMsg = document.getElementById('no-videos-message');
+            
+            if (loadingElement) loadingElement.style.display = 'flex';
+            if (contentElement) contentElement.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/videos');
+                const result = await response.json();
+                
+                if (loadingElement) loadingElement.style.display = 'none';
+                if (contentElement) contentElement.style.display = 'block';
+                
+                if (result.success && result.videos && result.videos.length > 0) {
+                    if (noVideosMsg) noVideosMsg.style.display = 'none';
+                    
+                    const sortedVideos = result.videos.sort((a, b) => (a.order || 0) - (b.order || 0));
+                    
+                    videosList.innerHTML = sortedVideos.map((video, index) => `
+                        <div class="card" style="padding: 20px;" data-video-id="${video.id}">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                                <h4 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-video" style="color: #3b82f6;"></i>
+                                    ${video.title || 'Untitled Video'}
+                                </h4>
+                                <span style="background: #e2e8f0; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #64748b;">#${index + 1}</span>
+                            </div>
+                            <div style="margin-bottom: 12px; background: #000; border-radius: 8px; overflow: hidden; aspect-ratio: 16/9;">
+                                <video style="width: 100%; height: 100%; object-fit: cover;" controls>
+                                    <source src="${video.videoUrl}" type="video/mp4">
+                                </video>
+                            </div>
+                            <div style="margin-bottom: 12px;">
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">
+                                    ${video.productSKU ? `<span style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 12px;"><i class="fas fa-link"></i> SKU: ${video.productSKU}</span>` : '<span style="background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px; font-size: 12px;"><i class="fas fa-unlink"></i> No product linked</span>'}
+                                </div>
+                                ${video.description ? `<p style="margin: 0; font-size: 13px; color: #64748b;">${video.description}</p>` : ''}
+                                <p style="margin: 8px 0 0 0; font-size: 11px; color: #94a3b8;">Uploaded: ${new Date(video.uploadedAt).toLocaleDateString()}</p>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-secondary btn-sm" onclick='showEditVideoModal(${JSON.stringify(video).replace(/'/g, "\\'")})' style="flex: 1;">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button class="btn btn-sm" onclick="deleteVideo('${video.id}', '${video.title?.replace(/'/g, "\\'") || 'Untitled'}')" style="flex: 1; background: #fee2e2; color: #dc2626; border: none;">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    videosList.innerHTML = '';
+                    if (noVideosMsg) noVideosMsg.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading videos:', error);
+                if (loadingElement) {
+                    loadingElement.innerHTML = `
+                        <div style="text-align: center; color: #dc2626;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Error loading videos: ${error.message}
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        window.loadWatchBuyVideosNew = loadWatchBuyVideosNew;
+        window.showUploadVideoModal = showUploadVideoModal;
+        window.closeUploadVideoModal = closeUploadVideoModal;
+        window.showEditVideoModal = showEditVideoModal;
+        window.closeEditVideoModal = closeEditVideoModal;
+        window.uploadVideo = uploadVideo;
+        window.saveVideoEdit = saveVideoEdit;
+        window.deleteVideo = deleteVideo;
 
         // Make functions global
         window.loadWatchBuyVideos = loadWatchBuyVideos;

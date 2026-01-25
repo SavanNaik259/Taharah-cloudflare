@@ -1,11 +1,17 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
-const ShiprocketService = require('./services/shiprocket');
 const admin = require('firebase-admin');
+const multer = require('multer');
+const { Storage } = require('@google-cloud/storage');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 100 * 1024 * 1024 }
+});
 
 // Initialize Firebase Admin SDK
 function initializeFirebaseAdmin() {
@@ -41,9 +47,10 @@ function initializeFirebaseAdmin() {
       
       if (serviceAccount && serviceAccount.project_id) {
         admin.initializeApp({
-          credential: admin.credential.cert(serviceAccount)
+          credential: admin.credential.cert(serviceAccount),
+          storageBucket: process.env.FIREBASE_STORAGE_BUCKET || `${serviceAccount.project_id}.appspot.com`
         });
-        console.log('✅ Firebase Admin SDK initialized successfully');
+        console.log('✅ Firebase Admin SDK initialized successfully with Storage');
       } else {
         console.log('⚠️ Firebase Admin SDK not fully configured');
         console.log('💡 Set FIREBASE_PROJECT_ID, FIREBASE_PRIVATE_KEY, etc. or add FIREBASE_SERVICE_ACCOUNT_KEY');
@@ -55,15 +62,6 @@ function initializeFirebaseAdmin() {
 }
 
 initializeFirebaseAdmin();
-
-// Initialize Shiprocket service
-let shiprocketService = null;
-try {
-  shiprocketService = new ShiprocketService();
-  console.log('Shiprocket service initialized successfully');
-} catch (error) {
-  console.error('Failed to initialize Shiprocket service:', error.message);
-}
 
 // Enable CORS for all routes
 app.use(cors());
@@ -1435,6 +1433,187 @@ app.post('/api/test-send-notification', async (req, res) => {
       success: false,
       error: 'Server error: ' + error.message
     });
+  }
+});
+
+// Watch & Buy Video Management API Endpoints
+
+// Get all videos from Firestore
+app.get('/api/videos', async (req, res) => {
+  try {
+    const db = admin.firestore();
+    const videosDoc = await db.collection('settings').doc('watchBuyVideos').get();
+    
+    if (videosDoc.exists) {
+      const videos = videosDoc.data().videos || [];
+      res.json({ success: true, videos });
+    } else {
+      res.json({ success: true, videos: [] });
+    }
+  } catch (error) {
+    console.error('Error fetching videos:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Upload video to Firebase Storage
+app.post('/api/videos/upload', upload.single('video'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No video file provided' });
+    }
+
+    const { title, productSKU, description } = req.body;
+    const timestamp = Date.now();
+    const filename = `watch-buy-videos/${timestamp}-${req.file.originalname}`;
+    
+    const bucket = admin.storage().bucket();
+    const file = bucket.file(filename);
+    
+    await file.save(req.file.buffer, {
+      metadata: {
+        contentType: req.file.mimetype
+      }
+    });
+
+    await file.makePublic();
+    const videoUrl = `https://storage.googleapis.com/${bucket.name}/${filename}`;
+    
+    const db = admin.firestore();
+    const videosDoc = await db.collection('settings').doc('watchBuyVideos').get();
+    const currentVideos = videosDoc.exists ? (videosDoc.data().videos || []) : [];
+    
+    const newVideo = {
+      id: `video-${timestamp}`,
+      title: title || 'Untitled Video',
+      description: description || '',
+      productSKU: productSKU || '',
+      videoUrl,
+      filename,
+      uploadedAt: new Date().toISOString(),
+      order: currentVideos.length
+    };
+    
+    currentVideos.push(newVideo);
+    await db.collection('settings').doc('watchBuyVideos').set({ videos: currentVideos }, { merge: true });
+    
+    res.json({ success: true, video: newVideo });
+  } catch (error) {
+    console.error('Error uploading video:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Update video metadata
+app.put('/api/videos/:videoId', async (req, res) => {
+  try {
+    const { videoId } = req.params;
+    const { title, productSKU, description, order } = req.body;
+    
+    const db = admin.firestore();
+    const videosDoc = await db.collection('settings').doc('watchBuyVideos').get();
+    
+    if (!videosDoc.exists) {
+      return res.status(404).json({ success: false, error: 'No videos found' });
+    }
+    
+    const videos = videosDoc.data().videos || [];
+    const videoIndex = videos.findIndex(v => v.id === videoId);
+    
+    if (videoIndex === -1) {
+      return res.status(404).json({ success: false, error: 'Video not found' });
+    }
+    
+    if (title !== undefined) videos[videoIndex].title = title;
+    if (productSKU !== undefined) videos[videoIndex].productSKU = productSKU;
+    if (description !== undefined) videos[videoIndex].description = description;
+    if (order !== undefined) videos[videoIndex].order = order;
+    videos[videoIndex].updatedAt = new Date().toISOString();
+    
+    await db.collection('settings').doc('watchBuyVideos').set({ videos }, { merge: true });
+    
+    res.json({ success: true, video: videos[videoIndex] });
+  } catch (error) {
+    console.error('Error updating video:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Delete video
+app.delete('/api/videos/:videoId', async (req, res) => {
+  try {
+    const { videoId } = req.params;
+    
+    const db = admin.firestore();
+    const videosDoc = await db.collection('settings').doc('watchBuyVideos').get();
+    
+    if (!videosDoc.exists) {
+      return res.status(404).json({ success: false, error: 'No videos found' });
+    }
+    
+    const videos = videosDoc.data().videos || [];
+    const videoIndex = videos.findIndex(v => v.id === videoId);
+    
+    if (videoIndex === -1) {
+      return res.status(404).json({ success: false, error: 'Video not found' });
+    }
+    
+    const video = videos[videoIndex];
+    
+    if (video.filename) {
+      try {
+        const bucket = admin.storage().bucket();
+        await bucket.file(video.filename).delete();
+      } catch (storageError) {
+        console.warn('Could not delete video from storage:', storageError.message);
+      }
+    }
+    
+    videos.splice(videoIndex, 1);
+    videos.forEach((v, i) => v.order = i);
+    
+    await db.collection('settings').doc('watchBuyVideos').set({ videos }, { merge: true });
+    
+    res.json({ success: true, message: 'Video deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting video:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Reorder videos
+app.post('/api/videos/reorder', async (req, res) => {
+  try {
+    const { videoIds } = req.body;
+    
+    if (!Array.isArray(videoIds)) {
+      return res.status(400).json({ success: false, error: 'videoIds must be an array' });
+    }
+    
+    const db = admin.firestore();
+    const videosDoc = await db.collection('settings').doc('watchBuyVideos').get();
+    
+    if (!videosDoc.exists) {
+      return res.status(404).json({ success: false, error: 'No videos found' });
+    }
+    
+    const videos = videosDoc.data().videos || [];
+    const reorderedVideos = [];
+    
+    videoIds.forEach((id, index) => {
+      const video = videos.find(v => v.id === id);
+      if (video) {
+        video.order = index;
+        reorderedVideos.push(video);
+      }
+    });
+    
+    await db.collection('settings').doc('watchBuyVideos').set({ videos: reorderedVideos }, { merge: true });
+    
+    res.json({ success: true, videos: reorderedVideos });
+  } catch (error) {
+    console.error('Error reordering videos:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
