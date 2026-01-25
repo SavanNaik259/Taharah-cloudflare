@@ -50,6 +50,16 @@ Products are organized into Firestore collections:
 - `js/netlify-helpers.js` - Serverless function utilities
 - `firebase-messaging-sw.js` - Push notification service worker
 
+### Video Management (Watch & Buy)
+- **Storage Location**: Firebase Storage under `watch-buy-videos/` path
+- **Metadata Storage**: Firestore `watch-buy-videos` collection
+- **API Endpoints**:
+  - `GET /api/videos` - Fetch all videos
+  - `POST /api/videos` - Upload new video (multipart/form-data)
+  - `PUT /api/videos/:id` - Update video metadata
+  - `DELETE /api/videos/:id` - Delete video and metadata
+- **Video Fields**: title, description, videoUrl, thumbnailUrl, linkedProductSku, order, createdAt, updatedAt
+
 ## External Dependencies
 
 ### Firebase Services
