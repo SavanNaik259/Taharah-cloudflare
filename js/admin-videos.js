@@ -131,12 +131,16 @@ async function deleteVideo(id, storagePath) {
     if (!confirm('Are you sure you want to delete this video?')) return;
     
     try {
-        // Delete from Firestore
+        // Delete from Firestore first
         await db.collection('watch_buy_videos').doc(id).delete();
         
-        // Delete from Storage
-        if (storagePath) {
-            await firebase.storage().ref(storagePath).delete();
+        // Try to delete from Storage (ignore errors if file doesn't exist)
+        if (storagePath && storagePath.length > 5) {
+            try {
+                await firebase.storage().ref(storagePath).delete();
+            } catch (storageError) {
+                console.warn('Storage file not found or already deleted:', storageError.message);
+            }
         }
         
         loadWatchBuyVideos();
