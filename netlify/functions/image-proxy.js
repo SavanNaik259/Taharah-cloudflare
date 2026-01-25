@@ -25,6 +25,10 @@ try {
         client_x509_cert_url: process.env.FIREBASE_CERT_URL
       };
 
+      if (!serviceAccount.project_id || !serviceAccount.private_key || !serviceAccount.client_email) {
+        throw new Error('Missing required Firebase Admin credentials in environment variables');
+      }
+
       adminApp = admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
         storageBucket: process.env.FIREBASE_STORAGE_BUCKET
