@@ -8,8 +8,7 @@ async function loadWatchBuyVideos() {
     if (videoList) videoList.innerHTML = '';
     
     try {
-        // Use the same collection as the homepage logic
-        const snapshot = await db.collection('watchBuyVideos').orderBy('uploadedAt', 'desc').get();
+        const snapshot = await db.collection('watch_buy_videos').orderBy('createdAt', 'desc').get();
         
         if (loading) loading.style.display = 'none';
         
@@ -33,7 +32,7 @@ async function loadWatchBuyVideos() {
                     </div>
                 </div>
                 <div style="font-size: 14px; font-weight: 600; margin-bottom: 5px;">SKU: ${video.productSKU}</div>
-                <div style="font-size: 12px; color: #64748b;">Added: ${video.uploadedAt ? new Date(video.uploadedAt?.toDate()).toLocaleDateString() : 'N/A'}</div>
+                <div style="font-size: 12px; color: #64748b;">Added: ${new Date(video.createdAt?.toDate()).toLocaleDateString()}</div>
             `;
             videoList.appendChild(card);
         });
@@ -44,7 +43,7 @@ async function loadWatchBuyVideos() {
             videoList.innerHTML = `
                 <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">
                     <i class="fas fa-video" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
-                    <p style="margin: 0;">Error loading videos. Please check your connection.</p>
+                    <p style="margin: 0;">Videos will load once Firebase is connected.</p>
                 </div>`;
         }
     }
@@ -105,11 +104,11 @@ async function saveNewVideo() {
             async () => {
                 const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
                 
-                await db.collection('watchBuyVideos').add({
+                await db.collection('watch_buy_videos').add({
                     videoUrl: downloadURL,
                     storagePath: storagePath,
                     productSKU: sku,
-                    uploadedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
                 statusDiv.textContent = 'Upload complete!';
@@ -132,15 +131,11 @@ async function deleteVideo(id, storagePath) {
     
     try {
         // Delete from Firestore
-        await db.collection('watchBuyVideos').doc(id).delete();
+        await db.collection('watch_buy_videos').doc(id).delete();
         
         // Delete from Storage
         if (storagePath) {
-            try {
-                await firebase.storage().ref(storagePath).delete();
-            } catch (storageError) {
-                console.warn('Storage delete error (may already be gone):', storageError);
-            }
+            await firebase.storage().ref(storagePath).delete();
         }
         
         loadWatchBuyVideos();
