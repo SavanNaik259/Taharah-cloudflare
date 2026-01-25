@@ -1011,6 +1011,16 @@ background-color: #000 !important;
                 const response = await fetch('/api/videos');
                 const result = await response.json();
                 
+                if (result.development) {
+                    container.innerHTML = `
+                        <div style="padding: 40px; text-align: center; color: #64748b; width: 100%;">
+                            <i class="fas fa-video" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
+                            <p style="margin: 0; font-size: 16px;">Watch & Buy videos are available on the live site</p>
+                            <p style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.7;">Videos will display here when deployed to Netlify</p>
+                        </div>`;
+                    return;
+                }
+                
                 if (result.success && result.videos && result.videos.length > 0) {
                     const sortedVideos = result.videos.sort((a, b) => (a.order || 0) - (b.order || 0));
                     
@@ -1048,7 +1058,11 @@ background-color: #000 !important;
                 }
             } catch (error) {
                 console.error('Error loading videos:', error);
-                container.innerHTML = '<div style="padding: 40px; text-align: center; color: #dc2626; width: 100%;">Error loading videos</div>';
+                container.innerHTML = `
+                    <div style="padding: 40px; text-align: center; color: #64748b; width: 100%;">
+                        <i class="fas fa-video" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
+                        <p style="margin: 0; font-size: 16px;">Watch & Buy videos are available on the live site</p>
+                    </div>`;
             }
         }
         

@@ -13,6 +13,9 @@ const upload = multer({
   limits: { fileSize: 100 * 1024 * 1024 }
 });
 
+// Track if Firebase is fully configured for video operations
+let firebaseFullyConfigured = false;
+
 // Initialize Firebase Admin SDK
 function initializeFirebaseAdmin() {
   try {
@@ -54,20 +57,31 @@ function initializeFirebaseAdmin() {
         console.log('✅ Built service account from individual env vars');
       }
       
-      if (serviceAccount && serviceAccount.project_id) {
+      if (serviceAccount && serviceAccount.project_id && serviceAccount.private_key && serviceAccount.client_email) {
         admin.initializeApp({
           credential: admin.credential.cert(serviceAccount),
           storageBucket: process.env.FIREBASE_STORAGE_BUCKET || `${serviceAccount.project_id}.appspot.com`
         });
+        firebaseFullyConfigured = true;
         console.log('✅ Firebase Admin SDK initialized successfully with Storage');
       } else {
-        console.log('⚠️ Firebase Admin SDK not fully configured');
-        console.log('💡 Set FIREBASE_PROJECT_ID, FIREBASE_PRIVATE_KEY, etc. or add FIREBASE_SERVICE_ACCOUNT_KEY');
+        firebaseFullyConfigured = false;
+        console.log('⚠️ Firebase Admin SDK not fully configured (development mode)');
+        console.log('💡 Videos will show placeholder. Full functionality available on Netlify.');
       }
+    } else {
+      firebaseFullyConfigured = true;
     }
   } catch (error) {
+    firebaseFullyConfigured = false;
     console.log('⚠️ Firebase Admin SDK initialization error:', error.message);
+    console.log('💡 Videos will show placeholder. Full functionality available on Netlify.');
   }
+}
+
+// Helper to check if Firebase is ready for video operations
+function isFirebaseReady() {
+  return firebaseFullyConfigured && admin.apps.length > 0;
 }
 
 initializeFirebaseAdmin();
@@ -1450,6 +1464,15 @@ app.post('/api/test-send-notification', async (req, res) => {
 // Get all videos from Firestore
 app.get('/api/videos', async (req, res) => {
   try {
+    if (!isFirebaseReady()) {
+      return res.json({ 
+        success: true, 
+        videos: [],
+        development: true,
+        message: 'Videos available on production site. Firebase not configured in development.'
+      });
+    }
+    
     const db = admin.firestore();
     const videosDoc = await db.collection('settings').doc('watchBuyVideos').get();
     
@@ -1461,13 +1484,26 @@ app.get('/api/videos', async (req, res) => {
     }
   } catch (error) {
     console.error('Error fetching videos:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.json({ 
+      success: true, 
+      videos: [],
+      development: true,
+      message: 'Videos available on production site.'
+    });
   }
 });
 
 // Upload video to Firebase Storage
 app.post('/api/videos/upload', upload.single('video'), async (req, res) => {
   try {
+    if (!isFirebaseReady()) {
+      return res.status(503).json({ 
+        success: false, 
+        development: true,
+        error: 'Video upload is only available on the production site. Please deploy to Netlify to upload videos.'
+      });
+    }
+    
     if (!req.file) {
       return res.status(400).json({ success: false, error: 'No video file provided' });
     }
@@ -1516,6 +1552,14 @@ app.post('/api/videos/upload', upload.single('video'), async (req, res) => {
 // Update video metadata
 app.put('/api/videos/:videoId', async (req, res) => {
   try {
+    if (!isFirebaseReady()) {
+      return res.status(503).json({ 
+        success: false, 
+        development: true,
+        error: 'Video management is only available on the production site.'
+      });
+    }
+    
     const { videoId } = req.params;
     const { title, productSKU, description, order } = req.body;
     
@@ -1551,6 +1595,14 @@ app.put('/api/videos/:videoId', async (req, res) => {
 // Delete video
 app.delete('/api/videos/:videoId', async (req, res) => {
   try {
+    if (!isFirebaseReady()) {
+      return res.status(503).json({ 
+        success: false, 
+        development: true,
+        error: 'Video management is only available on the production site.'
+      });
+    }
+    
     const { videoId } = req.params;
     
     const db = admin.firestore();
@@ -1593,6 +1645,14 @@ app.delete('/api/videos/:videoId', async (req, res) => {
 // Reorder videos
 app.post('/api/videos/reorder', async (req, res) => {
   try {
+    if (!isFirebaseReady()) {
+      return res.status(503).json({ 
+        success: false, 
+        development: true,
+        error: 'Video management is only available on the production site.'
+      });
+    }
+    
     const { videoIds } = req.body;
     
     if (!Array.isArray(videoIds)) {
