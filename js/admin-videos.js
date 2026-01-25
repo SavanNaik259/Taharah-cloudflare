@@ -141,7 +141,8 @@ async function deleteVideo(id, storagePath) {
         });
 
         // Ensure we are using the correct Firestore instance
-        const firestore = firebase.firestore();
+        // Sometimes 'db' is defined globally, sometimes we need to get it from firebase.firestore()
+        const firestore = (typeof db !== 'undefined') ? db : firebase.firestore();
         
         // Delete from Firestore
         await firestore.collection('watch_buy_videos').doc(id).delete();
@@ -150,7 +151,9 @@ async function deleteVideo(id, storagePath) {
         // Delete from Storage
         if (storagePath && storagePath.length > 5) {
             try {
-                await firebase.storage().ref(storagePath).delete();
+                // In some Firebase versions, we need to use refFromURL if storagePath is a full URL
+                // but here it seems to be a path.
+                await firebase.storage().ref().child(storagePath).delete();
                 console.log('✅ Deleted from Storage');
             } catch (storageError) {
                 console.warn('⚠️ Storage file not found or already deleted:', storageError.message);
@@ -175,9 +178,6 @@ async function deleteVideo(id, storagePath) {
                 videoList.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">No videos found. Click "Add New Video" to get started.</div>';
             }
         }
-        
-        // Still reload to be sure
-        await loadWatchBuyVideos();
     } catch (error) {
         console.error('❌ Error deleting video:', error);
         alert('Error deleting video: ' + error.message);
