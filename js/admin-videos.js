@@ -8,7 +8,8 @@ async function loadWatchBuyVideos() {
     if (videoList) videoList.innerHTML = '';
     
     try {
-        const snapshot = await db.collection('watch_buy_videos').orderBy('createdAt', 'desc').get();
+        const firestore = firebase.firestore();
+        const snapshot = await firestore.collection('watch_buy_videos').orderBy('createdAt', 'desc').get();
         
         if (loading) loading.style.display = 'none';
         
@@ -103,8 +104,9 @@ async function saveNewVideo() {
             }, 
             async () => {
                 const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                const firestore = firebase.firestore();
                 
-                const docRef = await db.collection('watch_buy_videos').add({
+                const docRef = await firestore.collection('watch_buy_videos').add({
                     videoUrl: downloadURL,
                     storagePath: storagePath,
                     productSKU: sku,
