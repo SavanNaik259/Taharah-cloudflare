@@ -28,14 +28,12 @@ async function loadWatchBuyVideos() {
         const loadingSpinner = document.getElementById('watch-buy-loading-spinner');
         if (loadingSpinner) loadingSpinner.remove();
 
-        // Clear EVERYTHING inside the container before adding new items
-        // This ensures no hardcoded demo data from HTML remains
-        videoContainer.innerHTML = '';
-
         if (snapshot.empty) {
             videoContainer.innerHTML = '<div style="width: 100%; text-align: center; padding: 20px;">Coming soon...</div>';
             return;
         }
+
+        videoContainer.innerHTML = ''; // Clear existing content including any demo data
 
         snapshot.forEach((doc, index) => {
             const videoData = doc.data();
