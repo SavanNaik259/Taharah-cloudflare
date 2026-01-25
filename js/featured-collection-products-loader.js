@@ -129,12 +129,13 @@ const BridalProductsLoader = (function() {
                 console.log('Deployed site detected - using Netlify function endpoint');
 
                 // Use Netlify function endpoint for proper cache control
-                // ALWAYS add cache busting timestamp to ensure fresh products
-                const cacheBustTimestamp = Date.now();
-                let netlifyEndpoint = `/.netlify/functions/load-products?category=featured-collection&cacheBust=${cacheBustTimestamp}`;
+                // Only add cache busting when force refresh or cache invalidated (enables CDN caching)
+                let netlifyEndpoint = `/.netlify/functions/load-products?category=featured-collection`;
 
-                // Add cache busting parameter if force refresh or cache invalidated
+                // Add cache busting parameter ONLY if force refresh or cache invalidated
                 if (forceRefresh || cacheInvalidated) {
+                    const cacheBustTimestamp = Date.now();
+                    netlifyEndpoint += `&cacheBust=${cacheBustTimestamp}`;
                     console.log('Added cache busting parameter:', cacheBustTimestamp);
                 }
 

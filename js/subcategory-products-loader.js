@@ -88,11 +88,12 @@ const SubcategoryProductsLoader = (function() {
         try {
             console.log(`Loading ${category} products from Cloud Storage...`);
 
-            // ALWAYS add cache busting to ensure fresh product data
-            const cacheBustTimestamp = Date.now();
-            let netlifyEndpoint = `/.netlify/functions/load-products?category=${category}&cacheBust=${cacheBustTimestamp}`;
+            // Only add cache busting when force refresh or cache invalidated (not always)
+            let netlifyEndpoint = `/.netlify/functions/load-products?category=${category}`;
 
             if (forceRefresh || cacheInvalidated) {
+                const cacheBustTimestamp = Date.now();
+                netlifyEndpoint += `&cacheBust=${cacheBustTimestamp}`;
                 console.log('Force refresh enabled with timestamp:', cacheBustTimestamp);
             }
 
@@ -383,20 +384,24 @@ const SubcategoryProductsLoader = (function() {
 
     /**
      * Monitor for cache invalidation flag set by admin panel
+     * Uses longer interval to reduce unnecessary checks
      */
     function watchForCacheInvalidation() {
+        let lastCheckedUpdate = null;
+        
         setInterval(() => {
             const lastProductUpdate = localStorage.getItem('lastProductUpdate');
-            if (lastProductUpdate) {
+            if (lastProductUpdate && lastProductUpdate !== lastCheckedUpdate) {
                 const updateTime = parseInt(lastProductUpdate);
                 const now = Date.now();
-                // If flag was set recently (within last 10 seconds), reload products
-                if (now - updateTime < 10000) {
+                // If flag was set recently (within last 30 seconds) and we haven't processed it
+                if (now - updateTime < 30000) {
                     console.log('🔄 Detected cache invalidation, reloading products...');
+                    lastCheckedUpdate = lastProductUpdate;
                     SubcategoryProductsLoader.autoLoadForCurrentPage();
                 }
             }
-        }, 1000); // Check every second
+        }, 5000); // Check every 5 seconds instead of 1 second
     }
 
     // Public API
