@@ -5553,7 +5553,12 @@
                     }
                 } else {
                     hideGlobalLoader();
-                    alert('Failed to delete video: ' + (result.error || 'Unknown error'));
+                    // Fix: Handle case where it might be in development mode but success is false
+                    if (result.development) {
+                         alert('Video deletion is only available on the production site (Netlify).');
+                    } else {
+                         alert('Failed to delete video: ' + (result.error || 'Unknown error'));
+                    }
                 }
             } catch (error) {
                 hideGlobalLoader();
