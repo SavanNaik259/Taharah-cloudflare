@@ -150,28 +150,34 @@ async function deleteVideo(id, storagePath) {
         
         const firestore = firebase.firestore();
         
-        // Delete from Firestore - check if collection name is correct
-        // Based on replit.md it is 'watch-buy-videos' but previous code used 'watch_buy_videos'
-        // Let's try both or verify. The load function uses 'watch_buy_videos'
+        // Delete from Firestore
+        // The collection name used in loadWatchBuyVideos is 'watch_buy_videos'
+        console.log('🗑️ Attempting to delete from watch_buy_videos collection');
         await firestore.collection('watch_buy_videos').doc(id).delete();
         console.log('✅ Deleted from Firestore');
         
         // Delete from Storage
         if (storagePath && storagePath.length > 5) {
             try {
-                // Use the full reference for deletion
                 const storageRef = firebase.storage().ref();
                 const fileRef = storageRef.child(storagePath);
                 await fileRef.delete();
                 console.log('✅ Deleted from Storage');
             } catch (storageError) {
                 console.warn('⚠️ Storage file not found or already deleted:', storageError.message);
-                // Even if storage fails, we consider it deleted if Firestore is gone
             }
         }
         
+        // Also try 'watch-buy-videos' collection just in case of inconsistency
+        try {
+            await firestore.collection('watch-buy-videos').doc(id).delete();
+            console.log('✅ Also attempted delete from watch-buy-videos collection');
+        } catch (e) {
+            // Ignore errors for the alternative collection
+        }
+        
         // Directly remove from UI for immediate feedback
-        const videoList = document.getElementById('video-list');
+        const videoList = document.getElementById('video-list') || document.getElementById('videos-list');
         if (videoList) {
             // Find the card containing this video and remove it
             const cards = videoList.querySelectorAll('.stat-card');

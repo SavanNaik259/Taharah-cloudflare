@@ -5515,11 +5515,13 @@
             showGlobalLoader('Deleting video...');
             
             try {
+                console.log(`🗑️ Deleting video: ${videoId}`);
                 const response = await fetch(`/api/videos/${videoId}`, {
                     method: 'DELETE'
                 });
                 
                 const result = await response.json();
+                console.log('Delete response:', result);
                 
                 if (result.development) {
                     hideGlobalLoader();
@@ -5534,15 +5536,29 @@
                         title: 'Video Deleted!',
                         message: 'The video has been successfully deleted.'
                     });
-                    loadWatchBuyVideosNew();
+                    
+                    // Immediately remove from UI
+                    const videoCard = document.querySelector(`[data-video-id="${videoId}"]`);
+                    if (videoCard) {
+                        videoCard.remove();
+                        // Check if list is empty
+                        const videosList = document.getElementById('videos-list');
+                        if (videosList && videosList.children.length === 0) {
+                            const noVideosMsg = document.getElementById('no-videos-message');
+                            if (noVideosMsg) noVideosMsg.style.display = 'block';
+                        }
+                    } else {
+                        // Fallback to reload if card not found
+                        loadWatchBuyVideosNew();
+                    }
                 } else {
                     hideGlobalLoader();
-                    alert('Failed to delete video: ' + result.error);
+                    alert('Failed to delete video: ' + (result.error || 'Unknown error'));
                 }
             } catch (error) {
                 hideGlobalLoader();
                 console.error('Error deleting video:', error);
-                alert('Video deletion is only available on the production site (Netlify).');
+                alert('Error deleting video: ' + error.message);
             }
         }
 
