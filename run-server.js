@@ -20,21 +20,11 @@ let firebaseFullyConfigured = false;
 function initializeFirebaseAdmin() {
   try {
     if (!admin.apps.length) {
-      let serviceAccount = null;
-      
-      // Try parsing FIREBASE_SERVICE_ACCOUNT_KEY first (combined JSON)
-      if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
-        try {
-          serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
-        } catch (e) {
-          console.log('⚠️ FIREBASE_SERVICE_ACCOUNT_KEY is not valid JSON, trying individual env vars...');
-        }
-      }
-      
-      // If no combined key, try building from individual env vars
-      if (!serviceAccount && process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_PRIVATE_KEY) {
+      // Check if we have the necessary environment variables
+      if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL) {
         let privateKey = process.env.FIREBASE_PRIVATE_KEY;
         if (privateKey) {
+          // Ensure private key is properly formatted with newlines
           privateKey = privateKey.replace(/\\n/g, '\n');
           if (!privateKey.includes('\n') && privateKey.includes('-----BEGIN')) {
             privateKey = privateKey.replace(/-----BEGIN PRIVATE KEY-----/, '-----BEGIN PRIVATE KEY-----\n')
@@ -42,7 +32,7 @@ function initializeFirebaseAdmin() {
           }
         }
         
-        serviceAccount = {
+        const serviceAccount = {
           type: "service_account",
           project_id: process.env.FIREBASE_PROJECT_ID,
           private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
@@ -54,20 +44,16 @@ function initializeFirebaseAdmin() {
           auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
           client_x509_cert_url: process.env.FIREBASE_CERT_URL
         };
-        console.log('✅ Built service account from individual env vars');
-      }
-      
-      if (serviceAccount && serviceAccount.project_id && serviceAccount.private_key && serviceAccount.client_email) {
+
         admin.initializeApp({
           credential: admin.credential.cert(serviceAccount),
-          storageBucket: process.env.FIREBASE_STORAGE_BUCKET || `${serviceAccount.project_id}.appspot.com`
+          storageBucket: process.env.FIREBASE_STORAGE_BUCKET || `${process.env.FIREBASE_PROJECT_ID}.appspot.com`
         });
         firebaseFullyConfigured = true;
-        console.log('✅ Firebase Admin SDK initialized successfully with Storage');
+        console.log('✅ Firebase Admin SDK initialized successfully with environment variables');
       } else {
         firebaseFullyConfigured = false;
-        console.log('⚠️ Firebase Admin SDK not fully configured (development mode)');
-        console.log('💡 Videos will show placeholder. Full functionality available on Netlify.');
+        console.log('⚠️ Firebase credentials missing in environment variables');
       }
     } else {
       firebaseFullyConfigured = true;
@@ -75,7 +61,6 @@ function initializeFirebaseAdmin() {
   } catch (error) {
     firebaseFullyConfigured = false;
     console.log('⚠️ Firebase Admin SDK initialization error:', error.message);
-    console.log('💡 Videos will show placeholder. Full functionality available on Netlify.');
   }
 }
 
