@@ -10,6 +10,20 @@
 [[plugins]]
   package = "@netlify/plugin-functions-install-core"
 
+# Specific redirect for video upload (handles path correctly)
+[[redirects]]
+  from = "/api/videos/upload"
+  to = "/.netlify/functions/videos"
+  status = 200
+  force = true
+
+# Specific redirect for video operations by ID
+[[redirects]]
+  from = "/api/videos/:id"
+  to = "/.netlify/functions/videos/:id"
+  status = 200
+  force = true
+
 # Proxy API requests to Netlify Functions
 [[redirects]]
   from = "/api/*"
