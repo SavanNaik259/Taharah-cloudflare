@@ -1232,27 +1232,16 @@ a {
     justify-content: flex-start;
 }
 
-/* Scrollbar styling */
+/* Hide scrollbar for cleaner look */
 .new-arrivals-edit .product-scroll-container::-webkit-scrollbar,
 .new-arrivals-edit .arrivals-grid::-webkit-scrollbar {
-    height: 8px;
+    display: none;
 }
 
-.new-arrivals-edit .product-scroll-container::-webkit-scrollbar-track,
-.new-arrivals-edit .arrivals-grid::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-}
-
-.new-arrivals-edit .product-scroll-container::-webkit-scrollbar-thumb,
-.new-arrivals-edit .arrivals-grid::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 4px;
-}
-
-.new-arrivals-edit .product-scroll-container::-webkit-scrollbar-thumb:hover,
-.new-arrivals-edit .arrivals-grid::-webkit-scrollbar-thumb:hover {
-    background: #999;
+.new-arrivals-edit .product-scroll-container,
+.new-arrivals-edit .arrivals-grid {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 /* Product items with fixed 280px width */
