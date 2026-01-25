@@ -133,11 +133,21 @@ async function deleteVideo(id, storagePath) {
     console.log('🗑️ Deleting video:', { id, storagePath });
     
     try {
-        // Delete from Firestore first
-        await db.collection('watch_buy_videos').doc(id).delete();
+        // Find the buttons and disable them
+        const buttons = document.querySelectorAll(`button[onclick*="deleteVideo('${id}'"]`);
+        buttons.forEach(btn => {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        });
+
+        // Use the global db if available, otherwise fallback to firebase.firestore()
+        const firestore = typeof db !== 'undefined' ? db : firebase.firestore();
+        
+        // Delete from Firestore
+        await firestore.collection('watch_buy_videos').doc(id).delete();
         console.log('✅ Deleted from Firestore');
         
-        // Try to delete from Storage (ignore errors if file doesn't exist)
+        // Delete from Storage
         if (storagePath && storagePath.length > 5) {
             try {
                 await firebase.storage().ref(storagePath).delete();
@@ -148,10 +158,17 @@ async function deleteVideo(id, storagePath) {
         }
         
         alert('Video deleted successfully');
-        loadWatchBuyVideos();
+        await loadWatchBuyVideos();
     } catch (error) {
         console.error('❌ Error deleting video:', error);
         alert('Error deleting video: ' + error.message);
+        
+        // Re-enable buttons on error
+        const buttons = document.querySelectorAll(`button[onclick*="deleteVideo('${id}'"]`);
+        buttons.forEach(btn => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-trash"></i>';
+        });
     }
 }
 
