@@ -39,7 +39,13 @@ async function loadWatchBuyVideos() {
     } catch (error) {
         console.error('Error loading videos:', error);
         if (loading) loading.style.display = 'none';
-        alert('Error loading videos. Please try again.');
+        if (videoList) {
+            videoList.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">
+                    <i class="fas fa-video" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
+                    <p style="margin: 0;">Videos will load once Firebase is connected.</p>
+                </div>`;
+        }
     }
 }
 
