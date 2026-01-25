@@ -5585,19 +5585,6 @@
                 if (loadingElement) loadingElement.style.display = 'none';
                 if (contentElement) contentElement.style.display = 'block';
                 
-                if (result.development) {
-                    videosList.innerHTML = `
-                        <div class="card" style="padding: 40px; text-align: center; grid-column: 1 / -1;">
-                            <i class="fas fa-video" style="font-size: 48px; color: #cbd5e1; margin-bottom: 15px;"></i>
-                            <h3 style="margin: 0 0 10px 0; color: #64748b;">Development Mode</h3>
-                            <p style="margin: 0 0 15px 0; color: #94a3b8;">Video management is only available on the production site.</p>
-                            <p style="margin: 0; font-size: 13px; color: #94a3b8;">Deploy to Netlify to upload, edit, and manage videos.</p>
-                        </div>
-                    `;
-                    if (noVideosMsg) noVideosMsg.style.display = 'none';
-                    return;
-                }
-                
                 if (result.success && result.videos && result.videos.length > 0) {
                     if (noVideosMsg) noVideosMsg.style.display = 'none';
                     
@@ -5628,12 +5615,21 @@
                                 <button class="btn btn-secondary btn-sm" onclick='showEditVideoModal(${JSON.stringify(video).replace(/'/g, "\\'")})' style="flex: 1;">
                                     <i class="fas fa-edit"></i> Edit
                                 </button>
-                                <button class="btn btn-sm" onclick="deleteVideo('${video.id}', '${video.title?.replace(/'/g, "\\'") || 'Untitled'}')" style="flex: 1; background: #fee2e2; color: #dc2626; border: none;">
+                                <button class="btn btn-sm delete-video-btn" data-video-id="${video.id}" data-video-title="${video.title?.replace(/'/g, "\\'") || 'Untitled'}" style="flex: 1; background: #fee2e2; color: #dc2626; border: none;">
                                     <i class="fas fa-trash"></i> Delete
                                 </button>
                             </div>
                         </div>
                     `).join('');
+
+                    // Add click listeners to delete buttons
+                    videosList.querySelectorAll('.delete-video-btn').forEach(btn => {
+                        btn.addEventListener('click', function(e) {
+                            const id = this.getAttribute('data-video-id');
+                            const title = this.getAttribute('data-video-title');
+                            deleteVideo(id, title);
+                        });
+                    });
                 } else {
                     videosList.innerHTML = '';
                     if (noVideosMsg) noVideosMsg.style.display = 'block';
@@ -5646,8 +5642,8 @@
                     videosList.innerHTML = `
                         <div class="card" style="padding: 40px; text-align: center; grid-column: 1 / -1;">
                             <i class="fas fa-video" style="font-size: 48px; color: #cbd5e1; margin-bottom: 15px;"></i>
-                            <h3 style="margin: 0 0 10px 0; color: #64748b;">Development Mode</h3>
-                            <p style="margin: 0; color: #94a3b8;">Video management available on the production site (Netlify).</p>
+                            <h3 style="margin: 0 0 10px 0; color: #64748b;">Videos</h3>
+                            <p style="margin: 0; color: #94a3b8;">No videos found.</p>
                         </div>
                     `;
                 }
