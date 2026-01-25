@@ -5516,18 +5516,15 @@
             
             try {
                 console.log(`🗑️ Deleting video: ${videoId}`);
-                const response = await fetch(`/api/videos/${videoId}`, {
+                
+                // Always use the full path to Netlify functions in production
+                const baseUrl = window.location.hostname.includes('localhost') ? '/api' : '/.netlify/functions';
+                const response = await fetch(`${baseUrl}/videos/${videoId}`, {
                     method: 'DELETE'
                 });
                 
                 const result = await response.json();
                 console.log('Delete response:', result);
-                
-                if (result.development) {
-                    hideGlobalLoader();
-                    alert('Video deletion is only available on the production site (Netlify).');
-                    return;
-                }
                 
                 if (result.success) {
                     hideGlobalLoader();
@@ -5553,17 +5550,12 @@
                     }
                 } else {
                     hideGlobalLoader();
-                    // Fix: Handle case where it might be in development mode but success is false
-                    if (result.development) {
-                         alert('Video deletion is only available on the production site (Netlify).');
-                    } else {
-                         alert('Failed to delete video: ' + (result.error || 'Unknown error'));
-                    }
+                    alert('Failed to delete video: ' + (result.error || 'Unknown error'));
                 }
             } catch (error) {
                 hideGlobalLoader();
                 console.error('Error deleting video:', error);
-                alert('Error deleting video: ' + error.message);
+                alert('Error: ' + error.message);
             }
         }
 

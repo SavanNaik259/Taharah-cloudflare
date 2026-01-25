@@ -1580,9 +1580,6 @@ app.put('/api/videos/:videoId', async (req, res) => {
 // Delete video
 app.delete('/api/videos/:videoId', async (req, res) => {
   try {
-    // FORCE BYPASS for development/testing if requested
-    const isDev = !isFirebaseReady();
-    
     const { videoId } = req.params;
     console.log(`[API] Deleting video request for: ${videoId}`);
     
@@ -1590,6 +1587,7 @@ app.delete('/api/videos/:videoId', async (req, res) => {
     const videosDoc = await db.collection('settings').doc('watchBuyVideos').get();
     
     if (!videosDoc.exists) {
+      console.log('[API] Settings/watchBuyVideos document does not exist');
       return res.status(404).json({ success: false, error: 'No videos document found in settings' });
     }
     
@@ -1597,11 +1595,12 @@ app.delete('/api/videos/:videoId', async (req, res) => {
     const videoIndex = videos.findIndex(v => v.id === videoId);
     
     if (videoIndex === -1) {
-      console.log(`[API] Video ${videoId} not found in array, but returning success to clear UI if it was ghost data`);
+      console.log(`[API] Video ${videoId} not found in array. Current video IDs:`, videos.map(v => v.id));
       return res.json({ success: true, message: 'Video not found but UI should clear' });
     }
     
     const video = videos[videoIndex];
+    console.log(`[API] Found video to delete: ${video.title} (${videoId})`);
     
     // Attempt storage deletion but don't fail if it doesn't work
     if (video.filename) {
@@ -1619,7 +1618,7 @@ app.delete('/api/videos/:videoId', async (req, res) => {
     videos.forEach((v, i) => v.order = i);
     
     await db.collection('settings').doc('watchBuyVideos').set({ videos }, { merge: true });
-    console.log(`[API] Video ${videoId} removed from Firestore settings`);
+    console.log(`[API] Video ${videoId} removed from Firestore array. Remaining: ${videos.length}`);
     
     res.json({ success: true, message: 'Video deleted successfully' });
   } catch (error) {
