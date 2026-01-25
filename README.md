@@ -1,4 +1,4 @@
-# Auric Jewelry E-commerce Platform
+# royal meenakari Jewelry E-commerce Platform
 
 A premium e-commerce platform for Auric, delivering a sophisticated online jewelry shopping experience with advanced user engagement and secure transaction capabilities.
 
