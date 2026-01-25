@@ -17,7 +17,14 @@ async function loadWatchBuyVideos() {
     if (!videoContainer) return;
 
     try {
-        const snapshot = await db.collection('watch_buy_videos').orderBy('createdAt', 'desc').get();
+        // First try the collection used by admin panel
+        let snapshot = await db.collection('watch_buy_videos').orderBy('createdAt', 'desc').get();
+        
+        // If empty, try the other possible collection name
+        if (snapshot.empty) {
+            snapshot = await db.collection('watchBuyVideos').orderBy('uploadedAt', 'desc').get();
+        }
+        
         const loadingSpinner = document.getElementById('watch-buy-loading-spinner');
         if (loadingSpinner) loadingSpinner.remove();
 
@@ -26,8 +33,11 @@ async function loadWatchBuyVideos() {
             return;
         }
 
+        videoContainer.innerHTML = ''; // Clear existing content including any demo data
+
         snapshot.forEach((doc, index) => {
             const videoData = doc.data();
+            const sku = videoData.productSKU || videoData.sku || '';
             const videoItem = document.createElement('div');
             videoItem.className = 'testimonial-item';
             videoItem.innerHTML = `
@@ -50,7 +60,9 @@ async function loadWatchBuyVideos() {
             videoContainer.appendChild(videoItem);
             
             // Link product after adding to DOM
-            updateDynamicVideoProductLink(videoItem, videoData.productSKU);
+            if (sku) {
+                updateDynamicVideoProductLink(videoItem, sku);
+            }
         });
 
         // Re-initialize video controls for newly added elements
