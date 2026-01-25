@@ -53,6 +53,7 @@ waitForPort = 5000
 
 [agent]
 expertMode = true
+integrations = ["javascript_object_storage:2.0.0"]
 
 [userenv]
 
@@ -96,3 +97,6 @@ FIREBASE_CERT_URL = "https://www.googleapis.com/robot/v1/metadata/x509/firebase-
 FIREBASE_STORAGE_BUCKET = "auric-a0c92.firebasestorage.app"
 FIREBASE_API_KEY = "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI"
 FIREBASE_APP_ID = "1:878979958342:web:e6092f7522488d21eaec47"
+
+[objectStorage]
+defaultBucketID = "replit-objstore-4b3fceaf-e3ca-4051-a2fe-53f52a7b6bc2"
