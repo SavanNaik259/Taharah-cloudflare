@@ -140,8 +140,8 @@ async function deleteVideo(id, storagePath) {
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
         });
 
-        // Use the global db if available, otherwise fallback to firebase.firestore()
-        const firestore = typeof db !== 'undefined' ? db : firebase.firestore();
+        // Ensure we are using the correct Firestore instance
+        const firestore = firebase.firestore();
         
         // Delete from Firestore
         await firestore.collection('watch_buy_videos').doc(id).delete();
@@ -158,6 +158,25 @@ async function deleteVideo(id, storagePath) {
         }
         
         alert('Video deleted successfully');
+        
+        // Directly remove from UI for immediate feedback
+        const videoList = document.getElementById('video-list');
+        if (videoList) {
+            // Find the card containing this video and remove it
+            const cards = videoList.querySelectorAll('.stat-card');
+            cards.forEach(card => {
+                if (card.querySelector(`button[onclick*="deleteVideo('${id}'"]`)) {
+                    card.remove();
+                }
+            });
+            
+            // If list is now empty, show the "No videos" message
+            if (videoList.children.length === 0) {
+                videoList.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">No videos found. Click "Add New Video" to get started.</div>';
+            }
+        }
+        
+        // Still reload to be sure
         await loadWatchBuyVideos();
     } catch (error) {
         console.error('❌ Error deleting video:', error);
