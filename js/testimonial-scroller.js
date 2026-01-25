@@ -126,6 +126,11 @@ async function updateDynamicVideoProductLink(container, sku) {
             `;
         }
         
+        // Add click handler to ensure link works even if nested
+        productLinkAnchor.addEventListener('click', (e) => {
+            window.location.href = productLinkAnchor.href;
+        });
+        
         placeholder.replaceWith(productLinkAnchor);
 
     } catch (error) {
