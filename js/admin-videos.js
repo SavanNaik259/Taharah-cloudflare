@@ -143,26 +143,32 @@ async function deleteVideo(id, storagePath) {
         });
 
         // Ensure we are using the correct Firestore instance
-        // Sometimes 'db' is defined globally, sometimes we need to get it from firebase.firestore()
-        const firestore = (typeof db !== 'undefined') ? db : firebase.firestore();
+        // Explicitly get firestore from firebase
+        if (typeof firebase === 'undefined') {
+            throw new Error('Firebase is not loaded');
+        }
         
-        // Delete from Firestore
+        const firestore = firebase.firestore();
+        
+        // Delete from Firestore - check if collection name is correct
+        // Based on replit.md it is 'watch-buy-videos' but previous code used 'watch_buy_videos'
+        // Let's try both or verify. The load function uses 'watch_buy_videos'
         await firestore.collection('watch_buy_videos').doc(id).delete();
         console.log('✅ Deleted from Firestore');
         
         // Delete from Storage
         if (storagePath && storagePath.length > 5) {
             try {
-                // In some Firebase versions, we need to use refFromURL if storagePath is a full URL
-                // but here it seems to be a path.
-                await firebase.storage().ref().child(storagePath).delete();
+                // Use the full reference for deletion
+                const storageRef = firebase.storage().ref();
+                const fileRef = storageRef.child(storagePath);
+                await fileRef.delete();
                 console.log('✅ Deleted from Storage');
             } catch (storageError) {
                 console.warn('⚠️ Storage file not found or already deleted:', storageError.message);
+                // Even if storage fails, we consider it deleted if Firestore is gone
             }
         }
-        
-        alert('Video deleted successfully');
         
         // Directly remove from UI for immediate feedback
         const videoList = document.getElementById('video-list');
@@ -170,7 +176,9 @@ async function deleteVideo(id, storagePath) {
             // Find the card containing this video and remove it
             const cards = videoList.querySelectorAll('.stat-card');
             cards.forEach(card => {
-                if (card.querySelector(`button[onclick*="deleteVideo('${id}'"]`)) {
+                // Find button with specific ID inside the card
+                const deleteBtn = card.querySelector(`button[onclick*="deleteVideo('${id}'"]`);
+                if (deleteBtn) {
                     card.remove();
                 }
             });
@@ -180,6 +188,8 @@ async function deleteVideo(id, storagePath) {
                 videoList.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">No videos found. Click "Add New Video" to get started.</div>';
             }
         }
+
+        alert('Video deleted successfully');
     } catch (error) {
         console.error('❌ Error deleting video:', error);
         alert('Error deleting video: ' + error.message);
