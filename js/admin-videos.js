@@ -104,19 +104,20 @@ async function saveNewVideo() {
             async () => {
                 const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
                 
-                await db.collection('watch_buy_videos').add({
+                const docRef = await db.collection('watch_buy_videos').add({
                     videoUrl: downloadURL,
                     storagePath: storagePath,
                     productSKU: sku,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdAtLocal: new Date().toISOString()
                 });
                 
+                await docRef.get();
+                
                 statusDiv.textContent = 'Upload complete!';
-                setTimeout(() => {
-                    closeVideoModal();
-                    loadWatchBuyVideos();
-                    saveBtn.disabled = false;
-                }, 1000);
+                closeVideoModal();
+                await loadWatchBuyVideos();
+                saveBtn.disabled = false;
             }
         );
     } catch (error) {
