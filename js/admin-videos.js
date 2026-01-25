@@ -1,4 +1,3 @@
-
 // Watch & Buy Video Management Functions for Admin Panel
 async function loadWatchBuyVideos() {
     const loading = document.getElementById('watch-buy-loading');
@@ -8,19 +7,42 @@ async function loadWatchBuyVideos() {
     if (videoList) videoList.innerHTML = '';
     
     try {
-        // Use the same collection as the homepage logic
-        const snapshot = await db.collection('watchBuyVideos').orderBy('uploadedAt', 'desc').get();
+        // Query both collections to ensure all videos are found
+        const [snapshotNew, snapshotOld] = await Promise.all([
+            db.collection('watchBuyVideos').get(),
+            db.collection('watch_buy_videos').get()
+        ]);
         
         if (loading) loading.style.display = 'none';
         
-        if (snapshot.empty) {
-            videoList.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">No videos found. Click "Add New Video" to get started.</div>';
+        if (snapshotNew.empty && snapshotOld.empty) {
+            videoList.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">No videos found. Click "Upload Video" to get started.</div>';
             return;
         }
+
+        const allVideos = [];
         
-        snapshot.forEach(doc => {
-            const video = doc.data();
-            const videoId = doc.id;
+        snapshotNew.forEach(doc => {
+            allVideos.push({ id: doc.id, ...doc.data(), collection: 'watchBuyVideos' });
+        });
+
+        snapshotOld.forEach(doc => {
+            // Avoid duplicates if both exist
+            if (!allVideos.find(v => v.id === doc.id)) {
+                allVideos.push({ id: doc.id, ...doc.data(), collection: 'watch_buy_videos' });
+            }
+        });
+
+        // Sort combined list by date (uploadedAt or createdAt or timestamp)
+        allVideos.sort((a, b) => {
+            const dateA = (a.uploadedAt || a.createdAt || a.timestamp)?.toDate() || new Date(0);
+            const dateB = (b.uploadedAt || b.createdAt || b.timestamp)?.toDate() || new Date(0);
+            return dateB - dateA;
+        });
+        
+        allVideos.forEach(video => {
+            const videoId = video.id;
+            const collection = video.collection;
             
             const card = document.createElement('div');
             card.className = 'stat-card';
@@ -28,12 +50,11 @@ async function loadWatchBuyVideos() {
                 <div style="position: relative; margin-bottom: 15px;">
                     <video src="${video.videoUrl}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px;"></video>
                     <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 5px;">
-                        <button onclick="editVideo('${videoId}')" class="btn btn-outline btn-sm" style="background: white; padding: 5px 8px;"><i class="fas fa-edit"></i></button>
-                        <button onclick="deleteVideo('${videoId}', '${video.storagePath}')" class="btn btn-outline btn-sm" style="background: white; color: #dc2626; padding: 5px 8px;"><i class="fas fa-trash"></i></button>
+                        <button onclick="deleteVideo('${videoId}', '${video.storagePath}', '${collection}')" class="btn btn-outline btn-sm" style="background: white; color: #dc2626; padding: 5px 8px;"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>
-                <div style="font-size: 14px; font-weight: 600; margin-bottom: 5px;">SKU: ${video.productSKU}</div>
-                <div style="font-size: 12px; color: #64748b;">Added: ${video.uploadedAt ? new Date(video.uploadedAt?.toDate()).toLocaleDateString() : 'N/A'}</div>
+                <div style="font-size: 14px; font-weight: 600; margin-bottom: 5px;">SKU: ${video.productSKU || video.sku || 'N/A'}</div>
+                <div style="font-size: 12px; color: #64748b;">Added: ${new Date((video.uploadedAt || video.createdAt || video.timestamp)?.toDate()).toLocaleDateString()}</div>
             `;
             videoList.appendChild(card);
         });
@@ -127,19 +148,19 @@ async function saveNewVideo() {
     }
 }
 
-async function deleteVideo(id, storagePath) {
+async function deleteVideo(id, storagePath, collection) {
     if (!confirm('Are you sure you want to delete this video?')) return;
     
     try {
-        // Delete from Firestore
-        await db.collection('watchBuyVideos').doc(id).delete();
+        // Delete from the correct collection
+        await db.collection(collection || 'watchBuyVideos').doc(id).delete();
         
         // Delete from Storage
         if (storagePath) {
             try {
                 await firebase.storage().ref(storagePath).delete();
             } catch (storageError) {
-                console.warn('Storage delete error (may already be gone):', storageError);
+                console.warn('Storage delete error:', storageError);
             }
         }
         
