@@ -5307,9 +5307,9 @@
 
         async function saveVideoLink(videoNumber) {
             const skuInput = document.getElementById(`video${videoNumber}-sku`);
-            const sku = skuInput.value.trim().toUpperCase();
+            const rawSku = skuInput.value.trim();
             
-            if (!sku) {
+            if (!rawSku) {
                 alert('Please enter a Product SKU ID');
                 skuInput.focus();
                 return;
@@ -5318,7 +5318,7 @@
             showGlobalLoader(`Saving link for Video ${videoNumber}...`);
             
             try {
-                // Validate that product exists - search ALL collections including subcategories (in parallel)
+                // Search for product across ALL collections to find its EXACT ID case
                 const categories = [
                     'featured-collection', 
                     'new-arrivals', 
@@ -5337,7 +5337,6 @@
                     'meenakari-rings'
                 ];
                 
-                // Fetch all categories in parallel for faster search
                 const categoryPromises = categories.map(category =>
                     fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`)
                         .then(response => response.ok ? response.json() : null)
@@ -5346,32 +5345,41 @@
                 
                 const categoryResults = await Promise.all(categoryPromises);
                 let productFound = null;
+                let exactSku = rawSku; // Fallback to raw input
                 
-                // Search for product in results
                 for (const result of categoryResults) {
                     if (result && result.success && result.products) {
-                        productFound = result.products.find(p => p.id === sku || p.SKU === sku || (p.id && p.id.toString().toUpperCase() === sku.toUpperCase()));
-                        if (productFound) break;
+                        // Look for match using case-insensitive check to find the original product object
+                        productFound = result.products.find(p => 
+                            (p.id && p.id.toString().toLowerCase() === rawSku.toLowerCase()) || 
+                            (p.SKU && p.SKU.toString().toLowerCase() === rawSku.toLowerCase())
+                        );
+                        
+                        if (productFound) {
+                            // Use the actual ID from the database for the link
+                            exactSku = productFound.id || productFound.SKU || rawSku;
+                            break;
+                        }
                     }
                 }
                 
                 if (!productFound) {
                     hideGlobalLoader();
-                    alert(`Product with SKU "${sku}" not found in any collection. Please check the SKU and try again.`);
+                    alert(`Product with SKU "${rawSku}" not found in any collection. Please check the SKU and try again.`);
                     return;
                 }
                 
-                // Save to Firestore
+                // Save to Firestore using the exact SKU (preserving case)
                 await db.collection('settings').doc('watchBuyVideos').set({
                     [`video${videoNumber}`]: {
-                        productSKU: sku,
+                        productSKU: exactSku,
                         productName: productFound.name,
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     }
                 }, { merge: true });
                 
                 // Update display
-                await fetchAndDisplayProductName(videoNumber, sku);
+                await fetchAndDisplayProductName(videoNumber, exactSku);
                 
                 hideGlobalLoader();
                 
