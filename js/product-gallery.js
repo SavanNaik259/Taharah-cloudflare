@@ -249,6 +249,11 @@ class ProductGallery {
             return imagePath;
         }
         
+        // Check if it's a relative path starting with /productImages/
+        if (imagePath.startsWith('/productImages/') || imagePath.startsWith('productImages/')) {
+             return `/.netlify/functions/image-proxy?path=${encodeURIComponent(imagePath.startsWith('/') ? imagePath.substring(1) : imagePath)}`;
+        }
+
         // Use image proxy for Firebase Storage images
         return `/.netlify/functions/image-proxy?path=${encodeURIComponent(imagePath)}`;
     }
