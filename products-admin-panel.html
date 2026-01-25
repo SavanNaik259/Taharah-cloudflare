@@ -2052,9 +2052,11 @@
                             const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
                             console.log('Image uploaded successfully to Firebase Storage:', downloadURL);
 
-                            // Directly use the Firebase Download URL
-                            const proxyURL = downloadURL;
-                            console.log('Using direct Firebase download URL:', proxyURL);
+                            // Generate image proxy URL instead of direct Firebase URL
+                            // This ensures images are served through Netlify's true CDN to save on Firebase bandwidth costs
+                            const imagePath = `productImages/${fileName}`;
+                            const proxyURL = `/.netlify/functions/image-proxy?path=${encodeURIComponent(imagePath)}`;
+                            console.log('Generated image proxy URL for Netlify CDN:', proxyURL);
 
                             resolve(proxyURL);
                         } catch (error) {

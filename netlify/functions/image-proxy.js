@@ -77,7 +77,8 @@ exports.handler = async (event, context) => {
       headers: {
         ...corsHeaders,
         'Content-Type': metadata.contentType || 'image/jpeg',
-        'Cache-Control': 'public, max-age=31536000, immutable'
+        'Cache-Control': 'public, max-age=31536000, immutable',
+        'Netlify-CDN-Cache-Control': 'public, max-age=31536000, immutable'
       },
       body: buffer.toString('base64'),
       isBase64Encoded: true
