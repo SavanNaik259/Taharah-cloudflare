@@ -73,14 +73,14 @@ async function updateDynamicVideoProductLink(container, sku) {
         
         let productDetails = null;
 
-        for (const category of categories) {
-            const response = await fetch(`/.netlify/functions/load-products?category=${category}`);
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success && data.products) {
-                    productDetails = data.products.find(p => p.id === sku);
-                    if (productDetails) break;
-                }
+        // Use the categories parameter to fetch all at once for better performance and reliability
+        const categoriesQuery = categories.join(',');
+        const response = await fetch(`/.netlify/functions/load-products?categories=${categoriesQuery}`);
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.products) {
+                // Find by id (SKU)
+                productDetails = data.products.find(p => p.id === sku);
             }
         }
 
@@ -99,21 +99,24 @@ async function updateDynamicVideoProductLink(container, sku) {
         `;
 
         if (productDetails) {
+            const productImage = productDetails.image || productDetails.mainImage || (productDetails.images && productDetails.images[0]?.url) || 'images/logos/royalmeenakari.png';
+            const productPrice = productDetails.price ? `₹${productDetails.price.toLocaleString()}` : 'Price on request';
+            
             productLinkAnchor.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <img src="${productDetails.image || productDetails.mainImage || (productDetails.images && productDetails.images[0]?.url)}" 
+                    <img src="${productImage}" 
                          style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
                     <div style="flex: 1;">
                         <div style="font-weight: 600; font-size: 14px; color: #333; margin-bottom: 4px;">${productDetails.name}</div>
-                        <div style="font-size: 13px; color: #693208; font-weight: 500;">₹${productDetails.price.toLocaleString()}</div>
+                        <div style="font-size: 13px; color: #693208; font-weight: 500;">${productPrice}</div>
                     </div>
                 </div>
             `;
         } else {
             productLinkAnchor.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 50px; height: 50px; background: #667eea; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-gem" style="color: white;"></i>
+                    <div style="width: 50px; height: 50px; background: #f8f9fa; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                        <img src="images/logos/royalmeenakari.png" style="width: 30px; height: 30px; object-fit: contain;">
                     </div>
                     <div style="flex: 1;">
                         <div style="font-weight: 600; font-size: 14px; color: #333;">View Product</div>
