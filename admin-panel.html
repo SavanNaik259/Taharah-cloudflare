@@ -5519,8 +5519,17 @@
                 
                 // Always use the full path to Netlify functions in production
                 const baseUrl = window.location.hostname.includes('localhost') ? '/api' : '/.netlify/functions';
-                const response = await fetch(`${baseUrl}/videos/${videoId}`, {
-                    method: 'DELETE'
+                // Remove trailing slashes and ensure clean ID passing
+                const deleteUrl = `${baseUrl}/videos/${videoId}`.replace(/\/+$/, '');
+                
+                console.log(`🚀 Sending DELETE request to: ${deleteUrl}`);
+                
+                const response = await fetch(deleteUrl, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
                 });
                 
                 const result = await response.json();

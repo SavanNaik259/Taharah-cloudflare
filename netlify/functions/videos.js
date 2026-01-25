@@ -86,10 +86,16 @@ exports.handler = async (event) => {
     try {
         initAdmin();
         
-        const path = event.path.replace('/.netlify/functions/videos', '').replace('/api/videos', '');
+        // Comprehensive path parsing for all environments
+        const rawPath = event.path || '';
+        const videoId = rawPath.split('/').pop();
+        
+        console.log(`[Videos Function] Method: ${event.httpMethod}, Path: ${rawPath}, ID: ${videoId}`);
+        
         const db = admin.firestore();
         const bucket = admin.storage().bucket();
         
+        // Handle GET request to list all videos
         if (event.httpMethod === 'GET') {
             const videosSnapshot = await db.collection('watchBuyVideos').orderBy('uploadedAt', 'desc').get();
             const videos = [];
@@ -104,7 +110,8 @@ exports.handler = async (event) => {
             };
         }
         
-        if (event.httpMethod === 'POST' && (path === '/upload' || path === '')) {
+        // Handle POST for new uploads
+        if (event.httpMethod === 'POST') {
             const { fields, files } = await parseMultipartForm(event);
             
             if (!files.length) {
@@ -164,16 +171,16 @@ exports.handler = async (event) => {
             };
         }
         
+        // Handle PUT (update) and DELETE operations that require a video ID
+        if (!videoId || videoId === 'videos' || videoId === 'functions') {
+            return {
+                statusCode: 400,
+                headers: corsHeaders,
+                body: JSON.stringify({ success: false, error: 'Valid Video ID required' })
+            };
+        }
+
         if (event.httpMethod === 'PUT') {
-            const videoId = path.replace('/', '');
-            if (!videoId) {
-                return {
-                    statusCode: 400,
-                    headers: corsHeaders,
-                    body: JSON.stringify({ success: false, error: 'Video ID required' })
-                };
-            }
-            
             const body = JSON.parse(event.body);
             const updateData = {};
             if (body.title) updateData.title = body.title;
@@ -191,34 +198,35 @@ exports.handler = async (event) => {
         }
         
         if (event.httpMethod === 'DELETE') {
-            const videoId = path.replace('/', '');
-            if (!videoId) {
-                return {
-                    statusCode: 400,
-                    headers: corsHeaders,
-                    body: JSON.stringify({ success: false, error: 'Video ID required' })
-                };
-            }
-            
+            console.log(`[DELETE] Targeting video ID: ${videoId}`);
             const videoDoc = await db.collection('watchBuyVideos').doc(videoId).get();
+            
             if (videoDoc.exists) {
                 const videoData = videoDoc.data();
                 if (videoData.storagePath) {
                     try {
                         await bucket.file(videoData.storagePath).delete();
+                        console.log(`[DELETE] Deleted storage file: ${videoData.storagePath}`);
                     } catch (e) {
-                        console.log('Error deleting file from storage:', e.message);
+                        console.log('[DELETE] Storage deletion warning:', e.message);
                     }
                 }
+                
+                await db.collection('watchBuyVideos').doc(videoId).delete();
+                console.log(`[DELETE] Deleted Firestore document: ${videoId}`);
+                
+                return {
+                    statusCode: 200,
+                    headers: corsHeaders,
+                    body: JSON.stringify({ success: true, message: 'Video deleted successfully' })
+                };
+            } else {
+                return {
+                    statusCode: 404,
+                    headers: corsHeaders,
+                    body: JSON.stringify({ success: false, error: 'Video not found in database' })
+                };
             }
-            
-            await db.collection('watchBuyVideos').doc(videoId).delete();
-            
-            return {
-                statusCode: 200,
-                headers: corsHeaders,
-                body: JSON.stringify({ success: true, message: 'Video deleted successfully' })
-            };
         }
         
         return {
