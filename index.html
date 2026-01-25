@@ -993,122 +993,16 @@ background-color: #000 !important;
             <h2 class="section-title" data-translate="watch_and_buy">Watch And Buy</h2>
         </div>
         <div class="testimonials-container">
-            <div class="testimonials-scroll" id="watch-buy-videos-container">
-                <div id="videos-loading" style="display: flex; align-items: center; justify-content: center; padding: 40px; width: 100%;">
+            <div class="testimonials-scroll" id="dynamic-watch-buy-videos">
+                <div id="watch-buy-loading-spinner" style="display: flex; align-items: center; justify-content: center; padding: 40px; width: 100%;">
                     <span style="color: #64748b;">Loading videos...</span>
                 </div>
             </div>
         </div>
     </section>
 
-    <script>
-    (function() {
-        async function loadWatchBuyVideos() {
-            const container = document.getElementById('watch-buy-videos-container');
-            const loadingDiv = document.getElementById('videos-loading');
-            
-            try {
-                const response = await fetch('/api/videos');
-                const result = await response.json();
-                
-                if (result.development) {
-                    container.innerHTML = `
-                        <div style="padding: 40px; text-align: center; color: #64748b; width: 100%;">
-                            <i class="fas fa-video" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
-                            <p style="margin: 0; font-size: 16px;">Watch & Buy videos are available on the live site</p>
-                            <p style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.7;">Videos will display here when deployed to Netlify</p>
-                        </div>`;
-                    return;
-                }
-                
-                if (result.success && result.videos && result.videos.length > 0) {
-                    const sortedVideos = result.videos.sort((a, b) => (a.order || 0) - (b.order || 0));
-                    
-                    container.innerHTML = sortedVideos.map(video => `
-                        <div class="testimonial-item">
-                            <div class="video-container">
-                                <div class="play-button-overlay">
-                                    <div class="play-button">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M8 5.14v14l11-7-11-7z" fill="#ffffff"/>
-                                        </svg>
-                                    </div>
-                                </div>
-                                <video class="testimonial-video">
-                                    <source src="${video.videoUrl}" type="video/mp4">
-                                    Your browser does not support the video tag.
-                                </video>
-                                ${video.productSKU ? `
-                                    <a href="product-detail.html?id=${encodeURIComponent(video.productSKU)}" class="video-product-link">
-                                        <span class="video-product-link-text">${video.title || 'View Product'}</span>
-                                        <span class="video-product-link-arrow">→</span>
-                                    </a>
-                                ` : `
-                                    <div class="video-product-link" style="cursor: default;">
-                                        <span class="video-product-link-text">${video.title || 'Watch Video'}</span>
-                                    </div>
-                                `}
-                            </div>
-                        </div>
-                    `).join('');
-                    
-                    initializeVideoPlayers();
-                } else {
-                    container.innerHTML = '<div style="padding: 40px; text-align: center; color: #64748b; width: 100%;">No videos available</div>';
-                }
-            } catch (error) {
-                console.error('Error loading videos:', error);
-                container.innerHTML = `
-                    <div style="padding: 40px; text-align: center; color: #64748b; width: 100%;">
-                        <i class="fas fa-video" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
-                        <p style="margin: 0; font-size: 16px;">Watch & Buy videos are available on the live site</p>
-                    </div>`;
-            }
-        }
-        
-        function initializeVideoPlayers() {
-            const videoContainers = document.querySelectorAll('.testimonials-section .video-container');
-            
-            videoContainers.forEach(container => {
-                const video = container.querySelector('video');
-                const playButton = container.querySelector('.play-button-overlay');
-                
-                if (video && playButton) {
-                    playButton.addEventListener('click', function() {
-                        if (video.paused) {
-                            document.querySelectorAll('.testimonials-section video').forEach(v => {
-                                if (v !== video) v.pause();
-                            });
-                            video.play();
-                            playButton.style.opacity = '0';
-                        } else {
-                            video.pause();
-                            playButton.style.opacity = '1';
-                        }
-                    });
-                    
-                    video.addEventListener('ended', function() {
-                        playButton.style.opacity = '1';
-                    });
-                    
-                    video.addEventListener('pause', function() {
-                        playButton.style.opacity = '1';
-                    });
-                    
-                    video.addEventListener('play', function() {
-                        playButton.style.opacity = '0';
-                    });
-                }
-            });
-        }
-        
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', loadWatchBuyVideos);
-        } else {
-            loadWatchBuyVideos();
-        }
-    })();
-    </script>
+    <!-- Removing the duplicate inline script and keeping the external testimonial-scroller.js logic -->
+
 
     <!-- Bridal Collection Section with Video -->
     <section class="bridal-jewelry-section">
