@@ -1204,6 +1204,225 @@ a {
     box-shadow: none;
 }
 
+/* ========================================
+   NEW ARRIVALS EDIT SECTION - ORIGINAL HORIZONTAL SCROLL DESIGN
+   ======================================== */
+
+/* Main new arrivals edit section */
+.new-arrivals-edit {
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    position: relative;
+    padding: 5px 0;
+    margin-bottom: 10px;
+}
+
+/* Product scroll container styling */
+.new-arrivals-edit .product-scroll-container,
+.new-arrivals-edit .arrivals-grid {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    padding: 2px 20px 2px 20px !important;
+    width: 100%;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+}
+
+/* Scrollbar styling */
+.new-arrivals-edit .product-scroll-container::-webkit-scrollbar,
+.new-arrivals-edit .arrivals-grid::-webkit-scrollbar {
+    height: 8px;
+}
+
+.new-arrivals-edit .product-scroll-container::-webkit-scrollbar-track,
+.new-arrivals-edit .arrivals-grid::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.new-arrivals-edit .product-scroll-container::-webkit-scrollbar-thumb,
+.new-arrivals-edit .arrivals-grid::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+.new-arrivals-edit .product-scroll-container::-webkit-scrollbar-thumb:hover,
+.new-arrivals-edit .arrivals-grid::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+/* Product items with fixed 280px width */
+.new-arrivals-edit .product-item,
+.new-arrivals-edit .arrival-item {
+    background: none;
+    border: none;
+    box-shadow: none;
+    overflow: hidden;
+    flex: 0 0 280px !important;
+    width: 280px !important;
+    max-width: 280px !important;
+    min-width: 280px !important;
+    transition: none;
+    margin: 0 !important;
+    scroll-snap-align: center;
+}
+
+.new-arrivals-edit .product-item:hover,
+.new-arrivals-edit .arrival-item:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Product images - 480px height */
+.new-arrivals-edit .product-image,
+.new-arrivals-edit .arrival-image {
+    width: 100%;
+    height: 480px;
+    overflow: hidden;
+    position: relative;
+}
+
+.new-arrivals-edit .product-image img,
+.new-arrivals-edit .arrival-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.new-arrivals-edit .product-item:hover .product-image img,
+.new-arrivals-edit .arrival-item:hover .arrival-image img {
+    transform: scale(1.05);
+}
+
+/* Product details */
+.new-arrivals-edit .product-details,
+.new-arrivals-edit .arrival-details {
+    padding: 20px 15px 15px 15px;
+    text-align: center;
+    margin: 0;
+}
+
+.new-arrivals-edit .product-name,
+.new-arrivals-edit .arrival-title {
+    font-family: 'Futura PT', 'Futura', 'Century Gothic', 'Avenir Next', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    color: #333;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    line-height: 1.4;
+}
+
+.new-arrivals-edit .current-price,
+.new-arrivals-edit .arrival-price {
+    font-family: 'Futura PT', 'Futura', 'Century Gothic', 'Avenir Next', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: #333;
+    margin: 0;
+    letter-spacing: 1px;
+}
+
+/* New arrivals edit responsive - tablet */
+@media (max-width: 768px) {
+    .new-arrivals-edit {
+        margin: 0 0 10px 0;
+        padding: 5px 0;
+    }
+
+    .new-arrivals-edit .product-scroll-container,
+    .new-arrivals-edit .arrivals-grid {
+        gap: 12px;
+        scroll-snap-type: x mandatory;
+    }
+
+    .new-arrivals-edit .product-item,
+    .new-arrivals-edit .arrival-item {
+        flex: 0 0 280px !important;
+        width: 280px !important;
+        max-width: 280px !important;
+        min-width: 280px !important;
+        margin: 0 !important;
+        scroll-snap-align: center;
+    }
+
+    .new-arrivals-edit .product-image,
+    .new-arrivals-edit .arrival-image {
+        height: 360px;
+    }
+
+    .new-arrivals-edit .product-details,
+    .new-arrivals-edit .arrival-details {
+        padding: 12px 8px 8px 8px;
+    }
+
+    .new-arrivals-edit .product-name,
+    .new-arrivals-edit .arrival-title {
+        font-size: 0.9rem;
+        letter-spacing: 1.5px;
+        margin-bottom: 8px;
+    }
+
+    .new-arrivals-edit .current-price,
+    .new-arrivals-edit .arrival-price {
+        font-size: 1rem;
+        letter-spacing: 0.8px;
+    }
+}
+
+/* New arrivals edit responsive - mobile */
+@media (max-width: 480px) {
+    .new-arrivals-edit {
+        margin: 0 0 10px 0;
+        padding: 5px 0;
+    }
+
+    .new-arrivals-edit .product-scroll-container,
+    .new-arrivals-edit .arrivals-grid {
+        gap: 10px;
+        scroll-snap-type: x mandatory;
+    }
+
+    .new-arrivals-edit .product-item,
+    .new-arrivals-edit .arrival-item {
+        flex: 0 0 280px !important;
+        width: 280px !important;
+        max-width: 280px !important;
+        min-width: 280px !important;
+        margin: 0 !important;
+        scroll-snap-align: center;
+    }
+
+    .new-arrivals-edit .product-image,
+    .new-arrivals-edit .arrival-image {
+        height: 320px;
+    }
+
+    .new-arrivals-edit .product-details,
+    .new-arrivals-edit .arrival-details {
+        padding: 10px 6px 6px 6px;
+    }
+
+    .new-arrivals-edit .product-name,
+    .new-arrivals-edit .arrival-title {
+        font-size: 0.85rem;
+        letter-spacing: 1.2px;
+        margin-bottom: 6px;
+    }
+
+    .new-arrivals-edit .current-price,
+    .new-arrivals-edit .arrival-price {
+        font-size: 0.95rem;
+        letter-spacing: 0.6px;
+    }
+}
+
 /* Polki edit - larger cards */
 .polki-edit .arrival-item {
     background: none !important;
