@@ -5280,7 +5280,7 @@
                 // Search for product in results
                 for (const result of categoryResults) {
                     if (result && result.success && result.products) {
-                        productFound = result.products.find(p => p.id === sku);
+                        productFound = result.products.find(p => p.id === sku || p.SKU === sku || (p.id && p.id.toString().toUpperCase() === sku.toUpperCase()));
                         if (productFound) break;
                     }
                 }
@@ -5350,7 +5350,7 @@
                 // Search for product in results
                 for (const result of categoryResults) {
                     if (result && result.success && result.products) {
-                        productFound = result.products.find(p => p.id === sku);
+                        productFound = result.products.find(p => p.id === sku || p.SKU === sku || (p.id && p.id.toString().toUpperCase() === sku.toUpperCase()));
                         if (productFound) break;
                     }
                 }
