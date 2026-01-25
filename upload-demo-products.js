@@ -1,3 +1,6 @@
+
+
+
 /**
  * Script to upload demo product images to Firebase Storage
  * and create product entries for multiple collections
