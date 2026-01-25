@@ -5890,6 +5890,8 @@
                 loadNotifications();
             } else if (sectionName === "push-notifications") {
                 if (typeof loadTokenStats === "function") loadTokenStats();
+            } else if (sectionName === "watch-buy") {
+                if (typeof loadWatchBuyVideos === "function") loadWatchBuyVideos();
             }
 
             if (window.innerWidth <= 1024) {
