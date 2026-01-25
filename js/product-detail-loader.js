@@ -114,13 +114,11 @@ const ProductDetailLoader = (function() {
         for (const category of searchCategories) {
             try {
                 console.log(`🔍 Searching category: ${category} for SKU: ${productId}`);
-                // Add cache-busting timestamp to ensure fresh product data
-                const cacheBust = `cacheBust=${Date.now()}`;
-                const response = await fetch(`/.netlify/functions/load-products?category=${category}&${cacheBust}`, {
-                    headers: {
-                        'Cache-Control': 'no-cache, no-store, must-revalidate',
-                        'Pragma': 'no-cache'
-                    }
+                // Use CDN-friendly request without cache-busting for better performance
+                // Products will be refreshed when admin updates them via cache invalidation
+                const response = await fetch(`/.netlify/functions/load-products?category=${category}`, {
+                    method: 'GET',
+                    cache: 'default'
                 });
 
                 if (!response.ok) {

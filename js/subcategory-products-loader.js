@@ -12,7 +12,7 @@ const SubcategoryProductsLoader = (function() {
     let lastFetchTime = {};
     let cachedETags = {};
     const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
-    const SHORT_CACHE_DURATION = 60 * 60 * 1000; // 1 hour
+    const SHORT_CACHE_DURATION = 4 * 60 * 60 * 1000; // 4 hours for localStorage to reduce bandwidth
 
     /**
      * Initialize Firebase Storage connection

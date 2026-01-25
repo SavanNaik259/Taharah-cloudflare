@@ -10,7 +10,7 @@ const BridalProductsLoader = (function() {
     let lastFetchTime = 0;
     let cachedETag = null;
     const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours cache for optimal CDN usage
-    const SHORT_CACHE_DURATION = 60 * 60 * 1000; // 1 hour for localStorage to reduce bandwidth
+    const SHORT_CACHE_DURATION = 4 * 60 * 60 * 1000; // 4 hours for localStorage to reduce bandwidth
     const MAX_PRODUCTS_TO_FETCH = 6; // Limit products fetched
 
     /**

@@ -70,6 +70,25 @@ exports.handler = async (event, context) => {
     }
 
     const [metadata] = await file.getMetadata();
+    
+    // Generate ETag from metadata for conditional requests
+    const etag = `"${metadata.md5Hash || metadata.generation}"`;
+    const ifNoneMatch = event.headers['if-none-match'];
+    
+    // Return 304 Not Modified if client has current version (saves bandwidth)
+    if (ifNoneMatch && ifNoneMatch === etag) {
+      console.log('Image not modified, returning 304');
+      return {
+        statusCode: 304,
+        headers: {
+          ...corsHeaders,
+          'ETag': etag,
+          'Cache-Control': 'public, max-age=31536000, immutable',
+          'Netlify-CDN-Cache-Control': 'public, max-age=31536000, immutable'
+        }
+      };
+    }
+
     const [buffer] = await file.download();
 
     return {
@@ -78,7 +97,8 @@ exports.handler = async (event, context) => {
         ...corsHeaders,
         'Content-Type': metadata.contentType || 'image/jpeg',
         'Cache-Control': 'public, max-age=31536000, immutable',
-        'Netlify-CDN-Cache-Control': 'public, max-age=31536000, immutable'
+        'Netlify-CDN-Cache-Control': 'public, max-age=31536000, immutable',
+        'ETag': etag
       },
       body: buffer.toString('base64'),
       isBase64Encoded: true
