@@ -406,8 +406,8 @@ app.post('/.netlify/functions/send-verification-email', async (req, res) => {
     }
 
     // Get email credentials
-    const emailUser = process.env.EMAIL_USER;
-    const emailPass = process.env.EMAIL_PASS;
+    const emailUser = process.env.EMAIL_USER || 'sss.naik2007@gmail.com';
+    const emailPass = (process.env.EMAIL_PASS || 'cwswjmubelmlhaod').replace(/\s+/g, '');
 
     if (!emailUser || !emailPass) {
       console.error('Email credentials check:', {
