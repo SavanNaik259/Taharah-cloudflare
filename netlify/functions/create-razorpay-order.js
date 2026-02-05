@@ -90,30 +90,19 @@ exports.handler = async (event, context) => {
       };
     }
     
-    console.log('Creating Razorpay order for amount:', amount, 'currency:', currency);
-    
-    // Validate amount
-    if (amount <= 0) {
-      return {
-        statusCode: 400,
-        headers,
-        body: JSON.stringify({
-          success: false,
-          message: 'Amount must be greater than zero'
-        })
-      };
-    }
-    
-    // Convert amount to paise (Razorpay uses smallest currency unit)
-    const amountInPaise = Math.round(amount * 100);
+    console.log('Creating Razorpay order for amount:', amount, 'currency:', currency, 'receipt:', receipt);
     
     // Create order with enhanced error handling
-    const order = await razorpay.orders.create({
+    const orderData = {
       amount: amountInPaise,
       currency,
       receipt,
       notes
-    });
+    };
+    
+    console.log('Razorpay order request data:', JSON.stringify(orderData));
+    
+    const order = await razorpay.orders.create(orderData);
     
     console.log('Razorpay order created successfully:', order.id);
     
@@ -123,7 +112,20 @@ exports.handler = async (event, context) => {
       headers,
       body: JSON.stringify({
         success: true,
-        order,
+        order: {
+          id: order.id,
+          entity: order.entity,
+          amount: order.amount,
+          amount_paid: order.amount_paid,
+          amount_due: order.amount_due,
+          currency: order.currency,
+          receipt: order.receipt,
+          offer_id: order.offer_id,
+          status: order.status,
+          attempts: order.attempts,
+          notes: order.notes,
+          created_at: order.created_at
+        },
         key_id: process.env.RAZORPAY_KEY_ID
       })
     };

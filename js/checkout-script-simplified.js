@@ -2350,10 +2350,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 amount: result.order.amount,
                 currency: result.order.currency,
                 name: 'Royal Meenakari',
-                description: 'Purchase Order: ' + orderData.orderReference,
+                description: 'Order: ' + orderData.orderReference,
                 order_id: result.order.id,
                 handler: async function(response) {
+                    console.log('Razorpay handler success response:', response);
                     await handleRazorpaySuccess(response, orderData);
+                },
+                modal: {
+                    ondismiss: function() {
+                        console.log('Razorpay checkout modal closed by user');
+                        if (submitButton) {
+                            submitButton.disabled = false;
+                            submitButton.innerHTML = 'Place Order';
+                        }
+                    }
                 },
                 prefill: {
                     name: orderData.customer.firstName + ' ' + orderData.customer.lastName,
@@ -2361,10 +2371,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     contact: orderData.customer.phone
                 },
                 notes: {
-                    address: orderData.customer.address
+                    address: orderData.customer.address,
+                    orderReference: orderData.orderReference
                 },
                 theme: {
-                    color: '#3399cc'
+                    color: '#603000'
                 }
             };
 
