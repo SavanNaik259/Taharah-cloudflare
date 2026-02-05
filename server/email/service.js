@@ -21,13 +21,14 @@ async function sendCustomerOrderConfirmation(orderData) {
     }
     
     const htmlContent = templates.customerOrderTemplate(orderData);
+    const emailUser = process.env.EMAIL_USER;
     
     const mailOptions = {
-      from: `"Royal Meenakari" <${process.env.EMAIL_USER || 'sss.naik2007@gmail.com'}>`,
+      from: `"Royal Meenakari" <${emailUser}>`,
       to: customer.email,
       subject: `Order Confirmation - ${orderData.orderReference}`,
       html: htmlContent,
-      text: `Order Confirmation - ${orderData.orderReference}\n\nThank you for your order at Royal Meenakari!\n\nOrder Reference: ${orderData.orderReference}\nOrder Date: ${new Date(orderData.orderDate).toLocaleString()}\nTotal: ${orderData.userSelectedCurrency || 'INR'} ${orderData.orderTotal.toFixed(2)}\n\nYour order has been received and is being processed.\n\nIf you have any questions, please contact us at sss.naik2007@gmail.com.`
+      text: `Order Confirmation - ${orderData.orderReference}\n\nThank you for your order at Royal Meenakari!\n\nOrder Reference: ${orderData.orderReference}\nOrder Date: ${new Date(orderData.orderDate).toLocaleString()}\nTotal: ${orderData.userSelectedCurrency || 'INR'} ${orderData.orderTotal.toFixed(2)}\n\nYour order has been received and is being processed.\n\nIf you have any questions, please contact us at ${emailUser}.`
     };
     
     console.log(`Sending order confirmation email to customer: ${customer.email}`);
@@ -46,7 +47,8 @@ async function sendCustomerOrderConfirmation(orderData) {
  */
 async function sendOwnerOrderNotification(orderData) {
   try {
-    const ownerEmail = process.env.OWNER_EMAIL || 'sss.naik2007@gmail.com';
+    const ownerEmail = process.env.OWNER_EMAIL;
+    const emailUser = process.env.EMAIL_USER;
     
     if (!ownerEmail) {
       throw new Error('Owner email is required to send order notification');
@@ -55,7 +57,7 @@ async function sendOwnerOrderNotification(orderData) {
     const htmlContent = templates.ownerOrderTemplate(orderData);
     
     const mailOptions = {
-      from: `"Royal Meenakari Orders" <${process.env.EMAIL_USER || 'sss.naik2007@gmail.com'}>`,
+      from: `"Royal Meenakari Orders" <${emailUser}>`,
       to: ownerEmail,
       subject: `New Order - ${orderData.orderReference}`,
       html: htmlContent,
@@ -79,6 +81,7 @@ async function sendOwnerOrderNotification(orderData) {
 async function sendCustomerOrderCancellation(orderData) {
   try {
     const { customer } = orderData;
+    const emailUser = process.env.EMAIL_USER;
     
     if (!customer || !customer.email) {
       throw new Error('Customer email is required to send order cancellation');
@@ -87,11 +90,11 @@ async function sendCustomerOrderCancellation(orderData) {
     const htmlContent = templates.customerCancellationTemplate(orderData);
     
     const mailOptions = {
-      from: `"Royal Meenakari" <${process.env.EMAIL_USER || 'sss.naik2007@gmail.com'}>`,
+      from: `"Royal Meenakari" <${emailUser}>`,
       to: customer.email,
       subject: `Order Cancelled - ${orderData.orderReference}`,
       html: htmlContent,
-      text: `Order Cancelled - ${orderData.orderReference}\n\nWe regret to inform you that your order has been cancelled.\n\nOrder Reference: ${orderData.orderReference}\nOrder Date: ${new Date(orderData.orderDate).toLocaleString()}\nTotal: ${orderData.userSelectedCurrency || 'INR'} ${orderData.orderTotal.toFixed(2)}\n${orderData.cancellationReason ? `Cancellation Reason: ${orderData.cancellationReason}\n` : ''}\nIf a refund is applicable, it will be processed within 5-7 business days.\n\nIf you have any questions, please contact us at sss.naik2007@gmail.com.`
+      text: `Order Cancelled - ${orderData.orderReference}\n\nWe regret to inform you that your order has been cancelled.\n\nOrder Reference: ${orderData.orderReference}\nOrder Date: ${new Date(orderData.orderDate).toLocaleString()}\nTotal: ${orderData.userSelectedCurrency || 'INR'} ${orderData.orderTotal.toFixed(2)}\n${orderData.cancellationReason ? `Cancellation Reason: ${orderData.cancellationReason}\n` : ''}\nIf a refund is applicable, it will be processed within 5-7 business days.\n\nIf you have any questions, please contact us at ${emailUser}.`
     };
     
     console.log(`Sending order cancellation email to customer: ${customer.email}`);
@@ -110,7 +113,8 @@ async function sendCustomerOrderCancellation(orderData) {
  */
 async function sendOwnerOrderCancellation(orderData) {
   try {
-    const ownerEmail = process.env.OWNER_EMAIL || 'sss.naik2007@gmail.com';
+    const ownerEmail = process.env.OWNER_EMAIL;
+    const emailUser = process.env.EMAIL_USER;
     
     if (!ownerEmail) {
       throw new Error('Owner email is required to send order cancellation notification');
@@ -119,7 +123,7 @@ async function sendOwnerOrderCancellation(orderData) {
     const htmlContent = templates.ownerCancellationTemplate(orderData);
     
     const mailOptions = {
-      from: `"Royal Meenakari Orders" <${process.env.EMAIL_USER || 'sss.naik2007@gmail.com'}>`,
+      from: `"Royal Meenakari Orders" <${emailUser}>`,
       to: ownerEmail,
       subject: `Order Cancelled - ${orderData.orderReference}`,
       html: htmlContent,
@@ -143,6 +147,7 @@ async function sendOwnerOrderCancellation(orderData) {
 async function sendCustomerDeliveryConfirmation(orderData) {
   try {
     const { customer } = orderData;
+    const emailUser = process.env.EMAIL_USER;
     
     if (!customer || !customer.email) {
       throw new Error('Customer email is required to send delivery confirmation');
@@ -151,11 +156,11 @@ async function sendCustomerDeliveryConfirmation(orderData) {
     const htmlContent = templates.customerDeliveryTemplate(orderData);
     
     const mailOptions = {
-      from: `"Royal Meenakari" <${process.env.EMAIL_USER || 'sss.naik2007@gmail.com'}>`,
+      from: `"Royal Meenakari" <${emailUser}>`,
       to: customer.email,
       subject: `Delivery Confirmed - ${orderData.orderReference}`,
       html: htmlContent,
-      text: `Delivery Confirmed - ${orderData.orderReference}\n\nGreat news! Your order has been delivered successfully.\n\nOrder Reference: ${orderData.orderReference}\nOriginal Order Date: ${new Date(orderData.orderDate).toLocaleString()}\n${orderData.trackingNumber ? `Tracking Number: ${orderData.trackingNumber}\n` : ''}\nIf you have any questions, please contact us at sss.naik2007@gmail.com.`
+      text: `Delivery Confirmed - ${orderData.orderReference}\n\nGreat news! Your order has been delivered successfully.\n\nOrder Reference: ${orderData.orderReference}\nOriginal Order Date: ${new Date(orderData.orderDate).toLocaleString()}\n${orderData.trackingNumber ? `Tracking Number: ${orderData.trackingNumber}\n` : ''}\nIf you have any questions, please contact us at ${emailUser}.`
     };
     
     console.log(`Sending delivery confirmation email to customer: ${customer.email}`);
@@ -174,7 +179,8 @@ async function sendCustomerDeliveryConfirmation(orderData) {
  */
 async function sendOwnerDeliveryConfirmation(orderData) {
   try {
-    const ownerEmail = process.env.OWNER_EMAIL || 'sss.naik2007@gmail.com';
+    const ownerEmail = process.env.OWNER_EMAIL;
+    const emailUser = process.env.EMAIL_USER;
     
     if (!ownerEmail) {
       throw new Error('Owner email is required to send delivery confirmation');
@@ -183,7 +189,7 @@ async function sendOwnerDeliveryConfirmation(orderData) {
     const htmlContent = templates.ownerDeliveryTemplate(orderData);
     
     const mailOptions = {
-      from: `"Royal Meenakari Orders" <${process.env.EMAIL_USER || 'sss.naik2007@gmail.com'}>`,
+      from: `"Royal Meenakari Orders" <${emailUser}>`,
       to: ownerEmail,
       subject: `Order Delivered - ${orderData.orderReference}`,
       html: htmlContent,

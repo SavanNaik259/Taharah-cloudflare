@@ -453,7 +453,7 @@ async function sendCustomerDeliveryConfirmation(orderData) {
  */
 async function sendOwnerDeliveryConfirmation(orderData) {
   try {
-    const ownerEmail = process.env.OWNER_EMAIL || 'nazakatwebsite24@gmail.com';
+    const ownerEmail = process.env.OWNER_EMAIL;
 
     if (!ownerEmail) {
       throw new Error('Owner email is required to send delivery confirmation');

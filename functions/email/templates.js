@@ -150,7 +150,7 @@ function customerOrderTemplate(data) {
       ${customer.city ? customer.city + ', ' : ''}${customer.state ? customer.state + ' ' : ''}${customer.postalCode || ''}<br>
       Phone: ${customer.phone}</p>
 
-      <p>If you have any questions about your order, please contact our customer service team at <a href="mailto:nazakat2407@gmail.com">nazakat2407@gmail.com</a> or call us at +91 93102 50047.</p>
+      <p>If you have any questions about your order, please contact our customer service team at <a href="mailto:${process.env.EMAIL_USER}">${process.env.EMAIL_USER}</a> or call us at +91 93102 50047.</p>
 
       <p>Thank you for shopping with Nazakat!</p>
 
@@ -163,10 +163,10 @@ function customerOrderTemplate(data) {
               Your Business Address<br>
               City, State, PIN Code<br>
               Phone: +91 93102 50047<br>
-              Email: nazakat2407@gmail.com
+              Email: ${process.env.EMAIL_USER}
             </td>
             <td style="text-align: right; vertical-align: top;">
-              <a href="mailto:nazakatwebsite24@gmail.com?subject=Unsubscribe%20Request" style="color: #666; text-decoration: none;">Unsubscribe</a><br>
+              <a href="mailto:${process.env.OWNER_EMAIL}?subject=Unsubscribe%20Request" style="color: #666; text-decoration: none;">Unsubscribe</a><br>
               <a href="https://your-domain.com/privacy-policy" style="color: #666; text-decoration: none;">Privacy Policy</a><br>
               <a href="https://your-domain.com/terms-conditions" style="color: #666; text-decoration: none;">Terms & Conditions</a>
             </td>

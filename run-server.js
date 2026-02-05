@@ -406,8 +406,8 @@ app.post('/.netlify/functions/send-verification-email', async (req, res) => {
     }
 
     // Get email credentials
-    const emailUser = process.env.EMAIL_USER || 'sss.naik2007@gmail.com';
-    const emailPass = (process.env.EMAIL_PASS || 'cwswjmubelmlhaod').replace(/\s+/g, '');
+    const emailUser = process.env.EMAIL_USER;
+    const emailPass = (process.env.EMAIL_PASS || '').replace(/\s+/g, '');
 
     if (!emailUser || !emailPass) {
       console.error('Email credentials check:', {
@@ -482,7 +482,7 @@ app.post('/.netlify/functions/send-verification-email', async (req, res) => {
 
               <div class="footer">
                   <p>Nazakat - Your trusted saree destination</p>
-                  <p>Email: sss.naik2007@gmail.com</p>
+                  <p>Email: ${emailUser}</p>
                   <p style="font-size: 12px; color: #999;">This is an automated email. Please do not reply to this email.</p>
               </div>
           </div>
@@ -499,7 +499,7 @@ app.post('/.netlify/functions/send-verification-email', async (req, res) => {
         'X-Priority': '3',
         'X-MSMail-Priority': 'Normal',
         'X-Mailer': 'Nazakat E-commerce Platform v1.0',
-        'Reply-To': 'sss.naik2007@gmail.com',
+        'Reply-To': emailUser,
         'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@nazakat.com>`,
         'Return-Path': emailUser,
         'Organization': 'Nazakat Jewelry'
