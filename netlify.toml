@@ -108,8 +108,8 @@
   FIREBASE_STORAGE_BUCKET = "auric-a0c92.firebasestorage.app"
   FIREBASE_VAPID_KEY = "BENFZQbE3p9n6YnjBdDwOySmVUao9Y9ryEH4_PJhsAKUMcUUfYDZV_c3BlZai6G77Rojwy2f0Ab540bfo5w2Mys"
   
-  RAZORPAY_KEY_ID = "rzp_live_SCOazTCPWFjXmG"
-  RAZORPAY_KEY_SECRET = "IrFxi094JQQnelevb02VTmrh"
+  RAZORPAY_KEY_ID = "rzp_live_SCLx3PSv4D3HYL"
+  RAZORPAY_KEY_SECRET = "KOipGNtnWTXNhFagecszI736"
 
 [functions]
   node_bundler = "nft"
