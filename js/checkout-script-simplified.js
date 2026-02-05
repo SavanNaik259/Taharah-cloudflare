@@ -2355,22 +2355,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 handler: async function(response) {
                     await handleRazorpaySuccess(response, orderData);
                 },
-                modal: {
-                    ondismiss: function() {
-                        console.log('Razorpay modal dismissed/closed by user');
-                        if (submitButton) {
-                            submitButton.disabled = false;
-                            submitButton.innerHTML = 'Place Order';
-                        }
-                    }
-                },
                 prefill: {
-                    name: (orderData.customer.firstName || '') + ' ' + (orderData.customer.lastName || ''),
-                    email: orderData.customer.email || '',
-                    contact: orderData.customer.phone || ''
+                    name: orderData.customer.firstName + ' ' + orderData.customer.lastName,
+                    email: orderData.customer.email,
+                    contact: orderData.customer.phone
                 },
                 notes: {
-                    address: orderData.customer.address || ''
+                    address: orderData.customer.address
                 },
                 theme: {
                     color: '#3399cc'
@@ -2381,11 +2372,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
             try {
                 // Create Razorpay instance and open payment modal
-                if (typeof Razorpay === 'undefined') {
-                    throw new Error('Razorpay SDK is not loaded. Please refresh the page.');
-                }
                 const rzp = new Razorpay(options);
-                
+                rzp.open();
+
+                // Backup mechanism: Monitor button state and reset if stuck
+                const buttonResetInterval = setInterval(() => {
+                    // Check if Razorpay popup is still open
+                    const razorpayContainer = document.querySelector('.razorpay-container');
+                    const isRazorpayOpen = razorpayContainer && razorpayContainer.style.display !== 'none';
+
+                    if (!isRazorpayOpen && submitButton && submitButton.innerHTML === 'Opening Payment Gateway...') {
+                        console.log('Backup mechanism: Resetting stuck button after Razorpay exit');
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = 'Place Order';
+                        clearInterval(buttonResetInterval);
+                    }
+                }, 1000);
+
+                // Clear the interval after 30 seconds to avoid memory leaks
+                setTimeout(() => {
+                    clearInterval(buttonResetInterval);
+                }, 30000);
+
                 // Handle payment failure
                 rzp.on('payment.failed', function (response) {
                     console.error('Razorpay payment failed:', response.error);
@@ -2398,7 +2406,28 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
 
-                rzp.open();
+                // Handle modal closed/cancelled by user
+                rzp.on('payment.cancel', function() {
+                    console.log('Razorpay payment cancelled by user');
+
+                    // Immediately reset button state
+                    if (submitButton) {
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = 'Place Order';
+                    }
+                });
+
+                // Handle modal closed without explicit cancel (including "Yes, exit" confirmation)
+                rzp.on('modal.close', function() {
+                    console.log('Razorpay modal closed (including exit confirmation)');
+
+                    // Immediately reset button state when modal closes
+                    if (submitButton) {
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = 'Place Order';
+                        console.log('Button reset immediately on modal close');
+                    }
+                });
 
 
                 // If we get here, it means the popup didn't open or there was another issue
