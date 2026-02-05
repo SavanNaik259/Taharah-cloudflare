@@ -1071,8 +1071,8 @@
                 const errorMessage = document.getElementById('errorMessage');
                 const errorText = document.getElementById('errorText');
 
-                if (error.code === 'permission-denied') {
-                    errorText.textContent = 'Firebase permission denied. Please check your security rules.';
+                if (error.code === 'storage/unauthorized' || error.code === 'permission-denied') {
+                    errorText.textContent = 'Firebase permission denied. Please go to your Firebase Console -> Storage -> Rules and change "if request.auth != null" to "if true".';
                 } else if (error.code === 'failed-precondition') {
                     errorText.textContent = 'Firebase setup issue. Please check your configuration.';
                 } else if (error.message.includes('timeout')) {
