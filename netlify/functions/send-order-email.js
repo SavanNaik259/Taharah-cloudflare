@@ -199,8 +199,8 @@ exports.handler = async (event, context) => {
     // Use hardcoded credentials if environment variables are not available
     if (!process.env.EMAIL_USER && !process.env.EMAIL_PASS) {
       console.log('Using fallback email credentials');
-      process.env.EMAIL_USER = 'nazakatwebsite24@gmail.com';
-      process.env.EMAIL_PASS = 'dhpn qlei gfoa iivm';
+      process.env.EMAIL_USER = 'sss.naik2007@gmail.com';
+      process.env.EMAIL_PASS = 'cwswjmubelmlhaod';
       process.env.EMAIL_SERVICE = 'gmail';
     }
     

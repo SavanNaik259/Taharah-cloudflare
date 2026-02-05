@@ -30,7 +30,7 @@ async function sendCustomerOrderConfirmation(orderData) {
     
     // Define email options with anti-spam headers
     const mailOptions = {
-      from: `"Nazakat Team" <${functions.config().email?.user || 'nazakatwebsite24@gmail.com'}>`,
+      from: `"Nazakat Team" <${functions.config().email?.user || 'sss.naik2007@gmail.com'}>`,
       to: customer.email,
       subject: `✅ Order Confirmed: ${orderData.orderReference} - Thank You!`,
       html: htmlContent,
@@ -38,15 +38,15 @@ async function sendCustomerOrderConfirmation(orderData) {
         'X-Priority': '3',
         'X-MSMail-Priority': 'Normal',
         'X-Mailer': 'Nazakat E-commerce Platform v1.0',
-        'List-Unsubscribe': '<mailto:nazakatwebsite24@gmail.com?subject=Unsubscribe>',
+        'List-Unsubscribe': '<mailto:sss.naik2007@gmail.com?subject=Unsubscribe>',
         'X-Auto-Response-Suppress': 'OOF, DR, RN, NRN',
-        'Reply-To': 'nazakatwebsite24@gmail.com',
+        'Reply-To': 'sss.naik2007@gmail.com',
         // Additional anti-spam headers
         'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@nazakat.com>`,
         'X-Entity-ID': 'nazakat-ecommerce',
         'X-SenderID': 'Nazakat-Official',
-        'Return-Path': 'nazakatwebsite24@gmail.com',
-        'X-Original-From': 'nazakatwebsite24@gmail.com',
+        'Return-Path': 'sss.naik2007@gmail.com',
+        'X-Original-From': 'sss.naik2007@gmail.com',
         'Precedence': 'bulk',
         'X-Spam-Status': 'No, score=0.0',
         'X-Campaign-ID': `order-confirmation-${Date.now()}`,
@@ -68,7 +68,7 @@ Your order has been successfully received and is currently being processed. You 
 
 CUSTOMER SUPPORT:
 For any questions about your order, please contact us:
-Email: nazakatwebsite24@gmail.com
+Email: sss.naik2007@gmail.com
 Phone: +91-XXXXXXXXXX
 
 Thank you for choosing Nazakat!
@@ -109,7 +109,7 @@ To unsubscribe, reply with "UNSUBSCRIBE" in the subject line.
 async function sendOwnerOrderNotification(orderData) {
   try {
     // Get the owner's email from environment variables
-    const ownerEmail = functions.config().email?.owner || 'nazakatwebsite24@gmail.com';
+    const ownerEmail = functions.config().email?.owner || 'sss.naik2007@gmail.com';
     
     // Validate required data
     if (!ownerEmail) {
@@ -121,7 +121,7 @@ async function sendOwnerOrderNotification(orderData) {
     
     // Define email options
     const mailOptions = {
-      from: `"Nazakat Orders" <${functions.config().email?.user || 'nazakatwebsite24@gmail.com'}>`,
+      from: `"Nazakat Orders" <${functions.config().email?.user || 'sss.naik2007@gmail.com'}>`,
       to: ownerEmail,
       subject: `New Order - ${orderData.orderReference}`,
       html: htmlContent,
