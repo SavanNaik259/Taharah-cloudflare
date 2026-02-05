@@ -789,7 +789,7 @@ function customerDeliveryTemplate(data) {
       <h3>Next Steps</h3>
       <p>If you have any questions about your order or need to report any issues with the delivered items, please don't hesitate to contact us:</p>
       <ul>
-        <li>Email: <a href="mailto:nazakat2407@gmail.com">nazakat2407@gmail.com</a></li>
+        <li>Email: <a href="mailto:${process.env.EMAIL_USER}">${process.env.EMAIL_USER}</a></li>
         <li>Phone: +91 93102 50047</li>
       </ul>
 

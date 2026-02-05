@@ -609,7 +609,7 @@ async function sendVerificationEmail(emailData) {
 
               <div class="footer">
                   <p>Welcome to Nazakat - Your trusted jewelry destination</p>
-                  <p>Email: nazakatwebsite24@gmail.com</p>
+                  <p>Email: ${process.env.EMAIL_USER}</p>
                   <p style="font-size: 12px; color: #999;">This is an automated email. Please do not reply to this email.</p>
               </div>
           </div>
@@ -618,7 +618,7 @@ async function sendVerificationEmail(emailData) {
     `;
 
     const mailOptions = {
-      from: `"Nazakat Team" <${process.env.EMAIL_USER || 'nazakatwebsite24@gmail.com'}>`,
+      from: `"Nazakat Team" <${process.env.EMAIL_USER}>`,
       to: customer.email,
       subject: '✅ Verify Your Email Address - Nazakat',
       html: htmlContent,
@@ -626,9 +626,9 @@ async function sendVerificationEmail(emailData) {
         'X-Priority': '3',
         'X-MSMail-Priority': 'Normal',
         'X-Mailer': 'Nazakat E-commerce Platform v1.0',
-        'Reply-To': 'nazakatwebsite24@gmail.com',
+        'Reply-To': process.env.EMAIL_USER,
         'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@nazakat.com>`,
-        'Return-Path': process.env.EMAIL_USER || 'nazakatwebsite24@gmail.com',
+        'Return-Path': process.env.EMAIL_USER,
         'Organization': 'Nazakat Jewelry'
       }
     };
@@ -751,7 +751,7 @@ async function sendPasswordResetEmail(emailData) {
 
               <div class="footer">
                   <p>Nazakat - Your trusted jewelry destination</p>
-                  <p>Email: nazakatwebsite24@gmail.com</p>
+                  <p>Email: ${process.env.EMAIL_USER}</p>
                   <p style="font-size: 12px; color: #999;">This is an automated email. Please do not reply to this email.</p>
               </div>
           </div>
@@ -760,7 +760,7 @@ async function sendPasswordResetEmail(emailData) {
     `;
 
     const mailOptions = {
-      from: `"Nazakat Security" <${process.env.EMAIL_USER || 'nazakatwebsite24@gmail.com'}>`,
+      from: `"Nazakat Security" <${process.env.EMAIL_USER}>`,
       to: customer.email,
       subject: '🔐 Reset Your Password - Nazakat',
       html: htmlContent,
@@ -768,9 +768,9 @@ async function sendPasswordResetEmail(emailData) {
         'X-Priority': '1', // High priority for security emails
         'X-MSMail-Priority': 'High',
         'X-Mailer': 'Nazakat E-commerce Platform v1.0',
-        'Reply-To': 'nazakatwebsite24@gmail.com',
+        'Reply-To': process.env.EMAIL_USER,
         'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@nazakat.com>`,
-        'Return-Path': process.env.EMAIL_USER || 'nazakatwebsite24@gmail.com',
+        'Return-Path': process.env.EMAIL_USER,
         'Organization': 'Nazakat Jewelry'
       }
     };
@@ -948,7 +948,7 @@ async function sendAppointmentEmail(appointmentData) {
               <p>If you need to reschedule or have any questions, please contact us at:</p>
               <ul>
                   <li>Phone: +91 93102 50047</li>
-                  <li>Email: nazakat2407@gmail.com</li>
+                  <li>Email: ${process.env.EMAIL_USER}</li>
               </ul>
 
               <p>We look forward to meeting you!</p>
@@ -965,8 +965,8 @@ async function sendAppointmentEmail(appointmentData) {
 
     // Send email to admin/owner
     const adminMailOptions = {
-      from: `"Royal Meenakari Appointments" <${process.env.EMAIL_USER || 'nazakatwebsite24@gmail.com'}>`,
-      to: process.env.OWNER_EMAIL || 'nazakatwebsite24@gmail.com',
+      from: `"Royal Meenakari Appointments" <${process.env.EMAIL_USER}>`,
+      to: process.env.OWNER_EMAIL,
       subject: `🗓️ New Appointment: ${fullName} - ${formattedDate} at ${selectedTime}`,
       html: adminEmailContent,
       replyTo: email
@@ -974,7 +974,7 @@ async function sendAppointmentEmail(appointmentData) {
 
     // Send confirmation email to customer
     const customerMailOptions = {
-      from: `"Royal Meenakari" <${process.env.EMAIL_USER || 'nazakatwebsite24@gmail.com'}>`,
+      from: `"Royal Meenakari" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: '✅ Appointment Confirmation - Royal Meenakari',
       html: customerEmailContent
@@ -1122,8 +1122,8 @@ async function sendContactEmail(contactData) {
 
     // Send email to admin/owner
     const adminMailOptions = {
-      from: `"Nazakat Contact Form" <${process.env.EMAIL_USER || 'nazakatwebsite24@gmail.com'}>`,
-      to: process.env.OWNER_EMAIL || 'nazakatwebsite24@gmail.com',
+      from: `"Nazakat Contact Form" <${process.env.EMAIL_USER}>`,
+      to: process.env.OWNER_EMAIL,
       subject: `New Contact Form: ${subject} - ${firstName} ${lastName}`,
       html: adminEmailContent,
       replyTo: email,
@@ -1133,14 +1133,14 @@ async function sendContactEmail(contactData) {
         'X-Mailer': 'Nazakat Contact System v1.0',
         'Reply-To': email,
         'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@nazakat.com>`,
-        'Return-Path': process.env.EMAIL_USER || 'nazakatwebsite24@gmail.com',
+        'Return-Path': process.env.EMAIL_USER,
         'Organization': 'Nazakat'
       }
     };
 
     // Send confirmation email to customer
     const customerMailOptions = {
-      from: `"Nazakat Team" <${process.env.EMAIL_USER || 'nazakatwebsite24@gmail.com'}>`,
+      from: `"Nazakat Team" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: '✅ Thank you for contacting Nazakat - We\'ll be in touch soon!',
       html: customerEmailContent,
@@ -1148,9 +1148,9 @@ async function sendContactEmail(contactData) {
         'X-Priority': '3',
         'X-MSMail-Priority': 'Normal',
         'X-Mailer': 'Nazakat Contact System v1.0',
-        'Reply-To': process.env.OWNER_EMAIL || 'nazakatwebsite24@gmail.com',
+        'Reply-To': process.env.OWNER_EMAIL,
         'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@nazakat.com>`,
-        'Return-Path': process.env.EMAIL_USER || 'nazakatwebsite24@gmail.com',
+        'Return-Path': process.env.EMAIL_USER,
         'Organization': 'Nazakat'
       }
     };
