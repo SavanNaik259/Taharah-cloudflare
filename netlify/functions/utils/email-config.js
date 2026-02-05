@@ -12,8 +12,8 @@ const nodemailer = require('nodemailer');
 function getEmailConfig() {
   // Load variables from environment with fallback values for development
   const emailService = process.env.EMAIL_SERVICE || 'gmail';
-  const emailUser = process.env.EMAIL_USER || 'sss.naik2007@gmail.com';
-  const emailPass = (process.env.EMAIL_PASS || 'cwswjmubelmlhaod').replace(/\s+/g, '');
+  const emailUser = process.env.EMAIL_USER;
+  const emailPass = (process.env.EMAIL_PASS || '').replace(/\s+/g, '');
 
   console.log('Email configuration:', {
     service: emailService,

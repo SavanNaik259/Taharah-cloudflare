@@ -191,14 +191,14 @@ function customerOrderTemplate(data) {
       ${customer.city ? customer.city + ', ' : ''}${customer.state ? customer.state + ' ' : ''}${customer.postalCode || ''}<br>
       Phone: ${customer.phone}</p>
 
-      <p>If you have any questions about your order, please contact our customer service team at <a href="mailto:sss.naik2007@gmail.com">sss.naik2007@gmail.com</a>.</p>
+      <p>If you have any questions about your order, please contact our customer service team at <a href="mailto:${process.env.EMAIL_USER}">${process.env.EMAIL_USER}</a>.</p>
 
       <p>Thank you for shopping with Royal Meenakari!</p>
 
       <div class="footer">
         <p>&copy; 2025 Royal Meenakari. All Rights Reserved.</p>
         <p>This email was sent to ${customer.email}</p>
-        <p>Contact us: sss.naik2007@gmail.com | +91 93102 50047</p>
+        <p>Contact us: ${process.env.EMAIL_USER} | +91 93102 50047</p>
       </div>
     </div>
   </body>
@@ -518,14 +518,14 @@ function customerCancellationTemplate(data) {
 
       <p>If a refund is applicable, it will be processed within 5-7 business days to your original payment method.</p>
 
-      <p>If you have any questions about this cancellation, please contact our customer service team at <a href="mailto:sss.naik2007@gmail.com">sss.naik2007@gmail.com</a>.</p>
+      <p>If you have any questions about this cancellation, please contact our customer service team at <a href="mailto:${process.env.EMAIL_USER}">${process.env.EMAIL_USER}</a>.</p>
 
       <p>Thank you for your understanding.</p>
 
       <div class="footer">
         <p>&copy; 2025 Royal Meenakari. All Rights Reserved.</p>
         <p>This email was sent to ${customer.email}</p>
-        <p>Contact us: sss.naik2007@gmail.com | +91 93102 50047</p>
+        <p>Contact us: ${process.env.EMAIL_USER} | +91 93102 50047</p>
       </div>
     </div>
   </body>
@@ -798,7 +798,7 @@ function customerDeliveryTemplate(data) {
       <div class="footer">
         <p>&copy; 2025 Royal Meenakari. All Rights Reserved.</p>
         <p>This email was sent to ${customer.email}</p>
-        <p>Contact us: sss.naik2007@gmail.com | +91 93102 50047</p>
+        <p>Contact us: ${process.env.EMAIL_USER} | +91 93102 50047</p>
       </div>
     </div>
   </body>

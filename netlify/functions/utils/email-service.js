@@ -129,7 +129,7 @@ function generateCancellationEmailContent(orderData) {
 
             <div class="footer">
                 <p>Thank you for choosing Royal Meenakari</p>
-                <p>Email: sss.naik2007@gmail.com | Phone: +91 93102 50047</p>
+                <p>Email: ${process.env.EMAIL_USER} | Phone: +91 93102 50047</p>
                 <p style="font-size: 12px; color: #999;">This is an automated email. Please do not reply to this email.</p>
             </div>
         </div>
@@ -282,7 +282,7 @@ async function sendCustomerOrderConfirmation(orderData) {
 
     // Define email options
     const mailOptions = {
-      from: `"Nazakat Team" <${process.env.EMAIL_USER || 'sss.naik2007@gmail.com'}>`,
+      from: `"Nazakat Team" <${process.env.EMAIL_USER}>`,
       to: customerData.email,
       subject: subject,
       html: htmlContent,
@@ -290,11 +290,11 @@ async function sendCustomerOrderConfirmation(orderData) {
         'X-Priority': '3',
         'X-MSMail-Priority': 'Normal',
         'X-Mailer': 'Nazakat E-commerce Platform v1.0',
-        'List-Unsubscribe': '<mailto:sss.naik2007@gmail.com?subject=Unsubscribe>',
-        'Reply-To': 'sss.naik2007@gmail.com',
+        'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=Unsubscribe>`,
+        'Reply-To': process.env.EMAIL_USER,
         'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@nazakat.com>`,
         'X-Entity-ID': 'nazakat-ecommerce',
-        'Return-Path': process.env.EMAIL_USER || 'sss.naik2007@gmail.com',
+        'Return-Path': process.env.EMAIL_USER,
         'Organization': 'Nazakat Jewelry'
       },
       // Text version for email clients that don't support HTML
@@ -308,7 +308,7 @@ Total: ₹${completeOrderData.orderTotal.toFixed(2)}
 
 Your order has been received and is being processed.
 
-If you have any questions, please contact us at sss.naik2007@gmail.com.
+If you have any questions, please contact us at ${process.env.EMAIL_USER}.
       `
     };
 
@@ -339,11 +339,12 @@ If you have any questions, please contact us at sss.naik2007@gmail.com.
 async function sendOwnerOrderNotification(orderData) {
   try {
     // Get the owner's email from environment variables
-    const ownerEmail = process.env.OWNER_EMAIL || 'sss.naik2007@gmail.com';
+    const ownerEmail = process.env.OWNER_EMAIL || process.env.EMAIL_USER;
 
     // Validate required data
     if (!ownerEmail) {
-      throw new Error('Owner email is required to send order notification');
+      console.error('Owner email is required but not set in environment (OWNER_EMAIL or EMAIL_USER)');
+      throw new Error('Owner email configuration missing');
     }
 
     const transporter = createTransporter();
@@ -376,7 +377,7 @@ async function sendOwnerOrderNotification(orderData) {
 
     // Define email options
     const mailOptions = {
-      from: `"Nazakat Orders" <${process.env.EMAIL_USER || 'sss.naik2007@gmail.com'}>`,
+      from: `"Nazakat Orders" <${process.env.EMAIL_USER}>`,
       to: ownerEmail,
       subject: subject,
       html: ownerContent,
@@ -429,11 +430,11 @@ async function sendCustomerDeliveryConfirmation(orderData) {
     const htmlContent = templates.customerDeliveryTemplate(orderData);
 
     const mailOptions = {
-      from: `"Nazakat Team" <${process.env.EMAIL_USER || 'sss.naik2007@gmail.com'}>`,
+      from: `"Nazakat Team" <${process.env.EMAIL_USER}>`,
       to: customer.email,
       subject: `✅ Delivery Confirmed - ${orderData.orderReference}`,
       html: htmlContent,
-      text: `Delivery Confirmed - ${orderData.orderReference}\n\nGreat news! Your order has been successfully delivered.\n\nOrder Reference: ${orderData.orderReference}\nIf you have any questions, please contact us at sss.naik2007@gmail.com.`
+      text: `Delivery Confirmed - ${orderData.orderReference}\n\nGreat news! Your order has been successfully delivered.\n\nOrder Reference: ${orderData.orderReference}\nIf you have any questions, please contact us at ${process.env.EMAIL_USER}.`
     };
 
     console.log(`Sending delivery confirmation email to customer: ${customer.email}`);
@@ -462,7 +463,7 @@ async function sendOwnerDeliveryConfirmation(orderData) {
     const htmlContent = templates.ownerDeliveryTemplate(orderData);
 
     const mailOptions = {
-      from: `"Nazakat Orders" <${process.env.EMAIL_USER || 'sss.naik2007@gmail.com'}>`,
+      from: `"Nazakat Orders" <${process.env.EMAIL_USER}>`,
       to: ownerEmail,
       subject: `✅ Order Delivered - ${orderData.orderReference}`,
       html: htmlContent,
@@ -954,7 +955,7 @@ async function sendAppointmentEmail(appointmentData) {
 
               <div class="footer">
                   <p>Thank you for choosing Royal Meenakari - Where elegance meets tradition</p>
-                  <p>Email: sss.naik2007@gmail.com | Phone: +91 93102 50047</p>
+                  <p>Email: ${process.env.EMAIL_USER} | Phone: +91 93102 50047</p>
                   <p style="font-size: 12px; color: #999;">This is an automated confirmation email.</p>
               </div>
           </div>

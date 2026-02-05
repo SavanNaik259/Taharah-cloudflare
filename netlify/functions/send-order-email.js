@@ -196,12 +196,9 @@ exports.handler = async (event, context) => {
       emailService: process.env.EMAIL_SERVICE || 'not set'
     });
 
-    // Use hardcoded credentials if environment variables are not available
-    if (!process.env.EMAIL_USER && !process.env.EMAIL_PASS) {
-      console.log('Using fallback email credentials');
-      process.env.EMAIL_USER = 'sss.naik2007@gmail.com';
-      process.env.EMAIL_PASS = 'cwswjmubelmlhaod';
-      process.env.EMAIL_SERVICE = 'gmail';
+    // Use environment variables for email credentials
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error('CRITICAL: Email credentials missing in environment variables');
     }
     
     // Parse the request body
