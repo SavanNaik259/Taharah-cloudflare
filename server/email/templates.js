@@ -518,7 +518,7 @@ function customerCancellationTemplate(data) {
 
       <p>If a refund is applicable, it will be processed within 5-7 business days to your original payment method.</p>
 
-      <p>If you have any questions about this cancellation, please contact our customer service team at <a href="mailto:${process.env.EMAIL_USER}">${process.env.EMAIL_USER}</a>.</p>
+      <p>If you have any questions about your order or cancellation, please contact our customer service team at <a href="mailto:${process.env.EMAIL_USER}">${process.env.EMAIL_USER}</a>.</p>
 
       <p>Thank you for your understanding.</p>
 
