@@ -1010,7 +1010,7 @@
         };
 
         // Initialize Firebase with error handling
-        let app, storage;
+        let app, storage, auth;
         try {
             // Check if Firebase is already initialized
             try {
@@ -1025,6 +1025,20 @@
                 }
             }
             storage = firebase.storage();
+            auth = firebase.auth();
+            
+            // Protect page with authentication
+            auth.onAuthStateChanged((user) => {
+                if (!user) {
+                    console.log('No user logged in, redirecting to login...');
+                    window.location.href = 'login.html?redirect=products-admin-panel.html';
+                } else {
+                    console.log('Admin authenticated:', user.email);
+                    // Check if user is admin (you can add specific admin email check here)
+                    const adminEmails = ['admin@example.com', 'your-admin-email@gmail.com']; 
+                    // Optional: if (!adminEmails.includes(user.email)) { ... }
+                }
+            });
         } catch (error) {
             console.error('Firebase initialization failed:', error);
             showError('Firebase initialization failed. Please check your connection and try again.');
