@@ -19,10 +19,10 @@ if (!admin.apps.length) {
 
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
-      projectId: process.env.FIREBASE_PROJECT_ID || 'auric-a0c92'
+      projectId: process.env.FIREBASE_PROJECT_ID
     });
     
-    console.log('Firebase Admin initialized successfully for project:', process.env.FIREBASE_PROJECT_ID || 'auric-a0c92');
+    console.log('Firebase Admin initialized successfully for project:', process.env.FIREBASE_PROJECT_ID);
   } catch (error) {
     console.error('Error initializing Firebase Admin:', error);
     console.error('Available environment variables:', {
