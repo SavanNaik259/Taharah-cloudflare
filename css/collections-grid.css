@@ -1,19 +1,26 @@
 .collections-grid-section {
+    
+    margin-bottom:60px;
     padding: 20px 20px 60px 20px;
-    background-color: #fff;
+    background-color: #f8f8f5;
 }
 
 .collections-grid {
+    
     display: flex;
+    
+    place-items:center;
+    justify-content:cneter;
     flex-direction: column;
     gap: 20px;
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
 .collection-card {
     position: relative;
-    width: 100%;
+    width: 90%;
+    height:240px;
     border-radius: 20px;
     overflow: hidden;
     aspect-ratio: 16 / 9;
