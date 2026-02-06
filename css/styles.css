@@ -396,9 +396,7 @@ a {
     height: 120vh;
     max-height: 1000px;
     overflow: hidden;
-}
-.promo-banner {
-    margin-top: 50px;
+    margin-top: 0;
 }
 
 .slide {
