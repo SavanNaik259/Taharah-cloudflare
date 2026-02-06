@@ -2545,11 +2545,40 @@
             const hasReviewed = await FirebaseReviewsManager.hasUserReviewed(productId, orderId);
             
             if (hasReviewed) {
-              statusContainer.innerHTML = `
-                <span style="color: #27ae60; font-size: 13px; font-weight: 500;">
-                  <i class="fas fa-check-circle"></i> Review Submitted
-                </span>
+              // Get the actual review to show rating
+              const reviews = await FirebaseReviewsManager.getProductReviews(productId);
+              const userReview = reviews.find(r => r.orderId === orderId);
+              
+              let reviewHtml = `
+                <div style="background: #f9f9f9; padding: 10px; border-radius: 6px; border-left: 3px solid #27ae60;">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;">
+                    <span style="color: #27ae60; font-size: 13px; font-weight: 600;">
+                      <i class="fas fa-check-circle"></i> Your Review
+                    </span>
+                    <div style="color: #ffc107; font-size: 12px;">
               `;
+              
+              if (userReview && userReview.rating) {
+                for (let i = 1; i <= 5; i++) {
+                  reviewHtml += `<i class="${i <= userReview.rating ? 'fas' : 'far'} fa-star"></i>`;
+                }
+              }
+              
+              reviewHtml += `
+                    </div>
+                  </div>
+                  ${userReview && userReview.comment ? `<p style="margin: 5px 0 0 0; font-size: 12px; color: #555; line-height: 1.4;">"${userReview.comment}"</p>` : ''}
+                  ${userReview && userReview.images && userReview.images.length > 0 ? `
+                    <div style="display: flex; gap: 5px; margin-top: 8px;">
+                      ${userReview.images.map(img => `
+                        <img src="${img}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; cursor: pointer;" onclick="openReviewImageModal('${img}')">
+                      `).join('')}
+                    </div>
+                  ` : ''}
+                </div>
+              `;
+              
+              statusContainer.innerHTML = reviewHtml;
             } else {
               statusContainer.innerHTML = `
                 <button class="btn-primary review-order-btn" 
@@ -2619,7 +2648,7 @@
         currentReviewOrderId = orderId;
 
         if (options.productId && options.productName) {
-          // Direct edit mode
+          // Direct edit mode - we already have the basic info
           showReviewForm({
             id: options.productId,
             name: options.productName
@@ -2627,23 +2656,46 @@
           return;
         }
 
+        // Only reach here if clicking the main order review button (if it exists)
+        const user = firebase.auth().currentUser;
+        if (!user) {
+          showNotification('Please log in to review.', 'error');
+          return;
+        }
+
         // Find the order to get products - MUST get actual order data
         firebase.firestore()
           .collection('users')
-          .doc(firebase.auth().currentUser.uid)
+          .doc(user.uid)
           .collection('orders')
           .doc(orderId)
           .get()
           .then(orderDoc => {
             if (!orderDoc.exists) {
-              console.error("Order document not found in Firestore:", orderId);
-              showNotification('Could not load order details. Please try again.', 'error');
-              return;
+              // Try searching by orderReference/orderId field if doc ID doesn't match
+              return firebase.firestore()
+                .collection('users')
+                .doc(user.uid)
+                .collection('orders')
+                .where('orderId', '==', orderId)
+                .limit(1)
+                .get()
+                .then(querySnapshot => {
+                  if (!querySnapshot.empty) {
+                    return querySnapshot.docs[0];
+                  }
+                  throw new Error("Order not found");
+                });
             }
-
+            return orderDoc;
+          })
+          .then(orderDoc => {
             const orderData = orderDoc.data();
+            // Update currentReviewOrderId to the actual doc ID if it was different
+            currentReviewOrderId = orderDoc.id;
+            
             const items = orderData.products || orderData.items || [];
-
+            
             if (items.length === 0) {
               console.error("No products found in order:", orderId);
               showNotification('No products found in this order.', 'error');
@@ -2656,12 +2708,9 @@
               id: item.productId || item.id || ''
             }));
 
-            console.log('Products loaded for review:', currentReviewProducts);
-
             const missingIds = currentReviewProducts.filter(p => !p.id);
             if (missingIds.length > 0) {
-              console.error('Some products missing IDs:', missingIds);
-              showNotification('Some products are missing required data. Please contact support.', 'error');
+              showNotification('Order data is incomplete. Please contact support.', 'error');
               return;
             }
 
@@ -2673,7 +2722,7 @@
           })
           .catch(error => {
             console.error('Error loading order for review:', error);
-            showNotification('Failed to load order details: ' + error.message, 'error');
+            showNotification('Could not load order details. Please try again.', 'error');
           });
       }
 
