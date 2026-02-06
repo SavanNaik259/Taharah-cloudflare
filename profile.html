@@ -2446,6 +2446,176 @@
     </style>
 
     <script>
+      // Setup review form event listeners
+      function setupReviewForm(existingReview) {
+        const form = document.getElementById('review-form');
+        if (!form) return;
+
+        form.addEventListener('submit', handleReviewSubmit);
+
+        // Star rating logic
+        const stars = document.querySelectorAll('.star-rating i');
+        const ratingInput = document.getElementById('review-rating');
+
+        function updateStars(rating) {
+          stars.forEach(star => {
+            const starRating = parseInt(star.dataset.rating);
+            if (starRating <= rating) {
+              star.classList.remove('far');
+              star.classList.add('fas', 'active');
+            } else {
+              star.classList.remove('fas', 'active');
+              star.classList.add('far');
+            }
+          });
+        }
+
+        // Initialize stars if editing
+        if (existingReview && existingReview.rating) {
+          updateStars(existingReview.rating);
+        }
+
+        stars.forEach(star => {
+          star.addEventListener('click', function() {
+            const rating = parseInt(this.dataset.rating);
+            ratingInput.value = rating;
+            updateStars(rating);
+          });
+
+          star.addEventListener('mouseenter', function() {
+            const rating = parseInt(this.dataset.rating);
+            stars.forEach(s => {
+              if (parseInt(s.dataset.rating) <= rating) {
+                s.classList.add('active');
+              }
+            });
+          });
+
+          star.addEventListener('mouseleave', function() {
+            updateStars(parseInt(ratingInput.value) || 0);
+          });
+        });
+
+        // Image upload logic
+        const imageInput = document.getElementById('review-images');
+        if (imageInput) {
+          imageInput.addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            const totalAllowed = 3 - existingReviewImagesData.length;
+            
+            if (files.length > totalAllowed) {
+              showNotification(`You can only upload up to ${totalAllowed} more images.`, 'error');
+              imageInput.value = '';
+              return;
+            }
+
+            uploadedImageFiles = files;
+            console.log('Selected image files:', uploadedImageFiles);
+          });
+        }
+      }
+
+      function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type} show`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+          notification.classList.remove('show');
+          setTimeout(() => notification.remove(), 300);
+        }, 3000);
+      }
+
+      async function loadOrderReviews(orderId, products) {
+        const orderCard = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
+        if (!orderCard) return;
+
+        // Add container for review buttons/info
+        let reviewSection = orderCard.querySelector('.order-reviews-section');
+        if (!reviewSection) {
+          reviewSection = document.createElement('div');
+          reviewSection.className = 'order-reviews-section';
+          reviewSection.style.marginTop = '15px';
+          orderCard.appendChild(reviewSection);
+        }
+
+        for (const product of products) {
+          const productId = product.productId || product.id;
+          if (!productId) continue;
+
+          try {
+            const hasReviewed = await FirebaseReviewsManager.hasUserReviewed(productId, orderId);
+            
+            const btnContainer = document.createElement('div');
+            btnContainer.style.marginBottom = '10px';
+            
+            if (hasReviewed) {
+              btnContainer.innerHTML = `
+                <span style="color: #27ae60; font-size: 14px;">
+                  <i class="fas fa-check-circle"></i> Reviewed: ${product.name}
+                </span>
+              `;
+            } else {
+              const reviewBtn = document.createElement('button');
+              reviewBtn.className = 'btn-primary review-order-btn';
+              reviewBtn.style.padding = '5px 15px';
+              reviewBtn.style.fontSize = '14px';
+              reviewBtn.textContent = `Review ${product.name}`;
+              reviewBtn.onclick = () => openReviewModal(orderId, '', { 
+                productId: productId, 
+                productName: product.name 
+              });
+              btnContainer.appendChild(reviewBtn);
+            }
+            reviewSection.appendChild(btnContainer);
+          } catch (error) {
+            console.error('Error checking review status:', error);
+          }
+        }
+      }
+
+      function getDeliveryStatusInfo(status) {
+        const statuses = {
+          'pending': {
+            label: 'Order Placed',
+            description: 'We have received your order and it is awaiting processing.',
+            icon: 'fas fa-clock',
+            bgColor: '#fff8e1',
+            textColor: '#f57f17'
+          },
+          'confirmed': {
+            label: 'Order Confirmed',
+            description: 'Your order has been confirmed and is being prepared.',
+            icon: 'fas fa-check-circle',
+            bgColor: '#e8f5e9',
+            textColor: '#2e7d32'
+          },
+          'shipped': {
+            label: 'Order Shipped',
+            description: 'Your order is on its way to you.',
+            icon: 'fas fa-shipping-fast',
+            bgColor: '#e3f2fd',
+            textColor: '#1565c0'
+          },
+          'delivered': {
+            label: 'Delivered',
+            description: 'Your order has been successfully delivered.',
+            icon: 'fas fa-home',
+            bgColor: '#f1f8e9',
+            textColor: '#33691e'
+          },
+          'cancelled': {
+            label: 'Cancelled',
+            description: 'This order has been cancelled.',
+            icon: 'fas fa-times-circle',
+            bgColor: '#ffe9e9',
+            textColor: '#c62828'
+          }
+        };
+        return statuses[status] || statuses['pending'];
+      }
+
       // Review Modal Functions
       let currentReviewOrderId = null;
       let currentReviewProducts = [];

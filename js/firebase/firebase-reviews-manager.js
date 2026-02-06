@@ -131,6 +131,12 @@ window.FirebaseReviewsManager = (function() {
                 await productRef.collection('reviews').doc(reviewId).set(reviewToSave);
                 console.log('Review created successfully:', reviewId);
             }
+
+            // Update product's hasReviews flag
+            await productRef.update({
+                hasReviews: true,
+                lastReviewAt: firebase.firestore.Timestamp.now()
+            }).catch(e => console.warn('Could not update product hasReviews flag:', e));
             
             return { success: true, reviewId: reviewId, review: reviewToSave };
         } catch (error) {
