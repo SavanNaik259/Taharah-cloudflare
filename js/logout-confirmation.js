@@ -214,7 +214,7 @@ window.LogoutConfirmation = (function() {
       if (result.success) {
         closeModal();
         // Redirect to home page or login page
-        window.location.href = 'index.html';
+        window.location.href = 'index';
       } else {
         alert('Logout failed. Please try again.');
         // Re-enable buttons
@@ -275,14 +275,14 @@ window.LogoutConfirmation = (function() {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function() {
       // Only auto-initialize on profile page or pages that definitely have logout functionality
-      if (window.location.pathname.includes('profile.html') || 
+      if (window.location.pathname.includes('profile') || 
           document.querySelector('[data-logout]')) {
         initLogoutButtons();
       }
     });
   } else {
     // Only auto-initialize on profile page or pages that definitely have logout functionality
-    if (window.location.pathname.includes('profile.html') || 
+    if (window.location.pathname.includes('profile') || 
         document.querySelector('[data-logout]')) {
       initLogoutButtons();
     }

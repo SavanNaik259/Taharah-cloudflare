@@ -2299,7 +2299,7 @@
                 <i class="fas fa-video"></i>
                 Watch & Buy Videos
             </a>
-            <a href="index.html" class="nav-item">
+            <a href="index" class="nav-item">
                 <i class="fas fa-home"></i>
                 Back to Store
             </a>
@@ -3557,7 +3557,7 @@
             return true;
         }
 
-        // Global variables - EXACT copy from working admin-dashboard.html
+        // Global variables - EXACT copy from working admin-dashboard
         let allOrders = [];
         let newOrders = [];
         let confirmedOrders = [];
@@ -3793,7 +3793,7 @@
             }
         }
 
-        // Helper functions for order processing - EXACT copy from working admin-dashboard.html
+        // Helper functions for order processing - EXACT copy from working admin-dashboard
         function calculateOrderAmount(orderData) {
             if (orderData.totalAmount) return parseFloat(orderData.totalAmount);
             if (orderData.total) return parseFloat(orderData.total);
@@ -5100,7 +5100,7 @@
                     for (let i = 1; i <= 6; i++) {
                         if (data[`video${i}`]) {
                             document.getElementById(`video${i}-sku`).value = data[`video${i}`].productSKU || '';
-                            document.getElementById(`video${i}-product-name`).innerHTML = data[`video${i}`].html || '';
+                            document.getElementById(`video${i}-product-name`).innerHTML = data[`video${i}`] || '';
                         }
                     }
                 }
@@ -5237,7 +5237,7 @@
                 
                 if (productFound) {
                     const price = parseFloat(productFound.price || 0).toLocaleString('en-IN');
-                    const productUrl = `product-detail.html?id=${encodeURIComponent(sku)}`;
+                    const productUrl = `product-detail?id=${encodeURIComponent(sku)}`;
                     productNameElement.innerHTML = `
                         <div style="font-weight: 600; color: #1e293b; margin-bottom: 4px;">${productFound.name}</div>
                         <div style="color: #059669; font-size: 12px;">₹${price}</div>
@@ -7162,7 +7162,7 @@
             console.log(`Opening edit form for product ${productId} in category ${category}`);
 
             // Open products admin panel with edit parameters
-            const editUrl = `products-admin-panel.html?category=${category}&edit=${productId}`;
+            const editUrl = `products-admin-panel?category=${category}&edit=${productId}`;
 
             // Try to open in a new tab, with fallback handling
             try {
@@ -8599,7 +8599,7 @@
             sessionStorage.setItem('adminVerifyTime', Date.now().toString());
 
             // Open products admin panel
-            window.open('products-admin-panel.html', '_blank');
+            window.open('products-admin-panel', '_blank');
         }
 
 
@@ -8845,7 +8845,7 @@
 
                 if (result.success) {
                     // Open tracking page in new tab
-                    window.open('/track-order.html?tracking=' + awbNumber, '_blank');
+                    window.open('/track-order?tracking=' + awbNumber, '_blank');
                 } else {
                     throw new Error(result.error || 'Failed to track shipment');
                 }
@@ -9196,7 +9196,7 @@
                             timestamp: firebase.firestore.Timestamp.fromDate(visitTime),
                             visitorId: `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                             sessionId: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                            page: ['/', '/product-detail.html', '/featured-collection.html'][Math.floor(Math.random() * 3)],
+                            page: ['/', '/product-detail', '/featured-collection'][Math.floor(Math.random() * 3)],
                             trafficSource: ['Google', 'Facebook', 'Instagram', 'Direct'][Math.floor(Math.random() * 4)],
                             deviceType: Math.random() > 0.5 ? 'Desktop' : 'Mobile',
                             isNewVisitor: Math.random() > 0.6
@@ -11186,11 +11186,11 @@
             console.log('🚀 [INIT DEBUG] DOMContentLoaded fired!');
             console.log('🚀 [INIT DEBUG] Current pathname:', window.location.pathname);
             console.log('🚀 [INIT DEBUG] Full URL:', window.location.href);
-            console.log('🚀 [INIT DEBUG] Checking if pathname includes admin-panel.html:', window.location.pathname.includes('admin-panel.html'));
+            console.log('🚀 [INIT DEBUG] Checking if pathname includes admin-panel:', window.location.pathname.includes('admin-panel'));
 
             try {
                 // Initialize analytics only if on admin panel
-                if (window.location.pathname.includes('admin-panel.html')) {
+                if (window.location.pathname.includes('admin-panel')) {
                     console.log('🚀 [INIT DEBUG] Path matches, calling initializeAnalytics()');
                     if (typeof initializeAnalytics === 'function') {
                         initializeAnalytics();
@@ -11198,7 +11198,7 @@
                         console.warn('⚠️ [INIT DEBUG] initializeAnalytics function not available');
                     }
                 } else {
-                    console.log('🚀 [INIT DEBUG] Path does not match admin-panel.html, analytics not initialized');
+                    console.log('🚀 [INIT DEBUG] Path does not match admin-panel, analytics not initialized');
                 }
             } catch (error) {
                 console.error('❌ [INIT DEBUG] Error during page initialization:', error);

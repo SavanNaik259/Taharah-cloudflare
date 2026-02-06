@@ -1031,7 +1031,7 @@
             auth.onAuthStateChanged((user) => {
                 if (!user) {
                     console.log('No user logged in, redirecting to login...');
-                    window.location.href = 'login.html?redirect=products-admin-panel.html';
+                    window.location.href = 'login?redirect=products-admin-panel';
                 } else {
                     console.log('Admin authenticated:', user.email);
                     // Check if user is admin (you can add specific admin email check here)

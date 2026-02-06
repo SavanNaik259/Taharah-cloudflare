@@ -343,7 +343,7 @@ const SearchUI = (function() {
         
         // Add click handler to navigate to product detail
         productDiv.addEventListener('click', () => {
-            window.location.href = `product-detail.html?id=${product.id}`;
+            window.location.href = `product-detail?id=${product.id}`;
         });
         
         return productDiv;

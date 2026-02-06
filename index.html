@@ -1053,7 +1053,7 @@ background-color: #000 !important;
                             </a>
                         </div>
                         <div class="store-actions">
-                            <button class="book-appointment-btn" onclick="window.location.href='book-appointment.html'" data-translate-dynamic>BOOK APPOINTMENT</button>
+                            <button class="book-appointment-btn" onclick="window.location.href='book-appointment'" data-translate-dynamic>BOOK APPOINTMENT</button>
                             <button class="call-btn" onclick="window.location.href='tel:+919310250047'">
                                 <i class="fas fa-phone"></i>
                             </button>
@@ -1719,8 +1719,8 @@ background-color: #000 !important;
                 <div class="footer-content" id="info-content">
                     <ul>
                         <li><a href="/about-us" data-translate="about_us">About Us</a></li>
-                        <li><a href="terms-conditions.html#shipping-and-delivery" data-translate-dynamic>Shipping Policy</a></li>
-                        <li><a href="terms-conditions.html#returns-and-refunds" data-translate-dynamic>Returns & Exchanges</a></li>
+                        <li><a href="terms-conditions#shipping-and-delivery" data-translate-dynamic>Shipping Policy</a></li>
+                        <li><a href="terms-conditions#returns-and-refunds" data-translate-dynamic>Returns & Exchanges</a></li>
                         <li><a href="/terms-conditions" data-translate-dynamic>Terms and Conditions</a></li>
                         <li><a href="/privacy-policy" data-translate-dynamic>Privacy Policy</a></li>
                     </ul>
@@ -1958,7 +1958,7 @@ background-color: #000 !important;
         measurementId: "G-ZYZ750JHMB"
       };
 
-      // Initialize Firebase directly (like in login.html)
+      // Initialize Firebase directly (like in login)
       if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
       }
@@ -2108,19 +2108,19 @@ background-color: #000 !important;
             if (currentUser) {
               // Firebase user is logged in
               console.log("Firebase user is logged in:", currentUser.uid);
-              userIcon.href = "profile.html";
+              userIcon.href = "profile";
               userIcon.classList.add('logged-in');
             } else {
               // No current Firebase user, check session
               if (FirebaseAuth.isLoggedIn()) {
                 // User is logged in according to session
                 console.log("User is logged in from session");
-                userIcon.href = "profile.html";
+                userIcon.href = "profile";
                 userIcon.classList.add('logged-in');
               } else {
                 // No session found
                 console.log("No user session found");
-                userIcon.href = "login.html";
+                userIcon.href = "login";
                 userIcon.classList.remove('logged-in');
               }
             }
@@ -2152,13 +2152,13 @@ background-color: #000 !important;
                   loggedIn: true
                 });
 
-                userIcon.href = "profile.html";
+                userIcon.href = "profile";
                 userIcon.classList.add('logged-in');
               } else {
                 // User is not signed in, keep login link
                 console.log("Auth state: User is signed out");
                 FirebaseAuth.clearSession();
-                userIcon.href = "login.html";
+                userIcon.href = "login";
                 userIcon.classList.remove('logged-in');
               }
             }
@@ -2272,7 +2272,7 @@ background-color: #000 !important;
                         openCart();
                     } else {
                         // Fallback to cart page
-                        window.location.href = 'checkout.html';
+                        window.location.href = 'checkout';
                     }
                 });
             }

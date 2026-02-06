@@ -902,7 +902,7 @@
         const session = FirebaseAuth && FirebaseAuth.getSession();
         if (!session || !session.loggedIn) {
           console.log("No active session found, redirecting to login");
-          window.location.replace("login.html");
+          window.location.replace("login");
           return;
         }
 
@@ -949,12 +949,12 @@
               // Try to restore auth state or redirect to login
               setTimeout(() => {
                 if (!firebase.auth().currentUser) {
-                  window.location.href = "login.html";
+                  window.location.href = "login";
                 }
               }, 1000);
             } else {
               console.log("No authenticated user found, redirecting to login");
-              window.location.href = "login.html";
+              window.location.href = "login";
             }
           }
         });
@@ -1001,7 +1001,7 @@
         // If we still don't have a user ID, redirect to login
         if (!userId) {
           console.error("No valid user ID found");
-          window.location.href = "login.html";
+          window.location.href = "login";
           return;
         }
 
@@ -1050,7 +1050,7 @@
             } else {
               console.error("No current user available for profile creation");
               showError("Session error. Please log in again.");
-              setTimeout(() => window.location.href = "login.html", 2000);
+              setTimeout(() => window.location.href = "login", 2000);
             }
           }
         } catch (error) {
@@ -1064,7 +1064,7 @@
             if (FirebaseAuth && FirebaseAuth.clearSession) {
               FirebaseAuth.clearSession();
             }
-            setTimeout(() => window.location.href = "login.html", 2000);
+            setTimeout(() => window.location.href = "login", 2000);
           } else if (error.code === 'unavailable' || error.message?.includes('Backend didn\'t respond')) {
             console.log("Firebase unavailable, attempting to use session data");
             const session = FirebaseAuth && FirebaseAuth.getSession();
@@ -2979,8 +2979,8 @@
                 <div class="footer-content" id="info-content">
                     <ul>
                         <li><a href="/about-us" data-translate="about_us">About Us</a></li>
-                        <li><a href="terms-conditions.html#shipping-and-delivery" data-translate-dynamic>Shipping Policy</a></li>
-                        <li><a href="terms-conditions.html#returns-and-refunds" data-translate-dynamic>Returns & Exchanges</a></li>
+                        <li><a href="terms-conditions#shipping-and-delivery" data-translate-dynamic>Shipping Policy</a></li>
+                        <li><a href="terms-conditions#returns-and-refunds" data-translate-dynamic>Returns & Exchanges</a></li>
                         <li><a href="/terms-conditions" data-translate-dynamic>Terms and Conditions</a></li>
                         <li><a href="/privacy-policy" data-translate-dynamic>Privacy Policy</a></li>
                     </ul>
@@ -3187,7 +3187,7 @@
                     if (typeof openCart === 'function') {
                         openCart();
                     } else {
-                        window.location.href = 'checkout.html';
+                        window.location.href = 'checkout';
                     }
                 });
             }

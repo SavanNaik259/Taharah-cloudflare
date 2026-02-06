@@ -227,7 +227,7 @@ const InteractiveShowcase = (function () {
 
         addToCartBtn.onclick = () => handleAddToCart(product);
         viewDetailsBtn.onclick = () =>
-            (window.location.href = `product-detail.html?id=${product.id}`);
+            (window.location.href = `product-detail?id=${product.id}`);
 
         // Show modal
         modal.classList.add("active");

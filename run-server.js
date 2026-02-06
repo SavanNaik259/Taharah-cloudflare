@@ -80,6 +80,22 @@ app.use(express.json());
 // Serve static files from the current directory
 app.use(express.static('.'));
 
+// Handle clean URLs for HTML files
+app.get('/:page', (req, res, next) => {
+  const page = req.params.page;
+  // Skip API and Netlify function routes
+  if (page === 'api' || page === '.netlify') {
+    return next();
+  }
+  
+  const filePath = path.join(__dirname, `${page}.html`);
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      next();
+    }
+  });
+});
+
 // API route for new product notifications
 app.post('/api/new-product-notification', async (req, res) => {
     try {

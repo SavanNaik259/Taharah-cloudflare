@@ -893,7 +893,7 @@ window.FirebaseAuth = (function() {
         console.log('🔄 Falling back to simple verification email send...');
 
         await user.sendEmailVerification({
-          url: window.location.origin + '/login.html',
+          url: window.location.origin + '/login',
           handleCodeInApp: false
         });
 
@@ -945,7 +945,7 @@ window.FirebaseAuth = (function() {
    */
   async function sendCustomVerificationEmail(email, displayName, token) {
     try {
-      const verificationUrl = `${window.location.origin}/verify-email.html?token=${token}&email=${encodeURIComponent(email)}`;
+      const verificationUrl = `${window.location.origin}/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
 
       const emailData = {
         type: 'verification',
@@ -986,7 +986,7 @@ window.FirebaseAuth = (function() {
    */
   async function sendCustomPasswordResetEmail(email, displayName, token) {
     try {
-      const resetUrl = `${window.location.origin}/reset-password.html?token=${token}&email=${encodeURIComponent(email)}`;
+      const resetUrl = `${window.location.origin}/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
 
       const emailData = {
         type: 'password-reset',

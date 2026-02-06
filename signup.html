@@ -760,7 +760,7 @@
                 // Fallback - shouldn't happen with new flow
                 showSuccess('Account created successfully! Redirecting...');
                 setTimeout(() => {
-                  window.location.href = 'index.html';
+                  window.location.href = 'index';
                 }, 2000);
               }
             } else {
@@ -785,7 +785,7 @@
       if (verificationPopupOkButton) {
         verificationPopupOkButton.addEventListener('click', function() {
           verificationPopup.style.display = 'none'; // Hide the popup
-          window.location.href = 'login.html'; // Redirect to login page
+          window.location.href = 'login'; // Redirect to login page
         });
       }
 
@@ -812,7 +812,7 @@
 
             // Redirect after 2 seconds
             setTimeout(() => {
-              window.location.href = 'index.html';
+              window.location.href = 'index';
             }, 2000);
 
           } catch (error) {
@@ -904,8 +904,8 @@
                 <div class="footer-content" id="info-content">
                     <ul>
                         <li><a href="/about-us" data-translate="about_us">About Us</a></li>
-                        <li><a href="terms-conditions.html#shipping-and-delivery" data-translate-dynamic>Shipping Policy</a></li>
-                        <li><a href="terms-conditions.html#returns-and-refunds" data-translate-dynamic>Returns & Exchanges</a></li>
+                        <li><a href="terms-conditions#shipping-and-delivery" data-translate-dynamic>Shipping Policy</a></li>
+                        <li><a href="terms-conditions#returns-and-refunds" data-translate-dynamic>Returns & Exchanges</a></li>
                         <li><a href="/terms-conditions" data-translate-dynamic>Terms and Conditions</a></li>
                         <li><a href="/privacy-policy" data-translate-dynamic>Privacy Policy</a></li>
                     </ul>
@@ -1112,7 +1112,7 @@
                     if (typeof openCart === 'function') {
                         openCart();
                     } else {
-                        window.location.href = 'checkout.html';
+                        window.location.href = 'checkout';
                     }
                 });
             }

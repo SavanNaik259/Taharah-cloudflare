@@ -429,7 +429,7 @@ window.CartManager = (function() {
         }
 
         // Check if the cart panel exists but don't create a new one if it already exists
-        // This ensures we respect the existing cart panel in pages like index.html
+        // This ensures we respect the existing cart panel in pages like index
         const existingCartPanel = document.querySelector('.cart-panel');
 
         if (!existingCartPanel) {
@@ -450,7 +450,7 @@ window.CartManager = (function() {
                         </div>
                         <div class="cart-panel-buttons">
                             <a href="#" class="view-cart-btn">Continue Shopping</a>
-                            <a href="checkout.html" class="checkout-btn">Checkout</a>
+                            <a href="checkout" class="checkout-btn">Checkout</a>
                         </div>
                     </div>
                 </div>

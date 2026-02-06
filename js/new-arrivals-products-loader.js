@@ -544,7 +544,7 @@ const NewArrivalsProductsLoader = (function() {
 
         return `
             <div class="product-item" data-product-id="${product.id}" data-product-price="${product.price}" data-product-name="${product.name}" data-product-image="${product.image}" style="background: none;">
-                <a href="product-detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">
+                <a href="product-detail?id=${product.id}" style="text-decoration: none; color: inherit;">
                     <div class="product-image">
                         <img src="${product.image}" alt="${product.name}" loading="lazy">
                         <button class="add-to-wishlist" data-product-id="${product.id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-image="${product.image}" >

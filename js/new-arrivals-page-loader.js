@@ -244,7 +244,7 @@ function createProductHTML(product) {
 
     return `
         <div class="product-item" data-product-id="${product.id}" data-product-price="${originalPrice}" style="background: none;">
-            <a href="product-detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">
+            <a href="product-detail?id=${product.id}" style="text-decoration: none; color: inherit;">
                 <div class="product-image">
                     ${imageUrl ? `<img src="${imageUrl}" alt="${product.name}" loading="lazy">` : ''}
                     <button class="add-to-wishlist" data-product-id="${product.id}" data-product-price="${originalPrice}">
@@ -279,7 +279,7 @@ function showEmptyState() {
         <div class="empty-state">
             <h3>No New Arrivals Yet</h3>
             <p>We're constantly adding new beautiful pieces to our collection. Check back soon!</p>
-            <a href="shop.html" class="browse-btn">Browse All Products</a>
+            <a href="shop" class="browse-btn">Browse All Products</a>
         </div>
     `;
 }

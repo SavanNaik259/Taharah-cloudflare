@@ -29,7 +29,7 @@ const ProductDetailLoader = (function() {
 
         if (!productId) {
             console.error('❌ No product ID found in URL');
-            console.log('💡 URL should be: product-detail.html?id=YOUR_SKU');
+            console.log('💡 URL should be: product-detail?id=YOUR_SKU');
             updatePlaceholders();
             return;
         }

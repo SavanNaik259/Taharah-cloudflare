@@ -478,10 +478,10 @@
 
           if (!isDirectNavigation) {
             console.log("User navigated from another page, redirecting to profile...");
-            window.location.replace('profile.html');
+            window.location.replace('profile');
           } else {
             console.log("Direct navigation to login page while logged in, redirecting to home...");
-            window.location.replace('index.html');
+            window.location.replace('index');
           }
         }
       };
@@ -505,7 +505,7 @@
 
               if (emailVerified) {
                 console.log("User email is verified, redirecting to profile page");
-                window.location.replace('profile.html');
+                window.location.replace('profile');
               } else {
                 console.log("User email not verified, signing out...");
                 // Store email for resend functionality
@@ -515,7 +515,7 @@
             } catch (error) {
               console.error("Error checking email verification:", error);
               // If there's an error checking verification, redirect to profile
-              window.location.replace('profile.html');
+              window.location.replace('profile');
             }
           }, 1000); // 1 second delay
         } else {
@@ -551,7 +551,7 @@
 
               // Redirect to home page
               setTimeout(() => {
-                window.location.href = 'index.html';
+                window.location.href = 'index';
               }, 1000);
             } else {
               isProcessingLogin = false; // Clear flag
@@ -722,7 +722,7 @@
 
               // Redirect to home page
               setTimeout(() => {
-                window.location.href = 'index.html';
+                window.location.href = 'index';
               }, 1000);
             } else {
               // Handle error
@@ -1120,8 +1120,8 @@
                 <div class="footer-content" id="info-content">
                     <ul>
                         <li><a href="/about-us" data-translate="about_us">About Us</a></li>
-                        <li><a href="terms-conditions.html#shipping-and-delivery" data-translate-dynamic>Shipping Policy</a></li>
-                        <li><a href="terms-conditions.html#returns-and-refunds" data-translate-dynamic>Returns & Exchanges</a></li>
+                        <li><a href="terms-conditions#shipping-and-delivery" data-translate-dynamic>Shipping Policy</a></li>
+                        <li><a href="terms-conditions#returns-and-refunds" data-translate-dynamic>Returns & Exchanges</a></li>
                         <li><a href="/terms-conditions" data-translate-dynamic>Terms and Conditions</a></li>
                         <li><a href="/privacy-policy" data-translate-dynamic>Privacy Policy</a></li>
                     </ul>
@@ -1328,7 +1328,7 @@
                     if (typeof openCart === 'function') {
                         openCart();
                     } else {
-                        window.location.href = 'checkout.html';
+                        window.location.href = 'checkout';
                     }
                 });
             }

@@ -103,7 +103,7 @@ async function updateDynamicVideoProductLink(container, sku) {
 
         const productLinkAnchor = document.createElement('a');
         productLinkAnchor.className = 'video-product-link';
-        productLinkAnchor.href = `product-detail.html?id=${encodeURIComponent(sku)}`;
+        productLinkAnchor.href = `product-detail?id=${encodeURIComponent(sku)}`;
         productLinkAnchor.style.cssText = `
             position: absolute; bottom: 20px; left: 20px;
             background: rgba(255, 255, 255, 0.95); padding: 12px 16px;
@@ -242,7 +242,7 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
         // This ensures the link always works and navigates to product detail page
         const productLinkAnchor = document.createElement('a');
         productLinkAnchor.className = 'video-product-link';
-        productLinkAnchor.href = `product-detail.html?id=${encodeURIComponent(sku)}`;
+        productLinkAnchor.href = `product-detail?id=${encodeURIComponent(sku)}`;
         productLinkAnchor.style.cssText = `
             position: absolute;
             bottom: 20px;
@@ -302,7 +302,7 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
             e.preventDefault();
             e.stopPropagation();
             
-            const targetUrl = `product-detail.html?id=${encodeURIComponent(sku)}`;
+            const targetUrl = `product-detail?id=${encodeURIComponent(sku)}`;
             
             console.log('🔗 VIDEO PRODUCT LINK CLICKED');
             console.log('📹 Video Number:', videoNumber);

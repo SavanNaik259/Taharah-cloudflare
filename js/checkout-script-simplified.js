@@ -1298,8 +1298,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <a href="login.html" class="btn btn-outline-primary">Sign In</a>
-                                <a href="signup.html" class="btn btn-primary">Create Account</a>
+                                <a href="login" class="btn btn-outline-primary">Sign In</a>
+                                <a href="signup" class="btn btn-primary">Create Account</a>
                             </div>
                         </div>
                     </div>
@@ -1484,7 +1484,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </div>
                             </div>
                             <div class="modal-footer">
-                                <a href="index.html" class="btn btn-primary" style="background-color: #603000; border-color: #603000;">Continue Shopping</a>
+                                <a href="index" class="btn btn-primary" style="background-color: #603000; border-color: #603000;">Continue Shopping</a>
                             </div>
                         </div>
                     </div>
@@ -1582,13 +1582,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const confirmationModal = new bootstrap.Modal(confirmationModalElement);
 
         // Handle both "Continue Shopping" link and "Return to Homepage" button
-        const continueShoppingBtn = confirmationModalElement.querySelector('.modal-footer a[href="index.html"]');
+        const continueShoppingBtn = confirmationModalElement.querySelector('.modal-footer a[href="index"]');
         const returnHomepageBtn = confirmationModalElement.querySelector('#closeConfirmationBtn');
 
         // Function to redirect to homepage
         function redirectToHomepage() {
             console.log('Redirecting to homepage...');
-            window.location.href = 'index.html';
+            window.location.href = 'index';
         }
 
         // Handle Continue Shopping link (if exists)
@@ -1635,7 +1635,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Order confirmation modal closed - redirecting to homepage');
             // Redirect to homepage when modal is closed by any means
             setTimeout(() => {
-                window.location.href = 'index.html';
+                window.location.href = 'index';
             }, 100);
         });
 
@@ -2142,9 +2142,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     // Add shipment info to order confirmation
                     if (result.data.awb_code) {
-                        showConfirmation(`Order placed successfully! 🎉\n\nOrder ID: ROYALMEENAKARI-${orderData.orderId}\nShipment created with AWB: ${result.data.awb_code}\nYou can track your order at: track-order.html`);
+                        showConfirmation(`Order placed successfully! 🎉\n\nOrder ID: ROYALMEENAKARI-${orderData.orderId}\nShipment created with AWB: ${result.data.awb_code}\nYou can track your order at: track-order`);
                     } else {
-                        showConfirmation(`Order placed successfully! 🎉\n\nOrder ID: ROYALMEENAKARI-${orderData.orderId}\nShipment created (AWB pending)\nYou can track your order at: track-order.html`);
+                        showConfirmation(`Order placed successfully! 🎉\n\nOrder ID: ROYALMEENAKARI-${orderData.orderId}\nShipment created (AWB pending)\nYou can track your order at: track-order`);
                     }
                 } else {
                     console.warn('Shipment creation failed but order was placed:', result);
