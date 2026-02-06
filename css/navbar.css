@@ -4,7 +4,7 @@
 .navbar {
     background: transparent;
     border-bottom: none;
-    position: relative;
+    position: absolute;
     width: 100%;
     top: 20px;
     z-index: 1000;
@@ -423,7 +423,7 @@
     .navbar {
         top: 20px;
         width: 100%;
-        position: relative;
+        position: absolute;
         z-index: 1000;
         background: transparent;
     }
@@ -737,6 +737,7 @@
 
     .navbar {
         top: 20px;
+        position: absolute;
     }
 
     .nav-container {
@@ -1132,6 +1133,7 @@
 @media (max-width: 576px) {
     .navbar {
         top: 20px;
+        position: absolute;
     }
 
     .nav-container {
