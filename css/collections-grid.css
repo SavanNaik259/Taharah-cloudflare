@@ -19,8 +19,8 @@
 
 .collection-card {
     position: relative;
-    width: 90%;
-    height:240px;
+    width: 94%;
+    height:70vw;
     border-radius: 20px;
     overflow: hidden;
     aspect-ratio: 16 / 9;
