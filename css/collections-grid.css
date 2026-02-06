@@ -1,5 +1,5 @@
 .collections-grid-section {
-    padding: 20px;
+    padding: 20px 20px 60px 20px;
     background-color: #fff;
 }
 
@@ -7,7 +7,7 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
-    max-width: 1200px;
+    max-width: 1000px;
     margin: 0 auto;
 }
 
@@ -16,7 +16,13 @@
     width: 100%;
     border-radius: 20px;
     overflow: hidden;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 16 / 9;
+    cursor: pointer;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.collection-card:hover {
+    transform: translateY(-5px);
 }
 
 .collection-card img {
@@ -24,6 +30,11 @@
     height: 100%;
     object-fit: cover;
     display: block;
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.collection-card:hover img {
+    transform: scale(1.05);
 }
 
 .collection-card-overlay {
@@ -32,12 +43,25 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(to right, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 60%);
+    background: linear-gradient(to right, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 60%);
     display: flex;
     flex-direction: column;
     justify-content: center;
     padding: 40px;
     color: #fff;
+    transition: background 0.5s ease;
+}
+
+.collection-card:hover .collection-card-overlay {
+    background: linear-gradient(to right, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 60%);
+}
+
+.collection-card-content {
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.collection-card:hover .collection-card-content {
+    transform: translateX(10px);
 }
 
 .collection-card-content h2 {
