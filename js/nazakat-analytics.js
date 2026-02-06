@@ -8,13 +8,13 @@
     // This ensures all analytics data goes to the same Firebase project
     const firebaseConfig = window.firebaseConfig || {
         // Fallback config if main config not loaded (unified nazakat project)
-        apiKey: window.ENV?.FIREBASE_API_KEY || "",
-        authDomain: window.ENV?.FIREBASE_AUTH_DOMAIN || "",
-        projectId: window.ENV?.FIREBASE_PROJECT_ID || "",
-        storageBucket: window.ENV?.FIREBASE_STORAGE_BUCKET || "",
-        messagingSenderId: window.ENV?.FIREBASE_MESSAGING_SENDER_ID || "",
-        appId: window.ENV?.FIREBASE_APP_ID || "",
-        measurementId: window.ENV?.FIREBASE_MEASUREMENT_ID || ""
+        apiKey: "AIzaSyAZw6AnBlQUJuF74pcP-VoliQtG6jLRIaI",
+        authDomain: "nazakat-ae992.firebaseapp.com",
+        projectId: "nazakat-ae992",
+        storageBucket: "nazakat-ae992.firebasestorage.app",
+        messagingSenderId: "313125797080",
+        appId: "1:313125797080:web:c84bc281bbbabae0816bad",
+        measurementId: "G-Y4QK5DGNK6"
     };
 
     let analytics = {
