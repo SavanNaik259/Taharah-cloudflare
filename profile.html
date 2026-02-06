@@ -1264,9 +1264,9 @@
             ordersContainer.insertAdjacentHTML('beforeend', orderHTML);
 
             // Check if order has been reviewed and display reviews or review button
-            if (deliveryStatus === 'delivered') {
+            if (deliveryStatus === 'delivered' || deliveryStatus === 'confirmed' || deliveryStatus === 'shipped') {
               // Load reviews for this order after the order card is in the DOM
-              loadOrderReviews(order.id, order.products || []);
+              loadOrderReviews(order.id, items);
             }
           });
 
