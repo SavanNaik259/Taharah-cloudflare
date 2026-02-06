@@ -41,9 +41,9 @@ class NotificationManager {
         console.log('✅ VAPID key retrieved:', this.vapidKey.substring(0, 20) + '...');
       } catch (error) {
         console.warn('⚠️ Could not fetch VAPID key from /api/get-vapid-key:', error.message);
-        console.warn('⚠️ Falling back to built-in VAPID key');
-        // Fallback to built-in VAPID key if API fails
-        this.vapidKey = 'BENFZQbE3p9n6YnjBdDwOySmVUao9Y9ryEH4_PJhsAKUMcUUfYDZV_c3BlZai6G77Rojwy2f0Ab540bfo5w2Mys';
+        console.warn('⚠️ Falling back to environment VAPID key');
+        // Fallback to environment VAPID key if API fails
+        this.vapidKey = window.ENV?.FIREBASE_VAPID_KEY || '';
         if (!this.vapidKey) {
           return false;
         }
