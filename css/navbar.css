@@ -1,6 +1,6 @@
 /* Responsive Navigation Bar Styles */
 
-/* Base Navbar Styles */
+/*Navbar Container */
 .navbar {
     background: transparent;
     border-bottom: none;
@@ -8,12 +8,7 @@
     width: 100%;
     top: 20px;
     z-index: 1000;
-}
-
-/* Ensure navbar stays absolute even if other styles try to change it */
-body:not(.home-page) .navbar,
-.navbar {
-    position: absolute !important;
+    /*padding: 0 20px;*/
 }
 
 .nav-container {
