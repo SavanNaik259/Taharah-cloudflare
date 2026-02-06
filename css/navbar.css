@@ -10,11 +10,20 @@
     z-index: 1000;
 }
 
-/* Ensure navbar stays absolute even if other styles try to change it */
-body:not(.home-page) .navbar,
-.navbar {
+/* Ensure navbar stays absolute and remove any fixed positioning */
+.navbar,
+.nav-menu,
+.nav-container {
     position: absolute !important;
 }
+
+/* Specific overrides for mobile and desktop states */
+@media (max-width: 991px) {
+    .nav-menu {
+        position: fixed !important; /* Mobile menu drawer must be fixed to cover screen */
+    }
+}
+
 
 .nav-container {
     display: flex;
