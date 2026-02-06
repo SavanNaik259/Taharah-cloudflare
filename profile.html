@@ -3025,20 +3025,24 @@
             closeReviewModal();
             const user = firebase.auth().currentUser;
             if (user) {
-              // Get products for the order to refresh the specific order's reviews
+              // Find the order card
               const orderCard = document.querySelector(`[data-order-id="${orderId}"]`);
               if (orderCard) {
-                // Find products in this card to pass to loadOrderReviews
+                // Find all products in this order card
                 const productElements = orderCard.querySelectorAll('.order-item-image');
                 const products = Array.from(productElements).map(el => ({
-                  id: el.getAttribute('data-product-id'),
-                  name: el.getAttribute('alt')
+                  id: el.getAttribute('data-product-id') || el.getAttribute('id'),
+                  productId: el.getAttribute('data-product-id') || el.getAttribute('id'),
+                  name: el.getAttribute('alt') || 'Product'
                 }));
                 
+                console.log('Refreshing reviews for order:', orderId, 'with products:', products);
+                
                 // Immediately reload the reviews section for this order
+                // This will replace the "Write Review" button with the actual review
                 await loadOrderReviews(orderId, products);
               } else {
-                // Fallback to full reload if card not found
+                console.warn('Order card not found for refreshing reviews, falling back to full reload');
                 await loadUserOrders(user.uid);
               }
             }
