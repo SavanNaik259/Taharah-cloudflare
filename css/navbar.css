@@ -6,7 +6,7 @@
     border-bottom: none;
     position: relative;
     width: 100%;
-    top: 0;
+    top: 20px;
     z-index: 1000;
     padding: 0 20px;
 }
@@ -421,7 +421,7 @@
 @media (min-width: 992px) {
     /* Add spacing from top and increase navbar height */
     .navbar {
-        top: 0;
+        top: 20px;
         width: 100%;
         position: relative;
         z-index: 1000;
@@ -736,7 +736,7 @@
     }
 
     .navbar {
-        top: 0;
+        top: 20px;
     }
 
     .nav-container {
@@ -1131,7 +1131,7 @@
 /* Mobile Portrait */
 @media (max-width: 576px) {
     .navbar {
-        top: 0;
+        top: 20px;
     }
 
     .nav-container {
