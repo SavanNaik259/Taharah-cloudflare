@@ -3025,7 +3025,22 @@
             closeReviewModal();
             const user = firebase.auth().currentUser;
             if (user) {
-              await loadUserOrders(user.uid);
+              // Get products for the order to refresh the specific order's reviews
+              const orderCard = document.querySelector(`[data-order-id="${orderId}"]`);
+              if (orderCard) {
+                // Find products in this card to pass to loadOrderReviews
+                const productElements = orderCard.querySelectorAll('.order-item-image');
+                const products = Array.from(productElements).map(el => ({
+                  id: el.getAttribute('data-product-id'),
+                  name: el.getAttribute('alt')
+                }));
+                
+                // Immediately reload the reviews section for this order
+                await loadOrderReviews(orderId, products);
+              } else {
+                // Fallback to full reload if card not found
+                await loadUserOrders(user.uid);
+              }
             }
           } else {
             showNotification('Failed to submit review: ' + result.error, 'error');
