@@ -6,7 +6,7 @@
     border-bottom: none;
     position: fixed;
     width: 100%;
-    top: 40px;
+    top: 20px;
     z-index: 1000;
     padding: 0 20px;
 }
@@ -21,7 +21,7 @@
     height: 60px; /* Reduced navbar height from 65px to 60px */
     border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 30px;
-    background: rgba(255, 255, 255, 0.5);
+    background: transparent;
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -421,7 +421,7 @@
 @media (min-width: 992px) {
     /* Add spacing from top and increase navbar height */
     .navbar {
-        top: 40px;
+        top: 20px;
         width: 100%;
         position: fixed;
         z-index: 1000;
@@ -439,7 +439,7 @@
         justify-content: space-between;
         border: 1px solid rgba(255, 255, 255, 0.4);
         border-radius: 30px;
-        background: rgba(255, 255, 255, 0.5);
+        background: transparent;
         backdrop-filter: blur(15px);
         -webkit-backdrop-filter: blur(15px);
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -736,7 +736,7 @@
     }
 
     .navbar {
-        top: 40px;
+        top: 20px;
     }
 
     .nav-container {
@@ -1131,7 +1131,7 @@
 /* Mobile Portrait */
 @media (max-width: 576px) {
     .navbar {
-        top: 40px;
+        top: 20px;
     }
 
     .nav-container {
