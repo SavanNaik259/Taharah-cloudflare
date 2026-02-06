@@ -1,0 +1,136 @@
+now the shipment it still not creating check the doc 
+Logo
+Customer Support
+Enter your search term here...
+
+Solution home Settings API Settings
+Shiprocket API Document Helpsheet Print
+Modified on: Mon, 6 Sep, 2021 at 3:52 PM
+
+The following steps will help you understand Shiprocket's API Documentation
+
+
+
+[ Base URL: apiv2.shiprocket.in ]
+Go to Settings from the left menu and navigate to API menu.
+Select Configure and click on Create an API User button.
+Please enter a Valid Email ID which is different from currently used registered email.
+Input an appropriate password.
+The next step will be to use the POST Authentication API in the given URL to Generate your Token for each request http://apidocs.shiprocket.in/
+
+How to Authenticate the API's
+
+Auth token is valid for 240 hours(10 days), which means it needs to be refreshed/regenerated after 240 hours(10 days).
+Auth token should be passed in the headers of each request
+The content of the header should look like the following: Authorization: Bearer <token>
+
+
+ 
+
+External API step by step process
+
+ 
+
+API Docs: https://apidocs.shiprocket.in
+
+ 
+
+1.    Go to Shiprocket Panel
+
+API menu on left hand side
+   Generate API User
+   Create an API User (email id should not registered on Shiprocket)
+  
+
+ 
+
+2.    Call the POST API : https://apiv2.shiprocket.in/v1/external/auth/login
+
+Pass the API user credentials instead of Shiprocket login credentials
+you will get the token.
+Use the token with "Bearer " to call other APIs like: "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjE4NTU5NSwiaXNzIjoiaHR0cHM6Ly9hcGl2M"
+ 
+
+3. Call the GET API : https://apiv2.shiprocket.in/v1/external/courier/serviceability/
+
+To get the serviceable courier with Shipping charhe.
+ 
+
+4.   Call the POST API : https://apiv2.shiprocket.in/v1/external/orders/create/adhoc
+
+To create order
+ In response you will get the Shiprocket's order id and Shipment id.
+ 
+
+5.   Call the POST API : https://apiv2.shiprocket.in/v1/external/courier/assign/awb
+
+You will get the awb_code and courier name in response.
+ 
+
+6.   Call the API: https://apiv2.shiprocket.in/v1/external/courier/generate/pickup
+
+You will get a successful pickup response.
+ 
+
+ 
+
+7.   Call the API : https://apiv2.shiprocket.in/v1/external/manifests/generate
+
+To generate Maifest
+ 
+
+ 
+
+8.   Call the API : https://apiv2.shiprocket.in/v1/external/manifests/print
+
+To Print Manifest
+ You will get PDF url of the Manifest
+ 
+
+9.   Call the API: https://apiv2.shiprocket.in/v1/external/courier/generate/label
+
+To generate Label.
+ You will get PDF url of the label
+ 
+
+10. Call the API : https://apiv2.shiprocket.in/v1/external/orders/print/invoice
+
+To print invoice
+You will get PDF url of the invoice
+ 
+
+ 
+
+11. Call the API: https://apiv2.shiprocket.in/v1/external/courier/track/awb/{awb_code}
+
+To get the tracking
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+Did you find it helpful? Yes No
+
+Preview
+Related Articles
+How to create an API user? Can I have more than one API users?
+Shiprocket Wordpress App Help Document
+How do I integrate Unicommerce with Shiprocket?
+How to Integrate Prestashop with Shiprocket?
+How to Integrate Kartrocket with Shiprocket?
+How do I integrate Shopify as a channel with Shiprocket ?
+How Do I integrate Woocommerce with Shiprocket?
+How Do I integrate Magento(Version 2) with Shiprocket?
+How Do I integrate Magento(version 1) with Shiprocket?
+How Do I integrate Opencart with Shiprocket?
+Home Solutions
+Article views count

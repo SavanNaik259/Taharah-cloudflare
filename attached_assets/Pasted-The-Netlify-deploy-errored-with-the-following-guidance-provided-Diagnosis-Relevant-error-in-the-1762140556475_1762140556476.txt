@@ -1,0 +1,101 @@
+The Netlify deploy errored, with the following guidance provided:
+
+Diagnosis
+- Relevant error in the logs: [line 126](#L126) shows Netlify rejected an invalid filename: "2,60,000rs_only_for_the_necklace_18kt_gold_hallmarked_certified_real_diamond_polkis_...".
+- The deploy failed during functions/site deployment: resolved config shows functionsDirectory is netlify/functions ([line 152](#L152)) and the bundler tried to include files from that directory. Netlify fails because a file in the repo (most likely inside netlify/functions or a path included by the functions bundler) has an invalid filename (commas and/or other unsupported characters).
+
+Cause
+- A file in the project contains characters Netlify rejects in artifact filenames (commas, possibly other punctuation or excessively long name). The functions bundler attempted to include that file in the deployment and Netlify refused the filename, causing the build to fail.
+
+Solution
+1. Locate the offending file(s)
+- From the repository root run (this finds filenames containing commas):
+```bash
+# show tracked files containing commas
+git ls-files | grep ','
+# search the working tree (including untracked files)
+find . -name '*\,*' -print
+# specifically check the functions directory
+find netlify/functions -name '*\,*' -print
+```
+
+2. Remove or rename the offending file(s)
+- If the file is an asset that doesn’t belong inside netlify/functions, move it to a public/static or assets folder (or external storage) and update any code that references it.
+- If you need the file in the repo, rename it to remove commas and other unsafe characters (use hyphens or underscores). Example rename:
+```bash
+# example: rename a file that currently contains commas
+git mv "netlify/functions/2,60,000rs_only_for_the_necklace_18kt_gold_hallmarked_certified_real_diamond_polkis_..." \
+       "netlify/functions/260000rs_only_for_the_necklace_18kt_gold_hallmarked_certified_real_diamond_polkis_..."
+git commit -m "Rename file to remove commas from filename"
+git push
+```
+- If the filename is generated during build, change the generator to sanitize file names (strip commas and illegal chars, replace spaces with hyphens, limit length).
+
+3. Re-run the build
+- Push the change and trigger a deploy. Optionally test locally:
+```bash
+# test netlify build locally (if you have netlify-cli installed)
+netlify build
+```
+
+Notes and best practices
+- Do not store large binary assets inside netlify/functions — functions should contain code only. Move images/assets to public/ or to a CDN/S3.
+- If you can’t find any comma-named file in netlify/functions, search the whole repo (step 1) — the bundler may be picking up files referenced by functions.
+- After renaming, make sure any code that reads that filename is updated.
+
+If you need, paste the exact full filename that Netlify complained about (the logs truncated it) and I’ll give the exact rename command.
+
+The relevant error logs are:
+
+Line 102:  - shiprocket-schedule-pickup.js
+Line 103:  - shiprocket-service.js
+Line 104:  - shiprocket-test-connection.js
+Line 105:  - shiprocket-track-order.js
+Line 106:  - update-product-stock.js
+Line 107:  - upload-bandwidth-test-product.js
+Line 108:  - upload-products.js
+Line 109:  - verify-razorpay-payment.js
+Line 110:  - verify-user-auth.js
+Line 111: ​
+Line 112: Failed during stage 'building site': Build script returned non-zero exit code: 2
+Line 113: ​
+Line 114: [90m(Functions bundling completed in 13.4s)[39m
+Line 115: [96m[1m​[22m[39m
+Line 116: [96m[1mDeploy site                                                   [22m[39m
+Line 117: [96m[1m────────────────────────────────────────────────────────────────[22m[39m
+Line 118: ​
+Line 119: Starting to deploy site from '.'
+Line 120: Section completed: deploying
+Line 121: [91m[1m​[22m[39m
+Line 122: [91m[1mConfiguration error                                           [22m[39m
+Line 123: [91m[1m────────────────────────────────────────────────────────────────[22m[39m
+Line 124: ​
+Line 125:   [31m[1mError message[22m[39m
+Line 126:   Deploy did not succeed: Invalid filename '2,60,000rs_only_for_the_necklace_18kt_gold_hallmarked_certified_real_diamond_polkis_
+Line 127: ​
+Line 128:   [31m[1mResolved config[22m[39m
+Line 129:   build:
+Line 130:     command: cd netlify/functions && npm install --production
+Line 131:     commandOrigin: config
+Line 132:     environment:
+Line 133:       - EMAIL_PASS
+Line 134:       - EMAIL_USER
+Line 135:       - FIREBASE_ADMIN_SDK_KEY
+Line 150:     "*":
+Line 151:       node_bundler: nft
+Line 152:   functionsDirectory: /opt/build/repo/netlify/functions
+Line 153:   plugins:
+Line 154:     - inputs: {}
+Line 155:       origin: config
+Line 156:       package: "@netlify/plugin-functions-install-core"
+Line 157:   redirects:
+Line 158:     - force: true
+Line 159:       from: /api/*
+      status: 200
+      to: /.netlify/functions/:splat
+    - from: /checkout.html
+      status: 200
+      to:
+Line 160: Build failed due to a user error: Build script returned non-zero exit code: 2
+Line 161: Failing build: Failed to build site
+Line 162: Finished processing build request in 1m0.363s

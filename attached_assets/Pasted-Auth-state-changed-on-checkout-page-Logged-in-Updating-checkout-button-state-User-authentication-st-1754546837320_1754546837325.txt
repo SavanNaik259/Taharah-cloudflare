@@ -1,0 +1,105 @@
+Auth state changed on checkout page: Logged in
+Updating checkout button state
+User authentication status: Logged in
+Button state updated for logged in user - enabled
+Loading cart items for checkout display...
+Initializing Firebase integration (simplified version)
+Using LocalStorageCart module for checkout
+Firebase auth detected, will try to use Firebase cart if user is logged in
+Firebase cart module initialized
+User login status: Logged in
+Updating checkout button state
+User authentication status: Logged in
+Button state updated for logged in user - enabled
+User is logged in, trying Firebase cart first
+Loading cart from Firebase...
+Using FirebaseCartManager directly
+Loading cart from Firebase path: users/tATbJuxJtGYBqeIwW7SODiGJWQ32/carts/current
+Firebase orders module loaded for checkout
+Updating checkout button state
+User authentication status: Logged in
+Button state updated for logged in user - enabled
+Found 1 items in Firebase wishlist
+Using existing Firebase wishlist
+Wishlist cleared from localStorage
+Warning: Wishlist count element not found in DOM
+Found 1 items in Firebase cart
+Cart loaded from Firebase: 
+Array [{…}]
+Firebase cart items loaded: 1
+Reloaded cart after auth change, items: 1
+Going to step 2
+Click detected: 
+<a id="continue-to-address" class="btn continue-shopping-btn custom-continue-btn" style="color: #603000; border-color: #603000;">…</a>
+Click detected: 
+<input type="email" class="form-control" id="email" name="email" required></input>
+Going to step 3
+Click detected: 
+<button type="button" class="btn btn-primary" id="continue-to-payment">…</button>
+Max attempts reached for finding product elements
+Click detected: 
+<button type="submit" class="btn btn-primary">…</button>
+checkOrderAuthRequirement function not available, proceeding with order
+Loading cart from Firebase...
+Loading cart from Firebase path: users/tATbJuxJtGYBqeIwW7SODiGJWQ32/carts/current
+Found 1 items in Firebase cart
+Cart loaded from Firebase for order processing
+Cart items being saved to order: 
+Array [{…}]
+Product #2938328 - image: https://nazakati.netlify.app/.netlify/functions/image-proxy?path=productImages%2FNEW-1754450547651-dd08s1qn-6196060000000894_1754450547652.jpg
+Firebase Orders module not available or saveOrderToFirebase function missing
+Sending order confirmation emails via Netlify Functions...
+Calling Netlify Function: /.netlify/functions/send-order-email 
+Object {method: "POST", body: "{"customer":{"firstName":"John","lastName":"Smith","email":"sss.naik2007@gmail.com",…", headers: {…}}
+Netlify Function response: 404 Not Found
+Failed to parse JSON response: 
+SyntaxError {}
+
+Error calling Netlify Function send-order-email: 
+Error {}
+
+Error sending order emails: 
+Error {}
+
+Order confirmation emails sent successfully
+About to clear cart after successful order
+Clearing cart after successful order
+Order summary cleared from UI
+Order total reset to zero
+Hidden product list cleared
+Cart cleared from localStorage
+Cart cleared using LocalStorageCart module
+Clearing Firebase cart...
+Saved cart cache to sessionStorage
+Saving cart to Firebase path: users/tATbJuxJtGYBqeIwW7SODiGJWQ32/carts/current
+Cart items being saved: 0 items
+Cart cleared after successful order submission
+Order confirmation modal shown, ensuring cart is cleared
+Cart cleared from localStorage
+Cart completely cleared after order confirmation modal shown
+Cart saved to Firebase successfully
+Cart cleared from Firebase using FirebaseCartManager.clearItems()
+Checkout
+Complete your order in a few simple steps
+
+Order Summary
+Shipping Address
+Payment
+Payment Method
+ Cash on Delivery
+ Pay Online with Razorpay Razorpay
+Shipping Address
+John Smith
+
+42A, Marine Drive, Churchgate
+
+Mumbai, Maharashtra - 400001
+
+Phone: 9876543210
+
+Order Summary
+#2938328
+#2938328
+₹1500.00
+₹1500.00
+Total:

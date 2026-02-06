@@ -13,7 +13,7 @@ const path = require('path');
 // Initialize Firebase Admin SDK
 const serviceAccount = {
   type: 'service_account',
-  project_id: process.env.FIREBASE_PROJECT_ID,
+  project_id: process.env.FIREBASE_PROJECT_ID || 'auric-a0c92',
   private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
   private_key: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : undefined,
   client_email: process.env.FIREBASE_CLIENT_EMAIL,
@@ -26,7 +26,7 @@ const serviceAccount = {
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'auric-a0c92.firebasestorage.app'
 });
 
 const bucket = admin.storage().bucket();
