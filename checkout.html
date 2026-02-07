@@ -44,13 +44,31 @@
     <!-- Note: Debug scripts removed as requested -->
 
     <!-- Firebase Config -->
-    <script src="js/firebase-config.js"></script>
-    <script src="js/firebase/firebase-init.js"></script>
     <script>
+        // Firebase configuration - Auric project
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
+            authDomain: "auric-a0c92.firebaseapp.com",
+            projectId: "auric-a0c92",
+            storageBucket: "auric-a0c92.firebasestorage.app",
+            messagingSenderId: "878979958342",
+            appId: "1:878979958342:web:e6092f7522488d21eaec47",
+            measurementId: "G-ZYZ750JHMB"
+        };
+
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Using Firebase configuration for authentication and order storage');
 
             try {
+                // Only initialize Firebase if it's not already initialized
+                if (!firebase.apps || !firebase.apps.length) {
+                    // Initialize Firebase
+                    firebase.initializeApp(firebaseConfig);
+                    console.log('Firebase initialized successfully');
+                } else {
+                    console.log('Firebase already initialized, using existing app');
+                }
+
                 // Check if user is logged in
                 firebase.auth().onAuthStateChanged(function(user) {
                     console.log('Auth state changed:', user ? 'Logged in' : 'Not logged in');

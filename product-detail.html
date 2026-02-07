@@ -46,7 +46,20 @@
 
     <!-- Unified Firebase Configuration -->
     <script src="js/firebase-config.js"></script>
-    <script src="js/firebase/firebase-init.js"></script>
+    <script>
+        // Initialize Firebase with unified configuration
+        console.log('Initializing Firebase with unified config...');
+        try {
+            if (window.firebaseConfig) {
+                firebase.initializeApp(window.firebaseConfig);
+                console.log('Firebase initialized successfully with unified config');
+            } else {
+                console.error('Firebase config not loaded from firebase-config.js');
+            }
+        } catch (error) {
+            console.error('Error initializing Firebase:', error);
+        }
+    </script>
 
     <!-- Nazakat Analytics Tracking -->
     <script src="js/nazakat-analytics.js?v=1.0.0"></script>
