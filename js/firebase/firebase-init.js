@@ -32,11 +32,17 @@ window.FirebaseInit = (function() {
       try {
         const app = firebase.app();
         console.log('Firebase already initialized by another module');
+        
+        // Ensure persistence is set even if already initialized
+        if (firebase.auth) {
+            firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(() => {});
+        }
+        
         initialized = true;
         return true;
       } catch (appError) {
         // If app/no-app error, initialize Firebase
-        if (appError.code === 'app-compat/no-app') {
+        if (appError.code === 'app-compat/no-app' || appError.code === 'app/no-app') {
           console.log('No Firebase app found, initializing now');
           
           // Check if firebaseConfig is available
@@ -49,18 +55,18 @@ window.FirebaseInit = (function() {
           firebase.initializeApp(firebaseConfig);
           
           // Enable persistence for auth
-          try {
-            firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-          } catch (persistenceError) {
-            console.warn('Could not set persistence:', persistenceError);
-            // Non-critical error, continue
+          if (firebase.auth) {
+              try {
+                firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+              } catch (persistenceError) {
+                console.warn('Could not set persistence:', persistenceError);
+              }
           }
           
           initialized = true;
           console.log('Firebase initialized successfully');
           return true;
         } else {
-          // If it's some other error, rethrow
           throw appError;
         }
       }
