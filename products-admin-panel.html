@@ -998,51 +998,32 @@
             }
         });
 
-        // Firebase configuration - UPDATED to auric project
-        const firebaseConfig = {
-            apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
-            authDomain: "auric-a0c92.firebaseapp.com",
-            projectId: "auric-a0c92",
-            storageBucket: "auric-a0c92.firebasestorage.app",
-            messagingSenderId: "878979958342",
-            appId: "1:878979958342:web:e6092f7522488d21eaec47",
-            measurementId: "G-ZYZ750JHMBK5DGNK6"
-        };
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
 
-        // Initialize Firebase with error handling
-        let app, storage, auth;
-        try {
-            // Check if Firebase is already initialized
-            try {
-                app = firebase.app();
-                console.log('Using existing Firebase app');
-            } catch (e) {
-                if (e.code === 'app-compat/no-app') {
-                    app = firebase.initializeApp(firebaseConfig);
-                    console.log('Initialized new Firebase app');
-                } else {
-                    throw e;
-                }
+    <!-- Initialize Firebase -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase/firebase-init.js"></script>
+
+    <script>
+        // Global references for existing code
+        const storage = firebase.storage();
+        const auth = firebase.auth();
+        const app = firebase.app();
+
+        // Protect page with authentication
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                console.log('No user logged in, redirecting to login...');
+                window.location.href = 'login?redirect=products-admin-panel';
+            } else {
+                console.log('Admin authenticated:', user.email);
             }
-            storage = firebase.storage();
-            auth = firebase.auth();
-            
-            // Protect page with authentication
-            auth.onAuthStateChanged((user) => {
-                if (!user) {
-                    console.log('No user logged in, redirecting to login...');
-                    window.location.href = 'login?redirect=products-admin-panel';
-                } else {
-                    console.log('Admin authenticated:', user.email);
-                    // Check if user is admin (you can add specific admin email check here)
-                    const adminEmails = ['admin@example.com', 'your-admin-email@gmail.com']; 
-                    // Optional: if (!adminEmails.includes(user.email)) { ... }
-                }
-            });
-        } catch (error) {
-            console.error('Firebase initialization failed:', error);
-            showError('Firebase initialization failed. Please check your connection and try again.');
-        }
+        });
+    </script>
 
 
         // Test Firebase connection with retry logic

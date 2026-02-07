@@ -54,6 +54,23 @@ window.FirebaseInit = (function() {
           // Initialize Firebase with config
           firebase.initializeApp(firebaseConfig);
           
+          // Configure Firestore settings
+          if (firebase.firestore) {
+              firebase.firestore().settings({
+                cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
+                ignoreUndefinedProperties: true
+              });
+
+              // Enable offline persistence
+              firebase.firestore().enablePersistence({ synchronizeTabs: true })
+                .catch(err => {
+                  console.warn('Firestore persistence error:', err.code);
+                });
+              
+              // Set global db
+              window.db = firebase.firestore();
+          }
+          
           // Enable persistence for auth
           if (firebase.auth) {
               try {
