@@ -56,6 +56,17 @@ exports.handler = async (event, context) => {
     
     // Create the signature verification data
     const secret = process.env.RAZORPAY_KEY_SECRET;
+    if (!secret) {
+      console.error('RAZORPAY_KEY_SECRET is missing');
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({
+          success: false,
+          message: 'Payment gateway configuration error'
+        })
+      };
+    }
     const generated_signature = crypto
       .createHmac('sha256', secret)
       .update(razorpay_order_id + "|" + razorpay_payment_id)
