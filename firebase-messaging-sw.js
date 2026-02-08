@@ -4,7 +4,7 @@ importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js'
 importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js');
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCQ9gafSnJBwuXvIpnOGn4Kwo8YqMkKY0M-uI",
+    apiKey: "AIzaSyCQ9gafSnJBwuXvIpnOGn4Kwo8YqMkKY0M",
     authDomain: "studio-7642357109-d9026.firebaseapp.com",
     projectId: "studio-7642357109-d9026",
     storageBucket: "studio-7642357109-d9026.firebasestorage.app",

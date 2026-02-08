@@ -8,7 +8,7 @@
     // This ensures all analytics data goes to the same Firebase project
     const firebaseConfig = window.firebaseConfig || {
         // Fallback config if main config not loaded (unified nazakat project)
-        apiKey: "AIzaSyCQ9gafSnJBwuXvIpnOGn4Kwo8YqMkKY0M-uI",
+        apiKey: "AIzaSyCQ9gafSnJBwuXvIpnOGn4Kwo8YqMkKY0M",
         authDomain: "studio-7642357109-d9026.firebaseapp.com",
         projectId: "studio-7642357109-d9026",
         storageBucket: "studio-7642357109-d9026.firebasestorage.app",
