@@ -8618,6 +8618,15 @@
                 // Hide modal and show admin panel
                 document.getElementById('verificationModal').style.display = 'none';
 
+                // Trigger auto-refresh if not already done in this session
+                if (!sessionStorage.getItem('admin_initial_refresh_done')) {
+                    console.log('🔄 Admin Panel: Triggering post-verification refresh in 2 seconds...');
+                    setTimeout(() => {
+                        sessionStorage.setItem('admin_initial_refresh_done', 'true');
+                        window.location.reload();
+                    }, 2000);
+                }
+
                 // Show success message briefly
                 showSuccessMessage();
             } else {
@@ -11259,32 +11268,48 @@
             }
 
             const checkVerification = () => {
-                const isVerified = localStorage.getItem('adminVerified') === 'true' || 
-                                 sessionStorage.getItem('adminVerified') === 'true';
-                const authModal = document.getElementById('admin-auth-modal');
+                const sessionData = localStorage.getItem('adminVerified');
+                let isVerified = false;
                 
-                // Case 1: Admin is already verified (cached session)
+                if (sessionData) {
+                    try {
+                        const data = JSON.parse(sessionData);
+                        const SESSION_DURATION = 24 * 60 * 60 * 1000;
+                        if (data.verified && (Date.now() - data.timestamp < SESSION_DURATION)) {
+                            isVerified = true;
+                        }
+                    } catch (e) {
+                        isVerified = localStorage.getItem('adminVerified') === 'true';
+                    }
+                }
+                
+                if (!isVerified) {
+                    isVerified = sessionStorage.getItem('adminVerified') === 'true';
+                }
+
+                const verificationModal = document.getElementById('verificationModal');
+                
+                // Case 1: Admin is already verified (cached session) on page load
                 // Case 2: Admin just entered the code (modal is hidden and verification is true)
-                if (isVerified && (!authModal || authModal.style.display === 'none')) {
+                if (isVerified && (!verificationModal || verificationModal.style.display === 'none')) {
                     triggerAutoRefresh();
                 }
             };
 
-            // Initial check on load
+            // Initial check on load for cached valid sessions
             checkVerification();
 
-            // Set up an observer for the auth modal to catch the moment it disappears after code entry
-            const authModal = document.getElementById('admin-auth-modal');
-            if (authModal) {
+            // Set up an observer for the verification modal to catch the moment it disappears after code entry
+            const verificationModal = document.getElementById('verificationModal');
+            if (verificationModal) {
                 const observer = new MutationObserver((mutations) => {
                     mutations.forEach((mutation) => {
-                        if (mutation.attributeName === 'style' && authModal.style.display === 'none') {
+                        if (mutation.attributeName === 'style' && verificationModal.style.display === 'none') {
                             checkVerification();
-                            // We don't disconnect immediately because the user might need to re-verify if they logout/login
                         }
                     });
                 });
-                observer.observe(authModal, { attributes: true });
+                observer.observe(verificationModal, { attributes: true });
             }
             // --- END AUTO REFRESH LOGIC ---
 
