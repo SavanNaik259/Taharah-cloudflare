@@ -170,13 +170,58 @@ exports.handler = async (event) => {
         
         // Handle POST for new uploads
         if (event.httpMethod === 'POST') {
-            const { fields, files } = await parseMultipartForm(event);
+            let fields, files;
+            const contentType = event.headers['content-type'] || event.headers['Content-Type'];
             
-            if (!files.length) {
+            if (contentType && contentType.includes('application/json')) {
+                // Handle JSON registration from presigned upload
+                const body = JSON.parse(event.body);
+                const { title, productSKU, description, videoUrl, filename } = body;
+                
+                if (!videoUrl || !filename) {
+                    return {
+                        statusCode: 400,
+                        headers: corsHeaders,
+                        body: JSON.stringify({ success: false, error: 'videoUrl and filename are required for registration' })
+                    };
+                }
+
+                const videoDoc = await db.collection('watchBuyVideos').add({
+                    title: title || 'Untitled Video',
+                    productSKU: productSKU || '',
+                    description: description || '',
+                    videoUrl: videoUrl,
+                    storagePath: filename,
+                    uploadedAt: admin.firestore.FieldValue.serverTimestamp(),
+                    status: 'active'
+                });
+
+                return {
+                    statusCode: 200,
+                    headers: corsHeaders,
+                    body: JSON.stringify({
+                        success: true,
+                        video: {
+                            id: videoDoc.id,
+                            title,
+                            productSKU,
+                            description,
+                            videoUrl
+                        }
+                    })
+                };
+            }
+
+            // Fallback to multipart for smaller direct uploads
+            try {
+                const parsed = await parseMultipartForm(event);
+                fields = parsed.fields;
+                files = parsed.files;
+            } catch (e) {
                 return {
                     statusCode: 400,
                     headers: corsHeaders,
-                    body: JSON.stringify({ success: false, error: 'No video file provided' })
+                    body: JSON.stringify({ success: false, error: 'Failed to parse form: ' + e.message })
                 };
             }
             

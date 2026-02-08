@@ -5397,13 +5397,18 @@
             try {
                 // Step 1: Get Presigned URL
                 progressText.textContent = 'Getting secure upload channel...';
-                const urlResponse = await fetch('/api/videos/get-upload-url', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
+                
+                // Determine base URL based on environment
+                const baseUrl = window.location.hostname.includes('localhost') ? '/api' : '/.netlify/functions';
+                const getUrlEndpoint = window.location.hostname.includes('localhost') ? '/api/videos/get-upload-url' : '/.netlify/functions/videos?action=getUploadUrl';
+
+                const urlResponse = await fetch(getUrlEndpoint, {
+                    method: window.location.hostname.includes('localhost') ? 'POST' : 'GET',
+                    headers: window.location.hostname.includes('localhost') ? { 'Content-Type': 'application/json' } : {},
+                    body: window.location.hostname.includes('localhost') ? JSON.stringify({
                         fileName: file.name,
-                        contentType: file.type
-                    })
+                        contentType: file.type || 'application/octet-stream'
+                    }) : null
                 });
                 
                 const urlData = await urlResponse.json();
@@ -5412,10 +5417,13 @@
                     throw new Error(urlData.error || 'Failed to get upload URL');
                 }
                 
-                const { uploadUrl, filename, publicUrl } = urlData;
+                const { uploadUrl, filename, storagePath, publicUrl } = urlData;
+                const finalFilename = filename || storagePath;
                 
                 // Step 2: Upload directly to Firebase Storage using the Presigned URL
                 progressText.textContent = 'Uploading video (direct channel)...';
+                
+                const contentType = file.type || 'application/octet-stream';
                 
                 try {
                     // Use a clean fetch with specific headers to match the V4 signature
@@ -5423,16 +5431,14 @@
                         method: 'PUT',
                         body: file,
                         headers: {
-                            'Content-Type': file.type || 'application/octet-stream'
+                            'Content-Type': contentType
                         },
-                        // Ensure we don't send any extra headers that might break the signature
                         mode: 'cors'
                     });
 
                     if (!uploadResponse.ok) {
                         const errorText = await uploadResponse.text();
                         console.error('Storage upload failed:', errorText);
-                        // Check if it's a content-type issue or signature issue
                         if (errorText.includes('SignatureDoesNotMatch')) {
                             throw new Error('Upload failed: Signature mismatch. This usually happens if the Content-Type sent doesn\'t match the one used to generate the URL.');
                         }
@@ -5446,7 +5452,9 @@
                 // Step 3: Register metadata
                 progressText.textContent = 'Finalizing...';
                 
-                const registerResponse = await fetch('/api/videos/register', {
+                const registerEndpoint = window.location.hostname.includes('localhost') ? '/api/videos/register' : '/.netlify/functions/videos';
+                
+                const registerResponse = await fetch(registerEndpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -5454,7 +5462,7 @@
                         productSKU,
                         description,
                         videoUrl: publicUrl,
-                        filename
+                        filename: finalFilename
                     })
                 });
                 

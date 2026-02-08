@@ -1578,10 +1578,7 @@ app.post('/api/videos/get-upload-url', async (req, res) => {
       version: 'v4',
       action: 'write',
       expires: Date.now() + 30 * 60 * 1000,
-      contentType: contentType,
-      extensionHeaders: {
-        'Content-Type': contentType
-      }
+      contentType: contentType
     });
 
     res.json({ 
