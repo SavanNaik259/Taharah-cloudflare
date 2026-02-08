@@ -135,7 +135,10 @@ exports.handler = async (event) => {
                     version: 'v4',
                     action: 'write',
                     expires: Date.now() + 15 * 60 * 1000, // 15 minutes
-                    contentType: fileType || 'application/octet-stream'
+                    contentType: fileType || 'application/octet-stream',
+                    extensionHeaders: {
+                        'x-goog-resumable': 'start'
+                    }
                 });
 
                 console.log(`[Videos Function] Generated signed URL for ${storagePath} with type ${fileType || 'application/octet-stream'}`);
