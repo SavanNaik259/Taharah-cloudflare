@@ -29,10 +29,10 @@ const InteractiveShowcase = (function () {
     async function setupSampleProducts() {
         console.log("Loading showcase products from Firebase...");
 
-        const showcaseProductIds = ["FEA-002", "NEW-003", "FEA-005"];
+        const showcaseProductIds = ["NEW-1770545795612-bc99v6uz-279728"];
 
         // Dot classes for positioning on the image
-        const dotClasses = ["dot-necklace", "dot-earrings", "dot-bangle"];
+        const dotClasses = ["dot-necklace", "dot-earrings","dot-bangle"];
 
         try {
             // Load all products from all categories
