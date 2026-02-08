@@ -135,10 +135,13 @@ exports.handler = async (event) => {
                     version: 'v4',
                     action: 'write',
                     expires: Date.now() + 15 * 60 * 1000, // 15 minutes
-                    contentType: fileType || 'video/mp4'
+                    contentType: fileType || 'video/mp4',
+                    extensionHeaders: {
+                        'x-goog-resumable': 'start'
+                    }
                 });
 
-                console.log(`[Videos Function] Generated signed URL for ${storagePath} with type ${fileType || 'application/octet-stream'}`);
+                console.log(`[Videos Function] Generated resumable signed URL for ${storagePath} with type ${fileType || 'video/mp4'}`);
 
                 return {
                     statusCode: 200,
