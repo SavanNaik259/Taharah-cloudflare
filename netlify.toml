@@ -100,15 +100,15 @@
   OWNER_EMAIL = ""
   
   FIREBASE_PROJECT_ID = "studio-7642357109-d9026"
-  FIREBASE_PRIVATE_KEY_ID = "067bc566a907eeca7ae57d98ec6ba463385b2617"
+  FIREBASE_PRIVATE_KEY_ID = "992b031db8cbb949f66b6a71ad1dd3d434adcd7c"
   FIREBASE_PRIVATE_KEY = ""
   FIREBASE_CLIENT_EMAIL = "firebase-adminsdk-fbsvc@studio-7642357109-d9026.iam.gserviceaccount.com"
-  FIREBASE_CLIENT_ID = "112489649638932528471"
+  FIREBASE_CLIENT_ID = "116019966837750187800"
   FIREBASE_CERT_URL = "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40studio-7642357109-d9026.iam.gserviceaccount.com"
   FIREBASE_STORAGE_BUCKET = "studio-7642357109-d9026.firebasestorage.app"
-  FIREBASE_VAPID_KEY = "BENFZQbE3p9n6YnjBdDwOySmVUao9Y9ryEH4_PJhsAKUMcUUfYDZV_c3BlZai6G77Rojwy2f0Ab540bfo5w2Mys"
+  FIREBASE_VAPID_KEY = "BLzgONy1dxvZSOupRvbC1gnjaW98YHtk683EuqQoT7sEqXsFU5R7CD_pa2Fhuem6qoVflcZr6f0rSeLpHyylzsI"
   
-  RAZORPAY_KEY_ID = "rzp_live_SCLx3PSv4D3HYL"
+  RAZORPAY_KEY_ID = "rzp_live_SCOazTCPWFjXmG"
   RAZORPAY_KEY_SECRET = ""
 
 [functions]
