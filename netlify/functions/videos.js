@@ -113,8 +113,8 @@ exports.handler = async (event) => {
             const action = event.queryStringParameters ? event.queryStringParameters.action : null;
             
             if (action === 'getUploadUrl') {
-                const fileName = event.queryStringParameters.fileName;
-                const fileType = event.queryStringParameters.fileType;
+                const fileName = event.queryStringParameters.fileName || event.queryStringParameters.filename;
+                const fileType = event.queryStringParameters.fileType || event.queryStringParameters.contenttype;
                 
                 if (!fileName) {
                     return {

@@ -5400,12 +5400,24 @@
                 
                 // Determine base URL based on environment
                 const baseUrl = window.location.hostname.includes('localhost') ? '/api' : '/.netlify/functions';
-                const getUrlEndpoint = window.location.hostname.includes('localhost') ? '/api/videos/get-upload-url' : '/.netlify/functions/videos?action=getUploadUrl';
+                const isLocal = window.location.hostname.includes('localhost');
+                
+                let getUrlEndpoint;
+                if (isLocal) {
+                    getUrlEndpoint = '/api/videos/get-upload-url';
+                } else {
+                    const params = new URLSearchParams({
+                        action: 'getUploadUrl',
+                        fileName: file.name,
+                        fileType: file.type || 'application/octet-stream'
+                    });
+                    getUrlEndpoint = `/.netlify/functions/videos?${params.toString()}`;
+                }
 
                 const urlResponse = await fetch(getUrlEndpoint, {
-                    method: window.location.hostname.includes('localhost') ? 'POST' : 'GET',
-                    headers: window.location.hostname.includes('localhost') ? { 'Content-Type': 'application/json' } : {},
-                    body: window.location.hostname.includes('localhost') ? JSON.stringify({
+                    method: isLocal ? 'POST' : 'GET',
+                    headers: isLocal ? { 'Content-Type': 'application/json' } : {},
+                    body: isLocal ? JSON.stringify({
                         fileName: file.name,
                         contentType: file.type || 'application/octet-stream'
                     }) : null
