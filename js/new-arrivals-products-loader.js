@@ -619,17 +619,11 @@ const NewArrivalsProductsLoader = (function() {
                 // No Firebase products found - show message
                 console.log('No products found in Firebase');
 
-                // Check if we're on Netlify and show appropriate message
-                const isNetlify = window.location.hostname.includes('netlify') || window.location.hostname.includes('.app');
-                const messageText = isNetlify
-                    ? 'If you recently deployed to Netlify, please ensure Firebase Admin credentials are configured in your Netlify environment variables.'
-                    : 'Products will appear here once they are added through the admin panel.';
-
                 newArrivalsGrid.innerHTML = `
                     <div class="no-products-message" style="grid-column: 1 / -1; text-align: center; padding: 40px 20px;">
                         <i class="fas fa-star" style="font-size: 48px; color: #5a3f2a; margin-bottom: 20px;"></i>
                         <h3 style="color: #5a3f2a; margin-bottom: 10px;">No Products Available</h3>
-                        <p style="color: #666;">${messageText}</p>
+                        <p style="color: #666;">Products will appear here once they are added through the admin panel.</p>
                     </div>
                 `;
             }
