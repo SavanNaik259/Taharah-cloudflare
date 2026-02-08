@@ -449,7 +449,7 @@ background-color: #000 !important;
 
 
                 <!-- Mobile Toggle Button - Match RIDHI MEHRA design -->
-                <div class="hamburger" id="navToggle"><img src="images/icons/bars-staggered (2).png" alt="SP Jewellers"style="width: 25px; height: 25px;">
+                <div class="hamburger" id="navToggle"><img src="images/icons/bars-staggered (2).png" alt="Taharah"style="width: 25px; height: 25px;">
                 </div>
 
                 <!-- Navigation Icons - Exact match to RIDHI MEHRA design -->
@@ -1724,7 +1724,10 @@ background-color: #000 !important;
             <div class="container">
                 <div class="footer-info">
                     <div class="copyright">
-                        <p data-translate-dynamic>&copy; 2025 Royal Meenakari. All rights reserved. | Developed by <a href="https://..netlify.app/" target="_blank" style="color: #9c7c38; text-decoration: none; font-weight: 500;">Savan Naik</a></p>
+                        <p data-translate-dynamic>&copy; <span id="currentYear"></span> Taharah. All rights reserved. | Developed by <a href="https://..netlify.app/" target="_blank" style="color: #9c7c38; text-decoration: none; font-weight: 500;">Savan Naik</a></p>
+                    <script>
+                        document.getElementById("currentYear").textContent = new Date().getFullYear();
+                    </script>
                     </div>
 
                     <div class="footer-links">
@@ -1748,7 +1751,7 @@ background-color: #000 !important;
     </footer>
 
     <!-- WhatsApp Button -->
-      <a href="https://wa.me/918963815289?text=Hi! I would like to know more about your services. Can you help me?" class="whatsapp-btn">
+      <a href="https://wa.me/919310250047?text=Hi! I would like to know more about your collection. Can you help me?" class="whatsapp-btn">
           <i class="fab fa-whatsapp"></i>
       </a>
 
@@ -2136,7 +2139,7 @@ background-color: #000 !important;
     <script>
         // WhatsApp Chat Function
         function openWhatsAppChat() {
-            const phoneNumber = "+919310250047"; // SP Jewellers WhatsApp business number
+            const phoneNumber = "+919310250047"; // Taharah WhatsApp business number
             const message = "Hi! I'm interested. Can you help me?";
             const encodedMessage = encodeURIComponent(message);
             const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
