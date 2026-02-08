@@ -11245,6 +11245,45 @@
         // Initialize analytics when the page loads
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 [INIT DEBUG] DOMContentLoaded fired!');
+
+            // --- AUTO REFRESH LOGIC START ---
+            function triggerAutoRefresh() {
+                if (!sessionStorage.getItem('admin_initial_refresh_done')) {
+                    console.log('🔄 Auto-refreshing in 2 seconds to ensure data consistency...');
+                    setTimeout(() => {
+                        sessionStorage.setItem('admin_initial_refresh_done', 'true');
+                        window.location.reload();
+                    }, 2000);
+                }
+            }
+
+            // Check if we should trigger refresh (either already verified or after modal hidden)
+            const checkAuthAndRefresh = () => {
+                const authModal = document.getElementById('admin-auth-modal');
+                const isVerified = localStorage.getItem('adminVerified') === 'true' || 
+                                 sessionStorage.getItem('adminVerified') === 'true';
+
+                if (isVerified && (!authModal || authModal.style.display === 'none')) {
+                    triggerAutoRefresh();
+                } else if (authModal) {
+                    // Observe the modal for when it gets hidden (after successful verification)
+                    const observer = new MutationObserver((mutations) => {
+                        mutations.forEach((mutation) => {
+                            if (mutation.attributeName === 'style') {
+                                if (authModal.style.display === 'none') {
+                                    triggerAutoRefresh();
+                                    observer.disconnect();
+                                }
+                            }
+                        });
+                    });
+                    observer.observe(authModal, { attributes: true });
+                }
+            };
+            
+            checkAuthAndRefresh();
+            // --- AUTO REFRESH LOGIC END ---
+
             console.log('🚀 [INIT DEBUG] Current pathname:', window.location.pathname);
             console.log('🚀 [INIT DEBUG] Full URL:', window.location.href);
             console.log('🚀 [INIT DEBUG] Checking if pathname includes admin-panel:', window.location.pathname.includes('admin-panel'));
