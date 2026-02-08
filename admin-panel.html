@@ -5383,6 +5383,13 @@
                 alert('Please select a video file');
                 return;
             }
+
+            // Client-side size check (100MB limit)
+            const MAX_SIZE = 100 * 1024 * 1024; // 100MB
+            if (file.size > MAX_SIZE) {
+                alert(`File is too large (${(file.size / (1024 * 1024)).toFixed(2)}MB). Maximum allowed size is 100MB.`);
+                return;
+            }
             
             const uploadBtn = document.getElementById('uploadVideoBtn');
             const progressDiv = document.getElementById('uploadProgress');
