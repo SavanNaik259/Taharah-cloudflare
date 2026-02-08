@@ -193,9 +193,11 @@ exports.handler = async (event) => {
                         contentType: videoContentType || 'video/mp4',
                         cacheControl: 'public, max-age=31536000'
                     });
-                    console.log(`[Videos Function] Set metadata for ${filename}: ${videoContentType || 'video/mp4'}`);
+                    // Make the file public so it can be viewed
+                    await file.makePublic();
+                    console.log(`[Videos Function] Set metadata and made public for ${filename}: ${videoContentType || 'video/mp4'}`);
                 } catch (metaError) {
-                    console.error('[Videos Function] Failed to set metadata:', metaError);
+                    console.error('[Videos Function] Failed to set metadata or make public:', metaError);
                 }
 
                 const videoDoc = await db.collection('watchBuyVideos').add({
