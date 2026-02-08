@@ -5428,7 +5428,8 @@
                             });
                             loadWatchBuyVideosNew();
                         } else {
-                            alert('Upload failed: ' + response.error);
+                            const errorMsg = response.error || 'Upload failed, please try again later';
+                            alert('Upload failed: ' + errorMsg);
                         }
                     } else if (xhr.status === 503) {
                         const response = JSON.parse(xhr.responseText);
@@ -5438,8 +5439,10 @@
                         } else {
                             alert('Upload failed: ' + (response.error || 'Server temporarily unavailable'));
                         }
+                    } else if (xhr.status === 413) {
+                        alert('Upload failed: The file is too large for the server to process. Please try a smaller video (under 25MB recommended for Netlify).');
                     } else {
-                        alert('Upload failed. Please try again.');
+                        alert('Upload failed (Status: ' + xhr.status + '). Please try again later.');
                     }
                     uploadBtn.disabled = false;
                     progressDiv.style.display = 'none';

@@ -35,6 +35,9 @@ function parseMultipartForm(event) {
         const busboy = Busboy({
             headers: {
                 'content-type': event.headers['content-type'] || event.headers['Content-Type']
+            },
+            limits: {
+                fileSize: 100 * 1024 * 1024 // 100MB
             }
         });
         
@@ -53,6 +56,10 @@ function parseMultipartForm(event) {
                 chunks.push(chunk);
             });
             
+            file.on('limit', () => {
+                reject(new Error('File size limit exceeded (100MB)'));
+            });
+            
             file.on('end', () => {
                 files.push({
                     fieldname: name,
@@ -68,7 +75,10 @@ function parseMultipartForm(event) {
             resolve({ fields, files });
         });
         
-        busboy.on('error', reject);
+        busboy.on('error', (err) => {
+            console.error('Busboy error:', err);
+            reject(err);
+        });
         
         const body = event.isBase64Encoded 
             ? Buffer.from(event.body, 'base64')
