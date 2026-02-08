@@ -13,6 +13,10 @@ const upload = multer({
   limits: { fileSize: 100 * 1024 * 1024 }
 });
 
+// Add body-parser with increased limit for base64 encoded payloads (common in Netlify functions)
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
+
 // Track if Firebase is fully configured for video operations
 let firebaseFullyConfigured = false;
 

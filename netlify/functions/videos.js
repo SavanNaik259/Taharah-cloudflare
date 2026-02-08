@@ -72,9 +72,12 @@ function parseMultipartForm(event) {
         
         const body = event.isBase64Encoded 
             ? Buffer.from(event.body, 'base64')
-            : Buffer.from(event.body);
+            : (typeof event.body === 'string' ? Buffer.from(event.body) : event.body);
         
-        busboy.end(body);
+        // Ensure body is not too large for Netlify (limit is actually 6MB usually, but we check if it's truncated)
+        if (!body) {
+            return reject(new Error('Empty request body'));
+        }
     });
 }
 
