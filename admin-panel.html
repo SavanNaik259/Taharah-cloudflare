@@ -11246,10 +11246,11 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 [INIT DEBUG] DOMContentLoaded fired!');
 
-            // --- AUTO REFRESH LOGIC START ---
+            // --- AUTO REFRESH LOGIC ---
             function triggerAutoRefresh() {
+                // Use a session-specific flag to prevent infinite loops
                 if (!sessionStorage.getItem('admin_initial_refresh_done')) {
-                    console.log('🔄 Auto-refreshing in 2 seconds to ensure data consistency...');
+                    console.log('🔄 Admin Panel: Triggering auto-refresh in 2 seconds...');
                     setTimeout(() => {
                         sessionStorage.setItem('admin_initial_refresh_done', 'true');
                         window.location.reload();
@@ -11257,32 +11258,35 @@
                 }
             }
 
-            // Check if we should trigger refresh (either already verified or after modal hidden)
-            const checkAuthAndRefresh = () => {
-                const authModal = document.getElementById('admin-auth-modal');
+            const checkVerification = () => {
                 const isVerified = localStorage.getItem('adminVerified') === 'true' || 
                                  sessionStorage.getItem('adminVerified') === 'true';
-
+                const authModal = document.getElementById('admin-auth-modal');
+                
+                // Case 1: Admin is already verified (cached session)
+                // Case 2: Admin just entered the code (modal is hidden and verification is true)
                 if (isVerified && (!authModal || authModal.style.display === 'none')) {
                     triggerAutoRefresh();
-                } else if (authModal) {
-                    // Observe the modal for when it gets hidden (after successful verification)
-                    const observer = new MutationObserver((mutations) => {
-                        mutations.forEach((mutation) => {
-                            if (mutation.attributeName === 'style') {
-                                if (authModal.style.display === 'none') {
-                                    triggerAutoRefresh();
-                                    observer.disconnect();
-                                }
-                            }
-                        });
-                    });
-                    observer.observe(authModal, { attributes: true });
                 }
             };
-            
-            checkAuthAndRefresh();
-            // --- AUTO REFRESH LOGIC END ---
+
+            // Initial check on load
+            checkVerification();
+
+            // Set up an observer for the auth modal to catch the moment it disappears after code entry
+            const authModal = document.getElementById('admin-auth-modal');
+            if (authModal) {
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.attributeName === 'style' && authModal.style.display === 'none') {
+                            checkVerification();
+                            // We don't disconnect immediately because the user might need to re-verify if they logout/login
+                        }
+                    });
+                });
+                observer.observe(authModal, { attributes: true });
+            }
+            // --- END AUTO REFRESH LOGIC ---
 
             console.log('🚀 [INIT DEBUG] Current pathname:', window.location.pathname);
             console.log('🚀 [INIT DEBUG] Full URL:', window.location.href);
