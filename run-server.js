@@ -1554,6 +1554,87 @@ app.post('/api/videos/upload', upload.single('video'), async (req, res) => {
   }
 });
 
+// Get presigned URL for large video uploads
+app.post('/api/videos/get-upload-url', async (req, res) => {
+  try {
+    if (!isFirebaseReady()) {
+      return res.status(503).json({ 
+        success: false, 
+        error: 'Firebase not configured'
+      });
+    }
+
+    const { fileName, contentType } = req.body;
+    if (!fileName || !contentType) {
+      return res.status(400).json({ success: false, error: 'fileName and contentType are required' });
+    }
+
+    const timestamp = Date.now();
+    const filename = `watch-buy-videos/${timestamp}-${fileName}`;
+    const bucket = admin.storage().bucket();
+    const file = bucket.file(filename);
+
+    const [url] = await file.getSignedUrl({
+      version: 'v4',
+      action: 'write',
+      expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+      contentType: contentType,
+    });
+
+    res.json({ 
+      success: true, 
+      uploadUrl: url, 
+      filename: filename,
+      publicUrl: `https://storage.googleapis.com/${bucket.name}/${filename}`
+    });
+  } catch (error) {
+    console.error('Error generating presigned URL:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Register video metadata after successful upload via presigned URL
+app.post('/api/videos/register', async (req, res) => {
+  try {
+    if (!isFirebaseReady()) {
+      return res.status(503).json({ success: false, error: 'Firebase not configured' });
+    }
+
+    const { title, productSKU, description, videoUrl, filename } = req.body;
+    if (!videoUrl || !filename) {
+      return res.status(400).json({ success: false, error: 'videoUrl and filename are required' });
+    }
+
+    // Make file public
+    const bucket = admin.storage().bucket();
+    await bucket.file(filename).makePublic();
+
+    const timestamp = Date.now();
+    const db = admin.firestore();
+    const videosDoc = await db.collection('settings').doc('watchBuyVideos').get();
+    const currentVideos = videosDoc.exists ? (videosDoc.data().videos || []) : [];
+    
+    const newVideo = {
+      id: `video-${timestamp}`,
+      title: title || 'Untitled Video',
+      description: description || '',
+      productSKU: productSKU || '',
+      videoUrl,
+      filename,
+      uploadedAt: new Date().toISOString(),
+      order: currentVideos.length
+    };
+    
+    currentVideos.push(newVideo);
+    await db.collection('settings').doc('watchBuyVideos').set({ videos: currentVideos }, { merge: true });
+    
+    res.json({ success: true, video: newVideo });
+  } catch (error) {
+    console.error('Error registering video:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Update video metadata
 app.put('/api/videos/:videoId', async (req, res) => {
   try {

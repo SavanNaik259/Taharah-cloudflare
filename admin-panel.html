@@ -5395,24 +5395,27 @@
             progressText.textContent = 'Preparing upload...';
             
             try {
-                // Step 1: Get Presigned URL from Netlify Function
-                const urlParams = new URLSearchParams({
-                    action: 'getUploadUrl',
-                    fileName: file.name,
-                    fileType: file.type
+                // Step 1: Get Presigned URL
+                progressText.textContent = 'Getting secure upload channel...';
+                const urlResponse = await fetch('/api/videos/get-upload-url', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fileName: file.name,
+                        contentType: file.type
+                    })
                 });
                 
-                const urlResponse = await fetch(`/.netlify/functions/videos?${urlParams.toString()}`);
                 const urlData = await urlResponse.json();
                 
                 if (!urlData.success) {
                     throw new Error(urlData.error || 'Failed to get upload URL');
                 }
                 
-                const { uploadUrl, storagePath, publicUrl } = urlData;
+                const { uploadUrl, filename, publicUrl } = urlData;
                 
                 // Step 2: Upload directly to Firebase Storage using the Presigned URL
-                progressText.textContent = 'Uploading to storage...';
+                progressText.textContent = 'Uploading video (direct channel)...';
                 
                 const xhr = new XMLHttpRequest();
                 xhr.open('PUT', uploadUrl);
@@ -5434,32 +5437,37 @@
                             reject(new Error(`Storage upload failed with status: ${xhr.status}`));
                         }
                     };
-                    xhr.onerror = () => reject(new Error('Network error during storage upload'));
+                    xhr.onerror = () => reject(new Error('Network error during storage upload. This might be due to CORS or network issues.'));
                 });
                 
                 xhr.send(file);
                 await uploadPromise;
                 
-                // Step 3: Save metadata to Firestore
+                // Step 3: Register metadata
                 progressText.textContent = 'Finalizing...';
                 
-                const videoDoc = {
-                    title,
-                    productSKU,
-                    description,
-                    videoUrl: publicUrl,
-                    storagePath,
-                    uploadedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    status: 'active'
-                };
+                const registerResponse = await fetch('/api/videos/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title,
+                        productSKU,
+                        description,
+                        videoUrl: publicUrl,
+                        filename
+                    })
+                });
                 
-                await db.collection('watchBuyVideos').add(videoDoc);
+                const registerData = await registerResponse.json();
+                if (!registerData.success) {
+                    throw new Error(registerData.error || 'Failed to register video metadata');
+                }
                 
                 closeUploadVideoModal();
                 showSuccessModal({
                     icon: '<i class="fas fa-check-circle"></i>',
                     title: 'Video Uploaded!',
-                    message: 'Your video has been successfully uploaded using a secure direct channel.'
+                    message: 'Your video has been successfully uploaded.'
                 });
                 loadWatchBuyVideosNew();
                 
