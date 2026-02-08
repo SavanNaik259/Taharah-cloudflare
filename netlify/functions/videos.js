@@ -135,10 +135,7 @@ exports.handler = async (event) => {
                     version: 'v4',
                     action: 'write',
                     expires: Date.now() + 15 * 60 * 1000, // 15 minutes
-                    contentType: fileType || 'application/octet-stream',
-                    extensionHeaders: {
-                        'x-goog-resumable': 'start'
-                    }
+                    contentType: fileType || 'video/mp4'
                 });
 
                 console.log(`[Videos Function] Generated signed URL for ${storagePath} with type ${fileType || 'application/octet-stream'}`);
@@ -179,7 +176,7 @@ exports.handler = async (event) => {
             if (contentType && contentType.includes('application/json')) {
                 // Handle JSON registration from presigned upload
                 const body = JSON.parse(event.body);
-                const { title, productSKU, description, videoUrl, filename } = body;
+                const { title, productSKU, description, videoUrl, filename, contentType: videoContentType } = body;
                 
                 if (!videoUrl || !filename) {
                     return {
@@ -187,6 +184,18 @@ exports.handler = async (event) => {
                         headers: corsHeaders,
                         body: JSON.stringify({ success: false, error: 'videoUrl and filename are required for registration' })
                     };
+                }
+
+                // Important: Ensure the file in storage has the correct content type metadata
+                try {
+                    const file = bucket.file(filename);
+                    await file.setMetadata({
+                        contentType: videoContentType || 'video/mp4',
+                        cacheControl: 'public, max-age=31536000'
+                    });
+                    console.log(`[Videos Function] Set metadata for ${filename}: ${videoContentType || 'video/mp4'}`);
+                } catch (metaError) {
+                    console.error('[Videos Function] Failed to set metadata:', metaError);
                 }
 
                 const videoDoc = await db.collection('watchBuyVideos').add({
