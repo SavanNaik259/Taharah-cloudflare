@@ -34,7 +34,7 @@ try {
 
       adminApp = admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
-        storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'auric-a0c92.firebasestorage.app'
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET
       });
       console.log('Initialized new Firebase Admin app for upload');
     } catch (initError) {
