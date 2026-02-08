@@ -174,7 +174,7 @@ const FOOTER_HTML = `
     </footer>
 
     <!-- WhatsApp Button -->
-      <a href="https://wa.me/8589920686?text=Hi! I would like to know more about your services. Can you help me?" class="whatsapp-btn">
+      <a href="https://wa.me/918589920686?text=Hi! I would like to know more about your services. Can you help me?" class="whatsapp-btn">
           <i class="fab fa-whatsapp"></i>
       </a>
 
