@@ -5419,7 +5419,8 @@
                 
                 const xhr = new XMLHttpRequest();
                 xhr.open('PUT', uploadUrl);
-                xhr.setRequestHeader('Content-Type', file.type);
+                // Remove specific Content-Type header to avoid "unsupported content type" issues with GCS signed URLs
+                // xhr.setRequestHeader('Content-Type', file.type);
                 
                 xhr.upload.addEventListener('progress', (e) => {
                     if (e.lengthComputable) {

@@ -1578,7 +1578,8 @@ app.post('/api/videos/get-upload-url', async (req, res) => {
       version: 'v4',
       action: 'write',
       expires: Date.now() + 15 * 60 * 1000, // 15 minutes
-      contentType: contentType,
+      // Remove specific contentType to avoid "unsupported content type" issues
+      // contentType: contentType,
     });
 
     res.json({ 
