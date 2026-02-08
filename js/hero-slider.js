@@ -35,7 +35,7 @@ function showSlide(index) {
 function startAutoSlide() {
     autoSlideInterval = setInterval(() => {
         showSlide(currentSlideIndex + 1);
-    }, 4000); // Change slide every 4 seconds
+    }, 6000); // Change slide every 6 seconds
 }
 
 /**
