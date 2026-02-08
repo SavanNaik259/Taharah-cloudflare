@@ -5443,10 +5443,6 @@
                 // Step 3: Save metadata to Firestore
                 progressText.textContent = 'Finalizing...';
                 
-                // We use the POST method but now it just saves metadata because we pass storage information
-                // However, the existing POST expects a file. Let's create a new metadata-only save.
-                // Or better, since we are in a browser, we can use the Firebase SDK directly since it's already initialized!
-                
                 const videoDoc = {
                     title,
                     productSKU,
