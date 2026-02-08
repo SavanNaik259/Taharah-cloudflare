@@ -2,7 +2,7 @@
  * Notification Registration Manager (V2 - Rebuilt)
  */
 const notificationManager = {
-    VAPID_KEY: 'BENFZQbE3p9n6YnjBdDwOySmVUao9Y9ryEH4_PJhsAKUMcUUfYDZV_c3BlZai6G77Rojwy2f0Ab540bfo5w2Mys',
+    VAPID_KEY: 'BLzgONy1dxvZSOupRvbC1gnjaW98YHtk683EuqQoT7sEqXsFU5R7CD_pa2Fhuem6qoVflcZr6f0rSeLpHyylzsI',
 
     async init() {
         if (!('serviceWorker' in navigator) || !('Notification' in window)) {

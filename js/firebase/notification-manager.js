@@ -43,7 +43,7 @@ class NotificationManager {
         console.warn('⚠️ Could not fetch VAPID key from /api/get-vapid-key:', error.message);
         console.warn('⚠️ Falling back to built-in VAPID key');
         // Fallback to built-in VAPID key if API fails
-        this.vapidKey = 'BENFZQbE3p9n6YnjBdDwOySmVUao9Y9ryEH4_PJhsAKUMcUUfYDZV_c3BlZai6G77Rojwy2f0Ab540bfo5w2Mys';
+        this.vapidKey = 'BLzgONy1dxvZSOupRvbC1gnjaW98YHtk683EuqQoT7sEqXsFU5R7CD_pa2Fhuem6qoVflcZr6f0rSeLpHyylzsI';
         if (!this.vapidKey) {
           return false;
         }
