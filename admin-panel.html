@@ -5417,32 +5417,26 @@
                 // Step 2: Upload directly to Firebase Storage using the Presigned URL
                 progressText.textContent = 'Uploading video (direct channel)...';
                 
-                const xhr = new XMLHttpRequest();
-                xhr.open('PUT', uploadUrl);
-                // Remove specific Content-Type header to avoid "unsupported content type" issues with GCS signed URLs
-                // xhr.setRequestHeader('Content-Type', file.type);
-                
-                xhr.upload.addEventListener('progress', (e) => {
-                    if (e.lengthComputable) {
-                        const percent = Math.round((e.loaded / e.total) * 100);
-                        progressBar.style.width = percent + '%';
-                        progressText.textContent = `Uploading... ${percent}%`;
-                    }
-                });
-                
-                const uploadPromise = new Promise((resolve, reject) => {
-                    xhr.onload = () => {
-                        if (xhr.status === 200 || xhr.status === 201) {
-                            resolve();
-                        } else {
-                            reject(new Error(`Storage upload failed with status: ${xhr.status}`));
+                // Use fetch for better compatibility with modern browsers and potentially better error handling
+                try {
+                    const uploadResponse = await fetch(uploadUrl, {
+                        method: 'PUT',
+                        body: file,
+                        headers: {
+                            'Content-Type': file.type
                         }
-                    };
-                    xhr.onerror = () => reject(new Error('Network error during storage upload. This might be due to CORS or network issues.'));
-                });
-                
-                xhr.send(file);
-                await uploadPromise;
+                    });
+
+                    if (!uploadResponse.ok) {
+                        const errorText = await uploadResponse.text();
+                        console.error('Storage upload failed:', errorText);
+                        throw new Error(`Storage upload failed with status: ${uploadResponse.status}. This might be due to CORS or bucket permissions.`);
+                    }
+                } catch (uploadErr) {
+                    console.error('Fetch upload error:', uploadErr);
+                    // Fallback to XHR if fetch fails for some reason, or just throw
+                    throw new Error('Network error during storage upload. This is likely due to CORS configuration on the Firebase Storage bucket. Please ensure CORS is allowed for this origin.');
+                }
                 
                 // Step 3: Register metadata
                 progressText.textContent = 'Finalizing...';
