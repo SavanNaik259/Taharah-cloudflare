@@ -5384,11 +5384,6 @@
                 return;
             }
             
-            if (file.size > 100 * 1024 * 1024) {
-                alert('File size exceeds 100MB limit');
-                return;
-            }
-            
             const uploadBtn = document.getElementById('uploadVideoBtn');
             const progressDiv = document.getElementById('uploadProgress');
             const progressBar = document.getElementById('uploadProgressBar');
@@ -5397,16 +5392,31 @@
             uploadBtn.disabled = true;
             progressDiv.style.display = 'block';
             progressBar.style.width = '0%';
-            progressText.textContent = 'Uploading...';
+            progressText.textContent = 'Preparing upload...';
             
             try {
-                const formData = new FormData();
-                formData.append('video', file);
-                formData.append('title', title);
-                formData.append('productSKU', productSKU);
-                formData.append('description', description);
+                // Step 1: Get Presigned URL from Netlify Function
+                const urlParams = new URLSearchParams({
+                    action: 'getUploadUrl',
+                    fileName: file.name,
+                    fileType: file.type
+                });
+                
+                const urlResponse = await fetch(`/.netlify/functions/videos?${urlParams.toString()}`);
+                const urlData = await urlResponse.json();
+                
+                if (!urlData.success) {
+                    throw new Error(urlData.error || 'Failed to get upload URL');
+                }
+                
+                const { uploadUrl, storagePath, publicUrl } = urlData;
+                
+                // Step 2: Upload directly to Firebase Storage using the Presigned URL
+                progressText.textContent = 'Uploading to storage...';
                 
                 const xhr = new XMLHttpRequest();
+                xhr.open('PUT', uploadUrl);
+                xhr.setRequestHeader('Content-Type', file.type);
                 
                 xhr.upload.addEventListener('progress', (e) => {
                     if (e.lengthComputable) {
@@ -5416,50 +5426,53 @@
                     }
                 });
                 
-                xhr.onload = function() {
-                    if (xhr.status === 200) {
-                        const response = JSON.parse(xhr.responseText);
-                        if (response.success) {
-                            closeUploadVideoModal();
-                            showSuccessModal({
-                                icon: '<i class="fas fa-check-circle"></i>',
-                                title: 'Video Uploaded!',
-                                message: 'Your video has been successfully uploaded and will appear in the Watch & Buy section.'
-                            });
-                            loadWatchBuyVideosNew();
+                const uploadPromise = new Promise((resolve, reject) => {
+                    xhr.onload = () => {
+                        if (xhr.status === 200 || xhr.status === 201) {
+                            resolve();
                         } else {
-                            const errorMsg = response.error || 'Upload failed, please try again later';
-                            alert('Upload failed: ' + errorMsg);
+                            reject(new Error(`Storage upload failed with status: ${xhr.status}`));
                         }
-                    } else if (xhr.status === 503) {
-                        const response = JSON.parse(xhr.responseText);
-                        if (response.development) {
-                            closeUploadVideoModal();
-                            alert('Video upload is only available on the production site (Netlify). Please deploy your changes first.');
-                        } else {
-                            alert('Upload failed: ' + (response.error || 'Server temporarily unavailable'));
-                        }
-                    } else if (xhr.status === 413) {
-                        alert('Upload failed: The file is too large for the server to process. Please try a smaller video (under 25MB recommended for Netlify).');
-                    } else {
-                        alert('Upload failed (Status: ' + xhr.status + '). Please try again later.');
-                    }
-                    uploadBtn.disabled = false;
-                    progressDiv.style.display = 'none';
+                    };
+                    xhr.onerror = () => reject(new Error('Network error during storage upload'));
+                });
+                
+                xhr.send(file);
+                await uploadPromise;
+                
+                // Step 3: Save metadata to Firestore
+                progressText.textContent = 'Finalizing...';
+                
+                // We use the POST method but now it just saves metadata because we pass storage information
+                // However, the existing POST expects a file. Let's create a new metadata-only save.
+                // Or better, since we are in a browser, we can use the Firebase SDK directly since it's already initialized!
+                
+                const videoDoc = {
+                    title,
+                    productSKU,
+                    description,
+                    videoUrl: publicUrl,
+                    storagePath,
+                    uploadedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: 'active'
                 };
                 
-                xhr.onerror = function() {
-                    alert('Upload failed. Please check your connection and try again.');
-                    uploadBtn.disabled = false;
-                };
+                await db.collection('watchBuyVideos').add(videoDoc);
                 
-                xhr.open('POST', '/api/videos/upload');
-                xhr.send(formData);
+                closeUploadVideoModal();
+                showSuccessModal({
+                    icon: '<i class="fas fa-check-circle"></i>',
+                    title: 'Video Uploaded!',
+                    message: 'Your video has been successfully uploaded using a secure direct channel.'
+                });
+                loadWatchBuyVideosNew();
                 
             } catch (error) {
                 console.error('Error uploading video:', error);
                 alert('Error uploading video: ' + error.message);
+            } finally {
                 uploadBtn.disabled = false;
+                progressDiv.style.display = 'none';
             }
         }
 

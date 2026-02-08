@@ -108,8 +108,48 @@ exports.handler = async (event) => {
         const db = admin.firestore();
         const bucket = admin.storage().bucket();
         
-        // Handle GET request to list all videos
+        // Handle GET request to list all videos or get a presigned URL
         if (event.httpMethod === 'GET') {
+            const action = event.queryStringParameters ? event.queryStringParameters.action : null;
+            
+            if (action === 'getUploadUrl') {
+                const fileName = event.queryStringParameters.fileName;
+                const fileType = event.queryStringParameters.fileType;
+                
+                if (!fileName) {
+                    return {
+                        statusCode: 400,
+                        headers: corsHeaders,
+                        body: JSON.stringify({ success: false, error: 'FileName is required' })
+                    };
+                }
+
+                const timestamp = Date.now();
+                const safeFilename = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
+                const storagePath = `videos/${timestamp}_${safeFilename}`;
+                
+                const file = bucket.file(storagePath);
+                
+                // Get a signed URL for uploading directly to Google Cloud Storage (Firebase Storage)
+                const [url] = await file.getSignedUrl({
+                    version: 'v4',
+                    action: 'write',
+                    expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+                    contentType: fileType || 'application/octet-stream'
+                });
+
+                return {
+                    statusCode: 200,
+                    headers: corsHeaders,
+                    body: JSON.stringify({ 
+                        success: true, 
+                        uploadUrl: url, 
+                        storagePath,
+                        publicUrl: `https://storage.googleapis.com/${bucket.name}/${storagePath}`
+                    })
+                };
+            }
+
             const videosSnapshot = await db.collection('watchBuyVideos').orderBy('uploadedAt', 'desc').get();
             const videos = [];
             videosSnapshot.forEach(doc => {
