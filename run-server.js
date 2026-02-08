@@ -1577,8 +1577,11 @@ app.post('/api/videos/get-upload-url', async (req, res) => {
     const [url] = await file.getSignedUrl({
       version: 'v4',
       action: 'write',
-      expires: Date.now() + 30 * 60 * 1000, // 30 minutes for larger files
-      contentType: contentType, // Re-include contentType as it's required for some V4 signatures to match headers
+      expires: Date.now() + 30 * 60 * 1000,
+      contentType: contentType,
+      extensionHeaders: {
+        'Content-Type': contentType
+      }
     });
 
     res.json({ 

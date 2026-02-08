@@ -5417,25 +5417,26 @@
                 // Step 2: Upload directly to Firebase Storage using the Presigned URL
                 progressText.textContent = 'Uploading video (direct channel)...';
                 
-                // Use fetch for better compatibility with modern browsers and potentially better error handling
                 try {
+                    // Use a clean fetch with specific headers to match the V4 signature
                     const uploadResponse = await fetch(uploadUrl, {
                         method: 'PUT',
                         body: file,
                         headers: {
                             'Content-Type': file.type
-                        }
+                        },
+                        // Ensure we don't send any extra headers that might break the signature
+                        mode: 'cors'
                     });
 
                     if (!uploadResponse.ok) {
                         const errorText = await uploadResponse.text();
                         console.error('Storage upload failed:', errorText);
-                        throw new Error(`Storage upload failed with status: ${uploadResponse.status}. This might be due to CORS or bucket permissions.`);
+                        throw new Error(`Storage upload failed with status: ${uploadResponse.status}. ${errorText.includes('SignatureDoesNotMatch') ? 'Signature mismatch.' : ''}`);
                     }
                 } catch (uploadErr) {
                     console.error('Fetch upload error:', uploadErr);
-                    // Fallback to XHR if fetch fails for some reason, or just throw
-                    throw new Error('Network error during storage upload. This is likely due to CORS configuration on the Firebase Storage bucket. Please ensure CORS is allowed for this origin.');
+                    throw new Error('Network error during storage upload. Please ensure your bucket CORS allows PUT methods and Content-Type headers.');
                 }
                 
                 // Step 3: Register metadata
