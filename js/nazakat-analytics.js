@@ -9,9 +9,9 @@
     const firebaseConfig = window.firebaseConfig || {
         // Fallback config if main config not loaded (unified nazakat project)
         apiKey: "AIzaSyCQ9gafSnJBwuXvIpnOGn4Kwo8YqMkKY0M-uI",
-        authDomain: "nazakat-ae992.firebaseapp.com",
-        projectId: "nazakat-ae992",
-        storageBucket: "nazakat-ae992.firebasestorage.app",
+        authDomain: "studio-7642357109-d9026.firebaseapp.com",
+        projectId: "studio-7642357109-d9026",
+        storageBucket: "studio-7642357109-d9026.firebasestorage.app",
         messagingSenderId: "313125797080",
         appId: "1:313125797080:web:c84bc281bbbabae0816bad",
         measurementId: "G-Y4QK5DGNK6"

@@ -60,7 +60,7 @@ exports.handler = async (event, context) => {
 
     // Use direct Firebase Storage URL with alt=media for CDN caching
     // This bypasses signed URLs and allows Firebase Storage CDN to work properly
-    const storageUrl = `https://firebasestorage.googleapis.com/v0/b/auric-a0c92.firebasestorage.app/o/bandwidthTest%2F${category}-products.json?alt=media`;
+    const storageUrl = `https://firebasestorage.googleapis.com/v0/b/studio-7642357109-d9026.firebasestorage.app/o/bandwidthTest%2F${category}-products.json?alt=media`;
 
     console.log(`Fetching from Firebase Storage CDN: ${storageUrl}`);
 

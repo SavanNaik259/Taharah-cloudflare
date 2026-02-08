@@ -84,9 +84,9 @@ exports.handler = async (event, context) => {
         let storageUrl;
         
         if (isBandwidthTest) {
-          storageUrl = `https://firebasestorage.googleapis.com/v0/b/auric-a0c92.firebasestorage.app/o/bandwidthTest%2F${cat}-products.json?alt=media`;
+          storageUrl = `https://firebasestorage.googleapis.com/v0/b/studio-7642357109-d9026.firebasestorage.app/o/bandwidthTest%2F${cat}-products.json?alt=media`;
         } else {
-          storageUrl = `https://firebasestorage.googleapis.com/v0/b/auric-a0c92.firebasestorage.app/o/productData%2F${cat}-products.json?alt=media`;
+          storageUrl = `https://firebasestorage.googleapis.com/v0/b/studio-7642357109-d9026.firebasestorage.app/o/productData%2F${cat}-products.json?alt=media`;
         }
 
         if (isCacheBust) {
@@ -169,9 +169,9 @@ exports.handler = async (event, context) => {
     let storageUrl;
     
     if (isBandwidthTest) {
-      storageUrl = `https://firebasestorage.googleapis.com/v0/b/auric-a0c92.firebasestorage.app/o/bandwidthTest%2F${category}-products.json?alt=media`;
+      storageUrl = `https://firebasestorage.googleapis.com/v0/b/studio-7642357109-d9026.firebasestorage.app/o/bandwidthTest%2F${category}-products.json?alt=media`;
     } else {
-      storageUrl = `https://firebasestorage.googleapis.com/v0/b/auric-a0c92.firebasestorage.app/o/productData%2F${category}-products.json?alt=media`;
+      storageUrl = `https://firebasestorage.googleapis.com/v0/b/studio-7642357109-d9026.firebasestorage.app/o/productData%2F${category}-products.json?alt=media`;
     }
     
     if (isCacheBust) {

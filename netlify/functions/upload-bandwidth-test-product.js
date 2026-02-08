@@ -33,7 +33,7 @@ if (!admin.apps.length) {
 
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
-        storageBucket: 'auric-a0c92.firebasestorage.app'
+        storageBucket: 'studio-7642357109-d9026.firebasestorage.app'
       });
 
       console.log('Firebase Admin initialized successfully for bandwidth test uploads');
@@ -139,7 +139,7 @@ exports.handler = async (event, context) => {
           };
 
           await imageFile.save(fileBuffer, { metadata });
-          const imageUrl = `https://firebasestorage.googleapis.com/v0/b/auric-a0c92.firebasestorage.app/o/bandwidthTest%2F${imageFileName}?alt=media`;
+          const imageUrl = `https://firebasestorage.googleapis.com/v0/b/studio-7642357109-d9026.firebasestorage.app/o/bandwidthTest%2F${imageFileName}?alt=media`;
 
           // Create product data
           const productData = {

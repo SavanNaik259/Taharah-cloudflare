@@ -1387,7 +1387,7 @@ app.post('/api/test-send-notification', async (req, res) => {
       category: 'test',
       timestamp: Date.now().toString(),
       link: '/',
-      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/auric-a0c92.firebasestorage.app/o/productData%2Ftest-image.png?alt=media',
+      imageUrl: 'https://firebasestorage.googleapis.com/v0/b/studio-7642357109-d9026.firebasestorage.app/o/productData%2Ftest-image.png?alt=media',
       buttonText: 'View More'
     };
 
