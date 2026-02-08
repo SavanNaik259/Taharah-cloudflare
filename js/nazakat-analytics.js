@@ -13,7 +13,7 @@
         projectId: "studio-7642357109-d9026",
         storageBucket: "studio-7642357109-d9026.firebasestorage.app",
         messagingSenderId: "1076239216683",
-        appId: "1:1076239216683:web:c84bc281bbbabae0816bad",
+        appId: "1:1076239216683:web:a298fa70bb136183217a6e",
         measurementId: "G-ZYZ750JHMB"
     };
 
