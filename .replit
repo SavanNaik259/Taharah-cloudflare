@@ -58,9 +58,9 @@ integrations = ["javascript_object_storage:2.0.0"]
 [userenv]
 
 [userenv.shared]
-FIREBASE_VAPID_KEY = "BENFZQbE3p9n6YnjBdDwOySmVUao9Y9ryEH4_PJhsAKUMcUUfYDZV_c3BlZai6G77Rojwy2f0Ab540bfo5w2Mys"
-FIREBASE_PROJECT_ID = "auric-a0c92"
-FIREBASE_PRIVATE_KEY_ID = "067bc566a907eeca7ae57d98ec6ba463385b2617"
+FIREBASE_VAPID_KEY = "BLzgONy1dxvZSOupRvbC1gnjaW98YHtk683EuqQoT7sEqXsFU5R7CD_pa2Fhuem6qoVflcZr6f0rSeLpHyylzsI"
+FIREBASE_PROJECT_ID = "studio-7642357109-d9026"
+FIREBASE_PRIVATE_KEY_ID = "992b031db8cbb949f66b6a71ad1dd3d434adcd7c"
 FIREBASE_PRIVATE_KEY = """
 -----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCW1inMXQEJA7c1
@@ -91,13 +91,16 @@ UD//owCkNu22xWl2SNoBVO3htsGuwokolPBt/MA8mGG+SDR7JJbeDxesfzUWTxHb
 PNWi5ETLiI2OCy1JSmPGq9k=
 -----END PRIVATE KEY-----
 """
-FIREBASE_CLIENT_EMAIL = "firebase-adminsdk-fbsvc@auric-a0c92.iam.gserviceaccount.com"
-FIREBASE_CLIENT_ID = "112489649638932528471"
-FIREBASE_CERT_URL = "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40auric-a0c92.iam.gserviceaccount.com"
-FIREBASE_STORAGE_BUCKET = "auric-a0c92.firebasestorage.app"
-FIREBASE_API_KEY = "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI"
-FIREBASE_APP_ID = "1:878979958342:web:e6092f7522488d21eaec47"
+FIREBASE_CLIENT_EMAIL = "firebase-adminsdk-fbsvc@studio-7642357109-d9026.iam.gserviceaccount.com"
+FIREBASE_CLIENT_ID = "116019966837750187800"
+FIREBASE_CERT_URL = "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40studio-7642357109-d9026.iam.gserviceaccount.com"
+FIREBASE_STORAGE_BUCKET = "studio-7642357109-d9026.firebasestorage.app"
+FIREBASE_API_KEY = "AIzaSyCQ9gafSnJBwuXvIpnOGn4Kwo8YqMkKY0M-uI"
+FIREBASE_APP_ID = "1:1076239216683:web:a298fa70bb136183217a6e"
 RAZORPAY_KEY_ID = "rzp_live_SCOazTCPWFjXmG"
+FIREBASE_MESSAGING_SENDER_ID = "1076239216683"
+FIREBASE_AUTH_DOMAIN = "studio-7642357109-d9026.firebaseapp.com"
+FIREBASE_MEASUREMENT_ID = "G-ZYZ750JHMB"
 
 [objectStorage]
 defaultBucketID = "replit-objstore-4b3fceaf-e3ca-4051-a2fe-53f52a7b6bc2"
