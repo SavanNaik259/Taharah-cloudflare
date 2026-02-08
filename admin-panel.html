@@ -5438,35 +5438,13 @@
                 const contentType = file.type || 'video/mp4';
                 
                 try {
-                    // Step 2a: Initialize Resumable Upload
-                    progressText.textContent = 'Initializing resumable upload...';
-                    const initResponse = await fetch(uploadUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': contentType,
-                            'x-goog-resumable': 'start'
-                        },
-                        mode: 'cors'
-                    });
-
-                    if (!initResponse.ok) {
-                        const errorText = await initResponse.text();
-                        console.error('Failed to initialize resumable upload:', errorText);
-                        throw new Error(`Failed to initialize resumable upload: ${initResponse.status}`);
-                    }
-
-                    const resumableUrl = initResponse.headers.get('Location');
-                    if (!resumableUrl) {
-                        throw new Error('No Location header received for resumable upload');
-                    }
-
-                    // Step 2b: Perform the actual upload to the resumable URL
+                    // Step 2: Upload directly to Firebase Storage using the Presigned URL
                     progressText.textContent = 'Uploading video data...';
                     
-                    // Simple XHR to track progress since fetch doesn't support upload progress natively
+                    // Use XMLHttpRequest to track progress since fetch doesn't support upload progress natively
                     await new Promise((resolve, reject) => {
                         const xhr = new XMLHttpRequest();
-                        xhr.open('PUT', resumableUrl);
+                        xhr.open('PUT', uploadUrl);
                         xhr.setRequestHeader('Content-Type', contentType);
                         
                         xhr.upload.onprogress = (e) => {
@@ -5489,7 +5467,7 @@
                         xhr.send(file);
                     });
                 } catch (uploadErr) {
-                    console.error('Resumable upload error:', uploadErr);
+                    console.error('Upload error:', uploadErr);
                     throw uploadErr;
                 }
                 
