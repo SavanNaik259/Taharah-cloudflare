@@ -56,20 +56,11 @@
     <!-- Initialize Firebase -->
     <script>
       // Firebase configuration - UPDATED to auric project
-      const firebaseConfig = {
-        apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
-        authDomain: "auric-a0c92.firebaseapp.com",
-        projectId: "auric-a0c92",
-        storageBucket: "auric-a0c92.firebasestorage.app",
-        messagingSenderId: "878979958342",
-        appId: "1:878979958342:web:e6092f7522488d21eaec47",
-        measurementId: "G-ZYZ750JHMB"
-      };
+      <!-- Firebase Config Centralized -->
+    <script src="js/firebase-config.js"></script>
 
       // Initialize Firebase directly (like in login)
-      if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-      }
+      <script src="js/firebase/firebase-init.js"></script>
 
       // Configure Firestore settings for better offline handling
       firebase.firestore().settings({
