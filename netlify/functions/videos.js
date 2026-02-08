@@ -138,9 +138,14 @@ exports.handler = async (event) => {
                     contentType: fileType || 'application/octet-stream'
                 });
 
+                console.log(`[Videos Function] Generated signed URL for ${storagePath} with type ${fileType || 'application/octet-stream'}`);
+
                 return {
                     statusCode: 200,
-                    headers: corsHeaders,
+                    headers: {
+                        ...corsHeaders,
+                        'Access-Control-Allow-Headers': 'Content-Type, x-goog-resumable'
+                    },
                     body: JSON.stringify({ 
                         success: true, 
                         uploadUrl: url, 

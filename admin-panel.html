@@ -5423,7 +5423,7 @@
                         method: 'PUT',
                         body: file,
                         headers: {
-                            'Content-Type': file.type
+                            'Content-Type': file.type || 'application/octet-stream'
                         },
                         // Ensure we don't send any extra headers that might break the signature
                         mode: 'cors'
@@ -5432,11 +5432,15 @@
                     if (!uploadResponse.ok) {
                         const errorText = await uploadResponse.text();
                         console.error('Storage upload failed:', errorText);
-                        throw new Error(`Storage upload failed with status: ${uploadResponse.status}. ${errorText.includes('SignatureDoesNotMatch') ? 'Signature mismatch.' : ''}`);
+                        // Check if it's a content-type issue or signature issue
+                        if (errorText.includes('SignatureDoesNotMatch')) {
+                            throw new Error('Upload failed: Signature mismatch. This usually happens if the Content-Type sent doesn\'t match the one used to generate the URL.');
+                        }
+                        throw new Error(`Storage upload failed with status: ${uploadResponse.status}`);
                     }
                 } catch (uploadErr) {
                     console.error('Fetch upload error:', uploadErr);
-                    throw new Error('Network error during storage upload. Please ensure your bucket CORS allows PUT methods and Content-Type headers.');
+                    throw uploadErr;
                 }
                 
                 // Step 3: Register metadata
