@@ -7,7 +7,7 @@ The admin dashboard and user profiles are showing empty data because Firestore s
 
 ### Step 1: Access Firebase Console
 1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Select your project: `auric-a0c92`
+2. Select your project: `studio-7642357109-d9026`
 3. Navigate to **Firestore Database** in the left sidebar
 4. Click on the **Rules** tab
 
@@ -48,6 +48,6 @@ If issues persist:
 4. Test with the Firebase Emulator for local development
 
 ## Current Firebase Project Configuration
-- Project ID: `auric-a0c92`
-- Storage Bucket: `auric-a0c92.firebasestorage.app`
-- Auth Domain: `auric-a0c92.firebaseapp.com`
+- Project ID: `studio-7642357109-d9026`
+- Storage Bucket: `studio-7642357109-d9026.firebasestorage.app`
+- Auth Domain: `studio-7642357109-d9026.firebaseapp.com`

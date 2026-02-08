@@ -12,9 +12,9 @@
         authDomain: "studio-7642357109-d9026.firebaseapp.com",
         projectId: "studio-7642357109-d9026",
         storageBucket: "studio-7642357109-d9026.firebasestorage.app",
-        messagingSenderId: "313125797080",
-        appId: "1:313125797080:web:c84bc281bbbabae0816bad",
-        measurementId: "G-Y4QK5DGNK6"
+        messagingSenderId: "1076239216683",
+        appId: "1:1076239216683:web:c84bc281bbbabae0816bad",
+        measurementId: "G-ZYZ750JHMB"
     };
 
     let analytics = {

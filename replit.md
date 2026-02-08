@@ -63,7 +63,7 @@ Products are organized into Firestore collections:
 ## External Dependencies
 
 ### Firebase Services
-- **Project ID**: `auric-a0c92`
+- **Project ID**: `studio-7642357109-d9026`
 - **Services Used**: Authentication, Firestore, Storage, Cloud Messaging
 - **Admin SDK**: Used server-side for privileged operations
 

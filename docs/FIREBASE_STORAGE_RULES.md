@@ -35,7 +35,7 @@ service firebase.storage {
 ## Steps to Update Storage Rules:
 
 1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Select your project: "auric-a0c92"
+2. Select your project: "studio-7642357109-d9026"
 3. Click on "Storage" in the left sidebar
 4. Click on the "Rules" tab
 5. Replace the existing rules with the rules above

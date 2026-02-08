@@ -11,9 +11,9 @@ Firebase Storage requires CORS configuration to allow browser requests from your
 ### Method 1: Using Google Cloud Console (Recommended)
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Select your project: `auric-a0c92`
+2. Select your project: `studio-7642357109-d9026`
 3. Navigate to **Cloud Storage** → **Browser**
-4. Find your bucket: `auric-a0c92.firebasestorage.app`
+4. Find your bucket: `studio-7642357109-d9026.firebasestorage.app`
 5. Click on the bucket name
 6. Go to **Configuration** tab
 7. Scroll down to **CORS** section
@@ -49,7 +49,7 @@ If you have Google Cloud SDK installed:
 
 2. Run this command:
 ```bash
-gsutil cors set cors-config.json gs://auric-a0c92.firebasestorage.app
+gsutil cors set cors-config.json gs://studio-7642357109-d9026.firebasestorage.app
 ```
 
 ### Method 3: For Production (Domain-Specific)
@@ -81,7 +81,7 @@ curl -H "Origin: https://ksa12.netlify.app" \
      -H "Access-Control-Request-Method: GET" \
      -H "Access-Control-Request-Headers: X-Requested-With" \
      -X OPTIONS \
-     "https://firebasestorage.googleapis.com/v0/b/auric-a0c92.firebasestorage.app/o/bandwidthTest%2Fbandwidth-test-1-products.json?alt=media"
+     "https://firebasestorage.googleapis.com/v0/b/studio-7642357109-d9026.firebasestorage.app/o/bandwidthTest%2Fbandwidth-test-1-products.json?alt=media"
 ```
 
 ## Expected Response Headers

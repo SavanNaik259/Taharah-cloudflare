@@ -24,15 +24,15 @@ Since the CORS section isn't visible in the Google Cloud Console UI, we'll use t
    EOF
    
    # Apply CORS configuration to your bucket
-   gsutil cors set cors-config.json gs://auric-a0c92.firebasestorage.app
+   gsutil cors set cors-config.json gs://studio-7642357109-d9026.firebasestorage.app
    
    # Verify the configuration was applied
-   gsutil cors get gs://auric-a0c92.firebasestorage.app
+   gsutil cors get gs://studio-7642357109-d9026.firebasestorage.app
    ```
 
 3. **Expected output after running the commands:**
    ```
-   Setting CORS on gs://auric-a0c92.firebasestorage.app/...
+   Setting CORS on gs://studio-7642357109-d9026.firebasestorage.app/...
    [
      {
        "origin": ["*"],
@@ -48,13 +48,13 @@ Since the CORS section isn't visible in the Google Cloud Console UI, we'll use t
 Try looking for CORS in a different location:
 
 1. **Go back to the bucket list**
-2. **Right-click on the bucket name** `auric-a0c92.firebasestorage.app`
+2. **Right-click on the bucket name** `studio-7642357109-d9026.firebasestorage.app`
 3. **Look for "Edit bucket" or "Bucket configuration"**
 4. **In the popup/modal, look for CORS settings**
 
 ## Option 3: Firebase Console Method
 
-1. Go to: https://console.firebase.google.com/project/auric-a0c92/storage
+1. Go to: https://console.firebase.google.com/project/studio-7642357109-d9026/storage
 2. Click on "Rules" tab
 3. Make sure the rules allow public read access:
    ```javascript
@@ -83,7 +83,7 @@ curl -H "Origin: https://ksa12.netlify.app" \
      -H "Access-Control-Request-Method: GET" \
      -H "Access-Control-Request-Headers: X-Requested-With" \
      -X OPTIONS \
-     "https://firebasestorage.googleapis.com/v0/b/auric-a0c92.firebasestorage.app/o/bandwidthTest%2Fbandwidth-test-1-products.json?alt=media"
+     "https://firebasestorage.googleapis.com/v0/b/studio-7642357109-d9026.firebasestorage.app/o/bandwidthTest%2Fbandwidth-test-1-products.json?alt=media"
 ```
 
 The response should include CORS headers like:

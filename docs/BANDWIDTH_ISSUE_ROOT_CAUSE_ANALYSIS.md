@@ -29,7 +29,7 @@ const proxyURL = isNetlify
 #### `js/bridal-products-loader.js` (Lines 88-98)
 ```javascript
 // ❌ PROBLEM: Uses direct URL but with static token
-const storageUrl = 'https://firebasestorage.googleapis.com/v0/b/auric-a0c92.firebasestorage.app/o/productData%2Fbridal-products.json?alt=media&token=c6a2eb63-56e3-4fc0-96ac-66773cf45f96';
+const storageUrl = 'https://firebasestorage.googleapis.com/v0/b/studio-7642357109-d9026.firebasestorage.app/o/productData%2Fbridal-products.json?alt=media&token=c6a2eb63-56e3-4fc0-96ac-66773cf45f96';
 ```
 
 #### `netlify/functions/load-products.js` (Lines 68-69)
@@ -70,7 +70,7 @@ The `js/bridal-products-loader.js` uses a static token:
 ### Direct CDN Access Implementation
 ```javascript
 // ✅ CORRECT: Direct Firebase Storage CDN access
-const directCDNUrl = `https://firebasestorage.googleapis.com/v0/b/auric-a0c92.firebasestorage.app/o/bandwidthTest%2F${category}-products.json?alt=media`;
+const directCDNUrl = `https://firebasestorage.googleapis.com/v0/b/studio-7642357109-d9026.firebasestorage.app/o/bandwidthTest%2F${category}-products.json?alt=media`;
 
 const response = await fetch(directCDNUrl, {
     method: 'GET',

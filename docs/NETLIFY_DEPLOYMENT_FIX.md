@@ -11,7 +11,7 @@ Your local development shows your actual products, but Netlify deployment shows 
 ### Step 1: Get Your Firebase Admin Credentials
 
 1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Select your project: **auric-a0c92**
+2. Select your project: **studio-7642357109-d9026**
 3. Click the gear icon → **Project Settings**
 4. Go to **Service Accounts** tab
 5. Click **Generate New Private Key**

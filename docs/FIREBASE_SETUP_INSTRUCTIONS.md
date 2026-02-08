@@ -10,7 +10,7 @@ You need to update your Firebase Firestore security rules to allow authenticated
 
 ### 1. Open Firebase Console
 1. Go to [Firebase Console](https://console.firebase.google.com)
-2. Select your project: **auric-a0c92**
+2. Select your project: **studio-7642357109-d9026**
 
 ### 2. Navigate to Firestore Rules
 1. In the left sidebar, click on **Firestore Database**

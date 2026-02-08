@@ -10,7 +10,7 @@
 
 2. **Select Your Project**
    - At the top of the page, click the project dropdown
-   - Find and select: `auric-a0c92`
+   - Find and select: `studio-7642357109-d9026`
 
 3. **Navigate to Cloud Storage**
    - In the left sidebar menu, scroll down to find **"Storage"**
@@ -18,7 +18,7 @@
    - OR use the search bar at top: type "Cloud Storage" and select "Buckets"
 
 4. **Find Your Bucket**
-   - Look for bucket named: `auric-a0c92.firebasestorage.app`
+   - Look for bucket named: `studio-7642357109-d9026.firebasestorage.app`
    - Click on the bucket name (NOT the checkbox, click the actual name)
 
 5. **Access Bucket Configuration**
@@ -63,13 +63,13 @@ If you can't find "Cloud Storage" in the sidebar:
 
 Try this direct link (replace with your project):
 ```
-https://console.cloud.google.com/storage/browser/auric-a0c92.firebasestorage.app?project=auric-a0c92
+https://console.cloud.google.com/storage/browser/studio-7642357109-d9026.firebasestorage.app?project=studio-7642357109-d9026
 ```
 
 ## Method 4: Using Firebase Console (Alternative)
 
 1. Go to: https://console.firebase.google.com/
-2. Select project: `auric-a0c92`
+2. Select project: `studio-7642357109-d9026`
 3. Click **"Storage"** in left sidebar
 4. You'll see a message about using Google Cloud Console for CORS
 5. Click the link to go directly to Google Cloud Storage
@@ -88,14 +88,14 @@ echo '[
 ]' > cors-config.json
 
 # Apply CORS configuration
-gsutil cors set cors-config.json gs://auric-a0c92.firebasestorage.app
+gsutil cors set cors-config.json gs://studio-7642357109-d9026.firebasestorage.app
 ```
 
 ## Troubleshooting
 
 **Can't find the bucket?**
-- Make sure you're in the correct project (`auric-a0c92`)
-- The bucket name should be: `auric-a0c92.firebasestorage.app`
+- Make sure you're in the correct project (`studio-7642357109-d9026`)
+- The bucket name should be: `studio-7642357109-d9026.firebasestorage.app`
 
 **Don't see Configuration tab?**
 - Make sure you clicked on the bucket NAME, not just selected it

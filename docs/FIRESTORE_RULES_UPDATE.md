@@ -8,7 +8,7 @@ Copy and paste these rules into your Firebase Console:
 
 ### Step 1: Go to Firebase Console
 1. Open https://console.firebase.google.com
-2. Select your project: `auric-a0c92`
+2. Select your project: `studio-7642357109-d9026`
 3. Go to **Firestore Database**
 4. Click on the **Rules** tab
 

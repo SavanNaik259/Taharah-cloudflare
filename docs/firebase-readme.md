@@ -61,7 +61,7 @@ fetch('/api/send-order-email', ...)
 
 With:
 ```javascript
-fetch('https://us-central1-auric-a0c92.cloudfunctions.net/sendOrderEmail', ...)
+fetch('https://us-central1-studio-7642357109-d9026.cloudfunctions.net/sendOrderEmail', ...)
 ```
 
 Or use relative paths which will be handled by the Firebase hosting rewrites:
