@@ -716,28 +716,28 @@
                     <label for="productCategory">Category</label>
                     <select id="productCategory" name="productCategory" required>
                         <option value="">Select Category</option>
-                        <option value="featured-collection">Ready to Wear</option>
+                        
                         <option value="new-arrivals">New Arrivals</option>
-                        <optgroup label="Necklaces">
-                            <option value="gold-necklace">Gold Necklace</option>
-                            <option value="silver-necklace">Silver Necklace</option>
-                            <option value="meenakari-necklace">Meenakari Necklace</option>
-                        </optgroup>
-                        <optgroup label="Earrings">
-                            <option value="gold-earrings">Gold Earrings</option>
-                            <option value="silver-earrings">Silver Earrings</option>
-                            <option value="meenakari-earrings">Meenakari Earrings</option>
-                        </optgroup>
-                        <optgroup label="Bangles">
-                            <option value="gold-bangles">Gold Bangles</option>
-                            <option value="silver-bangles">Silver Bangles</option>
-                            <option value="meenakari-bangles">Meenakari Bangles</option>
-                        </optgroup>
+                        <option value="featured-collection">Ready to Wear</option>
+                            <option value="gold-necklace">Party wear</option>
+                          <!--  <option value="silver-necklace">Silver Necklace</option>
+                            <option value="meenakari-necklace">Meenakari Necklace</option>-->
+                        
+                    
+                            <option value="gold-earrings">Modest wear</option>
+                          <!--  <option value="silver-earrings">Silver Earrings</option>
+                            <option value="meenakari-earrings">Meenakari Earrings</option>-->
+                    
+                        
+                            <option value="gold-bangles">Pakistani pret wear</option>
+                          <!--  <option value="silver-bangles">Silver Bangles</option>
+                            <option value="meenakari-bangles">Meenakari Bangles</option>-->
+                    <!--   
                         <optgroup label="Rings">
                             <option value="gold-rings">Gold Rings</option>
                             <option value="silver-rings">Silver Rings</option>
                             <option value="meenakari-rings">Meenakari Rings</option>
-                        </optgroup>
+                        </optgroup>-->
                     </select>
                 </div>
 
@@ -2001,9 +2001,22 @@
             const timestamp = Date.now();
             const randomStr = Math.random().toString(36).substring(2, 10);
             const randomNum = Math.random().toString().substring(2, 8);
-            // Branding change: featured-collection -> RTW
-            const prefix = category === 'featured-collection' ? 'RTW' : category.toUpperCase().substring(0, 3);
-            console.log(`Generating SKU for category: ${category === 'featured-collection' ? 'Ready to Wear' : category} (${category})`);
+
+            // Generate prefix based on fashion wording
+            let prefix = '';
+            if (category === 'gold-bangles') {
+                prefix = 'PPT'; // Pakistani Pret Wear
+            } else if (category === 'gold-earrings') {
+                prefix = 'MDW'; // Modest Wear
+            } else if (category === 'gold-necklace') {
+                prefix = 'PTW'; // Party Wear
+            } else if (category === 'featured-collection') {
+                prefix = 'RTW'; // Ready to Wear
+            } else {
+                prefix = category.toUpperCase().substring(0, 3);
+            }
+
+            console.log(`Generating SKU for category: ${category} using prefix: ${prefix}`);
             return `${prefix}-${timestamp}-${randomStr}-${randomNum}`;
         }
 
