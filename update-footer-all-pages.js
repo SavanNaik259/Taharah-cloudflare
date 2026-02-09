@@ -47,7 +47,7 @@ const FOOTER_HTML = `
                                 <i class="fas fa-plus category-toggle-icon"></i>
                             </div>
                             <ul class="subcategory-list">
-                                <li><a href="party-wear.html" data-translate-dynamic>Party Wear</a></li>
+                                <li><a href="gold-necklace.html" data-translate-dynamic>Party Wear</a></li>
                                 <li><a href="silver-necklace.html" data-translate-dynamic>Silver Necklace</a></li>
                                 <li><a href="meenakari-necklace.html" data-translate-dynamic>Meenakari Necklace</a></li>
                             </ul>
@@ -58,7 +58,7 @@ const FOOTER_HTML = `
                                 <i class="fas fa-plus category-toggle-icon"></i>
                             </div>
                             <ul class="subcategory-list">
-                                <li><a href="modest-wear.html" data-translate-dynamic>Modest Wear</a></li>
+                                <li><a href="gold-earrings.html" data-translate-dynamic>Modest Wear</a></li>
                                 <li><a href="silver-earrings.html" data-translate-dynamic>Silver Earrings</a></li>
                                 <li><a href="meenakari-earrings.html" data-translate-dynamic>Meenakari Earrings</a></li>
                             </ul>
@@ -69,7 +69,7 @@ const FOOTER_HTML = `
                                 <i class="fas fa-plus category-toggle-icon"></i>
                             </div>
                             <ul class="subcategory-list">
-                                <li><a href="pakistani-pret-wear.html" data-translate-dynamic>Pakistani Pret Wear</a></li>
+                                <li><a href="gold-bangles.html" data-translate-dynamic>Pakistani Pret Wear</a></li>
                                 <li><a href="silver-bangles.html" data-translate-dynamic>Silver Bangles</a></li>
                                 <li><a href="meenakari-bangles.html" data-translate-dynamic>Meenakari Bangles</a></li>
                             </ul>
@@ -259,10 +259,10 @@ const files = [
     "featured-collection.html",
     "new-arrivals.html",
     "saree-collection.html",
-    "party-wear.html",
-    "modest-wear.html",
+    "gold-necklace.html",
+    "gold-earrings.html",
     "gold-rings.html",
-    "pakistani-pret-wear.html",
+    "gold-bangles.html",
     "silver-necklace.html",
     "silver-earrings.html",
     "silver-rings.html",
