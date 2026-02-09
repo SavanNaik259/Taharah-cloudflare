@@ -7305,7 +7305,7 @@
                 modal.className = 'delete-product-modal';
                 modal.style.zIndex = '15000';
 
-                const categoryDisplay = productData.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                const categoryDisplay = productData.category === 'featured-collection' ? 'Ready to Wear' : productData.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
                 const formattedPrice = `₹${parseFloat(productData.productPrice || 0).toLocaleString('en-IN')}`;
 
                 modal.innerHTML = `
