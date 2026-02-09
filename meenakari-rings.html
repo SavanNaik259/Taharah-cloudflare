@@ -7,6 +7,7 @@
     <link rel="icon" type="image/png" href="images/logos/royalmeenakari.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-straight/css/uicons-regular-straight.css'>
     <link rel="stylesheet" href="css/styles.css?v=1.1.1">
     <link rel="stylesheet" href="css/navbar.css?v=1.1.3">
     <link rel="stylesheet" href="css/responsive.css?v=1.0.4">
@@ -15,6 +16,8 @@
     <link rel="stylesheet" href="css/new-arrivals-grid.css?v=2.0.0">
     <link rel="stylesheet" href="css/product-loader.css?v=1.0.0">
     <link rel="stylesheet" href="css/search.css">
+    <link rel="stylesheet" href="css/currency-converter.css?v=1.0.0">
+    <link rel="stylesheet" href="css/language-selector.css?v=1.0.0">
     
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -22,8 +25,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
     <script src="js/firebase-config.js"></script>
     <script>
-      if (window.firebaseConfig && !firebase.apps.length) {
-          firebase.initializeApp(window.firebaseConfig);
+      if (window.firebaseConfig) {
+        if (!firebase.apps.length) firebase.initializeApp(window.firebaseConfig);
+        firebase.firestore().settings({cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED, ignoreUndefinedProperties: true});
+        firebase.firestore().enablePersistence({ synchronizeTabs: true }).catch(() => {});
       }
     </script>
     <script src="js/whatsapp-tooltip.js"></script>
@@ -51,7 +56,27 @@
         </nav>
         <div class="nav-menu" id="navMenu">
             <i id="closeMenu" class="fa-solid fa-xmark meenu-close" onclick="closeMobileMenu()" style="font-size: 24px; margin-left: 90%; color: #333;" ></i>
-            <ul class="nav-list"></ul>
+            <ul class="nav-list">
+                <li class="nav-item"><a href="/index" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="/new-arrivals" class="nav-link">New Arrivals</a></li>
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle">Collections <i class="fas fa-chevron-down"></i></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/all-collection">All Collection</a></li>
+                        <li><a href="/featured-collection">Featured Collection</a></li>
+                        <li class="dropdown-submenu">
+                            <a href="#">Necklace <i class="fas fa-chevron-right"></i></a>
+                            <ul class="dropdown-submenu-list">
+                                <li><a href="/gold-necklace">Gold Necklace</a></li>
+                                <li><a href="/silver-necklace">Silver Necklace</a></li>
+                                <li><a href="/meenakari-necklace">Meenakari Necklace</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a href="/about-us" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="/contact-us" class="nav-link">Contact</a></li>
+            </ul>
         </div>
     </header>
     <div class="menu-overlay" id="menuOverlay"></div>
@@ -103,13 +128,50 @@
     </div>
     <div class="wishlist-overlay"></div>
 
-    <script src="js/navigation.js"></script>
-    <script src="js/cart-manager.js"></script>
-    <script src="js/wishlist-manager.js"></script>
+    <footer class="footer-minimalist">
+        <div class="container">
+            <div class="footer-section">
+                <button class="footer-toggle" data-section="info-content">
+                    <span class="footer-title">Info</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="footer-content" id="info-content">
+                    <ul>
+                        <li><a href="about-us">About Us</a></li>
+                        <li><a href="terms-conditions">Terms and Conditions</a></li>
+                        <li><a href="privacy-policy">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="copyright">
+                    <p>&copy; 2025 Royal Meenakari. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <nav class="bottom-nav">
+        <a href="index" class="bottom-nav-item active"><i class="fi fi-rs-home"></i><span>Home</span></a>
+        <a href="all-collection" class="bottom-nav-item"><i class="fi fi-rs-shop"></i><span>Shop</span></a>
+        <a href="login" class="bottom-nav-item"><i class="fi fi-rs-user"></i><span>Account</span></a>
+        <div class="bottom-nav-item currency-selector-wrapper">
+            <span id="selected-currency-flag">🇮🇳</span> <span id="selected-currency-code">INR</span>
+            <select id="currency-selector" onchange="CurrencyConverter.changeCurrency(this.value)">
+                <option value="INR">INR</option><option value="USD">USD</option>
+            </select>
+        </div>
+        <a href="#" class="bottom-nav-item" id="bottomNavCart"><i class="fi fi-rs-shopping-bag"></i><span>Bag</span></a>
+    </nav>
+
+    <script src="js/navigation.js?v=1.0.4"></script>
+    <script src="js/cart-manager.js?v=1.0.1"></script>
+    <script src="js/wishlist-manager.js?v=1.0.0"></script>
     <script src="js/filter-sort-handler.js"></script>
     <script src="js/subcategory-products-loader.js"></script>
     <script src="js/footer-toggle.js"></script>
-    <script src="js/currency-converter.js?v=1.0.0"></script>
+    <script src="js/currency-converter.js?v=3.0.0"></script>
     <script src="js/language-translator.js?v=1.0.0"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
