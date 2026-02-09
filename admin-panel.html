@@ -6557,6 +6557,10 @@
             // Get the image URL - handle both mainImage and image properties
             const imageUrl = product.mainImage || product.image || '/images/placeholder-product.jpg';
 
+            // Branding change for category display
+            let categoryDisplay = product.category || 'Unknown';
+            if (categoryDisplay === 'featured-collection') categoryDisplay = 'Ready to Wear';
+            
             card.innerHTML = `
                 <div class="product-image-container ${stockType === 'out-of-stock' ? 'out-of-stock' : ''}">
                     <img src="${imageUrl}" alt="${product.name}" class="product-image"
@@ -6567,7 +6571,7 @@
                     <div class="product-name">${product.name}</div>
                     <div class="product-price">₹${parseFloat(product.price || 0).toLocaleString('en-IN')}</div>
                     <div class="product-details" style="font-size: 12px; color: #64748b; margin-bottom: 12px;">
-                        <div>Category: ${product.category || 'Unknown'}</div>
+                        <div>Category: ${categoryDisplay}</div>
                         <div>Stock: <span class="stock-count ${stockType === 'out-of-stock' ? 'zero' : 'low'}">${product.stock || 0}</span></div>
                     </div>
                     <div class="product-actions">
@@ -6599,6 +6603,10 @@
 
             const lastUpdated = product.updatedAt ? new Date(product.updatedAt).toLocaleDateString('en-IN') : 'Unknown';
 
+            // Branding change for category display
+            let categoryDisplay = product.category || 'Unknown';
+            if (categoryDisplay === 'featured-collection') categoryDisplay = 'Ready to Wear';
+
             row.innerHTML = `
                 <td>
                     <div style="display: flex; align-items: center; gap: 12px;">
@@ -6612,7 +6620,7 @@
                     </div>
                 </td>
                 <td>
-                    <span class="status-badge">${product.category || 'Unknown'}</span>
+                    <span class="status-badge">${categoryDisplay}</span>
                 </td>
                 <td>₹${parseFloat(product.price || 0).toLocaleString('en-IN')}</td>
                 <td><span class="stock-count ${statusClass}">${stock}</span></td>

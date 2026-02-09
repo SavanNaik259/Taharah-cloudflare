@@ -1271,8 +1271,8 @@
                 originalProductData = null; // Store original data for comparison
 
                 // Update UI for edit mode
-                document.querySelector('.admin-header h1').innerHTML = '<i class="fas fa-edit"></i> Edit Product';
-                document.querySelector('.admin-header p').textContent = `Editing ${category} product`;
+                document.querySelector('.admin-header h1').innerHTML = '<i class="fas fa-edit"></i> Edit Ready to Wear Product';
+                document.querySelector('.admin-header p').textContent = `Editing Ready to Wear product`;
                 document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Update Product';
 
                 // Show loading state
@@ -2000,7 +2000,9 @@
             const timestamp = Date.now();
             const randomStr = Math.random().toString(36).substring(2, 10);
             const randomNum = Math.random().toString().substring(2, 8);
+            // Branding change: featured-collection -> RTW
             const prefix = category === 'featured-collection' ? 'RTW' : category.toUpperCase().substring(0, 3);
+            console.log(`Generating SKU for category: ${category === 'featured-collection' ? 'Ready to Wear' : category} (${category})`);
             return `${prefix}-${timestamp}-${randomStr}-${randomNum}`;
         }
 
