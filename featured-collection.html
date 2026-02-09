@@ -5,23 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
 
     <!-- SEO Meta Tags -->
-    <title>Ready to Wear - Taharah | Premium Pakistani Fashion</title>
-    <meta name="description" content="Discover Taharah's Ready to Wear collection. Handpicked Pakistani fashion designs showcasing the finest traditional craftsmanship." />
-    <meta name="keywords" content="ready to wear, pakistani fashion, premium ethnic wear, taharah collection" />
+    <title>Featured Collection - Royal Meenakari | Handpicked Jewelry Designs</title>
+    <meta name="description" content="Discover Royal Meenakari's featured jewelry collection. Handpicked Meenakari designs showcasing the finest traditional craftsmanship." />
+    <meta name="keywords" content="featured meenakari jewelry, handpicked jewelry, premium meenakari designs, royal meenakari collection" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="images/logos/taharah.png" />
-    <link rel="apple-touch-icon" href="images/logos/taharah.png" />
+    <link rel="icon" type="image/png" href="images/logos/royalmeenakari.png" />
+    <link rel="apple-touch-icon" href="images/logos/royalmeenakari.png" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://taharah.in/ready-to-wear" />
-    <meta property="og:title" content="Ready to Wear - Taharah" />
-    <meta property="og:description" content="Discover Taharah's Ready to Wear collection showcasing the finest Pakistani fashion." />
-    <meta property="og:image" content="https://taharah.in/images/logos/taharah.png" />
+    <meta property="og:url" content="https://royalmeenkari.in/featured-collection" />
+    <meta property="og:title" content="Featured Collection - Royal Meenakari" />
+    <meta property="og:description" content="Discover Royal Meenakari's featured jewelry collection showcasing the finest traditional craftsmanship." />
+    <meta property="og:image" content="https://royalmeenkari.in/images/logos/royalmeenakari.png" />
 
     <!-- Canonical URL -->
-    <link rel="canonical" href="https://taharah.in/ready-to-wear" />
+    <link rel="canonical" href="https://royalmeenkari.in/featured-collection" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpLGCJKypKP/lX+/Pvw2DNA" crossorigin="anonymous">
     <!-- Fallback font awesome icons if CDN fails -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -114,7 +114,7 @@
             <div class="nav-container">
                 <!-- Logo -->
                 <a href="/index" class="brand">
-                    <img src="images/logos/taharah.png" alt="Taharah" class="brand-logo">
+                    <img src="images/logos/royalmeenakari.png" alt="Royal Meenakari" class="brand-logo">
                 </a>
 
 
@@ -160,7 +160,7 @@
                     <a href="#" class="nav-link dropdown-toggle"><span data-translate="categories">Collections</span> <i class="fas fa-chevron-down"></i></a>
                     <ul class="dropdown-menu">
                         <li><a href="/all-collection" data-translate="all_collections">All Collection</a></li>
-                        <li><a href="/ready-to-wear" data-translate="ready_to_wear">Ready to Wear</a></li>
+                        <li><a href="/featured-collection" data-translate="featured">Featured Collection</a></li>
                         <li class="dropdown-submenu">
                             <a href="#"><span data-translate="necklaces">Necklace</span> <i class="fas fa-chevron-right"></i></a>
                             <ul class="dropdown-submenu-list">
@@ -228,8 +228,8 @@
             <div class="hero-overlay"></div>
         </div>
         <div class="hero-content">
-            <h1 class="hero-title">Ready to Wear</h1>
-            <p class="hero-subtitle">Discover our handpicked fashion collections</p>
+            <h1 class="hero-title">Featured Collection</h1>
+            <p class="hero-subtitle">Discover our handpicked featured jewelry collections</p>
         </div>
     </section>
 
@@ -249,11 +249,11 @@
         </div>
 
         <div class="shop-products">
-            <div class="products-grid" id="ready-to-wear-products-grid">
+            <div class="products-grid" id="featured-collection-products-grid">
                 <!-- Loader -->
-                <div class="product-loader show" id="readyToWearPageLoader" style="grid-column: 1 / -1;">
+                <div class="product-loader show" id="featuredCollectionPageLoader" style="grid-column: 1 / -1;">
                     <div class="product-loader-spinner"></div>
-                    <div class="product-loader-text">Loading Ready to Wear...</div>
+                    <div class="product-loader-text">Loading featured collection...</div>
                 </div>
                 <!-- Products will be loaded here dynamically -->
             </div>
@@ -357,8 +357,8 @@
 
     <!-- Featured Collection Products Loader -->
     <script>
-        // Ready to Wear Products Loader
-        const ReadyToWearLoader = (function() {
+        // Featured Collection Products Loader
+        const FeaturedCollectionLoader = (function() {
             let storage;
             let isInitialized = false;
             let cachedProducts = null;
@@ -373,30 +373,30 @@
              */
             function init() {
                 try {
-                    console.log('Initializing Ready to Wear Loader...');
+                    console.log('Initializing Featured Collection Loader...');
                     console.log('Firebase available:', typeof firebase !== 'undefined');
 
                     if (typeof firebase !== 'undefined') {
                         storage = firebase.storage();
                         isInitialized = true;
-                        console.log('Ready to Wear Loader initialized successfully');
+                        console.log('Featured Collection Loader initialized successfully');
                         return true;
                     } else {
                         console.error('Firebase not available - make sure Firebase scripts are loaded');
                         return false;
                     }
                 } catch (error) {
-                    console.error('Error initializing Ready to Wear Loader:', error);
+                    console.error('Error initializing Featured Collection Loader:', error);
                     return false;
                 }
             }
 
             /**
-             * Load ready to wear products from Netlify CDN
+             * Load featured collection products from Netlify CDN
              */
-            async function loadReadyToWearProducts(forceRefresh = false) {
+            async function loadFeaturedProducts(forceRefresh = false) {
                 if (!isInitialized) {
-                    console.error('Ready to Wear Loader not initialized - Firebase connection failed');
+                    console.error('Featured Collection Loader not initialized - Firebase connection failed');
                     return [];
                 }
 
@@ -406,7 +406,7 @@
 
                 if (lastProductUpdate) {
                     const updateTime = parseInt(lastProductUpdate);
-                    const cacheTime = parseInt(localStorage.getItem('readyToWearProductsTime') || '0');
+                    const cacheTime = parseInt(localStorage.getItem('featuredCollectionProductsTime') || '0');
 
                     if (updateTime > cacheTime) {
                         console.log('🚨 Cache invalidated by admin panel update:', new Date(updateTime));
@@ -421,19 +421,19 @@
                 const now = Date.now();
 
                 if (!forceRefresh && !cacheInvalidated && cachedProducts && (now - lastFetchTime) < CACHE_DURATION) {
-                    console.log('Using memory cached ready to wear products');
+                    console.log('Using memory cached featured products');
                     return cachedProducts;
                 }
 
                 // Check localStorage cache
                 if (!forceRefresh && !cacheInvalidated) {
                     try {
-                        const stored = localStorage.getItem('readyToWearProducts');
-                        const storedTime = localStorage.getItem('readyToWearProductsTime');
-                        const storedETag = localStorage.getItem('readyToWearProductsETag');
+                        const stored = localStorage.getItem('featuredCollectionProducts');
+                        const storedTime = localStorage.getItem('featuredCollectionProductsTime');
+                        const storedETag = localStorage.getItem('featuredCollectionProductsETag');
 
                         if (stored && storedTime && (now - parseInt(storedTime)) < SHORT_CACHE_DURATION) {
-                            console.log('Using localStorage cached ready to wear products');
+                            console.log('Using localStorage cached featured products');
                             cachedProducts = JSON.parse(stored);
                             cachedETag = storedETag;
                             lastFetchTime = parseInt(storedTime);
@@ -447,10 +447,10 @@
                 let products = [];
 
                 try {
-                    console.log('Loading ready to wear products from Netlify CDN...');
+                    console.log('Loading featured products from Netlify CDN...');
 
                     // Use Netlify function for proper CDN caching
-                    let netlifyEndpoint = '/.netlify/functions/load-products?category=ready-to-wear';
+                    let netlifyEndpoint = '/.netlify/functions/load-products?category=featured-collection';
 
                     // Add cache busting parameter if force refresh or cache invalidated
                     if (forceRefresh || cacheInvalidated) {
