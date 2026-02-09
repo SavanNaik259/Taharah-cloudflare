@@ -119,7 +119,7 @@ class OutOfStockHandler {
         if (stock === 0) {
             this.outOfStockProducts.add(productId);
             console.log(`Product ${productId} is out of stock`);
-        } else if (stock <= 5) {
+        } else if (stock <= 3) {
             this.lowStockProducts.add(productId);
             console.log(`Product ${productId} has low stock: ${stock}`);
         }
@@ -422,7 +422,7 @@ class OutOfStockHandler {
             
             if (newStock === 0) {
                 this.outOfStockProducts.add(productId);
-            } else if (newStock <= 5) {
+            } else if (newStock <= 3) {
                 this.lowStockProducts.add(productId);
             }
             
