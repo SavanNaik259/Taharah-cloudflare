@@ -6569,6 +6569,9 @@
             // Branding change for category display
             let categoryDisplay = product.category || 'Unknown';
             if (categoryDisplay === 'featured-collection') categoryDisplay = 'Ready to Wear';
+                        else if (categoryDisplay === 'gold-bangles') categoryDisplay = 'Pakistani Pret Wear';
+            else if (categoryDisplay === 'gold-earrings') categoryDisplay = 'Modest Wear';
+            else if (categoryDisplay === 'gold-necklace') categoryDisplay = 'Party Wear';
             
             card.innerHTML = `
                 <div class="product-image-container ${stockType === 'out-of-stock' ? 'out-of-stock' : ''}">
@@ -6615,7 +6618,10 @@
             // Branding change for category display
             let categoryDisplay = product.category || 'Unknown';
             if (categoryDisplay === 'featured-collection') categoryDisplay = 'Ready to Wear';
-
+            else if (categoryDisplay === 'gold-bangles') categoryDisplay = 'Pakistani Pret Wear';
+            else if (categoryDisplay === 'gold-earrings') categoryDisplay = 'Modest Wear';
+            else if (categoryDisplay === 'gold-necklace') categoryDisplay = 'Party Wear';
+        
             row.innerHTML = `
                 <td>
                     <div style="display: flex; align-items: center; gap: 12px;">
