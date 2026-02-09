@@ -353,12 +353,22 @@ const SubcategoryProductsLoader = (function() {
      * Auto-detect category from page URL and load products
      */
     function autoLoadForCurrentPage() {
+        console.log('🚀 [FIX] autoLoadForCurrentPage called');
         // Handle both /category and /category.html
-        let pageName = window.location.pathname.split('/').pop();
+        let path = window.location.pathname;
+        let pageName = path.split('/').pop();
+        
+        console.log('🚀 [FIX] Path:', path, 'PageName:', pageName);
+
         if (pageName.endsWith('.html')) {
             pageName = pageName.replace('.html', '');
         }
-        if (!pageName || pageName === 'index') return;
+        
+        // If we're at the root or just a directory, pageName might be empty
+        if (!pageName || pageName === 'index') {
+            console.log('🚀 [FIX] Root or index page detected, skipping auto-load');
+            return;
+        }
         
         // Map of page names to their Firebase Storage category names
         const categoryMap = {
@@ -379,11 +389,11 @@ const SubcategoryProductsLoader = (function() {
         const category = categoryMap[pageName];
         
         if (category) {
-            console.log(`Auto-loading products for category: ${category}`);
+            console.log(`🚀 [FIX] Auto-loading products for category: ${category}`);
             updateProductsGrid(category);
             setupSortUI(category);
         } else {
-            console.log(`No category mapping found for page: ${pageName}`);
+            console.log(`🚀 [FIX] No category mapping found for page: ${pageName}`);
         }
     }
 
@@ -421,10 +431,18 @@ const SubcategoryProductsLoader = (function() {
 
 // Auto-initialize and load when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 [FIX] DOMContentLoaded: Initializing Subcategory Loader');
+    // Initialize immediately
+    if (SubcategoryProductsLoader.init()) {
+        SubcategoryProductsLoader.autoLoadForCurrentPage();
+        SubcategoryProductsLoader.watchForCacheInvalidation();
+    }
+    
+    // Also run with a delay as a fallback for slow-loading scripts
     setTimeout(() => {
+        console.log('🚀 [FIX] Fallback initialization check');
         if (SubcategoryProductsLoader.init()) {
             SubcategoryProductsLoader.autoLoadForCurrentPage();
-            SubcategoryProductsLoader.watchForCacheInvalidation();
         }
     }, 1000);
 });
