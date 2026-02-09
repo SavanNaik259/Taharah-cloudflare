@@ -1,9 +1,19 @@
-<!DOCTYPE html>
+const fs = require('fs');
+const path = require('path');
+
+const subcategories = [
+    'gold-necklace.html', 'silver-necklace.html', 'meenakari-necklace.html',
+    'gold-earrings.html', 'silver-earrings.html', 'meenakari-earrings.html',
+    'gold-bangles.html', 'silver-bangles.html', 'meenakari-bangles.html',
+    'gold-rings.html', 'silver-rings.html', 'meenakari-rings.html'
+];
+
+const template = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-    <title>Gold Rings - Royal Meenakari</title>
+    <title>{{TITLE}} - Royal Meenakari</title>
     <link rel="icon" type="image/png" href="images/logos/royalmeenakari.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
@@ -58,12 +68,12 @@
 
     <section class="new-arrivals-hero">
         <div class="hero-background">
-            <img src="images/b0bb682fbc453cd01cde00d00869232f.jpg" alt="Gold Rings" class="hero-bg-image">
+            <img src="images/b0bb682fbc453cd01cde00d00869232f.jpg" alt="{{TITLE}}" class="hero-bg-image">
             <div class="hero-overlay"></div>
         </div>
         <div class="hero-content">
-            <h1 class="hero-title">Gold Rings</h1>
-            <p class="hero-subtitle">Exquisite handcrafted Gold Rings collection</p>
+            <h1 class="hero-title">{{TITLE}}</h1>
+            <p class="hero-subtitle">Exquisite handcrafted {{TITLE}} collection</p>
         </div>
     </section>
 
@@ -78,7 +88,7 @@
         </div>
         <div class="shop-products">
             <div class="products-grid" id="products-grid">
-                <div class="product-loader show" id="gold-rings-loader" style="grid-column: 1 / -1;">
+                <div class="product-loader show" id="{{LOADER_ID}}" style="grid-column: 1 / -1;">
                     <div class="product-loader-spinner"></div>
                     <div class="product-loader-text">Loading products...</div>
                 </div>
@@ -112,4 +122,12 @@
     <script src="js/currency-converter.js?v=1.0.0"></script>
     <script src="js/language-translator.js?v=1.0.0"></script>
 </body>
-</html>
+</html>`;
+
+subcategories.forEach(file => {
+    const categoryName = file.replace('.html', '').split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    const loaderId = file.replace('.html', '') + '-loader';
+    const content = template.replace(/{{TITLE}}/g, categoryName).replace(/{{LOADER_ID}}/g, loaderId);
+    fs.writeFileSync(file, content);
+    console.log(`Updated ${file}`);
+});

@@ -353,7 +353,12 @@ const SubcategoryProductsLoader = (function() {
      * Auto-detect category from page URL and load products
      */
     function autoLoadForCurrentPage() {
-        const pageName = window.location.pathname.split('/').pop().replace('', '');
+        // Handle both /category and /category.html
+        let pageName = window.location.pathname.split('/').pop();
+        if (pageName.endsWith('.html')) {
+            pageName = pageName.replace('.html', '');
+        }
+        if (!pageName || pageName === 'index') return;
         
         // Map of page names to their Firebase Storage category names
         const categoryMap = {
