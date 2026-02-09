@@ -719,9 +719,9 @@
                         <option value="featured-collection">Ready to Wear</option>
                         <option value="new-arrivals">New Arrivals</option>
                         <optgroup label="Clothing Collections">
-                            <option value="pakistani-pret-wear">Pakistani Pret Wear</option>
-                            <option value="modest-wear">Modest Wear</option>
-                            <option value="party-wear">Party Wear</option>
+                            <option value="gold-bangles">Pakistani Pret Wear</option>
+                            <option value="gold-earrings">Modest Wear</option>
+                            <option value="gold-necklace">Party Wear</option>
                         </optgroup>
                         <optgroup label="Other Categories">
                             <option value="gold-rings">Gold Rings</option>
@@ -1267,10 +1267,7 @@
                 originalProductData = null; // Store original data for comparison
 
                 // Update UI for edit mode
-                const displayCategoryLabel = category === 'featured-collection' ? 'Ready to Wear' : 
-                                           category === 'pakistani-pret-wear' ? 'Pakistani Pret Wear' :
-                                           category === 'modest-wear' ? 'Modest Wear' :
-                                           category === 'party-wear' ? 'Party Wear' : category;
+                const displayCategoryLabel = category === 'featured-collection' ? 'Ready to Wear' : category;
                 document.querySelector('.admin-header h1').innerHTML = '<i class="fas fa-edit"></i> Edit Ready to Wear Product';
                 document.querySelector('.admin-header p').textContent = `Editing ${displayCategoryLabel} product`;
                 document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Update Product';
@@ -2000,14 +1997,8 @@
             const timestamp = Date.now();
             const randomStr = Math.random().toString(36).substring(2, 10);
             const randomNum = Math.random().toString().substring(2, 8);
-            // Branding change: ready-to-wear -> RTW
-            const prefixMap = {
-                'featured-collection': 'RTW',
-                'pakistani-pret-wear': 'PPW',
-                'modest-wear': 'MW',
-                'party-wear': 'PW'
-            };
-            const prefix = prefixMap[category] || category.toUpperCase().substring(0, 3);
+            // Branding change: featured-collection -> RTW
+            const prefix = category === 'featured-collection' ? 'RTW' : category.toUpperCase().substring(0, 3);
             console.log(`Generating SKU for category: ${category === 'featured-collection' ? 'Ready to Wear' : category} (${category})`);
             return `${prefix}-${timestamp}-${randomStr}-${randomNum}`;
         }
