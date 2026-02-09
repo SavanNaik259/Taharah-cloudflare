@@ -7256,7 +7256,9 @@
                             <div class="product-name" title="${productName}">${productName}</div>
                             <div class="product-price">₹${price.toLocaleString('en-IN')}</div>
                             <div class="product-category">
-                                Category: ${product.category === 'featured-collection' ? 'Ready to Wear' : (product.categoryDisplay || product.category || 'Unknown')}
+                                Category: ${product.category === 'featured-collection' ? 'Ready to Wear' : product.category === 'gold-bangles' ? 'Pakistani Pret Wear' :
+                                            product.category === 'gold-earrings' ? 'Modest Wear' :
+                                            product.category === 'gold-necklace' ? 'Party Wear' : (product.categoryDisplay || product.category || 'Unknown')}
                             </div>
                             <div class="product-actions">
                                 <button class="btn btn-primary btn-sm" onclick="editProduct('${product.id}', '${product.category}')">
@@ -7308,7 +7310,10 @@
                 modal.className = 'delete-product-modal';
                 modal.style.zIndex = '15000';
 
-                const categoryDisplay = productData.category === 'featured-collection' ? 'Ready to Wear' : productData.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                const categoryDisplay = productData.category === 'featured-collection' ? 'Ready to Wear' : productData.category === 'gold-bangles' ? 'Pakistani Pret Wear' :
+                    productData.category === 'gold-earrings' ? 'Modest Wear' :
+                    productData.category === 'gold-necklace' ? 'Party Wear' :
+ productData.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
                 const formattedPrice = `₹${parseFloat(productData.productPrice || 0).toLocaleString('en-IN')}`;
 
                 modal.innerHTML = `
