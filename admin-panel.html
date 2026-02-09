@@ -6561,8 +6561,8 @@
             const imageUrl = product.mainImage || product.image || '/images/placeholder-product.jpg';
 
             // Branding change for category display
-           /* let categoryDisplay = product.category || 'Unknown';
-            if (categoryDisplay === 'featured-collection') categoryDisplay = 'Ready to Wear';*/
+            let categoryDisplay = product.category || 'Unknown';
+            if (categoryDisplay === 'featured-collection') categoryDisplay = 'Ready to Wear';
             
             card.innerHTML = `
                 <div class="product-image-container ${stockType === 'out-of-stock' ? 'out-of-stock' : ''}">
