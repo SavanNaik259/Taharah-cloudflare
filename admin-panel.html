@@ -2693,13 +2693,13 @@
                             <button class="section-tab" onclick="filterProducts('featured-collection')">Ready to Wear</button>
                             <button class="section-tab" onclick="filterProducts('new-arrivals')">New Arrivals</button>
                             <button class="section-tab" onclick="filterProducts('saree-collection')">Saree Collection</button>
-                            <button class="section-tab" onclick="filterProducts('party-wear')">Party Wear</button>
+                            <button class="section-tab" onclick="filterProducts('gold-necklace')">Party Wear</button>
                             <button class="section-tab" onclick="filterProducts('silver-necklace')">Silver Necklace</button>
                             <button class="section-tab" onclick="filterProducts('meenakari-necklace')">Meenakari Necklace</button>
-                            <button class="section-tab" onclick="filterProducts('modest-wear')">Modest Wear</button>
+                            <button class="section-tab" onclick="filterProducts('gold-earrings')">Modest Wear</button>
                             <button class="section-tab" onclick="filterProducts('silver-earrings')">Silver Earrings</button>
                             <button class="section-tab" onclick="filterProducts('meenakari-earrings')">Meenakari Earrings</button>
-                            <button class="section-tab" onclick="filterProducts('pakistani-pret-wear')">Pakistani Pret Wear</button>
+                            <button class="section-tab" onclick="filterProducts('gold-bangles')">Pakistani Pret Wear</button>
                             <button class="section-tab" onclick="filterProducts('silver-bangles')">Silver Bangles</button>
                             <button class="section-tab" onclick="filterProducts('meenakari-bangles')">Meenakari Bangles</button>
                             <button class="section-tab" onclick="filterProducts('gold-rings')">Gold Rings</button>
@@ -7254,9 +7254,9 @@
                             <div class="product-price">₹${price.toLocaleString('en-IN')}</div>
                             <div class="product-category">
                                 Category: ${product.category === 'featured-collection' ? 'Ready to Wear' : 
-                                            product.category === 'pakistani-pret-wear' ? 'Pakistani Pret Wear' :
-                                            product.category === 'modest-wear' ? 'Modest Wear' :
-                                            product.category === 'party-wear' ? 'Party Wear' :
+                                            product.category === 'gold-bangles' ? 'Pakistani Pret Wear' :
+                                            product.category === 'gold-earrings' ? 'Modest Wear' :
+                                            product.category === 'gold-necklace' ? 'Party Wear' :
                                             (product.categoryDisplay || product.category || 'Unknown')}
                             </div>
                             <div class="product-actions">
@@ -7310,9 +7310,9 @@
                 modal.style.zIndex = '15000';
 
                 const categoryDisplay = productData.category === 'featured-collection' ? 'Ready to Wear' : 
-                                        productData.category === 'pakistani-pret-wear' ? 'Pakistani Pret Wear' :
-                                        productData.category === 'modest-wear' ? 'Modest Wear' :
-                                        productData.category === 'party-wear' ? 'Party Wear' :
+                                        productData.category === 'gold-bangles' ? 'Pakistani Pret Wear' :
+                                        productData.category === 'gold-earrings' ? 'Modest Wear' :
+                                        productData.category === 'gold-necklace' ? 'Party Wear' :
                                         productData.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
                 const formattedPrice = `₹${parseFloat(productData.productPrice || 0).toLocaleString('en-IN')}`;
 
