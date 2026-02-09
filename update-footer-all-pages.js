@@ -271,16 +271,10 @@ const files = [
     "meenakari-earrings.html",
     "meenakari-rings.html",
     "meenakari-bangles.html",
-    "about-us-t.html",
-    "contact-us-t.html",
-    "terms-conditions-t.html",
-    "privacy-policy-t.html",
-    "all-collection-t.html",
-    "login-t.html",
-    "signup-t.html",
-    "profile-t.html",
-    "checkout-t.html",
-    "product-detail-t.html"
+    "about-us.html",
+    "contact-us.html",
+    "terms-conditions.html",
+    "privacy-policy.html"
 ];
 
 console.log('Starting footer and bottom nav update...\n');
