@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Royal Meenakari Professional Admin Panel</title>
+    <title>Taharah Professional Admin Panel</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * {
@@ -691,7 +691,7 @@
 <body>
     <div class="admin-container">
         <div class="admin-header">
-            <h1>Royal Meenakari Admin Panel</h1>
+            <h1>Taharah Admin Panel</h1>
             <p>Product Management System</p>
         </div>
 
@@ -716,7 +716,7 @@
                     <label for="productCategory">Category</label>
                     <select id="productCategory" name="productCategory" required>
                         <option value="">Select Category</option>
-                        <option value="featured-collection">Featured Collection</option>
+                        <option value="featured-collection">Ready to Wear</option>
                         <option value="new-arrivals">New Arrivals</option>
                         <optgroup label="Necklaces">
                             <option value="gold-necklace">Gold Necklace</option>
@@ -2000,7 +2000,7 @@
             const timestamp = Date.now();
             const randomStr = Math.random().toString(36).substring(2, 10);
             const randomNum = Math.random().toString().substring(2, 8);
-            const prefix = category.toUpperCase().substring(0, 3);
+            const prefix = category === 'featured-collection' ? 'RTW' : category.toUpperCase().substring(0, 3);
             return `${prefix}-${timestamp}-${randomStr}-${randomNum}`;
         }
 
