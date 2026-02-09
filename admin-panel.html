@@ -6232,7 +6232,13 @@
             // Show selected tab content
             const contentId = tabName === 'out-of-stock' ? 'out-of-stock-products' :
                             tabName === 'low-stock' ? 'low-stock-products' : 'all-products-inventory';
-            document.getElementById(contentId).style.display = 'block';
+            const targetContent = document.getElementById(contentId);
+            if (targetContent) {
+                targetContent.style.display = 'block';
+                console.log(`Displayed content: ${contentId}`);
+            } else {
+                console.error(`Content element not found: ${contentId}`);
+            }
 
             // Load data for the tab if needed
             if (tabName === 'out-of-stock') {
@@ -8377,6 +8383,9 @@
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('Professional Admin Dashboard initialized');
 
+            // Force clear session storage for debugging if needed
+            // sessionStorage.removeItem('admin_initial_refresh_done');
+
             // Check admin verification first
             if (!checkAdminSession()) {
                 // Show verification modal and focus on input
@@ -8432,6 +8441,17 @@
             setTimeout(() => {
                 setupPermanentScrollbars();
             }, 1000);
+
+            // MANUALLY TRIGGER DATA LOADING FOR INVENTORY TABS
+            // This ensures that when the user clicks these tabs, data is already there or loading
+            try {
+                console.log('🚀 [FIX] Pre-loading inventory data...');
+                loadOutOfStockProducts();
+                loadLowStockProducts();
+                loadAllProductsInventory();
+            } catch (e) {
+                console.warn('Error pre-loading inventory data:', e);
+            }
         });
 
         // Load dashboard data from localStorage cache for instant display
