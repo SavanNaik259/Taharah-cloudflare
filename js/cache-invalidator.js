@@ -17,6 +17,9 @@ window.CacheInvalidator = (function() {
         'polkiProducts',
         'polkiProductsTime',
         'polkiProductsETag',
+        'readyToWearProducts',
+        'readyToWearProductsTime',
+        'readyToWearProductsETag',
         'lastProductUpdate'
     ];
 
@@ -128,7 +131,7 @@ window.CacheInvalidator = (function() {
     /**
      * Force cache invalidation by making cache-busting requests for ALL categories
      */
-    async function forceCacheInvalidation(categories = ['bridal', 'new-arrivals', 'polki']) {
+    async function forceCacheInvalidation(categories = ['bridal', 'new-arrivals', 'polki', 'ready-to-wear']) {
         console.log('🌐 Forcing cache invalidation for categories:', categories);
         const timestamp = Date.now();
         const results = [];
