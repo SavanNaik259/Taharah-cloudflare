@@ -4194,7 +4194,7 @@
 
                 // Load products from each category in PARALLEL
                 const categories = [
-                    'ready-to-wear', 
+                    'featured-collection', 
                     'new-arrivals', 
                     'saree-collection',
                     'gold-necklace',
@@ -4452,7 +4452,7 @@
                 // Use the Global Cache Invalidator if available
                 if (window.CacheInvalidator && typeof window.CacheInvalidator.invalidateAllCaches === 'function') {
                     console.log('🚀 Using CacheInvalidator to clear all product caches...');
-                    await window.CacheInvalidator.invalidateAllCaches(['bridal', 'new-arrivals', 'polki', 'ready-to-wear', 'saree-collection']);
+                    await window.CacheInvalidator.invalidateAllCaches(['bridal', 'new-arrivals', 'polki', 'featured-collection', 'saree-collection']);
                 } else {
                     // Fallback to manual localStorage clearing if CacheInvalidator is missing
                     console.log('🧹 CacheInvalidator not found, clearing localStorage manually...');
@@ -5244,7 +5244,7 @@
             try {
                 // Search for product across ALL categories including subcategories (in parallel)
                 const categories = [
-                    'ready-to-wear', 
+                    'featured-collection', 
                     'new-arrivals', 
                     'saree-collection',
                     'gold-necklace',
@@ -5314,7 +5314,7 @@
             try {
                 // Search for product across ALL collections to find its EXACT ID case
                 const categories = [
-                    'ready-to-wear', 
+                    'featured-collection', 
                     'new-arrivals', 
                     'saree-collection',
                     'gold-necklace',
@@ -6636,7 +6636,7 @@
         // Load all products data from all categories
         async function loadAllProductsData() {
             const categories = [
-                'ready-to-wear', 
+                'featured-collection', 
                 'new-arrivals', 
                 'saree-collection',
                 'gold-necklace',
@@ -7084,7 +7084,7 @@
 
                 let allProducts = [];
                 const categories = [
-                    'ready-to-wear', 
+                    'featured-collection', 
                     'new-arrivals', 
                     'saree-collection',
                     'gold-necklace',
