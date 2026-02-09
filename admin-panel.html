@@ -7253,7 +7253,7 @@
                             <div class="product-name" title="${productName}">${productName}</div>
                             <div class="product-price">₹${price.toLocaleString('en-IN')}</div>
                             <div class="product-category">
-                                Category: ${product.categoryDisplay}
+                                Category: ${product.category === 'featured-collection' ? 'Ready to Wear' : (product.categoryDisplay || product.category || 'Unknown')}
                             </div>
                             <div class="product-actions">
                                 <button class="btn btn-primary btn-sm" onclick="editProduct('${product.id}', '${product.category}')">
