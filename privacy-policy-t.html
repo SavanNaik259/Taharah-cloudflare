@@ -305,12 +305,12 @@ background-color: #000 !important;
             <div class="nav-container">
                 <!-- Logo -->
                 <a href="/index" class="brand">
-                    <img src="images/logos/royalmeenakari.png" alt="Royal Meenakari" class="brand-logo">
+                    <img src="images/logos/taharah.png" alt="Taharah" class="brand-logo">
                 </a>
 
 
                 <!-- Mobile Toggle Button - Match RIDHI MEHRA design -->
-                <div class="hamburger" id="navToggle"><img src="images/icons/bars-staggered (2).png" alt="SP Jewellers"style="width: 25px; height: 25px;">
+                <div class="hamburger" id="navToggle"><img src="images/icons/bars-staggered (2).png" alt="Taharah"style="width: 25px; height: 25px;">
                 </div>
 
                 <!-- Navigation Icons - Exact match to RIDHI MEHRA design -->
@@ -351,16 +351,11 @@ background-color: #000 !important;
                     <a href="#" class="nav-link dropdown-toggle"><span data-translate="categories">Collections</span> <i class="fas fa-chevron-down"></i></a>
                     <ul class="dropdown-menu">
                         <li><a href="/all-collection" data-translate="all_collections">All Collection</a></li>
-                        <li><a href="/featured-collection" data-translate="featured">Featured Collection</a></li>
-                        <li class="dropdown-submenu">
-                            <a href="#"><span data-translate="necklaces">Necklace</span> <i class="fas fa-chevron-right"></i></a>
-                            <ul class="dropdown-submenu-list">
-                                <li><a href="/gold-necklace" data-translate-dynamic>Gold Necklace</a></li>
-                                <li><a href="/silver-necklace" data-translate-dynamic>Silver Necklace</a></li>
-                                <li><a href="/meenakari-necklace" data-translate-dynamic>Meenakari Necklace</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown-submenu">
+                        <li><a href="/featured-collection" data-translate="featured">Ready to Wear</a></li>
+                        <li><a href="/pakistani-asuals" data-translate-dynamic>Pakistani Casuals</a></li>
+                        <li><a href="/pakistani-suits" data-translate-dynamic>Pakistani Suits</a></li>
+                        <li><a href="/party-ears" data-translate-dynamic>Party Wears</a></li>
+                        <!--<li class="dropdown-submenu">
                             <a href="#"><span data-translate="earrings">Earrings</span> <i class="fas fa-chevron-right"></i></a>
                             <ul class="dropdown-submenu-list">
                                 <li><a href="/gold-earrings" data-translate-dynamic>Gold Earrings</a></li>
@@ -383,7 +378,7 @@ background-color: #000 !important;
                                 <li><a href="/silver-rings" data-translate-dynamic>Silver Rings</a></li>
                                 <li><a href="/meenakari-rings" data-translate-dynamic>Meenakari Rings</a></li>
                             </ul>
-                        </li>
+                        </li>-->
                     </ul>
                 </li>
                 <li class="nav-item"><a href="/about-us" class="nav-link" data-translate="about_us">About</a></li>
@@ -506,65 +501,22 @@ background-color: #000 !important;
     </section>
 
     <!-- WhatsApp Button -->
-    <a href="https://wa.me/918963815289" target="_blank" class="whatsapp-btn" aria-label="Chat on WhatsApp">
-        <i class="fab fa-whatsapp"></i>
-        <div class="whatsapp-tooltip" data-translate="how_can_help">How can I help you?</div>
-    </a>
+    
 
-    <!-- WhatsApp Tooltip Script -->
-    <script src="js/whatsapp-tooltip.js"></script>
-
+    <!-- Bottom Navigation Bar -->
+    
 
     <!-- Footer Toggle Script -->
+    
 
+    <!-- Bottom Navigation Cart Handler Script -->
+    
 
-<!-- Minimalist Collapsible Footer -->
+    <!-- Currency Converter -->
+    
 
-
-
-
-    <!-- Search Scripts -->
-    <script src="js/search-manager.js"></script>
-    <script src="js/search-ui.js"></script>
-
-    <!-- Core JS Files -->
-    <script src="js/navigation.js?v=1.0.4"></script>
-    <script src="js/banner-rotator.js?v=1.0.1"></script>
-    <script src="js/error-handler.js"></script>
-    <script src="js/cart-local-storage.js?v=1.0.0"></script>
-    <script src="js/cart-manager.js?v=1.0.1"></script>
-    <script src="js/wishlist-local-storage.js?v=1.0.0"></script>
-    <script src="js/wishlist-manager.js?v=1.0.0"></script>
-    <script src="js/main.js"></script>
-
-    <!-- Initialize search after all scripts are loaded -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Ensure search functionality is working
-            setTimeout(() => {
-                if (typeof SearchManager !== 'undefined') {
-                    console.log('SearchManager available');
-                }
-                if (typeof SearchUI !== 'undefined') {
-                    console.log('SearchUI available');
-                }
-
-                // Manual search icon setup as backup
-                const searchIcon = document.querySelector('.search-icon');
-                if (searchIcon && !searchIcon.hasAttribute('data-search-attached')) {
-                    searchIcon.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        console.log('Manual search icon click handler triggered');
-                        if (typeof SearchUI !== 'undefined' && SearchUI.openSearch) {
-                            SearchUI.openSearch();
-                        }
-                    });
-                    searchIcon.setAttribute('data-search-attached', 'true');
-                    console.log('Manual search icon handler attached');
-                }
-            }, 500);
-        });
-    </script>
+    <!-- Language Translator -->
+    
 
 
     <!-- Minimalist Collapsible Footer -->
@@ -578,11 +530,11 @@ background-color: #000 !important;
                 </button>
                 <div class="footer-content" id="info-content">
                     <ul>
-                        <li><a href="about-us" data-translate="about_us">About Us</a></li>
-                        <li><a href="terms-conditions#shipping-and-delivery" data-translate-dynamic>Shipping Policy</a></li>
-                        <li><a href="terms-conditions#returns-and-refunds" data-translate-dynamic>Returns & Exchanges</a></li>
-                        <li><a href="terms-conditions" data-translate-dynamic>Terms and Conditions</a></li>
-                        <li><a href="privacy-policy" data-translate-dynamic>Privacy Policy</a></li>
+                        <li><a href="about-us.html" data-translate="about_us">About Us</a></li>
+                        <li><a href="terms-conditions.html#shipping-and-delivery" data-translate-dynamic>Shipping Policy</a></li>
+                        <li><a href="terms-conditions.html#returns-and-refunds" data-translate-dynamic>Returns & Exchanges</a></li>
+                        <li><a href="terms-conditions.html" data-translate-dynamic>Terms and Conditions</a></li>
+                        <li><a href="privacy-policy.html" data-translate-dynamic>Privacy Policy</a></li>
                     </ul>
                 </div>
             </div>
@@ -601,9 +553,9 @@ background-color: #000 !important;
                                 <i class="fas fa-plus category-toggle-icon"></i>
                             </div>
                             <ul class="subcategory-list">
-                                <li><a href="gold-necklace" data-translate-dynamic>Gold Necklace</a></li>
-                                <li><a href="silver-necklace" data-translate-dynamic>Silver Necklace</a></li>
-                                <li><a href="meenakari-necklace" data-translate-dynamic>Meenakari Necklace</a></li>
+                                <li><a href="gold-necklace.html" data-translate-dynamic>Party Wear</a></li>
+                                <li><a href="silver-necklace.html" data-translate-dynamic>Silver Necklace</a></li>
+                                <li><a href="meenakari-necklace.html" data-translate-dynamic>Meenakari Necklace</a></li>
                             </ul>
                         </li>
                         <li class="category-with-sub">
@@ -612,9 +564,9 @@ background-color: #000 !important;
                                 <i class="fas fa-plus category-toggle-icon"></i>
                             </div>
                             <ul class="subcategory-list">
-                                <li><a href="gold-earrings" data-translate-dynamic>Gold Earrings</a></li>
-                                <li><a href="silver-earrings" data-translate-dynamic>Silver Earrings</a></li>
-                                <li><a href="meenakari-earrings" data-translate-dynamic>Meenakari Earrings</a></li>
+                                <li><a href="gold-earrings.html" data-translate-dynamic>Modest Wear</a></li>
+                                <li><a href="silver-earrings.html" data-translate-dynamic>Silver Earrings</a></li>
+                                <li><a href="meenakari-earrings.html" data-translate-dynamic>Meenakari Earrings</a></li>
                             </ul>
                         </li>
                         <li class="category-with-sub">
@@ -623,9 +575,9 @@ background-color: #000 !important;
                                 <i class="fas fa-plus category-toggle-icon"></i>
                             </div>
                             <ul class="subcategory-list">
-                                <li><a href="gold-bangles" data-translate-dynamic>Gold Bangles</a></li>
-                                <li><a href="silver-bangles" data-translate-dynamic>Silver Bangles</a></li>
-                                <li><a href="meenakari-bangles" data-translate-dynamic>Meenakari Bangles</a></li>
+                                <li><a href="gold-bangles.html" data-translate-dynamic>Pakistani Pret Wear</a></li>
+                                <li><a href="silver-bangles.html" data-translate-dynamic>Silver Bangles</a></li>
+                                <li><a href="meenakari-bangles.html" data-translate-dynamic>Meenakari Bangles</a></li>
                             </ul>
                         </li>
                         <li class="category-with-sub">
@@ -634,9 +586,9 @@ background-color: #000 !important;
                                 <i class="fas fa-plus category-toggle-icon"></i>
                             </div>
                             <ul class="subcategory-list">
-                                <li><a href="gold-rings" data-translate-dynamic>Gold Rings</a></li>
-                                <li><a href="silver-rings" data-translate-dynamic>Silver Rings</a></li>
-                                <li><a href="meenakari-rings" data-translate-dynamic>Meenakari Rings</a></li>
+                                <li><a href="gold-rings.html" data-translate-dynamic>Gold Rings</a></li>
+                                <li><a href="silver-rings.html" data-translate-dynamic>Silver Rings</a></li>
+                                <li><a href="meenakari-rings.html" data-translate-dynamic>Meenakari Rings</a></li>
                             </ul>
                         </li>
                     </ul>
@@ -651,9 +603,9 @@ background-color: #000 !important;
                 </button>
                 <div class="footer-content" id="collection-content">
                     <ul>
-                        <li><a href="all-collection" data-translate="all_collections">All Collection</a></li>
-                        <li><a href="featured-collection" data-translate="featured">Featured Collection</a></li>
-                        <li><a href="new-arrivals" data-translate="new_arrivals">New Arrivals</a></li>
+                        <li><a href="all-collection.html" data-translate="all_collections">All Collection</a></li>
+                        <li><a href="featured-collection.html" data-translate="featured">Featured Collection</a></li>
+                        <li><a href="new-arrivals.html" data-translate="new_arrivals">New Arrivals</a></li>
                     </ul>
                 </div>
             </div>
@@ -681,6 +633,9 @@ background-color: #000 !important;
                     <a href="https://www.facebook.com" target="_blank" class="social-icon-link">
                         <i class="fab fa-facebook-f"></i>
                     </a>
+                    <a href="https://www.youtube.com" target="_blank" class="social-icon-link">
+                        <i class="fab fa-youtube"></i>
+                    </a>
                 </div>
             </div>
 
@@ -705,8 +660,8 @@ background-color: #000 !important;
                     </div>
 
                     <div class="footer-links">
-                        <a href="terms-conditions" data-translate-dynamic>Terms and Conditions</a>
-                        <a href="privacy-policy" data-translate-dynamic>Privacy Policy</a>
+                        <a href="terms-conditions.html" data-translate-dynamic>Terms and Conditions</a>
+                        <a href="privacy-policy.html" data-translate-dynamic>Privacy Policy</a>
                     </div>
 
                     <div class="payment-methods">
@@ -725,21 +680,21 @@ background-color: #000 !important;
     </footer>
 
     <!-- WhatsApp Button -->
-      <a href="https://wa.me/918963815289?text=Hi! I would like to know more about your services. Can you help me?" class="whatsapp-btn">
+      <a href="https://wa.me/918589920686?text=Hi! I would like to know more about your services. Can you help me?" class="whatsapp-btn">
           <i class="fab fa-whatsapp"></i>
       </a>
 
     <!-- Bottom Navigation Bar -->
     <nav class="bottom-nav">
-        <a href="index" class="bottom-nav-item active">
+        <a href="index.html" class="bottom-nav-item active">
             <i class="fi fi-rs-home"></i>
             <span data-translate="home">Home</span>
         </a>
-        <a href="all-collection" class="bottom-nav-item">
+        <a href="all-collection.html" class="bottom-nav-item">
             <i class="fi fi-rs-shop"></i>
             <span data-translate="shop">Shop</span>
         </a>
-        <a href="login" class="bottom-nav-item">
+        <a href="login.html" class="bottom-nav-item">
             <i class="fi fi-rs-user"></i>
             <span data-translate="account">Account</span>
         </a>
@@ -787,7 +742,7 @@ background-color: #000 !important;
                     if (typeof openCart === 'function') {
                         openCart();
                     } else {
-                        window.location.href = 'checkout';
+                        window.location.href = 'checkout.html';
                     }
                 });
             }
