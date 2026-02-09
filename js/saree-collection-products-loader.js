@@ -13,12 +13,9 @@ const JewelrySubcategoriesLoader = (function() {
     const SHORT_CACHE_DURATION = 60 * 60 * 1000; // 1 hour for localStorage to reduce bandwidth
     const MAX_PRODUCTS_TO_DISPLAY = 6; // Number of random products to display
     
-    // All jewelry subcategories to load from
+    // Only load gold-bangles as requested
     const JEWELRY_SUBCATEGORIES = [
-        'gold-necklace', 'silver-necklace', 'meenakari-necklace',
-        'gold-earrings', 'silver-earrings', 'meenakari-earrings',
-        'gold-bangles', 'silver-bangles', 'meenakari-bangles',
-        'gold-rings', 'silver-rings', 'meenakari-rings'
+        'gold-bangles'
     ];
 
     /**
@@ -335,10 +332,9 @@ const JewelrySubcategoriesLoader = (function() {
                 console.warn('Error saving to localStorage cache:', e);
             }
 
-            // Return randomized subset of products
-            const shuffled = shuffleArray(allProducts);
-            const selectedProducts = shuffled.slice(0, MAX_PRODUCTS_TO_DISPLAY);
-            console.log('Returning', selectedProducts.length, 'randomized products for display');
+            // Return subset of products (no shuffle to keep consistency if needed, or keeping it for variety)
+            const selectedProducts = allProducts.slice(0, MAX_PRODUCTS_TO_DISPLAY);
+            console.log('Returning', selectedProducts.length, 'products for display');
             return selectedProducts;
 
         } catch (error) {
