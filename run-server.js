@@ -472,13 +472,13 @@ app.post('/.netlify/functions/send-verification-email', async (req, res) => {
       <body>
           <div class="container">
               <div class="header">
-                  <div class="logo">Nazakat</div>
+                  <div class="logo">Taharah</div>
                   <h2 style="color: #28a745; margin: 10px 0;">📧 Verify Your Email Address</h2>
               </div>
 
               <p>Hello ${customer.firstName || 'Valued Customer'},</p>
 
-              <p>Welcome to Nazakat! We're excited to have you join our community of saree enthusiasts.</p>
+              <p>Welcome to Taharah! We're excited to have you join our community of fashion enthusiasts.</p>
 
               <p>To complete your account setup, please verify your email address by clicking the button below:</p>
 
@@ -498,11 +498,11 @@ app.post('/.netlify/functions/send-verification-email', async (req, res) => {
               <p>If the button above doesn't work, you can copy and paste this link into your browser:</p>
               <p style="word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace;">${verificationUrl}</p>
 
-              <p>Thank you for choosing Nazakat for your saree collection needs!</p>
+              <p>Thank you for choosing Taharah for your premium fashion needs!</p>
 
               <div class="footer">
-                  <p>Nazakat - Your trusted saree destination</p>
-                  <p>Email: ${emailUser}</p>
+                  <p>Taharah - Where elegance meets tradition</p>
+                  <p>Email: Officialtaharah@gmail.com</p>
                   <p style="font-size: 12px; color: #999;">This is an automated email. Please do not reply to this email.</p>
               </div>
           </div>
@@ -511,18 +511,18 @@ app.post('/.netlify/functions/send-verification-email', async (req, res) => {
     `;
 
     const mailOptions = {
-      from: `"Nazakat - Email Verification" <${emailUser}>`,
+      from: `"Taharah - Email Verification" <${emailUser}>`,
       to: customer.email,
-      subject: '📧 Please verify your email address - Nazakat',
+      subject: '📧 Please verify your email address - Taharah',
       html: htmlContent,
       headers: {
         'X-Priority': '3',
         'X-MSMail-Priority': 'Normal',
-        'X-Mailer': 'Nazakat E-commerce Platform v1.0',
+        'X-Mailer': 'Taharah E-commerce Platform v1.0',
         'Reply-To': emailUser,
-        'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@nazakat.com>`,
+        'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@taharah.in>`,
         'Return-Path': emailUser,
-        'Organization': 'Nazakat Jewelry'
+        'Organization': 'Taharah Fashion'
       }
     };
 
@@ -1778,6 +1778,6 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Nazakat website server running on port ${PORT}`);
+  console.log(`Taharah website server running on port ${PORT}`);
   console.log(`Visit: http://localhost:${PORT}`);
 });

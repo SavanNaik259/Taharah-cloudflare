@@ -198,7 +198,7 @@ function customerOrderTemplate(data) {
       <div class="footer">
         <p>&copy; 2025 Taharah. All Rights Reserved.</p>
         <p>This email was sent to ${customer.email}</p>
-        <p>Contact us: ${process.env.EMAIL_USER} | +91 93102 50047</p>
+        <p>Contact us: ${process.env.EMAIL_USER} | +91 8589920686</p>
       </div>
     </div>
   </body>
@@ -525,7 +525,7 @@ function customerCancellationTemplate(data) {
       <div class="footer">
         <p>&copy; 2025 Taharah. All Rights Reserved.</p>
         <p>This email was sent to ${customer.email}</p>
-        <p>Contact us: ${process.env.EMAIL_USER} | +91 93102 50047</p>
+        <p>Contact us: ${process.env.EMAIL_USER} | +91 8589920686</p>
       </div>
     </div>
   </body>
@@ -790,7 +790,7 @@ function customerDeliveryTemplate(data) {
       <p>If you have any questions about your order or need to report any issues with the delivered items, please don't hesitate to contact us:</p>
       <ul>
         <li>Email: <a href="mailto:${process.env.EMAIL_USER}">${process.env.EMAIL_USER}</a></li>
-        <li>Phone: +91 93102 50047</li>
+        <li>Phone: +91 8589920686</li>
       </ul>
 
       <p>We appreciate your business and look forward to serving you again!</p>
@@ -798,7 +798,7 @@ function customerDeliveryTemplate(data) {
       <div class="footer">
         <p>&copy; 2025 Taharah. All Rights Reserved.</p>
         <p>This email was sent to ${customer.email}</p>
-        <p>Contact us: ${process.env.EMAIL_USER} | +91 93102 50047</p>
+        <p>Contact us: ${process.env.EMAIL_USER} | +91 8589920686</p>
       </div>
     </div>
   </body>

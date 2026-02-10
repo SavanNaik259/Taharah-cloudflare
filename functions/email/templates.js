@@ -46,7 +46,7 @@ function customerOrderTemplate(data) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="x-apple-disable-message-reformatting">
-    <title>Order Confirmation - Nazakat</title>
+    <title>Order Confirmation - Taharah</title>
     <!--[if mso]>
     <noscript>
       <xml>
@@ -112,7 +112,7 @@ function customerOrderTemplate(data) {
   <body>
     <div class="container">
       <div class="header">
-        <div class="logo">Nazakat</div>
+        <div class="logo">Taharah</div>
       </div>
 
       <h2>Order Confirmation</h2>
@@ -150,20 +150,19 @@ function customerOrderTemplate(data) {
       ${customer.city ? customer.city + ', ' : ''}${customer.state ? customer.state + ' ' : ''}${customer.postalCode || ''}<br>
       Phone: ${customer.phone}</p>
 
-      <p>If you have any questions about your order, please contact our customer service team at <a href="mailto:${process.env.EMAIL_USER}">${process.env.EMAIL_USER}</a> or call us at +91 93102 50047.</p>
+      <p>If you have any questions about your order, please contact our customer service team at <a href="mailto:Officialtaharah@gmail.com">Officialtaharah@gmail.com</a> or call us at +91 8589920686.</p>
 
-      <p>Thank you for shopping with Nazakat!</p>
+      <p>Thank you for shopping with Taharah!</p>
 
       <div class="footer">
         <hr style="border: none; border-top: 1px solid #e1e1e1; margin: 30px 0;">
         <table style="width: 100%; font-size: 12px; color: #666;">
           <tr>
             <td style="text-align: left;">
-              <strong>Nazakat</strong><br>
-              Your Business Address<br>
-              City, State, PIN Code<br>
-              Phone: +91 93102 50047<br>
-              Email: ${process.env.EMAIL_USER}
+              <strong>Taharah</strong><br>
+              Kerala, India<br>
+              Phone: +91 8589920686<br>
+              Email: Officialtaharah@gmail.com
             </td>
             <td style="text-align: right; vertical-align: top;">
               <a href="mailto:${process.env.OWNER_EMAIL}?subject=Unsubscribe%20Request" style="color: #666; text-decoration: none;">Unsubscribe</a><br>
@@ -172,7 +171,7 @@ function customerOrderTemplate(data) {
             </td>
           </tr>
         </table>
-        <p style="text-align: center; margin-top: 20px;">&copy; 2025 Nazakat. All Rights Reserved.</p>
+        <p style="text-align: center; margin-top: 20px;">&copy; 2026 Taharah. All Rights Reserved.</p>
         <p style="text-align: center; font-size: 11px; color: #999;">
           This email was sent to ${customer.email} because you placed an order with us.
           <br>If you did not place this order, please contact us immediately.
@@ -224,7 +223,7 @@ function ownerOrderTemplate(data) {
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Order Notification - Nazakat</title>
+    <title>New Order Notification - Taharah</title>
     <style>
       body { 
         font-family: Arial, sans-serif; 
@@ -294,7 +293,7 @@ function ownerOrderTemplate(data) {
   <body>
     <div class="container">
       <div class="header">
-        <div class="logo">Nazakat</div>
+        <div class="logo">Taharah</div>
       </div>
 
       <h2>New Order Received</h2>
@@ -345,8 +344,8 @@ function ownerOrderTemplate(data) {
       <p>Please process this order as soon as possible.</p>
 
       <div class="footer">
-        <p>&copy; 2025 Nazakat. All Rights Reserved.</p>
-        <p>This is an automated email from your Nazakat website.</p>
+        <p>&copy; 2026 Taharah. All Rights Reserved.</p>
+        <p>This is an automated email from your Taharah website.</p>
       </div>
     </div>
   </body>

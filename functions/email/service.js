@@ -30,33 +30,33 @@ async function sendCustomerOrderConfirmation(orderData) {
     
     // Define email options with anti-spam headers
     const mailOptions = {
-      from: `"Nazakat Team" <${functions.config().email?.user || process.env.EMAIL_USER}>`,
+      from: `"Taharah Team" <${functions.config().email?.user || process.env.EMAIL_USER}>`,
       to: customer.email,
       subject: `✅ Order Confirmed: ${orderData.orderReference} - Thank You!`,
       html: htmlContent,
       headers: {
         'X-Priority': '3',
         'X-MSMail-Priority': 'Normal',
-        'X-Mailer': 'Nazakat E-commerce Platform v1.0',
+        'X-Mailer': 'Taharah E-commerce Platform v1.0',
         'List-Unsubscribe': `<mailto:${functions.config().email?.user || process.env.EMAIL_USER}?subject=Unsubscribe>`,
         'X-Auto-Response-Suppress': 'OOF, DR, RN, NRN',
         'Reply-To': functions.config().email?.user || process.env.EMAIL_USER,
         // Additional anti-spam headers
-        'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@nazakat.com>`,
-        'X-Entity-ID': 'nazakat-ecommerce',
-        'X-SenderID': 'Nazakat-Official',
+        'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@taharah.in>`,
+        'X-Entity-ID': 'taharah-ecommerce',
+        'X-SenderID': 'Taharah-Official',
         'Return-Path': functions.config().email?.user || process.env.EMAIL_USER,
         'X-Original-From': functions.config().email?.user || process.env.EMAIL_USER,
         'Precedence': 'bulk',
         'X-Spam-Status': 'No, score=0.0',
         'X-Campaign-ID': `order-confirmation-${Date.now()}`,
-        'Organization': 'Nazakat Jewelry',
+        'Organization': 'Taharah Fashion',
         'X-MC-Track': 'opens,clicks'
       },
       // Text version for email clients that don't support HTML
       text: `Dear ${customer.firstName} ${customer.lastName},
 
-Thank you for your order with Nazakat!
+Thank you for your order with Taharah!
 
 ORDER CONFIRMATION DETAILS:
 Order Reference: ${orderData.orderReference}
@@ -68,13 +68,13 @@ Your order has been successfully received and is currently being processed. You 
 
 CUSTOMER SUPPORT:
 For any questions about your order, please contact us:
-Email: ${functions.config().email?.user || process.env.EMAIL_USER}
-Phone: +91-XXXXXXXXXX
+Email: Officialtaharah@gmail.com
+Phone: +91 8589920686
 
-Thank you for choosing Nazakat!
+Thank you for choosing Taharah!
 
 Best regards,
-The Nazakat Team
+The Taharah Team
 
 ---
 This email was sent to ${customer.email}
@@ -121,14 +121,14 @@ async function sendOwnerOrderNotification(orderData) {
     
     // Define email options
     const mailOptions = {
-      from: `"Nazakat Orders" <${functions.config().email?.user || process.env.EMAIL_USER}>`,
+      from: `"Taharah Orders" <${functions.config().email?.user || process.env.EMAIL_USER}>`,
       to: ownerEmail,
       subject: `New Order - ${orderData.orderReference}`,
       html: htmlContent,
       // Text version for email clients that don't support HTML
       text: `New Order - ${orderData.orderReference}
         
-A new order has been placed on your Nazakat store.
+A new order has been placed on your Taharah store.
         
 Order Reference: ${orderData.orderReference}
 Order Date: ${new Date(orderData.orderDate).toLocaleString()}

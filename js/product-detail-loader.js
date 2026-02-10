@@ -343,7 +343,7 @@ const ProductDetailLoader = (function() {
 
         // Update page title
         if (product.name) {
-            document.title = `${product.name} - Nazakat Jewellers`;
+            document.title = `${product.name} - Taharah`;
         }
 
         // Set the product ID on the detail container for wishlist functionality

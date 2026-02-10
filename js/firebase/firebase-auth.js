@@ -954,7 +954,7 @@ window.FirebaseAuth = (function() {
           firstName: displayName || 'User'
         },
         verificationUrl: verificationUrl,
-        siteName: 'Nazakat'
+        siteName: 'Taharah'
       };
 
       // Use your existing email service endpoint
@@ -995,7 +995,7 @@ window.FirebaseAuth = (function() {
           firstName: displayName || 'User'
         },
         resetUrl: resetUrl,
-        siteName: 'Nazakat'
+        siteName: 'Taharah'
       };
 
       console.log('📧 Sending custom password reset email via Netlify function');
