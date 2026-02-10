@@ -20,8 +20,8 @@ const CurrencyConverter = (function() {
         'EUR': { symbol: '€', name: 'Euro', flag: '🇪🇺', country: 'Europe' },
         'GBP': { symbol: '£', name: 'British Pound', flag: '🇬🇧', country: 'United Kingdom' },
         'AED': { symbol: 'د.إ', name: 'UAE Dirham', flag: '🇦🇪', country: 'UAE' },
-        'CAD': { symbol: 'C', name: 'Canadian Dollar', flag: '🇨🇦', country: 'Canada' },
-        'AUD': { symbol: 'A', name: 'Australian Dollar', flag: '🇦🇺', country: 'Australia' }
+        'CAD': { symbol: 'C$', name: 'Canadian Dollar', flag: '🇨🇦', country: 'Canada' },
+        'AUD': { symbol: 'A$', name: 'Australian Dollar', flag: '🇦🇺', country: 'Australia' }
     };
 
     let exchangeRates = {};
