@@ -1,7 +1,7 @@
-# royal meenakari Jewelry E-commerce Platform
+# Taharah Fashion Brand E-commerce Platform
 
 ## Overview
-royal meenakari is a premium e-commerce platform for jewelry, offering a seamless online shopping experience. It includes user authentication, cart management, wishlist functionality, multi-currency support (INR base with USD, EUR, GBP, AED, CAD, AUD), order processing, email notifications, and real-time push notifications using Firebase Cloud Messaging. The platform aims to provide a modern interface for browsing and purchasing jewelry, featuring advanced stock management, multi-language support, and integrated shipping. Its business vision is to capture a significant share of the online luxury jewelry market by providing a reliable, feature-rich, and user-friendly platform.
+Taharah is a premium fashion brand e-commerce platform, offering a seamless online shopping experience for Pakistani suits and ethnic wear. It includes user authentication, cart management, wishlist functionality, multi-currency support (INR base with USD, EUR, GBP, AED, CAD, AUD), order processing, email notifications, and real-time push notifications using Firebase Cloud Messaging. The platform aims to provide a modern interface for browsing and purchasing ethnic fashion, featuring advanced stock management, multi-language support, and integrated shipping. Its business vision is to capture a significant share of the online fashion market by providing a reliable, feature-rich, and user-friendly platform.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.

@@ -1,6 +1,6 @@
-# royal meenakari Jewelry E-commerce Platform
+# Taharah Fashion Brand E-commerce Platform
 
-A premium e-commerce platform for Auric, delivering a sophisticated online jewelry shopping experience with advanced user engagement and secure transaction capabilities.
+A premium e-commerce platform for Taharah, delivering a sophisticated online fashion shopping experience with advanced user engagement and secure transaction capabilities.
 
 ## Technologies
 
