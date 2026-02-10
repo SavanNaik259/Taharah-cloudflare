@@ -1,5 +1,5 @@
 /**
- * Auric Cart Manager
+ * Taharah Cart Manager
  * 
  * A simplified cart management system that handles both local storage and Firebase.
  * - Uses local storage when user is not logged in

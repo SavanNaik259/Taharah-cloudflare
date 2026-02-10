@@ -300,7 +300,7 @@ async function sendCustomerOrderConfirmation(orderData) {
       // Text version for email clients that don't support HTML
       text: `Order Confirmation - ${completeOrderData.orderReference}
 
-Thank you for your order at Nazakat!
+Thank you for your order at Taharah!
 
 Order Reference: ${completeOrderData.orderReference}
 Order Date: ${new Date(completeOrderData.orderDate).toLocaleString()}
@@ -586,13 +586,13 @@ async function sendVerificationEmail(emailData) {
       <body>
           <div class="container">
               <div class="header">
-                  <div class="logo">Nazakat</div>
+                  <div class="logo">Taharah</div>
                   <h2 style="color: #d4af37; margin: 10px 0;">Verify Your Email Address</h2>
               </div>
 
               <p>Hello ${customer.firstName || 'Valued Customer'},</p>
 
-              <p>Thank you for creating an account with Nazakat! To complete your registration and ensure the security of your account, please verify your email address.</p>
+              <p>Thank you for creating an account with Taharah! To complete your registration and ensure the security of your account, please verify your email address.</p>
 
               <div style="text-align: center; margin: 30px 0;">
                   <a href="${verificationUrl}" class="verify-button">Verify My Email Address</a>
@@ -608,7 +608,7 @@ async function sendVerificationEmail(emailData) {
               <p>If you didn't create this account, please ignore this email.</p>
 
               <div class="footer">
-                  <p>Welcome to Nazakat - Your trusted jewelry destination</p>
+                  <p>Welcome to Taharah - Your trusted fashion destination</p>
                   <p>Email: ${process.env.EMAIL_USER}</p>
                   <p style="font-size: 12px; color: #999;">This is an automated email. Please do not reply to this email.</p>
               </div>
@@ -620,16 +620,16 @@ async function sendVerificationEmail(emailData) {
     const mailOptions = {
       from: `"Taharah Team" <${process.env.EMAIL_USER}>`,
       to: customer.email,
-      subject: '✅ Verify Your Email Address - Nazakat',
+      subject: '✅ Verify Your Email Address - Taharah',
       html: htmlContent,
       headers: {
         'X-Priority': '3',
         'X-MSMail-Priority': 'Normal',
-        'X-Mailer': 'Nazakat E-commerce Platform v1.0',
+        'X-Mailer': 'Taharah E-commerce Platform v1.0',
         'Reply-To': process.env.EMAIL_USER,
-        'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@nazakat.com>`,
+        'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@taharah.in>`,
         'Return-Path': process.env.EMAIL_USER,
-        'Organization': 'Nazakat Jewelry'
+        'Organization': 'Taharah Fashion'
       }
     };
 
@@ -721,13 +721,13 @@ async function sendPasswordResetEmail(emailData) {
       <body>
           <div class="container">
               <div class="header">
-                  <div class="logo">Nazakat</div>
+                  <div class="logo">Taharah</div>
                   <h2 style="color: #dc3545; margin: 10px 0;">🔐 Reset Your Password</h2>
               </div>
 
               <p>Hello ${customer.firstName || 'Valued Customer'},</p>
 
-              <p>We received a request to reset the password for your Nazakat account. If you made this request, please click the button below to create a new password.</p>
+              <p>We received a request to reset the password for your Taharah account. If you made this request, please click the button below to create a new password.</p>
 
               <div style="text-align: center; margin: 30px 0;">
                   <a href="${resetUrl}" class="reset-button">Reset My Password</a>
@@ -750,7 +750,7 @@ async function sendPasswordResetEmail(emailData) {
               <p>For your account security, never share this email or link with anyone.</p>
 
               <div class="footer">
-                  <p>Nazakat - Your trusted jewelry destination</p>
+                  <p>Taharah - Your trusted fashion destination</p>
                   <p>Email: ${process.env.EMAIL_USER}</p>
                   <p style="font-size: 12px; color: #999;">This is an automated email. Please do not reply to this email.</p>
               </div>
@@ -760,18 +760,18 @@ async function sendPasswordResetEmail(emailData) {
     `;
 
     const mailOptions = {
-      from: `"Nazakat Security" <${process.env.EMAIL_USER}>`,
+      from: `"Taharah Security" <${process.env.EMAIL_USER}>`,
       to: customer.email,
-      subject: '🔐 Reset Your Password - Nazakat',
+      subject: '🔐 Reset Your Password - Taharah',
       html: htmlContent,
       headers: {
         'X-Priority': '1', // High priority for security emails
         'X-MSMail-Priority': 'High',
-        'X-Mailer': 'Nazakat E-commerce Platform v1.0',
+        'X-Mailer': 'Taharah E-commerce Platform v1.0',
         'Reply-To': process.env.EMAIL_USER,
-        'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@nazakat.com>`,
+        'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@taharah.in>`,
         'Return-Path': process.env.EMAIL_USER,
-        'Organization': 'Nazakat Jewelry'
+        'Organization': 'Taharah Fashion'
       }
     };
 
@@ -1037,7 +1037,7 @@ async function sendContactEmail(contactData) {
       <body>
           <div class="container">
               <div class="header">
-                  <div class="logo">Nazakat</div>
+                  <div class="logo">Taharah</div>
                   <h2 style="color: #d4af37; margin: 10px 0;">New Contact Form Submission</h2>
               </div>
 
@@ -1060,7 +1060,7 @@ async function sendContactEmail(contactData) {
               <p><strong>Action Required:</strong> Please respond to this inquiry promptly to maintain excellent customer service.</p>
 
               <div class="footer">
-                  <p>This email was automatically generated from the Nazakat contact form</p>
+                  <p>This email was automatically generated from the Taharah contact form</p>
                   <p>Reply directly to: ${email}</p>
               </div>
           </div>
@@ -1086,7 +1086,7 @@ async function sendContactEmail(contactData) {
       <body>
           <div class="container">
               <div class="header">
-                  <div class="logo">Nazakat</div>
+                  <div class="logo">Taharah</div>
                   <h2 style="color: #d4af37; margin: 10px 0;">Thank You for Contacting Us!</h2>
               </div>
 
@@ -1097,7 +1097,7 @@ async function sendContactEmail(contactData) {
 
               <p>Dear ${firstName},</p>
 
-              <p>Thank you for reaching out to Nazakat! We appreciate your interest in our handcrafted collections and traditional artistry.</p>
+              <p>Thank you for reaching out to Taharah! We appreciate your interest in our handcrafted collections and traditional artistry.</p>
 
               <p>Here's a summary of your message:</p>
               <div style="background-color: #f8fafc; padding: 15px; border-radius: 5px; margin: 15px 0;">
@@ -1122,7 +1122,7 @@ async function sendContactEmail(contactData) {
 
     // Send email to admin/owner
     const adminMailOptions = {
-      from: `"Nazakat Contact Form" <${process.env.EMAIL_USER}>`,
+      from: `"Taharah Contact Form" <${process.env.EMAIL_USER}>`,
       to: process.env.OWNER_EMAIL,
       subject: `New Contact Form: ${subject} - ${firstName} ${lastName}`,
       html: adminEmailContent,
@@ -1130,11 +1130,11 @@ async function sendContactEmail(contactData) {
       headers: {
         'X-Priority': '2',
         'X-MSMail-Priority': 'High',
-        'X-Mailer': 'Nazakat Contact System v1.0',
+        'X-Mailer': 'Taharah Contact System v1.0',
         'Reply-To': email,
-        'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@nazakat.com>`,
+        'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@taharah.in>`,
         'Return-Path': process.env.EMAIL_USER,
-        'Organization': 'Nazakat'
+        'Organization': 'Taharah'
       }
     };
 
@@ -1142,16 +1142,16 @@ async function sendContactEmail(contactData) {
     const customerMailOptions = {
       from: `"Taharah Team" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: '✅ Thank you for contacting Nazakat - We\'ll be in touch soon!',
+      subject: '✅ Thank you for contacting Taharah - We\'ll be in touch soon!',
       html: customerEmailContent,
       headers: {
         'X-Priority': '3',
         'X-MSMail-Priority': 'Normal',
-        'X-Mailer': 'Nazakat Contact System v1.0',
+        'X-Mailer': 'Taharah Contact System v1.0',
         'Reply-To': process.env.OWNER_EMAIL,
-        'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@nazakat.com>`,
+        'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@taharah.in>`,
         'Return-Path': process.env.EMAIL_USER,
-        'Organization': 'Nazakat'
+        'Organization': 'Taharah'
       }
     };
 

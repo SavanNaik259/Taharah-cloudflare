@@ -1,4 +1,4 @@
-// Nazakat Analytics Tracking Script
+// Taharah Analytics Tracking Script
 // This script tracks visitor data and sends it to Firebase Firestore
 
 (function() {
@@ -7,7 +7,7 @@
     // Use the unified Firebase configuration from the main application
     // This ensures all analytics data goes to the same Firebase project
     const firebaseConfig = window.firebaseConfig || {
-        // Fallback config if main config not loaded (unified nazakat project)
+        // Fallback config if main config not loaded (unified taharah project)
         apiKey: "AIzaSyCQ9gafSnJBwuXvIpnOGn4Kwo8YqMkKY0M",
         authDomain: "studio-7642357109-d9026.firebaseapp.com",
         projectId: "studio-7642357109-d9026",
@@ -54,11 +54,11 @@
     // Initialize Analytics
     function initAnalytics() {
         if (analytics.initialized) {
-            console.log('⚠️ Nazakat Analytics already initialized');
+            console.log('⚠️ Taharah Analytics already initialized');
             return;
         }
 
-        console.log('🔄 Initializing Nazakat Analytics...');
+        console.log('🔄 Initializing Taharah Analytics...');
         console.log('🔍 Checking Firebase availability...');
 
         const db = initFirebase();
@@ -90,22 +90,22 @@
         // Start real-time visitor tracking
         startOnlineTracking();
 
-        console.log('✅ Nazakat Analytics initialized with real-time tracking');
+        console.log('✅ Taharah Analytics initialized with real-time tracking');
     }
 
     // Generate or retrieve visitor ID
     function getOrCreateVisitorId() {
-        let visitorId = localStorage.getItem('nazakat_visitor_id');
+        let visitorId = localStorage.getItem('taharah_visitor_id');
         if (!visitorId) {
             visitorId = 'visitor_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('nazakat_visitor_id', visitorId);
+            localStorage.setItem('taharah_visitor_id', visitorId);
         }
         return visitorId;
     }
 
     // Get or create session
     function getOrCreateSession() {
-        const existingSession = localStorage.getItem('nazakat_session_data');
+        const existingSession = localStorage.getItem('taharah_session_data');
         const now = Date.now();
         
         if (existingSession) {
@@ -115,7 +115,7 @@
                 session.lastActivity = now;
                 session.pageViews++;
                 session.bounced = false; // Multiple pages viewed
-                localStorage.setItem('nazakat_session_data', JSON.stringify(session));
+                localStorage.setItem('taharah_session_data', JSON.stringify(session));
                 return session;
             }
         }
@@ -132,7 +132,7 @@
             timeOnSite: 0
         };
 
-        localStorage.setItem('nazakat_session_data', JSON.stringify(newSession));
+        localStorage.setItem('taharah_session_data', JSON.stringify(newSession));
         return newSession;
     }
 
@@ -140,7 +140,7 @@
     async function getLocationData() {
         try {
             // Check if location is cached (valid for 1 hour)
-            const cachedLocation = localStorage.getItem('nazakat_location_cache');
+            const cachedLocation = localStorage.getItem('taharah_location_cache');
             if (cachedLocation) {
                 const cached = JSON.parse(cachedLocation);
                 if (Date.now() - cached.timestamp < 3600000) { // 1 hour
@@ -171,7 +171,7 @@
             };
 
             // Cache location data
-            localStorage.setItem('nazakat_location_cache', JSON.stringify({
+            localStorage.setItem('taharah_location_cache', JSON.stringify({
                 data: locationData,
                 timestamp: Date.now()
             }));
@@ -219,7 +219,7 @@
             deviceType: detectDeviceType(),
             browser: detectBrowser(),
             operatingSystem: detectOperatingSystem(),
-            isNewVisitor: analytics.sessionData.pageViews === 1 && !localStorage.getItem('nazakat_returning_visitor'),
+            isNewVisitor: analytics.sessionData.pageViews === 1 && !localStorage.getItem('taharah_returning_visitor'),
             pageLoadTime: performance.timing ? (performance.timing.loadEventEnd - performance.timing.navigationStart) : null,
             // Location data
             country: locationData.country,
@@ -232,7 +232,7 @@
         };
 
         // Mark as returning visitor
-        localStorage.setItem('nazakat_returning_visitor', 'true');
+        localStorage.setItem('taharah_returning_visitor', 'true');
 
         // Store in Firestore
         db.collection('analytics_visits').add(visitorData)
@@ -332,7 +332,7 @@
                 // Update session data
                 if (analytics.sessionData) {
                     analytics.sessionData.scrollDepth = maxScrollDepth;
-                    localStorage.setItem('nazakat_session_data', JSON.stringify(analytics.sessionData));
+                    localStorage.setItem('taharah_session_data', JSON.stringify(analytics.sessionData));
                 }
             }
 
@@ -386,7 +386,7 @@
             }
             if (analytics.sessionData) {
                 analytics.sessionData.lastActivity = Date.now();
-                localStorage.setItem('nazakat_session_data', JSON.stringify(analytics.sessionData));
+                localStorage.setItem('taharah_session_data', JSON.stringify(analytics.sessionData));
             }
         }
     }
@@ -398,7 +398,7 @@
         const now = Date.now();
         const timeOnSite = now - analytics.sessionData.startTime;
         analytics.sessionData.timeOnSite = timeOnSite;
-        localStorage.setItem('nazakat_session_data', JSON.stringify(analytics.sessionData));
+        localStorage.setItem('taharah_session_data', JSON.stringify(analytics.sessionData));
 
         // End online session
         endOnlineSession();
@@ -509,14 +509,14 @@
     }
 
     // Public API
-    window.NazakatAnalytics = {
+    window.TaharahAnalytics = {
         track: trackEvent,
         initialized: function() { return analytics.initialized; }
     };
 
     // Auto-initialize when DOM is ready or Firebase is available
     function autoInit() {
-        console.log('🚀 Nazakat Analytics auto-init started');
+        console.log('🚀 Taharah Analytics auto-init started');
         console.log('🔍 Firebase available:', typeof firebase !== 'undefined');
         console.log('🔍 Firebase apps:', typeof firebase !== 'undefined' ? firebase.apps.length : 'N/A');
         
@@ -530,7 +530,7 @@
     }
 
     // Start initialization
-    console.log('📊 Nazakat Analytics script loaded');
+    console.log('📊 Taharah Analytics script loaded');
     console.log('📊 Document ready state:', document.readyState);
     
     if (document.readyState === 'loading') {

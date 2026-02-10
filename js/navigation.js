@@ -1,5 +1,5 @@
 /**
- * Auric Responsive Navigation System
+ * Taharah Responsive Navigation System
  * Complete rewrite with responsive design
  */
 document.addEventListener('DOMContentLoaded', function() {
