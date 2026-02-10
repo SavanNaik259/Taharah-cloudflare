@@ -275,8 +275,6 @@ const CurrencyConverter = (function() {
                 element.dataset.originalText = text;
             }
             
-            // CRITICAL FIX: Improved regex to handle various currency symbols including '₱' (Philippine Peso)
-            // and replace them correctly with the selected currency symbol
             const match = text.match(/[\d,]+\.?\d*/);
             if (match) {
                 priceInINR = parseFloat(match[0].replace(/,/g, ''));
@@ -293,8 +291,7 @@ const CurrencyConverter = (function() {
         const originalPriceMatch = originalText.match(/[\d,]+\.?\d*/);
         
         if (originalPriceMatch) {
-            // CRITICAL FIX: Regex [₹$€£₱]? handles the Philippine Peso symbol seen on 'Ready to Wear' page
-            const updatedText = originalText.replace(/[₹$€£₱]?[\d,]+\.?\d*/, formattedPrice);
+            const updatedText = originalText.replace(/[₹$€£]?[\d,]+\.?\d*/, formattedPrice);
             element.textContent = updatedText;
         } else {
             element.textContent = formattedPrice;
