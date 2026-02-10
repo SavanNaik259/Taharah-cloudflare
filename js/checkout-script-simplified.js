@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Constants
-    const STORAGE_KEY = 'taharah_cart_items';
+    const STORAGE_KEY = 'auric_cart_items';
     let firebaseCartModule = null;
     let firebaseOrdersModule = null;
     let isLoadingCart = false; // Flag to prevent multiple loading operations
