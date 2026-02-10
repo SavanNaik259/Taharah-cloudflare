@@ -1,7 +1,7 @@
 {
-  "name": "Taharah",
-  "short_name": "Taharah",
-  "description": "Premium Pakistani fashion collection",
+  "name": "Royal Meenakari",
+  "short_name": "Royal Meenakari",
+  "description": "Premium meenakari and gold jewelry collection",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -9,13 +9,13 @@
   "background_color": "#ffffff",
   "icons": [
     {
-      "src": "/images/logos/taharah.png",
+      "src": "/images/logos/royalmeenakari.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/images/logos/taharah.png",
+      "src": "/images/logos/royalmeenakari.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -24,7 +24,7 @@
   "categories": ["shopping"],
   "screenshots": [
     {
-      "src": "/images/logos/taharah.png",
+      "src": "/images/logos/royalmeenakari.png",
       "sizes": "540x720",
       "type": "image/png"
     }
