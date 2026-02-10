@@ -1,8 +1,8 @@
-# Royal Meenakari E-commerce Platform
+# Taharah E-commerce Platform
 
 ## Overview
 
-Royal Meenakari is a premium e-commerce platform for traditional Indian Meenakari jewelry. The platform provides a sophisticated online shopping experience with product catalogs, user authentication, shopping cart functionality, wishlist management, secure payments, and order notifications.
+Taharah is a premium e-commerce platform for exquisite Pakistani fashion. The platform provides a sophisticated online shopping experience with product catalogs, user authentication, shopping cart functionality, wishlist management, secure payments, and order notifications.
 
 The site is built as a multi-page static website with serverless backend functions, designed for deployment on Netlify with Firebase as the primary data layer.
 
@@ -39,10 +39,10 @@ Preferred communication style: Simple, everyday language.
 
 ### Product Organization
 Products are organized into Firestore collections:
-- `new-arrivals` - Latest jewelry additions
-- `featured-collection` - Curated featured items
-- `saree-collection` - Saree/jewelry combinations
-- Category-specific collections for gold/silver jewelry types
+- `new-arrivals` - Latest fashion additions
+- `ready-to-wear` - Curated ready-to-wear items
+- `pakistani-pret-wear` - Pret wear collection
+- Category-specific collections for party wear, modest wear, etc.
 
 ### Key JavaScript Files
 - `js/firebase-config.js` - Centralized Firebase configuration
