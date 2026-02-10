@@ -87,7 +87,7 @@ function generateCancellationEmailContent(orderData) {
     <body>
         <div class="container">
             <div class="header">
-                <div class="logo">Royal Meenakari</div>
+                <div class="logo">Taharah</div>
                 <h2 style="color: #dc2626; margin: 10px 0;">Order Cancelled</h2>
             </div>
 
@@ -128,7 +128,7 @@ function generateCancellationEmailContent(orderData) {
             <p>We apologize for any inconvenience this may have caused. If you have any questions or would like to place a new order, please don't hesitate to contact us.</p>
 
             <div class="footer">
-                <p>Thank you for choosing Royal Meenakari</p>
+                <p>Thank you for choosing Taharah</p>
                 <p>Email: ${process.env.EMAIL_USER} | Phone: +91 93102 50047</p>
                 <p style="font-size: 12px; color: #999;">This is an automated email. Please do not reply to this email.</p>
             </div>
@@ -840,7 +840,7 @@ async function sendAppointmentEmail(appointmentData) {
       <body>
           <div class="container">
               <div class="header">
-                  <div class="logo">Royal Meenakari</div>
+                  <div class="logo">Taharah</div>
                   <h2 style="color: #9c7c38; margin: 10px 0;">New Appointment Booking</h2>
               </div>
 
@@ -890,7 +890,7 @@ async function sendAppointmentEmail(appointmentData) {
               <p><strong>Action Required:</strong> Please contact the customer to confirm this appointment.</p>
 
               <div class="footer">
-                  <p>This email was automatically generated from the Royal Meenakari appointment booking system</p>
+                  <p>This email was automatically generated from the Taharah appointment booking system</p>
                   <p>Reply directly to: ${email}</p>
               </div>
           </div>
@@ -917,7 +917,7 @@ async function sendAppointmentEmail(appointmentData) {
       <body>
           <div class="container">
               <div class="header">
-                  <div class="logo">Royal Meenakari</div>
+                  <div class="logo">Taharah</div>
                   <h2 style="color: #9c7c38; margin: 10px 0;">Appointment Booking Confirmation</h2>
               </div>
 
@@ -928,7 +928,7 @@ async function sendAppointmentEmail(appointmentData) {
 
               <p>Dear ${fullName},</p>
 
-              <p>Thank you for booking an appointment with Royal Meenakari. Here are your appointment details:</p>
+              <p>Thank you for booking an appointment with Taharah. Here are your appointment details:</p>
 
               <div class="appointment-details">
                   <p><strong>Appointment Type:</strong> ${appointmentType === 'in-store' ? 'In-Store Visit' : 'Virtual Consultation'}</p>
@@ -954,7 +954,7 @@ async function sendAppointmentEmail(appointmentData) {
               <p>We look forward to meeting you!</p>
 
               <div class="footer">
-                  <p>Thank you for choosing Royal Meenakari - Where elegance meets tradition</p>
+                  <p>Thank you for choosing Taharah - Where elegance meets tradition</p>
                   <p>Email: ${process.env.EMAIL_USER} | Phone: +91 93102 50047</p>
                   <p style="font-size: 12px; color: #999;">This is an automated confirmation email.</p>
               </div>
@@ -965,7 +965,7 @@ async function sendAppointmentEmail(appointmentData) {
 
     // Send email to admin/owner
     const adminMailOptions = {
-      from: `"Royal Meenakari Appointments" <${process.env.EMAIL_USER}>`,
+      from: `"Taharah Appointments" <${process.env.EMAIL_USER}>`,
       to: process.env.OWNER_EMAIL,
       subject: `🗓️ New Appointment: ${fullName} - ${formattedDate} at ${selectedTime}`,
       html: adminEmailContent,
@@ -974,9 +974,9 @@ async function sendAppointmentEmail(appointmentData) {
 
     // Send confirmation email to customer
     const customerMailOptions = {
-      from: `"Royal Meenakari" <${process.env.EMAIL_USER}>`,
+      from: `"Taharah" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: '✅ Appointment Confirmation - Royal Meenakari',
+      subject: '✅ Appointment Confirmation - Taharah',
       html: customerEmailContent
     };
 

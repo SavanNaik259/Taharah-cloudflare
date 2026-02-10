@@ -102,8 +102,8 @@ function displayNotification(payload) {
     
     const notificationId = data.timestamp || Date.now().toString();
     
-    const title = data.title || 'Royal Meenakari';
-    const body = data.body || 'New update from Royal Meenakari';
+    const title = data.title || 'Taharah';
+    const body = data.body || 'New update from Taharah';
     const image = data.imageUrl || data.image || '';
     const buttonText = data.buttonText || 'View';
     const icon = data.icon || '/images/logos/royalmeenakari.png';

@@ -117,7 +117,7 @@ exports.handler = async (event) => {
             imageUrl: String(imageUrl || ''),
             buttonText: String(buttonText || 'View'),
             icon: '/images/logos/royalmeenakari.png',
-            tag: 'royal-meenakari-notification',
+            tag: 'taharah-notification',
             timestamp: Date.now().toString()
         };
         

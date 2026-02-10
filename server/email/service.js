@@ -24,11 +24,11 @@ async function sendCustomerOrderConfirmation(orderData) {
     const emailUser = process.env.EMAIL_USER;
     
     const mailOptions = {
-      from: `"Royal Meenakari" <${emailUser}>`,
+      from: `"Taharah" <${emailUser}>`,
       to: customer.email,
       subject: `Order Confirmation - ${orderData.orderReference}`,
       html: htmlContent,
-      text: `Order Confirmation - ${orderData.orderReference}\n\nThank you for your order at Royal Meenakari!\n\nOrder Reference: ${orderData.orderReference}\nOrder Date: ${new Date(orderData.orderDate).toLocaleString()}\nTotal: ${orderData.userSelectedCurrency || 'INR'} ${orderData.orderTotal.toFixed(2)}\n\nYour order has been received and is being processed.\n\nIf you have any questions, please contact us at ${emailUser}.`
+      text: `Order Confirmation - ${orderData.orderReference}\n\nThank you for your order at Taharah!\n\nOrder Reference: ${orderData.orderReference}\nOrder Date: ${new Date(orderData.orderDate).toLocaleString()}\nTotal: ${orderData.userSelectedCurrency || 'INR'} ${orderData.orderTotal.toFixed(2)}\n\nYour order has been received and is being processed.\n\nIf you have any questions, please contact us at ${emailUser}.`
     };
     
     console.log(`Sending order confirmation email to customer: ${customer.email}`);
@@ -57,11 +57,11 @@ async function sendOwnerOrderNotification(orderData) {
     const htmlContent = templates.ownerOrderTemplate(orderData);
     
     const mailOptions = {
-      from: `"Royal Meenakari Orders" <${emailUser}>`,
+      from: `"Taharah Orders" <${emailUser}>`,
       to: ownerEmail,
       subject: `New Order - ${orderData.orderReference}`,
       html: htmlContent,
-      text: `New Order - ${orderData.orderReference}\n\nA new order has been placed on your Royal Meenakari store.\n\nOrder Reference: ${orderData.orderReference}\nOrder Date: ${new Date(orderData.orderDate).toLocaleString()}\nCustomer: ${orderData.customer.firstName} ${orderData.customer.lastName}\nEmail: ${orderData.customer.email}\nPhone: ${orderData.customer.phone}\nTotal (INR): ₹${orderData.orderTotal.toFixed(2)}\n\nPlease log in to your dashboard to view the complete order details.`
+      text: `New Order - ${orderData.orderReference}\n\nA new order has been placed on your Taharah store.\n\nOrder Reference: ${orderData.orderReference}\nOrder Date: ${new Date(orderData.orderDate).toLocaleString()}\nCustomer: ${orderData.customer.firstName} ${orderData.customer.lastName}\nEmail: ${orderData.customer.email}\nPhone: ${orderData.customer.phone}\nTotal (INR): ₹${orderData.orderTotal.toFixed(2)}\n\nPlease log in to your dashboard to view the complete order details.`
     };
     
     console.log(`Sending order notification email to owner: ${ownerEmail}`);
@@ -90,7 +90,7 @@ async function sendCustomerOrderCancellation(orderData) {
     const htmlContent = templates.customerCancellationTemplate(orderData);
     
     const mailOptions = {
-      from: `"Royal Meenakari" <${emailUser}>`,
+      from: `"Taharah" <${emailUser}>`,
       to: customer.email,
       subject: `Order Cancelled - ${orderData.orderReference}`,
       html: htmlContent,
@@ -123,11 +123,11 @@ async function sendOwnerOrderCancellation(orderData) {
     const htmlContent = templates.ownerCancellationTemplate(orderData);
     
     const mailOptions = {
-      from: `"Royal Meenakari Orders" <${emailUser}>`,
+      from: `"Taharah Orders" <${emailUser}>`,
       to: ownerEmail,
       subject: `Order Cancelled - ${orderData.orderReference}`,
       html: htmlContent,
-      text: `Order Cancelled - ${orderData.orderReference}\n\nAn order has been cancelled in your Royal Meenakari store.\n\nOrder Reference: ${orderData.orderReference}\nOrder Date: ${new Date(orderData.orderDate).toLocaleString()}\nCustomer: ${orderData.customer.firstName} ${orderData.customer.lastName}\nEmail: ${orderData.customer.email}\nPhone: ${orderData.customer.phone}\nTotal (INR): ₹${orderData.orderTotal.toFixed(2)}\n${orderData.cancellationReason ? `Cancellation Reason: ${orderData.cancellationReason}\n` : ''}\nYou may need to process a refund for this cancelled order.`
+      text: `Order Cancelled - ${orderData.orderReference}\n\nAn order has been cancelled in your Taharah store.\n\nOrder Reference: ${orderData.orderReference}\nOrder Date: ${new Date(orderData.orderDate).toLocaleString()}\nCustomer: ${orderData.customer.firstName} ${orderData.customer.lastName}\nEmail: ${orderData.customer.email}\nPhone: ${orderData.customer.phone}\nTotal (INR): ₹${orderData.orderTotal.toFixed(2)}\n${orderData.cancellationReason ? `Cancellation Reason: ${orderData.cancellationReason}\n` : ''}\nYou may need to process a refund for this cancelled order.`
     };
     
     console.log(`Sending order cancellation notification to owner: ${ownerEmail}`);
@@ -156,7 +156,7 @@ async function sendCustomerDeliveryConfirmation(orderData) {
     const htmlContent = templates.customerDeliveryTemplate(orderData);
     
     const mailOptions = {
-      from: `"Royal Meenakari" <${emailUser}>`,
+      from: `"Taharah" <${emailUser}>`,
       to: customer.email,
       subject: `Delivery Confirmed - ${orderData.orderReference}`,
       html: htmlContent,
@@ -189,7 +189,7 @@ async function sendOwnerDeliveryConfirmation(orderData) {
     const htmlContent = templates.ownerDeliveryTemplate(orderData);
     
     const mailOptions = {
-      from: `"Royal Meenakari Orders" <${emailUser}>`,
+      from: `"Taharah Orders" <${emailUser}>`,
       to: ownerEmail,
       subject: `Order Delivered - ${orderData.orderReference}`,
       html: htmlContent,

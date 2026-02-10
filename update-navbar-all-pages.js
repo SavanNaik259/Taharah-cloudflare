@@ -106,7 +106,7 @@ try {
     console.log(`📊 Summary: ${successCount} files updated, ${failCount} files skipped/failed`);
     console.log('\nUpdated navbar includes:');
     console.log('  • Promo banner with rotation');
-    console.log('  • Royal Meenakari branding');
+    console.log('  • Taharah branding');
     console.log('  • Hamburger menu icon');
     console.log('  • Navigation links with dropdowns');
     console.log('  • Mobile menu with close button');

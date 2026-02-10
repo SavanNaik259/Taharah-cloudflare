@@ -67,12 +67,11 @@ Products are organized into Firestore collections:
 - **Services Used**: Authentication, Firestore, Storage, Cloud Messaging
 - **Admin SDK**: Used server-side for privileged operations
 
-### Payment Gateway
-- **Razorpay**: Requires `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` environment variables
-
-### Email Service
-- **Nodemailer**: For order confirmation emails
-- **Required Variables**: `EMAIL_SERVICE`, `EMAIL_USER`, `EMAIL_PASS`, `EMAIL_SECURE`, `OWNER_EMAIL`
+Email: Officialtaharah@gmail.com
+Number to add on WhatsApp floating button and all: +91 8589920686
+Domain: taharah.in
+Instagram id: https://www.instagram.com/taharahofficial_?igsh=MTdpdTRvdTBiMDh1dQ==
+Address: kerala, India
 
 ### CDN Resources
 - Font Awesome icons

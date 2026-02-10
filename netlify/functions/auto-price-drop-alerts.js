@@ -71,7 +71,7 @@ exports.handler = async (event) => {
             imageUrl: productImage || '',
             buttonText: 'View Deal',
             icon: '/images/logos/royalmeenakari.png',
-            tag: 'royal-meenakari-price-drop',
+            tag: 'taharah-price-drop',
             timestamp: Date.now().toString()
         };
 

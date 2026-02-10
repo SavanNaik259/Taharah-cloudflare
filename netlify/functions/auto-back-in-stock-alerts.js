@@ -110,7 +110,7 @@ exports.handler = async (event) => {
             imageUrl: String(productImage || ''),
             buttonText: 'Shop Now',
             icon: '/images/logos/royalmeenakari.png',
-            tag: 'royal-meenakari-back-in-stock',
+            tag: 'taharah-back-in-stock',
             timestamp: Date.now().toString()
         };
         

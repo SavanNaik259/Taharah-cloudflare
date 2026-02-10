@@ -95,7 +95,7 @@ function customerOrderTemplate(data) {
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${status === 'cancelled' ? 'Order Cancelled' : status === 'confirmed' ? 'Order Confirmed' : 'Order Confirmation'} - Royal Meenakari</title>
+    <title>${status === 'cancelled' ? 'Order Cancelled' : status === 'confirmed' ? 'Order Confirmed' : 'Order Confirmation'} - Taharah</title>
     <style>
       body { 
         font-family: Arial, sans-serif; 
@@ -167,7 +167,7 @@ function customerOrderTemplate(data) {
   <body>
     <div class="container">
       <div class="header">
-        <div class="logo">Royal Meenakari</div>
+        <div class="logo">Taharah</div>
       </div>
 
       ${status === 'cancelled' ? `
@@ -232,10 +232,10 @@ function customerOrderTemplate(data) {
 
       <p>If you have any questions${status === 'cancelled' ? ' or would like to place a new order' : ' about your order'}, please contact our customer service team at <a href="mailto:${process.env.EMAIL_USER}">${process.env.EMAIL_USER}</a> or call us at +91 93102 50047.</p>
 
-      <p>Thank you for ${status === 'cancelled' ? 'your understanding' : 'shopping with Royal Meenakari'}!</p>
+      <p>Thank you for ${status === 'cancelled' ? 'your understanding' : 'shopping with Taharah'}!</p>
 
       <div class="footer">
-        <p>&copy; 2025 Royal Meenakari. All Rights Reserved.</p>
+        <p>&copy; 2025 Taharah. All Rights Reserved.</p>
         <p>This email was sent to ${customer.email || 'customer'}</p>
         <p>Contact us: ${process.env.EMAIL_USER} | +91 93102 50047</p>
       </div>
@@ -291,7 +291,7 @@ function ownerOrderTemplate(data) {
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Order Notification - Royal Meenakari</title>
+    <title>New Order Notification - Taharah</title>
     <style>
       body { 
         font-family: Arial, sans-serif; 
@@ -361,7 +361,7 @@ function ownerOrderTemplate(data) {
   <body>
     <div class="container">
       <div class="header">
-        <div class="logo">Royal Meenakari</div>
+        <div class="logo">Taharah</div>
       </div>
 
       <h2>New Order Received</h2>
@@ -412,8 +412,8 @@ function ownerOrderTemplate(data) {
       <p>Please process this order as soon as possible.</p>
 
       <div class="footer">
-        <p>&copy; 2025 Royal Meenakari. All Rights Reserved.</p>
-        <p>This is an automated email from your Royal Meenakari website.</p>
+        <p>&copy; 2025 Taharah. All Rights Reserved.</p>
+        <p>This is an automated email from your Taharah website.</p>
       </div>
     </div>
   </body>
@@ -434,7 +434,7 @@ function customerDeliveryTemplate(data) {
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delivery Confirmed - Royal Meenakari</title>
+    <title>Delivery Confirmed - Taharah</title>
     <style>
       body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
       .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -448,12 +448,12 @@ function customerDeliveryTemplate(data) {
   <body>
     <div class="container">
       <div class="header">
-        <div class="logo">Royal Meenakari</div>
+        <div class="logo">Taharah</div>
       </div>
 
       <h2 style="color: #4caf50; text-align: center;">✅ Your Order Has Been Delivered!</h2>
       <p>Dear ${customer.firstName || ''} ${customer.lastName || ''},</p>
-      <p>Great news! Your order has been successfully delivered. We hope you enjoy your beautiful jewelry from Royal Meenakari.</p>
+      <p>Great news! Your order has been successfully delivered. We hope you enjoy your beautiful jewelry from Taharah.</p>
 
       <div class="success-box">
         <h3 style="margin: 0 0 10px 0;">Delivery Confirmed</h3>
@@ -471,7 +471,7 @@ function customerDeliveryTemplate(data) {
       <p>We'd love to hear from you! Please share your feedback and help us improve your shopping experience.</p>
 
       <div class="footer">
-        <p>&copy; 2025 Royal Meenakari. All Rights Reserved.</p>
+        <p>&copy; 2025 Taharah. All Rights Reserved.</p>
         <p>Thank you for shopping with us!</p>
         <p>Contact us: ${process.env.EMAIL_USER} | +91 93102 50047</p>
       </div>
@@ -507,7 +507,7 @@ function ownerDeliveryTemplate(data) {
   <body>
     <div class="container">
       <div class="header">
-        <div class="logo">Royal Meenakari</div>
+        <div class="logo">Taharah</div>
       </div>
 
       <h2 style="color: #4caf50; text-align: center;">✅ Order Delivered</h2>
@@ -528,8 +528,8 @@ function ownerDeliveryTemplate(data) {
       <p>The customer has been notified of the successful delivery.</p>
 
       <div class="footer">
-        <p>&copy; 2025 Royal Meenakari. All Rights Reserved.</p>
-        <p>This is an automated email from your Royal Meenakari website.</p>
+        <p>&copy; 2025 Taharah. All Rights Reserved.</p>
+        <p>This is an automated email from your Taharah website.</p>
       </div>
     </div>
   </body>
