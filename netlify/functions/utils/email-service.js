@@ -129,7 +129,7 @@ function generateCancellationEmailContent(orderData) {
 
             <div class="footer">
                 <p>Thank you for choosing Taharah</p>
-                <p>Email: ${process.env.EMAIL_USER} | Phone: +91 93102 50047</p>
+                <p>Email: ${process.env.EMAIL_USER} | Phone: +91 8589920686</p>
                 <p style="font-size: 12px; color: #999;">This is an automated email. Please do not reply to this email.</p>
             </div>
         </div>
@@ -282,20 +282,20 @@ async function sendCustomerOrderConfirmation(orderData) {
 
     // Define email options
     const mailOptions = {
-      from: `"Nazakat Team" <${process.env.EMAIL_USER}>`,
+      from: `"Taharah Team" <${process.env.EMAIL_USER}>`,
       to: customerData.email,
       subject: subject,
       html: htmlContent,
       headers: {
         'X-Priority': '3',
         'X-MSMail-Priority': 'Normal',
-        'X-Mailer': 'Nazakat E-commerce Platform v1.0',
+        'X-Mailer': 'Taharah E-commerce Platform v1.0',
         'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=Unsubscribe>`,
         'Reply-To': process.env.EMAIL_USER,
-        'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@nazakat.com>`,
-        'X-Entity-ID': 'nazakat-ecommerce',
+        'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@taharah.in>`,
+        'X-Entity-ID': 'taharah-ecommerce',
         'Return-Path': process.env.EMAIL_USER,
-        'Organization': 'Nazakat Jewelry'
+        'Organization': 'Taharah Fashion'
       },
       // Text version for email clients that don't support HTML
       text: `Order Confirmation - ${completeOrderData.orderReference}
@@ -377,14 +377,14 @@ async function sendOwnerOrderNotification(orderData) {
 
     // Define email options
     const mailOptions = {
-      from: `"Nazakat Orders" <${process.env.EMAIL_USER}>`,
+      from: `"Taharah Orders" <${process.env.EMAIL_USER}>`,
       to: ownerEmail,
       subject: subject,
       html: ownerContent,
       // Text version for email clients that don't support HTML
       text: `New Order - ${orderData.orderReference}
 
-A new order has been placed on your Nazakat store.
+A new order has been placed on your Taharah store.
 
 Order Reference: ${orderData.orderReference}
 Order Date: ${new Date(orderData.orderDate).toLocaleString()}
@@ -430,7 +430,7 @@ async function sendCustomerDeliveryConfirmation(orderData) {
     const htmlContent = templates.customerDeliveryTemplate(orderData);
 
     const mailOptions = {
-      from: `"Nazakat Team" <${process.env.EMAIL_USER}>`,
+      from: `"Taharah Team" <${process.env.EMAIL_USER}>`,
       to: customer.email,
       subject: `✅ Delivery Confirmed - ${orderData.orderReference}`,
       html: htmlContent,
@@ -463,7 +463,7 @@ async function sendOwnerDeliveryConfirmation(orderData) {
     const htmlContent = templates.ownerDeliveryTemplate(orderData);
 
     const mailOptions = {
-      from: `"Nazakat Orders" <${process.env.EMAIL_USER}>`,
+      from: `"Taharah Orders" <${process.env.EMAIL_USER}>`,
       to: ownerEmail,
       subject: `✅ Order Delivered - ${orderData.orderReference}`,
       html: htmlContent,
@@ -618,7 +618,7 @@ async function sendVerificationEmail(emailData) {
     `;
 
     const mailOptions = {
-      from: `"Nazakat Team" <${process.env.EMAIL_USER}>`,
+      from: `"Taharah Team" <${process.env.EMAIL_USER}>`,
       to: customer.email,
       subject: '✅ Verify Your Email Address - Nazakat',
       html: htmlContent,
@@ -947,7 +947,7 @@ async function sendAppointmentEmail(appointmentData) {
 
               <p>If you need to reschedule or have any questions, please contact us at:</p>
               <ul>
-                  <li>Phone: +91 93102 50047</li>
+                  <li>Phone: +91 8589920686</li>
                   <li>Email: ${process.env.EMAIL_USER}</li>
               </ul>
 
@@ -955,7 +955,7 @@ async function sendAppointmentEmail(appointmentData) {
 
               <div class="footer">
                   <p>Thank you for choosing Taharah - Where elegance meets tradition</p>
-                  <p>Email: ${process.env.EMAIL_USER} | Phone: +91 93102 50047</p>
+                  <p>Email: ${process.env.EMAIL_USER} | Phone: +91 8589920686</p>
                   <p style="font-size: 12px; color: #999;">This is an automated confirmation email.</p>
               </div>
           </div>
@@ -1106,13 +1106,13 @@ async function sendContactEmail(contactData) {
                   <p style="font-style: italic; border-left: 3px solid #d4af37; padding-left: 15px;">"${message.substring(0, 200)}${message.length > 200 ? '...' : ''}"</p>
               </div>
 
-              <p>Our team will review your inquiry and get back to you as soon as possible. For urgent matters, you can also reach us via WhatsApp at +91 93102 50047.</p>
+              <p>Our team will review your inquiry and get back to you as soon as possible. For urgent matters, you can also reach us via WhatsApp at +91 8589920686.</p>
 
               <p>In the meantime, feel free to explore our latest collections and follow us on social media for the newest updates on traditional Indian wear and handloom artistry.</p>
 
               <div class="footer">
-                  <p>Thank you for choosing Nazakat - Where elegance meets tradition</p>
-                  <p>Email: info@nazakat.com | Phone: +91 93102 50047</p>
+                  <p>Thank you for choosing Taharah - Where elegance meets tradition</p>
+                  <p>Email: Officialtaharah@gmail.com | Phone: +91 8589920686</p>
                   <p style="font-size: 12px; color: #999;">This is an automated confirmation email. Please do not reply to this email.</p>
               </div>
           </div>
@@ -1140,7 +1140,7 @@ async function sendContactEmail(contactData) {
 
     // Send confirmation email to customer
     const customerMailOptions = {
-      from: `"Nazakat Team" <${process.env.EMAIL_USER}>`,
+      from: `"Taharah Team" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: '✅ Thank you for contacting Nazakat - We\'ll be in touch soon!',
       html: customerEmailContent,
