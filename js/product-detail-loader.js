@@ -206,8 +206,11 @@ const ProductDetailLoader = (function() {
         // Update product price
         const priceElements = document.querySelectorAll('.product-price, .current-price, .price');
         if (priceElements.length > 0) {
-            // Use consistent formatting for INR (₹ symbol)
-            const formattedPrice = `₹${Math.round(product.price).toLocaleString('en-IN')}`;
+            const formattedPrice = new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                minimumFractionDigits: 0
+            }).format(product.price);
 
             priceElements.forEach(element => {
                 element.textContent = formattedPrice;

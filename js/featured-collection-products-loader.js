@@ -347,8 +347,11 @@ const BridalProductsLoader = (function() {
      * Generate HTML for a product item (horizontal scrolling layout)
      */
     function generateProductHTML(product) {
-        // Use consistent formatting for INR (₹ symbol)
-        const formattedPrice = `₹${Math.round(product.price).toLocaleString('en-IN')}`;
+        const formattedPrice = new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            minimumFractionDigits: 0
+        }).format(product.price);
 
         return `
             <div class="product-item" data-product-id="${product.id}" data-product-price="${product.price}" data-product-name="${product.name}" data-product-image="${product.image}">
