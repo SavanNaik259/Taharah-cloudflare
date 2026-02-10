@@ -36,22 +36,14 @@ const SearchManager = (function() {
         console.log('Loading all product data for search...');
         
         try {
-            // Load from all collections including jewelry subcategories
+            // Load from all collections for Taharah Fashion
             const collections = [
                 'featured-collection',
                 'new-arrivals',
-                'gold-necklace',
-                'silver-necklace',
-                'meenakari-necklace',
-                'gold-earrings',
-                'silver-earrings',
-                'meenakari-earrings',
-                'gold-bangles',
-                'silver-bangles',
-                'meenakari-bangles',
-                'gold-rings',
-                'silver-rings',
-                'meenakari-rings'
+                'pakistani-pret-wear',
+                'ready-to-wear',
+                'modest-wear',
+                'party-wear'
             ];
             const productPromises = collections.map(category => loadProductsFromCategory(category));
             
