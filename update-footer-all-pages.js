@@ -36,55 +36,15 @@ const FOOTER_HTML = `
             <!-- Categories Section -->
             <div class="footer-section">
                 <button class="footer-toggle" data-section="categories-content">
-                    <span class="footer-title" data-translate="categories">Categories</span>
+                    <span class="footer-title" data-translate="categories">Collections</span>
                     <i class="fas fa-chevron-down"></i>
                 </button>
                 <div class="footer-content" id="categories-content">
                     <ul>
-                        <li class="category-with-sub">
-                            <div class="category-item-header">
-                                <a href="#" data-translate="necklaces">Necklace</a>
-                                <i class="fas fa-plus category-toggle-icon"></i>
-                            </div>
-                            <ul class="subcategory-list">
-                                <li><a href="gold-necklace.html" data-translate-dynamic>Gold Necklace</a></li>
-                                <li><a href="silver-necklace.html" data-translate-dynamic>Silver Necklace</a></li>
-                                <li><a href="meenakari-necklace.html" data-translate-dynamic>Meenakari Necklace</a></li>
-                            </ul>
-                        </li>
-                        <li class="category-with-sub">
-                            <div class="category-item-header">
-                                <a href="#" data-translate="earrings">Earrings</a>
-                                <i class="fas fa-plus category-toggle-icon"></i>
-                            </div>
-                            <ul class="subcategory-list">
-                                <li><a href="gold-earrings.html" data-translate-dynamic>Gold Earrings</a></li>
-                                <li><a href="silver-earrings.html" data-translate-dynamic>Silver Earrings</a></li>
-                                <li><a href="meenakari-earrings.html" data-translate-dynamic>Meenakari Earrings</a></li>
-                            </ul>
-                        </li>
-                        <li class="category-with-sub">
-                            <div class="category-item-header">
-                                <a href="#" data-translate="bangles">Bangles</a>
-                                <i class="fas fa-plus category-toggle-icon"></i>
-                            </div>
-                            <ul class="subcategory-list">
-                                <li><a href="gold-bangles.html" data-translate-dynamic>Gold Bangles</a></li>
-                                <li><a href="silver-bangles.html" data-translate-dynamic>Silver Bangles</a></li>
-                                <li><a href="meenakari-bangles.html" data-translate-dynamic>Meenakari Bangles</a></li>
-                            </ul>
-                        </li>
-                        <li class="category-with-sub">
-                            <div class="category-item-header">
-                                <a href="#" data-translate="rings">Rings</a>
-                                <i class="fas fa-plus category-toggle-icon"></i>
-                            </div>
-                            <ul class="subcategory-list">
-                                <li><a href="gold-rings.html" data-translate-dynamic>Gold Rings</a></li>
-                                <li><a href="silver-rings.html" data-translate-dynamic>Silver Rings</a></li>
-                                <li><a href="meenakari-rings.html" data-translate-dynamic>Meenakari Rings</a></li>
-                            </ul>
-                        </li>
+                        <li><a href="pakistani-pret-wear.html" data-translate-dynamic>Pakistani Pret Wear</a></li>
+                        <li><a href="ready-to-wear.html" data-translate="featured">Ready to Wear</a></li>
+                        <li><a href="modest-wear.html" data-translate-dynamic>Modest Wear</a></li>
+                        <li><a href="party-wear.html" data-translate-dynamic>Party Wear</a></li>
                     </ul>
                 </div>
             </div>
