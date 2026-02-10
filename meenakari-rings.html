@@ -51,28 +51,362 @@
 
     <!-- Unified Firebase Configuration -->
     <script src="js/firebase-config.js"></script>
-    
-
-    <!-- Currency Converter -->
-    <script src="js/currency-converter.js?v=3.0.0"></script>
-
-    <!-- Language Translator -->
-    
-
-    <!-- Initialize Currency Converter on this page -->
     <script>
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
-                if (typeof CurrencyConverter !== 'undefined') {
-                    CurrencyConverter.init();
-                }
-            });
-        } else {
-            if (typeof CurrencyConverter !== 'undefined') {
-                CurrencyConverter.init();
+      // Initialize Firebase with unified configuration
+      if (window.firebaseConfig) {
+        // Initialize Firebase directly (like in login)
+        if (!firebase.apps.length) {
+          firebase.initializeApp(window.firebaseConfig);
+        }
+
+        // Configure Firestore settings for better offline handling
+        firebase.firestore().settings({
+          cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
+          ignoreUndefinedProperties: true
+        });
+
+        // Enable offline persistence
+        firebase.firestore().enablePersistence({ synchronizeTabs: true })
+          .catch(err => {
+            if (err.code == 'failed-precondition') {
+              console.log('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+            } else if (err.code == 'unimplemented') {
+              console.log('The current browser does not support all of the features required to enable persistence');
+            }
+          });
+
+        // Enable session persistence
+        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+          .catch(error => {
+            console.error("Auth persistence error:", error);
+          });
+
+        console.log('✅ All Collection page: Firebase initialized with unified config');
+      } else {
+        console.error('❌ All Collection page: Firebase config not loaded');
+      }
+    </script>
+
+    <style>
+        /* Hide mobile menu close button on large devices */
+        @media (min-width: 769px) {
+            #closeMenu {
+                display: none !important;
             }
         }
+    </style>
+  
+</head>
+<body>
+    <header class="header">
+        <!-- Promo Banner -->
+        <div class="promo-banner">
+            <p class="banner-text"></p>
+        </div>
+
+
+        <!-- New Responsive Navigation -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <!-- Logo -->
+                <a href="/index" class="brand">
+                    <img src="images/logos/taharah.png" alt="Taharah" class="brand-logo">
+                </a>
+
+
+                <!-- Mobile Toggle Button - Match RIDHI MEHRA design -->
+                <div class="hamburger" id="navToggle"><img src="images/icons/bars-staggered (2).png" alt="SP Jewellers"style="width: 25px; height: 25px;">
+                </div>
+
+                <!-- Navigation Icons - Exact match to RIDHI MEHRA design -->
+                <div class="nav-icons">
+                    <a href="#" class="icon-link search-icon">
+                        <img src="images/icons/search.png" alt="Cart" style="width: 20px; height: 20px;">
+                    </a>
+                    <a href="#" class="icon-link account-icon" id="user-icon">
+                        <img src="images/icons/user.png" alt="Cart" style="width: 25px; height: 25px;">
+
+                    </a>
+                    <a href="#" class="icon-link wishlist-icon-container wishlist-toggle">
+                        <img src="images/icons/heart.png" alt="Cart" style="width: 20px; height: 20px;">
+
+                        <div class="wishlist-count">0</div>
+                    </a>
+                    <a href="#" class="icon-link cart-icon-container cart-toggle" id="cartToggleButton">
+                        <img src="images/icons/cart-minus.png" alt="Cart" style="width: 20px; height: 20px;">
+                        <div class="cart-count">0</div>
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Navigation Links - Moved outside nav-container to avoid backdrop-filter containing block -->
+        <div class="nav-menu" id="navMenu">
+            <!-- Close button for mobile menu in the top right corner -->
+
+            <i id="closeMenu" class="fa-solid fa-xmark meenu-close" onclick="closeMobileMenu()" style="font-size: 24px; margin-left: 90%; color: #333;" ></i>
+
+
+          <!-- "  <button class="menu-close fa fa-times" ></button>-->
+
+            <ul class="nav-list">
+                <li class="nav-item"><a href="/index" class="nav-link" data-translate="home">Home</a></li>
+                <li class="nav-item"><a href="/new-arrivals" class="nav-link" data-translate="new_arrivals">New Arrivals</a></li>
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle"><span data-translate="categories">Collections</span> <i class="fas fa-chevron-down"></i></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/all-collection" data-translate="all_collections">All Collection</a></li>
+                        <li><a href="/featured-collection" data-translate="featured">Featured Collection</a></li>
+                        <li class="dropdown-submenu">
+                            <a href="#"><span data-translate="necklaces">Necklace</span> <i class="fas fa-chevron-right"></i></a>
+                            <ul class="dropdown-submenu-list">
+                                <li><a href="/gold-necklace" data-translate-dynamic>Gold Necklace</a></li>
+                                <li><a href="/silver-necklace" data-translate-dynamic>Silver Necklace</a></li>
+                                <li><a href="/meenakari-necklace" data-translate-dynamic>Meenakari Necklace</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown-submenu">
+                            <a href="#"><span data-translate="earrings">Earrings</span> <i class="fas fa-chevron-right"></i></a>
+                            <ul class="dropdown-submenu-list">
+                                <li><a href="/gold-earrings" data-translate-dynamic>Gold Earrings</a></li>
+                                <li><a href="/silver-earrings" data-translate-dynamic>Silver Earrings</a></li>
+                                <li><a href="/meenakari-earrings" data-translate-dynamic>Meenakari Earrings</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown-submenu">
+                            <a href="#"><span data-translate="bangles">Bangles</span> <i class="fas fa-chevron-right"></i></a>
+                            <ul class="dropdown-submenu-list">
+                                <li><a href="/gold-bangles" data-translate-dynamic>Gold Bangles</a></li>
+                                <li><a href="/silver-bangles" data-translate-dynamic>Silver Bangles</a></li>
+                                <li><a href="/meenakari-bangles" data-translate-dynamic>Meenakari Bangles</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown-submenu">
+                            <a href="#"><span data-translate="rings">Rings</span> <i class="fas fa-chevron-right"></i></a>
+                            <ul class="dropdown-submenu-list">
+                                <li><a href="/gold-rings" data-translate-dynamic>Gold Rings</a></li>
+                                <li><a href="/silver-rings" data-translate-dynamic>Silver Rings</a></li>
+                                <li><a href="/meenakari-rings" data-translate-dynamic>Meenakari Rings</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a href="/about-us" class="nav-link" data-translate="about_us">About</a></li>
+                <li class="nav-item"><a href="#customer-reviews" class="nav-link" data-translate-dynamic>Testimonials</a></li>
+                <li class="nav-item"><a href="/book-appointment" class="nav-link" data-translate-dynamic>Book Appointment</a></li>
+                <li class="nav-item"><a href="#" class="nav-link" data-translate-dynamic>Order Track</a></li>
+                <li><a href="/contact-us" class="nav-link" data-translate="contact_us">Contact</a></li>
+            </ul>
+
+            <!-- Mobile account links in separate div after Contact -->
+            <div class="mobile-account-links mobile-special">
+                <a href="/login" class="mobile-account-link">
+                    <img src="images/icons/user.png" alt="Cart" style="width: 18px; height: 18px;">  &nbsp; <span data-translate="account">Account</span>
+                </a>
+                <a href="#" class="mobile-account-link wishlist-toggle">
+                    <img src="images/icons/heart.png" alt="Cart" style="width: 18px; height: 18px;"> &nbsp;   <span data-translate="wishlist">Wishlist</span> (<span class="mobile-wishlist-count">0</span>)
+                </a>
+                <a href="#" class="mobile-account-link mobile-cart-toggle">
+                    <img src="images/icons/cart-minus.png" alt="Cart" style="width:18px; height: 18px; vertical-align: middle;">  &nbsp; <span data-translate="shopping_bag">Shopping Bag</span> (<span class="mobile-cart-count">0</span>)
+                </a>
+
+            </div>
+        </div>
+    </header>
+    <div class="menu-overlay" id="menuOverlay"></div>
+
+    <section class="new-arrivals-hero">
+        <div class="hero-background">
+            <img id="heroBackgroundImage" src="images/b0bb682fbc453cd01cde00d00869232f.jpg" alt="Meenakari Rings" class="hero-bg-image">
+            <div class="hero-overlay"></div>
+        </div>
+        <div class="hero-content">
+            <h1 class="hero-title">Meenakari Rings</h1>
+            <p class="hero-subtitle">Exquisite handcrafted traditional designs</p>
+        </div>
+    </section>
+
+    <section class="shop-products-section">
+        <div class="shop-filter-header">
+            <div class="filter-option">FILTER</div>
+            <div class="sort-option" id="sortOption">
+                <span>SORT BY</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="sort-dropdown" id="sortDropdown">
+                <div class="sort-dropdown-option active" data-sort="price-low-high">Price: Low to High</div>
+                <div class="sort-dropdown-option" data-sort="price-high-low">Price: High to Low</div>
+            </div>
+        </div>
+
+        <div class="shop-products">
+            <div class="products-grid" id="products-grid">
+                <div class="product-loader show" id="meenakari-rings-loader" style="grid-column: 1 / -1;">
+                    <div class="product-loader-spinner"></div>
+                    <div class="product-loader-text">Loading meenakari rings...</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="cart-panel">
+      <div class="cart-panel-header">
+        <h3>Your Shopping Bag</h3>
+        <button class="close-cart-btn">×</button>
+      </div>
+      <div class="cart-items">
+        <!-- Cart items will be inserted here by JavaScript -->
+        <div class="empty-cart-message">Your cart is empty</div>
+      </div>
+      <div class="cart-panel-footer">
+        <div class="cart-panel-subtotal">
+          <span>Subtotal:</span>
+          <span class="subtotal-amount">₹0.00</span>
+        </div>
+        <div class="cart-panel-buttons">
+          <button class="view-cart-btn continue-shopping-btn">Continue Shopping</button>
+          <a href="checkout" class="checkout-btn">Checkout</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cart Overlay -->
+    <div class="cart-panel-overlay"></div>
+    <div class="wishlist-panel">
+      <div class="wishlist-panel-header">
+        <h3 data-translate="wishlist">My Wishlist</h3>
+        <button class="close-wishlist-btn">×</button>
+      </div>
+      <div class="wishlist-items">
+        <!-- Wishlist items will be inserted here by JavaScript -->
+        <div class="empty-wishlist-message" data-translate-dynamic>Your wishlist is empty</div>
+      </div>
+      <div class="wishlist-panel-footer">
+        <div class="wishlist-panel-actions">
+          <button class="clear-wishlist-btn" data-translate-dynamic>Clear Wishlist</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wishlist Overlay -->
+    <div class="wishlist-overlay"></div>
+    
+    <a href="https://wa.me/918589920686" target="_blank" class="whatsapp-btn" aria-label="Chat on WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+        <div class="whatsapp-tooltip" data-translate="how_can_help">How can I help you?</div>
+    </a>
+
+    <script src="js/filter-sort-handler.js?v=1.0.0"></script>
+    <script src="js/subcategory-products-loader.js"></script>
+    
+    <!-- Core JS Files -->
+    
+    <script src="js/navigation.js?v=1.0.4"></script>
+    <script src="js/banner-rotator.js?v=1.0.1"></script>
+    <script src="js/error-handler.js"></script>
+    <script src="js/firebase/firebase-auth.js"></script>
+    <script src="js/cart-local-storage.js?v=1.0.0"></script>
+    <script src="js/firebase/firebase-cart-manager.js?v=1.0.0"></script>
+    <script src="js/cart-manager.js?v=1.0.1"></script>
+    <script src="js/wishlist-local-storage.js?v=1.0.0"></script>
+    <script src="js/firebase/firebase-wishlist-manager.js?v=1.0.0"></script>
+    <script src="js/wishlist-manager.js?v=1.0.0"></script>
+    <script src="js/main.js"></script>
+    <script src="js/search-manager.js"></script>
+    <script src="js/search-ui.js"></script>
+
+    <!-- Initialize search after all scripts are loaded -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                if (typeof SearchManager !== 'undefined') {
+                    console.log('SearchManager available on all-collection page');
+                }
+                if (typeof SearchUI !== 'undefined') {
+                    console.log('SearchUI available on all-collection page');
+                }
+
+                // Manual search icon setup as backup
+                const searchIcon = document.querySelector('.search-icon');
+                if (searchIcon && !searchIcon.hasAttribute('data-search-attached')) {
+                    searchIcon.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        console.log('Manual search icon click handler triggered on all-collection');
+                        if (typeof SearchUI !== 'undefined' && SearchUI.openSearch) {
+                            SearchUI.openSearch();
+                        }
+                    });
+                    searchIcon.setAttribute('data-search-attached', 'true');
+                    console.log('Manual search icon handler attached on all-collection');
+                }
+            }, 500);
+        });
     </script>
+
+    <!-- Firebase Authentication Check -->
+    <script>
+      // Use the already loaded firebase-auth.js
+      const FirebaseAuth = window.FirebaseAuth;
+
+      // Handle user authentication state
+      document.addEventListener('DOMContentLoaded', () => {
+        const userIcon = document.getElementById('user-icon');
+
+        if (userIcon) {
+          const currentUser = firebase.auth().currentUser;
+
+          if (currentUser) {
+            console.log("Firebase user is logged in:", currentUser.uid);
+            userIcon.href = "profile";
+            userIcon.classList.add('logged-in');
+          } else {
+            if (FirebaseAuth.isLoggedIn()) {
+              console.log("User is logged in from session");
+              userIcon.href = "profile";
+              userIcon.classList.add('logged-in');
+            } else {
+              console.log("No user session found");
+              userIcon.href = "login";
+              userIcon.classList.remove('logged-in');
+            }
+          }
+        }
+      });
+
+      // Auth state observer for real-time updates
+      FirebaseAuth.observeAuthState((user) => {
+        const userIcon = document.getElementById('user-icon');
+
+        if (userIcon) {
+          if (user) {
+            console.log("Auth state: User is signed in:", user.uid);
+
+            FirebaseAuth.saveSession({
+              uid: user.uid,
+              email: user.email,
+              displayName: user.displayName || 'User',
+              photoURL: user.photoURL,
+              loggedIn: true
+            });
+
+            userIcon.href = "profile";
+            userIcon.classList.add('logged-in');
+          } else {
+            console.log("Auth state: User is signed out");
+            FirebaseAuth.clearSession();
+            userIcon.href = "login";
+            userIcon.classList.remove('logged-in');
+          }
+        }
+      });
+    </script>
+
+    <!-- Out of Stock Handler -->
+    <script src="js/out-of-stock-handler.js?v=1.0.0"></script>
+
+    
+    
+
 
 
     <!-- Minimalist Collapsible Footer -->
@@ -86,11 +420,11 @@
                 </button>
                 <div class="footer-content" id="info-content">
                     <ul>
-                        <li><a href="about-us.html" data-translate="about_us">About Us</a></li>
-                        <li><a href="terms-conditions.html#shipping-and-delivery" data-translate-dynamic>Shipping Policy</a></li>
-                        <li><a href="terms-conditions.html#returns-and-refunds" data-translate-dynamic>Returns & Exchanges</a></li>
-                        <li><a href="terms-conditions.html" data-translate-dynamic>Terms and Conditions</a></li>
-                        <li><a href="privacy-policy.html" data-translate-dynamic>Privacy Policy</a></li>
+                        <li><a href="about-us" data-translate="about_us">About Us</a></li>
+                        <li><a href="terms-conditions#shipping-and-delivery" data-translate-dynamic>Shipping Policy</a></li>
+                        <li><a href="terms-conditions#returns-and-refunds" data-translate-dynamic>Returns & Exchanges</a></li>
+                        <li><a href="terms-conditions" data-translate-dynamic>Terms and Conditions</a></li>
+                        <li><a href="privacy-policy" data-translate-dynamic>Privacy Policy</a></li>
                     </ul>
                 </div>
             </div>
@@ -98,15 +432,55 @@
             <!-- Categories Section -->
             <div class="footer-section">
                 <button class="footer-toggle" data-section="categories-content">
-                    <span class="footer-title" data-translate="categories">Collections</span>
+                    <span class="footer-title" data-translate="categories">Categories</span>
                     <i class="fas fa-chevron-down"></i>
                 </button>
                 <div class="footer-content" id="categories-content">
                     <ul>
-                        <li><a href="pakistani-pret-wear.html" data-translate-dynamic>Pakistani Pret Wear</a></li>
-                        <li><a href="ready-to-wear.html" data-translate="featured">Ready to Wear</a></li>
-                        <li><a href="modest-wear.html" data-translate-dynamic>Modest Wear</a></li>
-                        <li><a href="party-wear.html" data-translate-dynamic>Party Wear</a></li>
+                        <li class="category-with-sub">
+                            <div class="category-item-header">
+                                <a href="#" data-translate="necklaces">Necklace</a>
+                                <i class="fas fa-plus category-toggle-icon"></i>
+                            </div>
+                            <ul class="subcategory-list">
+                                <li><a href="gold-necklace" data-translate-dynamic>Gold Necklace</a></li>
+                                <li><a href="silver-necklace" data-translate-dynamic>Silver Necklace</a></li>
+                                <li><a href="meenakari-necklace" data-translate-dynamic>Meenakari Necklace</a></li>
+                            </ul>
+                        </li>
+                        <li class="category-with-sub">
+                            <div class="category-item-header">
+                                <a href="#" data-translate="earrings">Earrings</a>
+                                <i class="fas fa-plus category-toggle-icon"></i>
+                            </div>
+                            <ul class="subcategory-list">
+                                <li><a href="gold-earrings" data-translate-dynamic>Gold Earrings</a></li>
+                                <li><a href="silver-earrings" data-translate-dynamic>Silver Earrings</a></li>
+                                <li><a href="meenakari-earrings" data-translate-dynamic>Meenakari Earrings</a></li>
+                            </ul>
+                        </li>
+                        <li class="category-with-sub">
+                            <div class="category-item-header">
+                                <a href="#" data-translate="bangles">Bangles</a>
+                                <i class="fas fa-plus category-toggle-icon"></i>
+                            </div>
+                            <ul class="subcategory-list">
+                                <li><a href="gold-bangles" data-translate-dynamic>Gold Bangles</a></li>
+                                <li><a href="silver-bangles" data-translate-dynamic>Silver Bangles</a></li>
+                                <li><a href="meenakari-bangles" data-translate-dynamic>Meenakari Bangles</a></li>
+                            </ul>
+                        </li>
+                        <li class="category-with-sub">
+                            <div class="category-item-header">
+                                <a href="#" data-translate="rings">Rings</a>
+                                <i class="fas fa-plus category-toggle-icon"></i>
+                            </div>
+                            <ul class="subcategory-list">
+                                <li><a href="gold-rings" data-translate-dynamic>Gold Rings</a></li>
+                                <li><a href="silver-rings" data-translate-dynamic>Silver Rings</a></li>
+                                <li><a href="meenakari-rings" data-translate-dynamic>Meenakari Rings</a></li>
+                            </ul>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -119,9 +493,9 @@
                 </button>
                 <div class="footer-content" id="collection-content">
                     <ul>
-                        <li><a href="all-collection.html" data-translate="all_collections">All Collection</a></li>
-                        <li><a href="featured-collection.html" data-translate="featured">Featured Collection</a></li>
-                        <li><a href="new-arrivals.html" data-translate="new_arrivals">New Arrivals</a></li>
+                        <li><a href="all-collection" data-translate="all_collections">All Collection</a></li>
+                        <li><a href="featured-collection" data-translate="featured">Featured Collection</a></li>
+                        <li><a href="new-arrivals" data-translate="new_arrivals">New Arrivals</a></li>
                     </ul>
                 </div>
             </div>
@@ -149,9 +523,6 @@
                     <a href="https://www.facebook.com" target="_blank" class="social-icon-link">
                         <i class="fab fa-facebook-f"></i>
                     </a>
-                    <a href="https://www.youtube.com" target="_blank" class="social-icon-link">
-                        <i class="fab fa-youtube"></i>
-                    </a>
                 </div>
             </div>
 
@@ -176,8 +547,8 @@
                     </div>
 
                     <div class="footer-links">
-                        <a href="terms-conditions.html" data-translate-dynamic>Terms and Conditions</a>
-                        <a href="privacy-policy.html" data-translate-dynamic>Privacy Policy</a>
+                        <a href="terms-conditions" data-translate-dynamic>Terms and Conditions</a>
+                        <a href="privacy-policy" data-translate-dynamic>Privacy Policy</a>
                     </div>
 
                     <div class="payment-methods">
@@ -202,15 +573,15 @@
 
     <!-- Bottom Navigation Bar -->
     <nav class="bottom-nav">
-        <a href="index.html" class="bottom-nav-item active">
+        <a href="index" class="bottom-nav-item active">
             <i class="fi fi-rs-home"></i>
             <span data-translate="home">Home</span>
         </a>
-        <a href="all-collection.html" class="bottom-nav-item">
+        <a href="all-collection" class="bottom-nav-item">
             <i class="fi fi-rs-shop"></i>
             <span data-translate="shop">Shop</span>
         </a>
-        <a href="login.html" class="bottom-nav-item">
+        <a href="login" class="bottom-nav-item">
             <i class="fi fi-rs-user"></i>
             <span data-translate="account">Account</span>
         </a>
@@ -258,7 +629,7 @@
                     if (typeof openCart === 'function') {
                         openCart();
                     } else {
-                        window.location.href = 'checkout.html';
+                        window.location.href = 'checkout';
                     }
                 });
             }
@@ -266,10 +637,25 @@
     </script>
 
     <!-- Currency Converter -->
-    <script src="js/currency-converter.js?v=1.0.0"></script>
+    <script src="js/currency-converter.js?v=3.0.0"></script>
 
     <!-- Language Translator -->
     <script src="js/language-translator.js?v=1.0.0"></script>
+
+    <!-- Initialize Currency Converter on this page -->
+    <script>
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof CurrencyConverter !== 'undefined') {
+                    CurrencyConverter.init();
+                }
+            });
+        } else {
+            if (typeof CurrencyConverter !== 'undefined') {
+                CurrencyConverter.init();
+            }
+        }
+    </script>
 
 </body>
 </html>

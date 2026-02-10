@@ -366,46 +366,16 @@
             <i id="closeMenu" class="fa-solid fa-xmark meenu-close" onclick="closeMobileMenu()" style="font-size: 24px; margin-left: 90%; color: #333;" ></i>
 
 
-          <!-- "  <button class="menu-close fa fa-times" ></button>-->
-
             <ul class="nav-list">
                 <li class="nav-item"><a href="/index" class="nav-link" data-translate="home">Home</a></li>
                 <li class="nav-item"><a href="/new-arrivals" class="nav-link" data-translate="new_arrivals">New Arrivals</a></li>
                 <li class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle"><span data-translate="categories">Collections</span> <i class="fas fa-chevron-down"></i></a>
                     <ul class="dropdown-menu">
-                      <!--  <li><a href="/all-collection" data-translate="all_collections">All Collection</a></li>-->
                         <li><a href="/pakistani-pret-wear" data-translate-dynamic>Pakistani Pret Wear</a></li>
-
-
                         <li><a href="/ready-to-wear" data-translate="featured">Ready to Wear</a></li>
-                        
                         <li><a href="/modest-wear" data-translate-dynamic>Modest Wear</a></li>
                         <li><a href="/party-wear" data-translate-dynamic>Party Wear</a></li>
-                        <!--<li class="dropdown-submenu">
-                            <a href="#"><span data-translate="earrings">Earrings</span> <i class="fas fa-chevron-right"></i></a>
-                            <ul class="dropdown-submenu-list">
-                                <li><a href="/gold-earrings" data-translate-dynamic>Gold Earrings</a></li>
-                                <li><a href="/silver-earrings" data-translate-dynamic>Silver Earrings</a></li>
-                                <li><a href="/meenakari-earrings" data-translate-dynamic>Meenakari Earrings</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown-submenu">
-                            <a href="#"><span data-translate="bangles">Bangles</span> <i class="fas fa-chevron-right"></i></a>
-                            <ul class="dropdown-submenu-list">
-                                <li><a href="/gold-bangles" data-translate-dynamic>Gold Bangles</a></li>
-                                <li><a href="/silver-bangles" data-translate-dynamic>Silver Bangles</a></li>
-                                <li><a href="/meenakari-bangles" data-translate-dynamic>Meenakari Bangles</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown-submenu">
-                            <a href="#"><span data-translate="rings">Rings</span> <i class="fas fa-chevron-right"></i></a>
-                            <ul class="dropdown-submenu-list">
-                                <li><a href="/gold-rings" data-translate-dynamic>Gold Rings</a></li>
-                                <li><a href="/silver-rings" data-translate-dynamic>Silver Rings</a></li>
-                                <li><a href="/meenakari-rings" data-translate-dynamic>Meenakari Rings</a></li>
-                            </ul>
-                        </li>-->
                     </ul>
                 </li>
                 <li class="nav-item"><a href="/about-us" class="nav-link" data-translate="about_us">About</a></li>
@@ -474,12 +444,325 @@
     </div>
 
     <!-- WhatsApp Button -->
-      
+      <a href="https://wa.me/918589920686" target="_blank" class="whatsapp-btn" aria-label="Chat on WhatsApp">
+          <i class="fab fa-whatsapp"></i>
+          <div class="whatsapp-tooltip" data-translate="how_can_help">How can I help you?</div>
+      </a>
+
+    <div class="appointment-container">
+        <div class="appointment-header">
+            <h1>Book Your Appointment</h1>
+            <p>Schedule a personalized consultation with our designing experts</p>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            <i class="fas fa-check-circle"></i> Your appointment has been booked successfully! We'll send you a confirmation email shortly.
+        </div>
+
+        <div class="error-message" id="errorMessage">
+            <i class="fas fa-exclamation-circle"></i> <span id="errorText">Something went wrong. Please try again.</span>
+        </div>
+
+        <form class="appointment-form" id="appointmentForm">
+            <div class="form-section">
+                <h3>Appointment Type</h3>
+                <div class="appointment-type">
+                    <div class="type-option" data-type="in-store">
+                        <input type="radio" id="inStore" name="appointmentType" value="in-store" required>
+                        <label for="inStore">
+                            <i class="fas fa-store"></i>
+                            <div><strong>In-Store Visit</strong></div>
+                            <div style="font-size: 0.9rem; color: #666;">Visit our showroom</div>
+                        </label>
+                    </div>
+                    <div class="type-option" data-type="virtual">
+                        <input type="radio" id="virtual" name="appointmentType" value="virtual">
+                        <label for="virtual">
+                            <i class="fas fa-video"></i>
+                            <div><strong>Virtual Consultation</strong></div>
+                            <div style="font-size: 0.9rem; color: #666;">Video call consultation</div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Personal Information</h3>
+                <div class="form-group">
+                    <label for="fullName">Full Name *</label>
+                    <input type="text" id="fullName" name="fullName" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Select Date & Time</h3>
+                <div class="form-group">
+                    <label for="appointmentDate">Preferred Date *</label>
+                    <input type="date" id="appointmentDate" name="appointmentDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Preferred Time Slot *</label>
+                    <div class="time-slots" id="timeSlots">
+                        <div class="time-slot" data-time="11:00 AM">11:00 AM</div>
+                        <div class="time-slot" data-time="12:00 PM">12:00 PM</div>
+                        <div class="time-slot" data-time="01:00 PM">01:00 PM</div>
+                        <div class="time-slot" data-time="02:00 PM">02:00 PM</div>
+                        <div class="time-slot" data-time="03:00 PM">03:00 PM</div>
+                        <div class="time-slot" data-time="04:00 PM">04:00 PM</div>
+                        <div class="time-slot" data-time="05:00 PM">05:00 PM</div>
+                        <div class="time-slot" data-time="06:00 PM">06:00 PM</div>
+                    </div>
+                    <input type="hidden" id="selectedTime" name="selectedTime" required>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Additional Details</h3>
+                <div class="form-group">
+                    <label for="purpose">Purpose of Visit</label>
+                    <select id="purpose" name="purpose">
+                        <option value="">Select purpose</option>
+                        <option value="browse">Browse Collection</option>
+                        <option value="custom">Custom Design Consultation</option>
+                        <option value="bridal">Bridal Wear</option>
+                        <option value="ready-to-wear">Ready to Wear</option>
+                        <option value="pret-wear">Pakistani Pret Wear</option>
+                        <option value="modest-wear">Modest Wear</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="message">Special Requests or Questions</label>
+                    <textarea id="message" name="message" placeholder="Tell us more about your requirements..."></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">Book Appointment</button>
+        </form>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
+
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCQ9gafSnJBwuXvIpnOGn4Kwo8YqMkKY0M",
+            authDomain: "studio-7642357109-d9026.firebaseapp.com",
+            projectId: "studio-7642357109-d9026",
+            storageBucket: "studio-7642357109-d9026.firebasestorage.app",
+            messagingSenderId: "1076239216683",
+            appId: "1:1076239216683:web:a298fa70bb136183217a6e"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const db = firebase.firestore();
+
+        // Configure Firestore settings
+        firebase.firestore().settings({
+            cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
+            ignoreUndefinedProperties: true
+        });
+
+        // Enable offline persistence
+        firebase.firestore().enablePersistence({ synchronizeTabs: true })
+            .catch(err => {
+                if (err.code == 'failed-precondition') {
+                    console.log('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+                } else if (err.code == 'unimplemented') {
+                    console.log('The current browser does not support all of the features required to enable persistence');
+                }
+            });
+
+        // Enable session persistence
+        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+            .catch(error => console.log('Auth persistence error:', error));
+
+        // Wait for DOM to be ready before adding event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set minimum date to today
+            const dateInput = document.getElementById('appointmentDate');
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.min = today;
+
+            // Handle appointment type selection
+            document.querySelectorAll('.type-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.type-option').forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    const radio = this.querySelector('input[type="radio"]');
+                    radio.checked = true;
+                });
+            });
+
+            // Handle time slot selection
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.addEventListener('click', function() {
+                    if (!this.classList.contains('disabled')) {
+                        document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+                        this.classList.add('selected');
+                        document.getElementById('selectedTime').value = this.dataset.time;
+                    }
+                });
+            });
+
+            // Form submission
+            document.getElementById('appointmentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const submitBtn = this.querySelector('.submit-btn');
+            const successMsg = document.getElementById('successMessage');
+            const errorMsg = document.getElementById('errorMessage');
+
+            // Hide messages
+            successMsg.style.display = 'none';
+            errorMsg.style.display = 'none';
+
+            // Validate time slot selection
+            if (!document.getElementById('selectedTime').value) {
+                errorMsg.querySelector('#errorText').textContent = 'Please select a time slot.';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Booking...';
+
+            try {
+                const formData = {
+                    appointmentType: document.querySelector('input[name="appointmentType"]:checked').value,
+                    fullName: document.getElementById('fullName').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    appointmentDate: document.getElementById('appointmentDate').value,
+                    selectedTime: document.getElementById('selectedTime').value,
+                    purpose: document.getElementById('purpose').value,
+                    message: document.getElementById('message').value,
+                    status: 'pending',
+                    createdAt: new Date().toISOString()
+                };
+
+                // Send email notification
+                const response = await fetch('/.netlify/functions/send-appointment-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Email notification failed');
+                }
+
+                // Save to Firestore
+                await db.collection('appointments').add(formData);
+
+                // Show success message
+                successMsg.style.display = 'block';
+                this.reset();
+                document.querySelectorAll('.type-option').forEach(opt => opt.classList.remove('selected'));
+                document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+
+                // Scroll to success message
+                successMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            } catch (error) {
+                console.error('Error booking appointment:', error);
+                errorMsg.querySelector('#errorText').textContent = 'Failed to book appointment. Please try again.';
+                errorMsg.style.display = 'block';
+                errorMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Book Appointment';
+            }
+            });
+        });
+    </script>
+
+    <!-- Cart Panel -->
+    <div id="auricCartPanel" class="cart-panel">
+      <div class="cart-panel-header">
+        <h3 data-translate="shopping_bag">Your Shopping Bag</h3>
+        <button class="close-cart-btn">×</button>
+      </div>
+      <div class="cart-items">
+        <!-- Cart items will be inserted here by JavaScript -->
+        <div class="empty-cart-message" data-translate="your_cart_empty">Your cart is empty</div>
+      </div>
+      <div class="cart-panel-footer">
+        <div class="cart-panel-subtotal">
+          <span data-translate="subtotal">Subtotal:</span>
+          <span class="subtotal-amount">₹0.00</span>
+        </div>
+        <div class="cart-panel-buttons">
+          <button class="view-cart-btn continue-shopping-btn" data-translate="continue_shopping">Continue Shopping</button>
+          <a href="/checkout" class="checkout-btn" data-translate="checkout">Checkout</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cart Overlay -->
+    <div id="auricCartOverlay" class="cart-panel-overlay"></div>
+
+    <!-- Fix for closeCartDirectly error -->
+    <script>
+      // Define the missing closeCartDirectly function
+      window.closeCartDirectly = function() {
+        // Call the regular closeCart function
+        if (window.closeCart) {
+          return window.closeCart();
+        }
+      };
+    </script>
+
+    <!-- WhatsApp Button -->
+
+
+    <!-- WhatsApp Tooltip Script -->
+    <script src="js/whatsapp-tooltip.js"></script>
+
+    <!-- Footer Toggle Script -->
+
+    <!-- Minimalist Collapsible Footer -->
 
     <!-- Bottom Navigation Bar -->
-    
 
-    
+    <!-- Footer Toggle Script -->
+
+    <!-- Minimalist Collapsible Footer -->
+
+
+    <!-- Bottom Navigation Bar (Mobile Only) -->
+
+
+    <!-- Footer Toggle Script -->
+
+
+
+    <!-- Minimalist Collapsible Footer -->
+
+
+    <!-- Bottom Navigation Bar (Mobile Only) -->
+
+
+    <!-- Footer Toggle Script -->
+
 
 
     <!-- Minimalist Collapsible Footer -->
@@ -493,11 +776,11 @@
                 </button>
                 <div class="footer-content" id="info-content">
                     <ul>
-                        <li><a href="about-us.html" data-translate="about_us">About Us</a></li>
-                        <li><a href="terms-conditions.html#shipping-and-delivery" data-translate-dynamic>Shipping Policy</a></li>
-                        <li><a href="terms-conditions.html#returns-and-refunds" data-translate-dynamic>Returns & Exchanges</a></li>
-                        <li><a href="terms-conditions.html" data-translate-dynamic>Terms and Conditions</a></li>
-                        <li><a href="privacy-policy.html" data-translate-dynamic>Privacy Policy</a></li>
+                        <li><a href="/about-us" data-translate="about_us">About Us</a></li>
+                        <li><a href="terms-conditions#shipping-and-delivery" data-translate-dynamic>Shipping Policy</a></li>
+                        <li><a href="terms-conditions#returns-and-refunds" data-translate-dynamic>Returns & Exchanges</a></li>
+                        <li><a href="/terms-conditions" data-translate-dynamic>Terms and Conditions</a></li>
+                        <li><a href="/privacy-policy" data-translate-dynamic>Privacy Policy</a></li>
                     </ul>
                 </div>
             </div>
@@ -505,15 +788,15 @@
             <!-- Categories Section -->
             <div class="footer-section">
                 <button class="footer-toggle" data-section="categories-content">
-                    <span class="footer-title" data-translate="categories">Collections</span>
+                    <span class="footer-title" data-translate="categories">Categories</span>
                     <i class="fas fa-chevron-down"></i>
                 </button>
                 <div class="footer-content" id="categories-content">
                     <ul>
-                        <li><a href="pakistani-pret-wear.html" data-translate-dynamic>Pakistani Pret Wear</a></li>
-                        <li><a href="ready-to-wear.html" data-translate="featured">Ready to Wear</a></li>
-                        <li><a href="modest-wear.html" data-translate-dynamic>Modest Wear</a></li>
-                        <li><a href="party-wear.html" data-translate-dynamic>Party Wear</a></li>
+                        <li><a href="/pakistani-pret-wear">Pakistani Pret Wear</a></li>
+                        <li><a href="/ready-to-wear">Ready to Wear</a></li>
+                        <li><a href="/party-wear">Party Wear</a></li>
+                        <li><a href="/modest-wear">Modest Wear</a></li>
                     </ul>
                 </div>
             </div>
@@ -526,9 +809,11 @@
                 </button>
                 <div class="footer-content" id="collection-content">
                     <ul>
-                        <li><a href="all-collection.html" data-translate="all_collections">All Collection</a></li>
-                        <li><a href="featured-collection.html" data-translate="featured">Featured Collection</a></li>
-                        <li><a href="new-arrivals.html" data-translate="new_arrivals">New Arrivals</a></li>
+                        <li><a href="/new-arrivals">New Arrivals</a></li>
+                        <li><a href="/pakistani-pret-wear">Pakistani Pret Wear</a></li>
+                        <li><a href="/ready-to-wear">Ready to Wear</a></li>
+                        <li><a href="/party-wear">Party Wear</a></li>
+                        <li><a href="/modest-wear">Modest Wear</a></li>
                     </ul>
                 </div>
             </div>
@@ -556,9 +841,6 @@
                     <a href="https://www.facebook.com" target="_blank" class="social-icon-link">
                         <i class="fab fa-facebook-f"></i>
                     </a>
-                    <a href="https://www.youtube.com" target="_blank" class="social-icon-link">
-                        <i class="fab fa-youtube"></i>
-                    </a>
                 </div>
             </div>
 
@@ -583,8 +865,8 @@
                     </div>
 
                     <div class="footer-links">
-                        <a href="terms-conditions.html" data-translate-dynamic>Terms and Conditions</a>
-                        <a href="privacy-policy.html" data-translate-dynamic>Privacy Policy</a>
+                        <a href="/terms-conditions" data-translate-dynamic>Terms and Conditions</a>
+                        <a href="/privacy-policy" data-translate-dynamic>Privacy Policy</a>
                     </div>
 
                     <div class="payment-methods">
@@ -609,15 +891,15 @@
 
     <!-- Bottom Navigation Bar -->
     <nav class="bottom-nav">
-        <a href="index.html" class="bottom-nav-item active">
+        <a href="/index" class="bottom-nav-item active">
             <i class="fi fi-rs-home"></i>
             <span data-translate="home">Home</span>
         </a>
-        <a href="all-collection.html" class="bottom-nav-item">
+        <a href="/pakistani-pret-wear" class="bottom-nav-item">
             <i class="fi fi-rs-shop"></i>
             <span data-translate="shop">Shop</span>
         </a>
-        <a href="login.html" class="bottom-nav-item">
+        <a href="/login" class="bottom-nav-item">
             <i class="fi fi-rs-user"></i>
             <span data-translate="account">Account</span>
         </a>
@@ -652,31 +934,102 @@
         </a>
     </nav>
 
-    <!-- Footer Toggle Script -->
-    <script src="js/footer-toggle.js"></script>
+    <script>
+      // Network status monitoring
+      let isOnline = navigator.onLine;
+      window.addEventListener('online', () => {
+        console.log('Network connection restored');
+        isOnline = true;
+        document.dispatchEvent(new CustomEvent('network-status-changed', { detail: { online: true } }));
+      });
+      window.addEventListener('offline', () => {
+        console.log('Network connection lost');
+        isOnline = false;
+        document.dispatchEvent(new CustomEvent('network-status-changed', { detail: { online: false } }));
+      });
+    </script>
 
-    <!-- Bottom Navigation Cart Handler Script -->
+    <!-- Navigation scripts -->
+    <script src="js/navigation.js?v=1.0.4"></script>
+    <script src="js/banner-rotator.js"></script>
+
+    <!-- Global Error Handler - Place this before any other scripts -->
+    <script src="js/error-handler.js"></script>
+
+    <!-- Firebase Auth Module -->
+    <script src="js/firebase/firebase-auth.js"></script>
+
+    <!-- Cart System Scripts -->
+    <script src="js/cart-local-storage.js?v=1.0.0"></script>
+    <script src="js/firebase/firebase-cart-manager.js?v=1.0.0"></script>
+    <script src="js/cart-manager.js?v=1.0.1"></script>
+
+    <!-- Wishlist Scripts -->
+    <script src="js/wishlist-local-storage.js?v=1.0.0"></script>
+    <script src="js/firebase/firebase-wishlist-manager.js?v=1.0.0"></script>
+    <script src="js/wishlist-manager.js?v=1.0.0"></script>
+    <script src="js/main.js"></script>
+
+    <!-- Search functionality - load in correct order -->
+    <script src="js/search-manager.js"></script>
+    <script src="js/search-ui.js"></script>
+
+    <!-- Initialize search after all scripts are loaded -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const bottomNavCart = document.getElementById('bottomNavCart');
-            if (bottomNavCart) {
-                bottomNavCart.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    if (typeof openCart === 'function') {
-                        openCart();
-                    } else {
-                        window.location.href = 'checkout.html';
-                    }
-                });
-            }
+            // Ensure search functionality is working
+            setTimeout(() => {
+                if (typeof SearchManager !== 'undefined') {
+                    console.log('SearchManager available');
+                }
+                if (typeof SearchUI !== 'undefined') {
+                    console.log('SearchUI available');
+                }
+
+                // Manual search icon setup as backup
+                const searchIcon = document.querySelector('.search-icon');
+                if (searchIcon && !searchIcon.hasAttribute('data-search-attached')) {
+                    searchIcon.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        console.log('Manual search icon click handler triggered');
+                        if (typeof SearchUI !== 'undefined' && SearchUI.openSearch) {
+                            SearchUI.openSearch();
+                        }
+                    });
+                    searchIcon.setAttribute('data-search-attached', 'true');
+                    console.log('Manual search icon handler attached');
+                }
+            }, 500);
         });
     </script>
+
+    <!-- Footer Toggle Script -->
+    <script src="js/footer-toggle.js"></script>
 
     <!-- Currency Converter -->
     <script src="js/currency-converter.js?v=1.0.0"></script>
 
     <!-- Language Translator -->
     <script src="js/language-translator.js?v=1.0.0"></script>
+
+    <script>
+        // Bottom Navigation Cart Handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const bottomNavCart = document.getElementById('bottomNavCart');
+            if (bottomNavCart) {
+                bottomNavCart.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // Open cart panel (assuming the cart panel functionality exists)
+                    if (typeof openCart === 'function') {
+                        openCart();
+                    } else {
+                        // Fallback to cart page
+                        window.location.href = 'checkout';
+                    }
+                });
+            }
+        });
+    </script>
 
 </body>
 </html>
