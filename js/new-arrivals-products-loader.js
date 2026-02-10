@@ -540,7 +540,7 @@ const NewArrivalsProductsLoader = (function() {
             style: 'currency',
             currency: 'INR',
             minimumFractionDigits: 0
-        }).format(product.price).replace('₹', 'Rs. ');
+        }).format(product.price).replace('₹', '');
 
         return `
             <div class="product-item" data-product-id="${product.id}" data-product-price="${product.price}" data-product-name="${product.name}" data-product-image="${product.image}" style="background: none;">
@@ -554,7 +554,7 @@ const NewArrivalsProductsLoader = (function() {
                     <div class="product-details" style="text-align: center;">
                         <h3 class="product-name">${product.name}</h3>
                         <div class="product-pricing">
-                            <span class="current-price" data-original-price="${product.price}">${formattedPrice}</span>
+                            <span class="current-price" data-original-price="${product.price}">Rs. ${formattedPrice}</span>
                         </div>
                     </div>
                 </a>

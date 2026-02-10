@@ -371,7 +371,7 @@ const JewelrySubcategoriesLoader = (function() {
             style: 'currency',
             currency: 'INR',
             minimumFractionDigits: 0
-        }).format(product.price);
+        }).format(product.price).replace('₹', '');
 
         return `
             <div class="arrival-item polki-card" data-product-id="${product.id}" data-product-price="${product.price}" data-product-name="${product.name}" data-product-image="${product.image}">
@@ -385,7 +385,7 @@ const JewelrySubcategoriesLoader = (function() {
                     <div class="arrival-details">
                         <h3 class="arrival-title">${product.name}</h3>
                         <div class="product-pricing">
-                            <span class="current-price" data-original-price="${product.price}">${formattedPrice}</span>
+                            <span class="current-price" data-original-price="${product.price}">Rs. ${formattedPrice}</span>
                         </div>
                     </div>
                 </a>

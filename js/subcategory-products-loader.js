@@ -164,7 +164,7 @@ const SubcategoryProductsLoader = (function() {
             style: 'currency',
             currency: 'INR',
             minimumFractionDigits: 0
-        }).format(product.price);
+        }).format(product.price).replace('₹', '');
 
         return `
             <div class="product-item" data-product-id="${product.id}" data-product-price="${product.price}" data-product-name="${product.name}" data-product-image="${product.image}">
@@ -177,7 +177,7 @@ const SubcategoryProductsLoader = (function() {
                     </div>
                     <div class="product-details">
                         <h3 class="product-name">${product.name}</h3>
-                        <div class="current-price" data-original-price="${product.price}">${formattedPrice}</div>
+                        <div class="current-price" data-original-price="${product.price}">Rs. ${formattedPrice}</div>
                     </div>
                 </a>
             </div>

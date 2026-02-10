@@ -210,11 +210,11 @@ const ProductDetailLoader = (function() {
                 style: 'currency',
                 currency: 'INR',
                 minimumFractionDigits: 0
-            }).format(product.price);
+            }).format(product.price).replace('₹', '');
 
             priceElements.forEach(element => {
-                element.textContent = formattedPrice;
-                console.log('Updated product price element:', formattedPrice);
+                element.textContent = `Rs. ${formattedPrice}`;
+                console.log('Updated product price element:', `Rs. ${formattedPrice}`);
             });
         }
 

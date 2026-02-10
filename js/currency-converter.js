@@ -270,9 +270,12 @@ const CurrencyConverter = (function() {
         let priceInINR = parseFloat(element.dataset.originalPrice);
         
         if (!priceInINR) {
-            const text = element.textContent.trim();
+            let text = element.textContent.trim();
+            // Remove "Rs." prefix if it exists to correctly extract the number
+            text = text.replace(/^Rs\.\s*/i, '');
+            
             if (!element.dataset.originalText) {
-                element.dataset.originalText = text;
+                element.dataset.originalText = element.textContent.trim();
             }
             
             const match = text.match(/[\d,]+\.?\d*/);
@@ -287,15 +290,13 @@ const CurrencyConverter = (function() {
         const convertedPrice = convertPrice(priceInINR);
         const formattedPrice = formatPrice(convertedPrice);
         
-        const originalText = element.dataset.originalText || element.textContent;
-        const originalPriceMatch = originalText.match(/[\d,]+\.?\d*/);
-        
-        if (originalPriceMatch) {
-            const updatedText = originalText.replace(/[₹$€£]?[\d,]+\.?\d*/, formattedPrice);
-            element.textContent = updatedText;
-        } else {
-            element.textContent = formattedPrice;
+        // If we're back in INR, we want to show "Rs. 1,000" instead of "₹1,000"
+        let finalDisplay = formattedPrice;
+        if (currentCurrency === BASE_CURRENCY) {
+            finalDisplay = formattedPrice.replace('₹', 'Rs. ');
         }
+
+        element.textContent = finalDisplay;
     }
 
     /**

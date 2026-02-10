@@ -544,7 +544,7 @@
                     style: 'currency',
                     currency: 'INR',
                     minimumFractionDigits: 0
-                }).format(product.price).replace('₹', 'Rs. ');
+                }).format(product.price).replace('₹', '');
 
                 return `
                     <div class="product-item" data-product-id="${product.id}">
@@ -557,7 +557,7 @@
                             </div>
                             <div class="product-details">
                                 <h3 class="product-name">${product.name}</h3>
-                                <div class="current-price" data-original-price="${product.price}">${formattedPrice}</div>
+                                <div class="current-price" data-original-price="${product.price}">Rs. ${formattedPrice}</div>
                             </div>
                         </a>
                     </div>

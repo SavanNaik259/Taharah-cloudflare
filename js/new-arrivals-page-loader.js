@@ -235,8 +235,8 @@ function createProductHTML(product) {
     // Format price - CRITICAL: Store the original INR price for wishlist extraction
     const originalPrice = parseFloat(product.price) || 0;
     const price = typeof product.price === 'number' ? 
-        `Rs. ${product.price.toLocaleString('en-IN')}` : 
-        `Rs. ${product.price}`.replace('₹', 'Rs. ');
+        `${product.price.toLocaleString('en-IN')}` : 
+        `${product.price}`.replace('₹', '').replace('Rs.', '').trim();
 
     // Use the image URL directly as provided by the backend
     // The backend already processes Firebase Storage URLs and provides CDN-optimized proxy URLs
@@ -254,7 +254,7 @@ function createProductHTML(product) {
                 <div class="product-details">
                     <h3 class="product-name">${product.name}</h3>
                     <div class="product-pricing">
-                        <span class="current-price" data-original-price="${originalPrice}">${price}</span>
+                        <span class="current-price" data-original-price="${originalPrice}">Rs. ${price}</span>
                     </div>
                 </div>
             </a>
