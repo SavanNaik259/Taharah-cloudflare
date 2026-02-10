@@ -50,7 +50,7 @@ const SearchUI = (function() {
                 <div class="search-container">
                     <div class="search-header">
                         <div class="search-input-container">
-                            <input type="text" id="searchInput" class="search-input" placeholder="Search for products, categories, or styles...">
+                            <input type="text" id="searchInput" class="search-input" placeholder="Search for Pakistani suits, pret, or modest wear...">
                             <i class="fas fa-search search-input-icon"></i>
                         </div>
                         <button id="searchCloseBtn" class="search-close-btn">
@@ -60,9 +60,9 @@ const SearchUI = (function() {
                     
                     <div class="search-filters">
                         <button class="search-filter-btn active" data-category="all">All</button>
-                        <button class="search-filter-btn" data-category="featured-collection">Featured</button>
-                        <button class="search-filter-btn" data-category="new-arrivals">New Arrivals</button>
-                        <button class="search-filter-btn" data-category="saree-collection">Sarees</button>
+                        <button class="search-filter-btn" data-category="pakistani-pret-wear">Pret Wear</button>
+                        <button class="search-filter-btn" data-category="ready-to-wear">Ready to Wear</button>
+                        <button class="search-filter-btn" data-category="modest-wear">Modest Wear</button>
                     </div>
                     
                     <div class="search-content">
@@ -354,12 +354,18 @@ const SearchUI = (function() {
      */
     function formatCategoryName(category) {
         switch (category) {
-            case 'featured-collection':
-                return 'Featured';
+            case 'pakistani-pret-wear':
+                return 'Pret Wear';
+            case 'ready-to-wear':
+                return 'Ready to Wear';
+            case 'modest-wear':
+                return 'Modest Wear';
+            case 'party-wear':
+                return 'Party Wear';
             case 'new-arrivals':
                 return 'New Arrivals';
-            case 'saree-collection':
-                return 'Sarees';
+            case 'featured-collection':
+                return 'Featured';
             default:
                 return category;
         }
