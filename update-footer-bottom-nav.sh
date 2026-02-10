@@ -130,7 +130,7 @@ read -r -d '' FOOTER_HTML << 'EOF'
         <div class="footer-bottom">
             <div class="footer-info">
                 <div class="copyright">
-                    <p>&copy; 2025 Royal Meenakari. All rights reserved. | Developed by <a href="#">Savan Naik</a></p>
+                    <p>&copy; 2025 Taharah. All rights reserved. | Developed by <a href="#">Savan Naik</a></p>
                 </div>
                 <div class="footer-links">
                     <a href="terms-conditions.html">Terms and Conditions</a>
