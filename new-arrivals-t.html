@@ -717,6 +717,22 @@
                 <option value="AUD">AUD</option>
             </select>
         </div>
+                <div class="bottom-nav-item language-selector-wrapper">
+            <span id="selected-language-flag" class="language-flag-display">🇬🇧</span>
+            <span id="selected-language-code" class="language-code-display">EN</span>
+            <select id="language-selector" class="language-select" onchange="LanguageTranslator.changeLanguage(this.value)">
+                <option value="en">EN</option>
+                <option value="hi">HI</option>
+                <option value="es">ES</option>
+                <option value="fr">FR</option>
+                <option value="ar">AR</option>
+                <option value="de">DE</option>
+            </select>
+        </div>
+        <a href="#" class="bottom-nav-item" id="bottomNavCart">
+            <i class="fi fi-rs-shopping-bag"></i>
+            <span data-translate="bag">Bag</span>
+        </a>
     </nav>
 
     <!-- Footer Toggle Script -->
