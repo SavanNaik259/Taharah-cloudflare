@@ -235,8 +235,8 @@ function createProductHTML(product) {
     // Format price - CRITICAL: Store the original INR price for wishlist extraction
     const originalPrice = parseFloat(product.price) || 0;
     const price = typeof product.price === 'number' ? 
-        `₹${product.price.toLocaleString('en-IN')}` : 
-        `₹${product.price}`;
+        `Rs. ${product.price.toLocaleString('en-IN')}` : 
+        `Rs. ${product.price}`.replace('₹', 'Rs. ');
 
     // Use the image URL directly as provided by the backend
     // The backend already processes Firebase Storage URLs and provides CDN-optimized proxy URLs
@@ -289,7 +289,7 @@ function showEmptyState() {
  */
 function formatPrice(price) {
     if (typeof price === 'number') {
-        return `₹${price.toLocaleString('en-IN')}`;
+        return `Rs. ${price.toLocaleString('en-IN')}`;
     }
-    return `₹${price}`;
+    return `Rs. ${price}`.replace('₹', 'Rs. ');
 }
