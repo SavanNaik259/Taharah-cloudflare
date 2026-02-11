@@ -247,7 +247,8 @@ const CurrencyConverter = (function() {
             '.cart-total-price',
             '.subtotal-amount',
             '.checkout-total',
-            '.order-total'
+            '.order-total',
+            '.related-current-price'
         ];
 
         priceSelectors.forEach(selector => {
