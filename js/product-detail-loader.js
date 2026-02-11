@@ -45,6 +45,10 @@ const ProductDetailLoader = (function() {
     function getCategoriesForProduct(productId) {
         // Define all possible categories including subcategories
         const allCategories = [
+            'pakistani-pret-wear',
+            'ready-to-wear',
+            'party-wear',
+            'modest-wear',
             'featured-collection',
             'new-arrivals',
             'gold-necklace',
@@ -66,6 +70,22 @@ const ProductDetailLoader = (function() {
         console.log('🔍 Determining search categories for product ID:', productId);
 
         // Check product ID prefix to prioritize search order
+        if (productId.startsWith('PAK-')) {
+            console.log('📂 Product is from Pakistani Pret Wear');
+            return ['pakistani-pret-wear', ...allCategories.filter(c => c !== 'pakistani-pret-wear')];
+        }
+        if (productId.startsWith('RTW-')) {
+            console.log('📂 Product is from Ready To Wear');
+            return ['ready-to-wear', ...allCategories.filter(c => c !== 'ready-to-wear')];
+        }
+        if (productId.startsWith('PTY-')) {
+            console.log('📂 Product is from Party Wear');
+            return ['party-wear', ...allCategories.filter(c => c !== 'party-wear')];
+        }
+        if (productId.startsWith('MOD-')) {
+            console.log('📂 Product is from Modest Wear');
+            return ['modest-wear', ...allCategories.filter(c => c !== 'modest-wear')];
+        }
         if (productId.startsWith('FEA-')) {
             console.log('📂 Product is from Featured Collection');
             return ['featured-collection', ...allCategories.filter(c => c !== 'featured-collection')];
@@ -307,10 +327,18 @@ const ProductDetailLoader = (function() {
                 let categoryName = 'Unknown';
 
                 if (product.category) {
-                    categoryName = product.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    categoryName = product.category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                 } else if (product.id) {
                     // Determine category from product ID prefix
-                    if (product.id.startsWith('BRI-')) {
+                    if (product.id.startsWith('PAK-')) {
+                        categoryName = 'Pakistani Pret Wear';
+                    } else if (product.id.startsWith('RTW-')) {
+                        categoryName = 'Ready To Wear';
+                    } else if (product.id.startsWith('PTY-')) {
+                        categoryName = 'Party Wear';
+                    } else if (product.id.startsWith('MOD-')) {
+                        categoryName = 'Modest Wear';
+                    } else if (product.id.startsWith('BRI-')) {
                         categoryName = 'Featured Collection';
                     } else if (product.id.startsWith('NEW-')) {
                         categoryName = 'New Arrivals';
@@ -320,7 +348,7 @@ const ProductDetailLoader = (function() {
                         // Use the category that was searched to find this product
                         const searchCategories = getCategoriesForProduct(product.id);
                         if (searchCategories.length > 0) {
-                            categoryName = searchCategories[0].replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                            categoryName = searchCategories[0].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                         }
                     }
                 }
