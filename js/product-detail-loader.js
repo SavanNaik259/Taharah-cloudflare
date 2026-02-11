@@ -224,6 +224,34 @@ const ProductDetailLoader = (function() {
 
         console.log('Updating page with product:', product);
 
+        // Update product category (Moved up to ensure it's available for other elements)
+        let categoryName = 'Unknown';
+        if (product.category) {
+            categoryName = product.category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        } else if (product.id) {
+            const id = product.id.toUpperCase();
+            if (id.startsWith('PAK-')) {
+                categoryName = 'Pakistani Pret Wear';
+            } else if (id.startsWith('RTW-')) {
+                categoryName = 'Ready To Wear';
+            } else if (id.startsWith('PTY-')) {
+                categoryName = 'Party Wear';
+            } else if (id.startsWith('MOD-')) {
+                categoryName = 'Modest Wear';
+            } else if (id.startsWith('FEA-')) {
+                categoryName = 'Featured Collection';
+            } else if (id.startsWith('NEW-')) {
+                categoryName = 'New Arrivals';
+            } else if (id.startsWith('SAR-')) {
+                categoryName = 'Saree Collection';
+            } else {
+                const searchCategories = getCategoriesForProduct(product.id);
+                if (searchCategories.length > 0) {
+                    categoryName = searchCategories[0].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                }
+            }
+        }
+
         // Update product name
         const nameElements = document.querySelectorAll('.product-title, .product-name, h1');
         nameElements.forEach(element => {
@@ -320,53 +348,27 @@ const ProductDetailLoader = (function() {
         // Update category information
         const categoryElements = document.querySelectorAll('.meta-value');
         if (categoryElements.length > 0) {
-            // Find the category meta item (usually the 4th meta item based on the HTML structure)
-            const categoryMetaItem = document.querySelector('.meta-item:nth-child(4) .meta-value');
-            if (categoryMetaItem) {
-                // Determine category from product ID or use the category from search
-                let categoryName = 'Unknown';
-
-                if (product.category) {
-                    categoryName = product.category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                } else if (product.id) {
-                    // Determine category from product ID prefix
-                    const id = product.id.toUpperCase();
-                    if (id.startsWith('PAK-')) {
-                        categoryName = 'Pakistani Pret Wear';
-                    } else if (id.startsWith('RTW-')) {
-                        categoryName = 'Ready To Wear';
-                    } else if (id.startsWith('PTY-')) {
-                        categoryName = 'Party Wear';
-                    } else if (id.startsWith('MOD-')) {
-                        categoryName = 'Modest Wear';
-                    } else if (id.startsWith('BRI-')) {
-                        categoryName = 'Featured Collection';
-                    } else if (id.startsWith('NEW-')) {
-                        categoryName = 'New Arrivals';
-                    } else if (id.startsWith('POL-')) {
-                        categoryName = 'Saree Collection';
-                    } else {
-                        // Use the category that was searched to find this product
-                        const searchCategories = getCategoriesForProduct(product.id);
-                        if (searchCategories.length > 0) {
-                            categoryName = searchCategories[0].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                        }
-                    }
+            // Find the category meta item by looking at its sibling label
+            let categoryUpdated = false;
+            const metaItems = document.querySelectorAll('.meta-item');
+            
+            metaItems.forEach(item => {
+                const label = item.querySelector('.meta-label');
+                const value = item.querySelector('.meta-value');
+                if (label && label.textContent.includes('Category:') && value) {
+                    value.textContent = categoryName;
+                    categoryUpdated = true;
+                    console.log('Updated category to:', categoryName);
                 }
+            });
 
-                categoryMetaItem.textContent = categoryName;
-                console.log('Updated category to:', categoryName);
-            } else {
-                console.log('Category meta item not found, searching for all meta values');
-                // Fallback: try to find category element by content
-                const allMetaValues = document.querySelectorAll('.meta-value');
-                allMetaValues.forEach((metaValue, index) => {
-                    const parentItem = metaValue.closest('.meta-item');
-                    if (parentItem && parentItem.textContent.includes('Category:')) {
-                        metaValue.textContent = categoryName;
-                        console.log('Updated category via fallback method to:', categoryName);
-                    }
-                });
+            // Fallback to the 4th child if the label check failed
+            if (!categoryUpdated) {
+                const categoryMetaItem = document.querySelector('.meta-item:nth-child(4) .meta-value');
+                if (categoryMetaItem) {
+                    categoryMetaItem.textContent = categoryName;
+                    console.log('Updated category via nth-child to:', categoryName);
+                }
             }
         }
 
