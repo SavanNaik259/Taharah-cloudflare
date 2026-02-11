@@ -5,8 +5,8 @@
  */
 
 const FilterSortHandler = (function() {
-    let currentSort = 'featured';
-    let currentFilter = 'featured';
+    let currentSort = 'newest';
+    let currentFilter = 'newest';
 
     /**
      * Initialize filter and sort UI
@@ -19,6 +19,33 @@ const FilterSortHandler = (function() {
         const sortDropdown = document.getElementById('sortDropdown');
 
         if (sortOption && sortDropdown) {
+            // Remove Featured option from sort dropdown if it exists
+            const featuredSortOption = sortDropdown.querySelector('[data-sort="featured"]');
+            if (featuredSortOption) {
+                featuredSortOption.remove();
+            }
+
+            // Set default active option to newest
+            const initialSortOptions = sortDropdown.querySelectorAll('.sort-dropdown-option');
+            let newestOptionFound = false;
+            initialSortOptions.forEach(opt => {
+                if (opt.dataset.sort === 'newest') {
+                    opt.classList.add('active');
+                    newestOptionFound = true;
+                } else {
+                    opt.classList.remove('active');
+                }
+            });
+
+            // If newest option doesn't exist in dropdown, add it
+            if (!newestOptionFound) {
+                const newestOption = document.createElement('div');
+                newestOption.className = 'sort-dropdown-option active';
+                newestOption.dataset.sort = 'newest';
+                newestOption.textContent = 'Newest Arrivals';
+                sortDropdown.prepend(newestOption);
+            }
+
             sortOption.addEventListener('click', function(e) {
                 e.stopPropagation();
                 
@@ -58,13 +85,13 @@ const FilterSortHandler = (function() {
             });
 
             // Sort option clicks
-            const sortOptions = sortDropdown.querySelectorAll('.sort-dropdown-option');
-            sortOptions.forEach(option => {
+            const activeSortOptions = sortDropdown.querySelectorAll('.sort-dropdown-option');
+            activeSortOptions.forEach(option => {
                 option.addEventListener('click', function(e) {
                     e.stopPropagation();
                     
                     // Remove active class from all options
-                    sortOptions.forEach(opt => opt.classList.remove('active'));
+                    activeSortOptions.forEach(opt => opt.classList.remove('active'));
                     
                     // Add active class to clicked option
                     this.classList.add('active');
@@ -173,12 +200,12 @@ const FilterSortHandler = (function() {
 
         if (clearFilterBtn) {
             clearFilterBtn.addEventListener('click', function() {
-                const featuredOption = document.querySelector('input[name="filter-sort"][value="featured"]');
-                if (featuredOption) {
-                    featuredOption.checked = true;
+                const newestOption = document.querySelector('input[name="filter-sort"][value="newest"]');
+                if (newestOption) {
+                    newestOption.checked = true;
                 }
-                currentFilter = 'featured';
-                applySort('featured');
+                currentFilter = 'newest';
+                applySort('newest');
                 if (filterModal && filterModal.classList.contains('active')) {
                     filterModal.classList.add('closing');
                     
@@ -188,6 +215,9 @@ const FilterSortHandler = (function() {
                 }
             });
         }
+
+        // Initialize with newest products
+        applySort('newest');
 
         console.log('Filter and Sort Handler initialized');
     }
@@ -216,6 +246,22 @@ const FilterSortHandler = (function() {
             if (typeof NewArrivalsPageLoader !== 'undefined') {
                 products = await NewArrivalsPageLoader.loadNewArrivalsProducts();
             }
+        } else if (pageName === 'pakistani-pret-wear') {
+            if (typeof SubcategoryProductsLoader !== 'undefined') {
+                products = await SubcategoryProductsLoader.loadSubcategoryProducts('pakistani-pret-wear');
+            }
+        } else if (pageName === 'ready-to-wear') {
+            if (typeof SubcategoryProductsLoader !== 'undefined') {
+                products = await SubcategoryProductsLoader.loadSubcategoryProducts('ready-to-wear');
+            }
+        } else if (pageName === 'modest-wear') {
+            if (typeof SubcategoryProductsLoader !== 'undefined') {
+                products = await SubcategoryProductsLoader.loadSubcategoryProducts('modest-wear');
+            }
+        } else if (pageName === 'party-wear') {
+            if (typeof SubcategoryProductsLoader !== 'undefined') {
+                products = await SubcategoryProductsLoader.loadSubcategoryProducts('party-wear');
+            }
         } else {
             // Subcategory pages
             const categoryMap = {
@@ -230,7 +276,11 @@ const FilterSortHandler = (function() {
                 'meenakari-bangles': 'meenakari-bangles',
                 'gold-rings': 'gold-rings',
                 'silver-rings': 'silver-rings',
-                'meenakari-rings': 'meenakari-rings'
+                'meenakari-rings': 'meenakari-rings',
+                'pakistani-pret-wear': 'pakistani-pret-wear',
+                'ready-to-wear': 'ready-to-wear',
+                'modest-wear': 'modest-wear',
+                'party-wear': 'party-wear'
             };
             
             const category = categoryMap[pageName];
