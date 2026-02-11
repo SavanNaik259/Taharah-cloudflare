@@ -318,7 +318,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Generate a unique order reference
     function generateOrderReference() {
-        const prefix = 'ORD';
+        const prefix = 'TAH';
         const timestamp = Date.now().toString().substr(-6);
         const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
         return `${prefix}-${timestamp}-${random}`;
