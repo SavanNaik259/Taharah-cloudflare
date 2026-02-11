@@ -226,11 +226,11 @@ const ProductDetailLoader = (function() {
         const id = product.id ? product.id.toUpperCase() : '';
 
         // Prioritize SKU prefix over product.category property for ALL specific collections
-        if (id.startsWith('PAK-') || id.startsWith('PAKISTANI-')) {
+        if (id.startsWith('PAK-') || id.startsWith('PAKISTANI-') || id.startsWith('PPT-')) {
             categoryName = 'Pakistani Pret Wear';
         } else if (id.startsWith('RTW-') || id.startsWith('READY-')) {
             categoryName = 'Ready To Wear';
-        } else if (id.startsWith('PTY-') || id.startsWith('PARTY-')) {
+        } else if (id.startsWith('PTY-') || id.startsWith('PARTY-') || id.startsWith('PTW-')) {
             categoryName = 'Party Wear';
         } else if (id.startsWith('MOD-') || id.startsWith('MODEST-') || id.startsWith('MDW-')) {
             categoryName = 'Modest Wear';
