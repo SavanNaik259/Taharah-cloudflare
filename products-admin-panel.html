@@ -2217,18 +2217,14 @@
                 let existingProducts = [];
 
                 try {
-                    // Detect environment and use appropriate endpoint
-                    const isNetlify = window.location.hostname.includes('netlify') || window.location.hostname.includes('.app');
+                    // Use the server API to load existing products (more reliable)
+                    console.log('Loading existing products via server API...');
+                    let existingProducts = [];
 
-                    // ADD CACHE BUSTING FOR ADMIN PANEL - Always get fresh data when adding products
-                    const cacheBust = `cacheBust=${Date.now()}`;
-                    const separator = isNetlify ? '&' : '?';
+                    // Always use the relative path which works across all domains on Netlify
+                    const apiEndpoint = `/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`;
 
-                    const apiEndpoint = isNetlify
-                        ? `/.netlify/functions/load-products?category=${category}&${cacheBust}`
-                        : `/api/load-products/${category}?${cacheBust}`;
-
-                    console.log('Using endpoint with cache busting:', apiEndpoint, '(Netlify:', isNetlify, ')');
+                    console.log('Using endpoint with cache busting:', apiEndpoint);
 
                     // Use aggressive cache-busting headers to ensure fresh data
                     const response = await fetch(apiEndpoint, {
