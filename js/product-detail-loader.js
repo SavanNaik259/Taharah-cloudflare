@@ -102,7 +102,7 @@ const ProductDetailLoader = (function() {
     /**
      * Load product data from Firebase Storage via Netlify function
      */
-    async function loadProductData(productId) {
+    async function loadProductData(productId, forceRefresh = false) {
         if (!productId) {
             console.error('No product ID provided');
             return null;
@@ -114,12 +114,25 @@ const ProductDetailLoader = (function() {
         for (const category of searchCategories) {
             try {
                 console.log(`🔍 Searching category: ${category} for SKU: ${productId}`);
-                // Use CDN-friendly request without cache-busting for better performance
-                // Products will be refreshed when admin updates them via cache invalidation
-                const response = await fetch(`/.netlify/functions/load-products?category=${category}`, {
+                
+                // Prepare request options
+                const requestOptions = {
                     method: 'GET',
-                    cache: 'default'
-                });
+                    cache: forceRefresh ? 'no-store' : 'default'
+                };
+
+                // Add cache-busting and headers if force refresh
+                let endpoint = `/.netlify/functions/load-products?category=${category}`;
+                if (forceRefresh) {
+                    endpoint += `&cacheBust=${Date.now()}`;
+                    requestOptions.headers = {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    };
+                }
+
+                const response = await fetch(endpoint, requestOptions);
 
                 if (!response.ok) {
                     console.warn(`⚠️ Failed to load category ${category}:`, response.status);
@@ -136,12 +149,6 @@ const ProductDetailLoader = (function() {
                         const matches = p.id === productId;
                         if (matches) {
                             console.log(`✅ PRODUCT FOUND in ${category}!`);
-                            console.log('📦 Product details:', {
-                                id: p.id,
-                                name: p.name,
-                                price: p.price,
-                                category: category
-                            });
                         }
                         return matches;
                     });
@@ -149,20 +156,21 @@ const ProductDetailLoader = (function() {
                     if (product) {
                         console.log(`🎉 Successfully found and loading product:`, product.name);
                         return product;
-                    } else {
-                        console.log(`❌ Product ${productId} not found in ${category}`);
                     }
                 }
-
-                console.log(`Product ${productId} not found in ${category}`);
-
             } catch (error) {
                 console.error(`Error loading from category ${category}:`, error);
                 continue;
             }
         }
 
-        console.error(`Product with ID ${productId} not found in any category`);
+        // If not found and we haven't tried force refresh yet, try one more time without cache
+        if (!forceRefresh) {
+            console.log('🔄 Product not found in initial search. Retrying with cache bypass...');
+            return await loadProductData(productId, true);
+        }
+
+        console.error(`Product with ID ${productId} not found in any category even after cache bypass`);
         return null;
     }
 
