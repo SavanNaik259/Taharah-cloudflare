@@ -232,7 +232,7 @@ const ProductDetailLoader = (function() {
             categoryName = 'Ready To Wear';
         } else if (id.startsWith('PTY-') || id.startsWith('PARTY-')) {
             categoryName = 'Party Wear';
-        } else if (id.startsWith('MOD-') || id.startsWith('MODEST-')) {
+        } else if (id.startsWith('MOD-') || id.startsWith('MODEST-') || id.startsWith('MDW-')) {
             categoryName = 'Modest Wear';
         } else if (id.startsWith('FEA-') || id.startsWith('FEATURED-')) {
             categoryName = 'Featured Collection';
@@ -242,7 +242,18 @@ const ProductDetailLoader = (function() {
             categoryName = 'Saree Collection';
         } else if (product.category) {
             // Fallback to normalized category property if no SKU prefix match
-            categoryName = product.category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            const normalizedCategory = product.category.toLowerCase().trim();
+            if (normalizedCategory === 'pakistani-pret-wear' || normalizedCategory === 'pakistani pret wear') {
+                categoryName = 'Pakistani Pret Wear';
+            } else if (normalizedCategory === 'ready-to-wear' || normalizedCategory === 'ready to wear') {
+                categoryName = 'Ready To Wear';
+            } else if (normalizedCategory === 'party-wear' || normalizedCategory === 'party wear') {
+                categoryName = 'Party Wear';
+            } else if (normalizedCategory === 'modest-wear' || normalizedCategory === 'modest wear') {
+                categoryName = 'Modest Wear';
+            } else {
+                categoryName = product.category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            }
         } else if (id) {
             const searchCategories = getCategoriesForProduct(product.id);
             if (searchCategories.length > 0) {
