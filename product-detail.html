@@ -936,24 +936,35 @@ background-color: #000 !important;
 
     <!-- You May Also Like Products Loader -->
     <script>
+        // Flag to prevent multiple concurrent loads or unnecessary re-loads
+        let isRelatedProductsLoading = false;
+        let lastLoadedRelatedProductId = null;
+
         // Function to load random products for "You May Also Like" section
         async function loadYouMayAlsoLikeProducts() {
+            // Prevent duplicate loads for the same product
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentProductId = urlParams.get('id');
+            
+            if (isRelatedProductsLoading) return;
+            if (lastLoadedRelatedProductId === currentProductId) {
+                console.log('Related products already loaded for this SKU, skipping refresh');
+                return;
+            }
+
             try {
+                isRelatedProductsLoading = true;
                 console.log('Loading products for "You May Also Like" section...');
 
                 const container = document.getElementById('you-may-also-like-container');
                 if (!container) {
-                    console.log('Container not found for "You May Also Like" section');
+                    isRelatedProductsLoading = false;
                     return;
                 }
 
-                // Get current product ID from URL or global variable
-                const urlParams = new URLSearchParams(window.location.search);
-                const currentProductId = urlParams.get('id');
+                console.log('Current product ID to exclude:', currentProductId);
 
-                console.log('Current product ID from URL:', currentProductId);
-
-                // Load all products from all collections using Netlify CDN
+                // Load all products from all collections
                 const categories = [
                     'pakistani-pret-wear', 
                     'ready-to-wear', 
@@ -963,138 +974,85 @@ background-color: #000 !important;
                     'new-arrivals', 
                     'saree-collection'
                 ];
-                let allProducts = [];
-
-                // Use Promise.all for faster parallel loading
-                const fetchPromises = categories.map(async (category) => {
+                
+                // Parallel fetch for speed
+                const results = await Promise.all(categories.map(async (category) => {
                     try {
-                        const timestamp = Date.now();
-                        const response = await fetch(`/.netlify/functions/load-products?category=${category}&t=${timestamp}`);
+                        const response = await fetch(`/.netlify/functions/load-products?category=${category}&t=${Date.now()}`);
                         if (response.ok) {
                             const data = await response.json();
                             return data.products || [];
                         }
-                    } catch (error) {
-                        console.warn(`Error loading ${category} products:`, error);
-                    }
+                    } catch (e) { console.warn(`Error loading ${category}:`, e); }
                     return [];
-                });
+                }));
 
-                const results = await Promise.all(fetchPromises);
-                allProducts = results.flat();
-
-                console.log(`Total products loaded: ${allProducts.length}`);
-
-                // Filter out the current product AND duplicates by ID
+                const allProducts = results.flat();
+                
+                // Strict filtering logic
                 const uniqueProducts = [];
                 const seenIds = new Set();
                 
+                // Explicitly add current ID to seen set to blackball it
                 if (currentProductId) {
-                    seenIds.add(currentProductId);
-                    console.log('Excluding current product ID:', currentProductId);
+                    seenIds.add(String(currentProductId).trim().toUpperCase());
                 }
 
                 for (const product of allProducts) {
-                    const productId = String(product.id);
-                    if (productId && !seenIds.has(productId)) {
-                        seenIds.add(productId);
+                    if (!product.id) continue;
+                    const prodIdStr = String(product.id).trim().toUpperCase();
+                    
+                    if (!seenIds.has(prodIdStr)) {
+                        seenIds.add(prodIdStr);
                         uniqueProducts.push(product);
                     }
                 }
 
-                console.log(`Unique products after filtering current product (${currentProductId}): ${uniqueProducts.length}`);
-
-                // Shuffle the products array to get random order
-                const shuffledProducts = uniqueProducts.sort(() => Math.random() - 0.5);
-
-                // Take first 6 products for display
-                const productsToShow = shuffledProducts.slice(0, 6);
-                console.log('Products selected for display:', productsToShow.map(p => p.id));
+                // Randomize and take 6
+                const shuffled = uniqueProducts.sort(() => 0.5 - Math.random());
+                const productsToShow = shuffled.slice(0, 6);
 
                 if (productsToShow.length === 0) {
                     container.innerHTML = '<div class="no-products-message">No related products found</div>';
-                    return;
-                }
+                } else {
+                    container.innerHTML = productsToShow.map(product => {
+                        const price = new Intl.NumberFormat('en-IN', {
+                            style: 'currency', currency: 'INR', minimumFractionDigits: 0
+                        }).format(product.price);
 
-                // Generate HTML for products
-                const productsHTML = productsToShow.map(product => {
-                    const formattedPrice = new Intl.NumberFormat('en-IN', {
-                        style: 'currency',
-                        currency: 'INR',
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0
-                    }).format(product.price).replace('₹', '₹');
+                        const img = product.mainImage || product.image || (product.images && product.images[0]?.url) || '/images/placeholder-product.jpg';
 
-                    // Handle different image structures between categories
-                    let imageUrl;
-                    if (product.mainImage) {
-                        // Featured collection uses mainImage
-                        imageUrl = product.mainImage;
-                    } else if (product.image) {
-                        // New arrivals and saree collection use image
-                        imageUrl = product.image;
-                    } else if (product.images && product.images.length > 0) {
-                        // Fallback to first image in images array
-                        imageUrl = product.images[0].url;
-                    } else {
-                        // Fallback placeholder
-                        imageUrl = '/images/placeholder-product.jpg';
-                    }
-
-                    console.log(`Product ${product.id} image URL:`, imageUrl);
-
-                    return `
-                        <div class="product-item" data-product-id="${product.id}" onclick="window.location.href='product-detail?id=${product.id}'">
-                            <div class="product-image">
-                                <img src="${imageUrl}" alt="${product.name}" loading="lazy" onerror="console.error('Image failed to load:', '${imageUrl}'); this.style.display='none'; this.nextElementSibling.style.display='block';">
-                                <div class="image-fallback" style="display:none; background:#f5f5f5; height:100%; display:flex; align-items:center; justify-content:center; color:#999; font-size:12px; text-align:center; padding:10px;">${product.name}</div>
-                                <button class="add-to-wishlist" onclick="event.stopPropagation(); if(window.WishlistManager) WishlistManager.toggleWishlist('${product.id}'); return false;"><i class="far fa-heart"></i></button>
-                            </div>
-                            <div class="product-details">
-                                <h3 class="product-name">${product.name}</h3>
-                                <div class="product-pricing">
-                                    <span class="current-price">${formattedPrice}</span>
+                        return `
+                            <div class="product-item" data-product-id="${product.id}" onclick="window.location.href='product-detail?id=${product.id}'">
+                                <div class="product-image">
+                                    <img src="${img}" alt="${product.name}" loading="lazy">
+                                    <button class="add-to-wishlist" onclick="event.stopPropagation(); if(window.WishlistManager) WishlistManager.toggleWishlist('${product.id}');"><i class="far fa-heart"></i></button>
+                                </div>
+                                <div class="product-details">
+                                    <h3 class="product-name">${product.name}</h3>
+                                    <div class="product-pricing"><span class="current-price">${price}</span></div>
                                 </div>
                             </div>
-                        </div>
-                    `;
-                }).join('');
+                        `;
+                    }).join('');
+                    
+                    lastLoadedRelatedProductId = currentProductId;
+                }
 
-                // Update the container with new products
-                container.innerHTML = productsHTML;
-
-                console.log('Successfully loaded "You May Also Like" products');
-
-                // Initialize wishlist for the new products
-                if (window.WishlistManager && window.WishlistManager.initializeWishlistButtons) {
-                    setTimeout(() => {
-                        window.WishlistManager.initializeWishlistButtons();
-                    }, 100);
+                if (window.WishlistManager?.initializeWishlistButtons) {
+                    setTimeout(() => window.WishlistManager.initializeWishlistButtons(), 100);
                 }
 
             } catch (error) {
-                console.error('Error loading "You May Also Like" products:', error);
-                console.error('Error stack:', error.stack);
-                console.error('Error message:', error.message);
-                console.error('Error name:', error.name);
-
-                const container = document.getElementById('you-may-also-like-container');
-                if (container) {
-                    container.innerHTML = `<div class="error-message">Unable to load related products<br><small>Error: ${error.message}</small></div>`;
-                }
+                console.error('Error loading related products:', error);
+            } finally {
+                isRelatedProductsLoading = false;
             }
         }
 
-        // Load products when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            // Delay loading to ensure current product is loaded first
-            setTimeout(loadYouMayAlsoLikeProducts, 1000);
-        });
-
-        // Also load when product details are updated (in case of navigation)
-        window.addEventListener('productLoaded', function() {
-            setTimeout(loadYouMayAlsoLikeProducts, 500);
-        });
+        // Optimized event triggers
+        document.addEventListener('DOMContentLoaded', () => setTimeout(loadYouMayAlsoLikeProducts, 500));
+        window.addEventListener('productLoaded', () => loadYouMayAlsoLikeProducts());
     </script>
 
     <!-- Product Detail Loader -->
