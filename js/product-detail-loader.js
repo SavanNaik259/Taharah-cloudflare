@@ -225,20 +225,20 @@ const ProductDetailLoader = (function() {
         let categoryName = 'Unknown';
         const id = product.id ? product.id.toUpperCase() : '';
 
-        // Prioritize SKU prefix over product.category property for specific collections
-        if (id.startsWith('PAK-')) {
+        // Prioritize SKU prefix over product.category property for ALL specific collections
+        if (id.startsWith('PAK-') || id.startsWith('PAKISTANI-')) {
             categoryName = 'Pakistani Pret Wear';
-        } else if (id.startsWith('RTW-')) {
+        } else if (id.startsWith('RTW-') || id.startsWith('READY-')) {
             categoryName = 'Ready To Wear';
-        } else if (id.startsWith('PTY-')) {
+        } else if (id.startsWith('PTY-') || id.startsWith('PARTY-')) {
             categoryName = 'Party Wear';
-        } else if (id.startsWith('MOD-')) {
+        } else if (id.startsWith('MOD-') || id.startsWith('MODEST-')) {
             categoryName = 'Modest Wear';
-        } else if (id.startsWith('FEA-')) {
+        } else if (id.startsWith('FEA-') || id.startsWith('FEATURED-')) {
             categoryName = 'Featured Collection';
-        } else if (id.startsWith('NEW-')) {
+        } else if (id.startsWith('NEW-') || id.startsWith('ARRIVAL-')) {
             categoryName = 'New Arrivals';
-        } else if (id.startsWith('SAR-') || id.startsWith('POL-')) {
+        } else if (id.startsWith('SAR-') || id.startsWith('POL-') || id.startsWith('SAREE-')) {
             categoryName = 'Saree Collection';
         } else if (product.category) {
             // Fallback to normalized category property if no SKU prefix match
