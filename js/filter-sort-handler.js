@@ -229,7 +229,10 @@ const FilterSortHandler = (function() {
         console.log('Applying sort:', sortBy);
 
         // Determine which loader to use based on page
-        const pageName = window.location.pathname.split('/').pop().replace('', '');
+        const path = window.location.pathname;
+        const pageName = path.split('/').pop().replace('.html', '') || 'index';
+        
+        console.log('Current page detected for filtering:', pageName);
         
         let products = [];
         
@@ -246,46 +249,21 @@ const FilterSortHandler = (function() {
             if (typeof NewArrivalsPageLoader !== 'undefined') {
                 products = await NewArrivalsPageLoader.loadNewArrivalsProducts();
             }
-        } else if (pageName === 'pakistani-pret-wear') {
+        } else if (pageName === 'pakistani-pret-wear' || pageName === 'ready-to-wear' || pageName === 'modest-wear' || pageName === 'party-wear') {
             if (typeof SubcategoryProductsLoader !== 'undefined') {
-                products = await SubcategoryProductsLoader.loadSubcategoryProducts('pakistani-pret-wear');
-            }
-        } else if (pageName === 'ready-to-wear') {
-            if (typeof SubcategoryProductsLoader !== 'undefined') {
-                products = await SubcategoryProductsLoader.loadSubcategoryProducts('ready-to-wear');
-            }
-        } else if (pageName === 'modest-wear') {
-            if (typeof SubcategoryProductsLoader !== 'undefined') {
-                products = await SubcategoryProductsLoader.loadSubcategoryProducts('modest-wear');
-            }
-        } else if (pageName === 'party-wear') {
-            if (typeof SubcategoryProductsLoader !== 'undefined') {
-                products = await SubcategoryProductsLoader.loadSubcategoryProducts('party-wear');
+                products = await SubcategoryProductsLoader.loadSubcategoryProducts(pageName);
             }
         } else {
-            // Subcategory pages
-            const categoryMap = {
-                'gold-necklace': 'gold-necklace',
-                'silver-necklace': 'silver-necklace',
-                'meenakari-necklace': 'meenakari-necklace',
-                'gold-earrings': 'gold-earrings',
-                'silver-earrings': 'silver-earrings',
-                'meenakari-earrings': 'meenakari-earrings',
-                'gold-bangles': 'gold-bangles',
-                'silver-bangles': 'silver-bangles',
-                'meenakari-bangles': 'meenakari-bangles',
-                'gold-rings': 'gold-rings',
-                'silver-rings': 'silver-rings',
-                'meenakari-rings': 'meenakari-rings',
-                'pakistani-pret-wear': 'pakistani-pret-wear',
-                'ready-to-wear': 'ready-to-wear',
-                'modest-wear': 'modest-wear',
-                'party-wear': 'party-wear'
-            };
+            // Check if it's a known subcategory
+            const categories = [
+                'gold-necklace', 'silver-necklace', 'meenakari-necklace',
+                'gold-earrings', 'silver-earrings', 'meenakari-earrings',
+                'gold-bangles', 'silver-bangles', 'meenakari-bangles',
+                'gold-rings', 'silver-rings', 'meenakari-rings'
+            ];
             
-            const category = categoryMap[pageName];
-            if (category && typeof SubcategoryProductsLoader !== 'undefined') {
-                products = await SubcategoryProductsLoader.loadSubcategoryProducts(category);
+            if (categories.includes(pageName) && typeof SubcategoryProductsLoader !== 'undefined') {
+                products = await SubcategoryProductsLoader.loadSubcategoryProducts(pageName);
             }
         }
 

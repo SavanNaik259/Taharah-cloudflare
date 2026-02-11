@@ -330,19 +330,20 @@ const ProductDetailLoader = (function() {
                     categoryName = product.category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                 } else if (product.id) {
                     // Determine category from product ID prefix
-                    if (product.id.startsWith('PAK-')) {
+                    const id = product.id.toUpperCase();
+                    if (id.startsWith('PAK-')) {
                         categoryName = 'Pakistani Pret Wear';
-                    } else if (product.id.startsWith('RTW-')) {
+                    } else if (id.startsWith('RTW-')) {
                         categoryName = 'Ready To Wear';
-                    } else if (product.id.startsWith('PTY-')) {
+                    } else if (id.startsWith('PTY-')) {
                         categoryName = 'Party Wear';
-                    } else if (product.id.startsWith('MOD-')) {
+                    } else if (id.startsWith('MOD-')) {
                         categoryName = 'Modest Wear';
-                    } else if (product.id.startsWith('BRI-')) {
+                    } else if (id.startsWith('BRI-')) {
                         categoryName = 'Featured Collection';
-                    } else if (product.id.startsWith('NEW-')) {
+                    } else if (id.startsWith('NEW-')) {
                         categoryName = 'New Arrivals';
-                    } else if (product.id.startsWith('POL-')) {
+                    } else if (id.startsWith('POL-')) {
                         categoryName = 'Saree Collection';
                     } else {
                         // Use the category that was searched to find this product
