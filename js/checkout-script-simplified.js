@@ -1361,7 +1361,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Generate a random order reference
     function generateOrderReference() {
-        const prefix = 'ROYALMEENAKARI';
+        const prefix = 'TAH';
         const timestamp = new Date().getTime().toString().slice(-6);
         const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
         return `${prefix}-${timestamp}-${random}`;

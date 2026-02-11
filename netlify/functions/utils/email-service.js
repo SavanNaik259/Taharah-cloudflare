@@ -242,7 +242,7 @@ async function sendCustomerOrderConfirmation(orderData) {
     const completeOrderData = {
       ...orderData,
       customer: customerData,
-      orderReference: orderData.orderReference || 'ORD-' + Date.now(),
+      orderReference: orderData.orderReference || 'TAH-' + Date.now(),
       orderDate: orderData.orderDate || new Date().toISOString(),
       orderTotal: orderData.orderTotal || 0,
       paymentMethod: orderData.paymentMethod || 'Not specified',
