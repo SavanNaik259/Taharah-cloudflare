@@ -51,6 +51,7 @@ const ProductDetailLoader = (function() {
             'modest-wear',
             'featured-collection',
             'new-arrivals',
+            'saree-collection',
             'gold-necklace',
             'silver-necklace',
             'meenakari-necklace',
@@ -67,55 +68,51 @@ const ProductDetailLoader = (function() {
 
         if (!productId) return allCategories;
 
-        console.log('🔍 Determining search categories for product ID:', productId);
+        const id = productId.toUpperCase();
+        console.log('🔍 Determining search categories for product ID:', id);
 
         // Check product ID prefix to prioritize search order
-        if (productId.startsWith('PAK-')) {
+        if (id.startsWith('PAK-')) {
             console.log('📂 Product is from Pakistani Pret Wear');
             return ['pakistani-pret-wear', ...allCategories.filter(c => c !== 'pakistani-pret-wear')];
         }
-        if (productId.startsWith('RTW-')) {
+        if (id.startsWith('RTW-')) {
             console.log('📂 Product is from Ready To Wear');
             return ['ready-to-wear', ...allCategories.filter(c => c !== 'ready-to-wear')];
         }
-        if (productId.startsWith('PTY-')) {
+        if (id.startsWith('PTY-')) {
             console.log('📂 Product is from Party Wear');
             return ['party-wear', ...allCategories.filter(c => c !== 'party-wear')];
         }
-        if (productId.startsWith('MOD-')) {
+        if (id.startsWith('MOD-')) {
             console.log('📂 Product is from Modest Wear');
             return ['modest-wear', ...allCategories.filter(c => c !== 'modest-wear')];
         }
-        if (productId.startsWith('FEA-')) {
+        if (id.startsWith('FEA-')) {
             console.log('📂 Product is from Featured Collection');
             return ['featured-collection', ...allCategories.filter(c => c !== 'featured-collection')];
         }
-        if (productId.startsWith('NEW-')) {
+        if (id.startsWith('NEW-')) {
             console.log('📂 Product is from New Arrivals');
             return ['new-arrivals', ...allCategories.filter(c => c !== 'new-arrivals')];
         }
-        if (productId.startsWith('SAR-')) {
+        if (id.startsWith('SAR-') || id.startsWith('POL-')) {
             console.log('📂 Product is from Saree Collection');
             return ['saree-collection', ...allCategories.filter(c => c !== 'saree-collection')];
         }
-        if (productId.startsWith('GOL-')) {
-            // Gold products - prioritize gold categories
+        if (id.startsWith('GOL-')) {
             console.log('📂 Product is Gold category');
             return ['gold-necklace', 'gold-earrings', 'gold-bangles', 'gold-rings', ...allCategories.filter(c => !c.startsWith('gold'))];
         }
-        if (productId.startsWith('SIL-')) {
-            // Silver products - prioritize silver categories
+        if (id.startsWith('SIL-')) {
             console.log('📂 Product is Silver category');
             return ['silver-necklace', 'silver-earrings', 'silver-bangles', 'silver-rings', ...allCategories.filter(c => !c.startsWith('silver'))];
         }
-        if (productId.startsWith('MEE-')) {
-            // Meenakari products - prioritize meenakari categories
+        if (id.startsWith('MEE-')) {
             console.log('📂 Product is Meenakari category');
             return ['meenakari-necklace', 'meenakari-earrings', 'meenakari-bangles', 'meenakari-rings', ...allCategories.filter(c => !c.startsWith('meenakari'))];
         }
 
-        // If no prefix match, search all categories
-        console.log('📂 No prefix match, searching all categories');
         return allCategories;
     }
 
@@ -226,29 +223,30 @@ const ProductDetailLoader = (function() {
 
         // Update product category (Moved up to ensure it's available for other elements)
         let categoryName = 'Unknown';
-        if (product.category) {
+        const id = product.id ? product.id.toUpperCase() : '';
+
+        // Prioritize SKU prefix over product.category property for specific collections
+        if (id.startsWith('PAK-')) {
+            categoryName = 'Pakistani Pret Wear';
+        } else if (id.startsWith('RTW-')) {
+            categoryName = 'Ready To Wear';
+        } else if (id.startsWith('PTY-')) {
+            categoryName = 'Party Wear';
+        } else if (id.startsWith('MOD-')) {
+            categoryName = 'Modest Wear';
+        } else if (id.startsWith('FEA-')) {
+            categoryName = 'Featured Collection';
+        } else if (id.startsWith('NEW-')) {
+            categoryName = 'New Arrivals';
+        } else if (id.startsWith('SAR-') || id.startsWith('POL-')) {
+            categoryName = 'Saree Collection';
+        } else if (product.category) {
+            // Fallback to normalized category property if no SKU prefix match
             categoryName = product.category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        } else if (product.id) {
-            const id = product.id.toUpperCase();
-            if (id.startsWith('PAK-')) {
-                categoryName = 'Pakistani Pret Wear';
-            } else if (id.startsWith('RTW-')) {
-                categoryName = 'Ready To Wear';
-            } else if (id.startsWith('PTY-')) {
-                categoryName = 'Party Wear';
-            } else if (id.startsWith('MOD-')) {
-                categoryName = 'Modest Wear';
-            } else if (id.startsWith('FEA-')) {
-                categoryName = 'Featured Collection';
-            } else if (id.startsWith('NEW-')) {
-                categoryName = 'New Arrivals';
-            } else if (id.startsWith('SAR-')) {
-                categoryName = 'Saree Collection';
-            } else {
-                const searchCategories = getCategoriesForProduct(product.id);
-                if (searchCategories.length > 0) {
-                    categoryName = searchCategories[0].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                }
+        } else if (id) {
+            const searchCategories = getCategoriesForProduct(product.id);
+            if (searchCategories.length > 0) {
+                categoryName = searchCategories[0].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
             }
         }
 
