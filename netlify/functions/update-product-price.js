@@ -105,7 +105,7 @@ exports.handler = async (event, context) => {
           console.log(`   Product name: ${updatedProduct.name || updatedProduct.productName}`);
           console.log(`   Discount: ${Math.round(((oldPrice - newPrice) / oldPrice) * 100)}%`);
           
-          const priceDropResponse = await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-price-drop-alerts', {
+          const priceDropResponse = await fetch('https://taharah.netlify.app/.netlify/functions/auto-price-drop-alerts', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

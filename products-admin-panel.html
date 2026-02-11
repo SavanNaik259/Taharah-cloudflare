@@ -2217,10 +2217,6 @@
                 let existingProducts = [];
 
                 try {
-                    // Use the server API to load existing products (more reliable)
-                    console.log('Loading existing products via server API...');
-                    let existingProducts = [];
-
                     // Always use the relative path which works across all domains on Netlify
                     const apiEndpoint = `/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`;
 
@@ -2460,7 +2456,7 @@
                       // Back-in-stock: ONLY if stock field was edited and stock went from 0 to available
                       if (fieldsChanged.stock && originalProductData.stock === 0 && updatedProductData.stock > 0) {
                         console.log('📦 Triggering back-in-stock notification (stock field was edited)...');
-                        await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-back-in-stock-alerts', {
+                        await fetch('https://taharah.netlify.app/.netlify/functions/auto-back-in-stock-alerts', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({
@@ -2475,7 +2471,7 @@
                       // Low-stock: ONLY if stock field was edited and stock changed to 3 or below
                       if (fieldsChanged.stock && updatedProductData.stock <= 3 && updatedProductData.stock > 0) {
                         console.log('⚡ Triggering low-stock notification (stock field was edited)...');
-                        await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-low-stock-alerts', {
+                        await fetch('https://taharah.netlify.app/.netlify/functions/auto-low-stock-alerts', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({
@@ -2492,7 +2488,7 @@
                       // Price-drop: ONLY if price field was edited and price decreased
                       if (fieldsChanged.price && originalProductData.price > updatedProductData.price) {
                         console.log('📉 Triggering price-drop notification (price field was edited)...');
-                        await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-price-drop-alerts', {
+                        await fetch('https://taharah.netlify.app/.netlify/functions/auto-price-drop-alerts', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({
@@ -2536,7 +2532,7 @@
                       console.log('⭐ Triggering new-product notification...');
                       const isProduction = !window.location.hostname.includes('localhost');
                       const notificationUrl = isProduction 
-                        ? 'https://royalmeenakari.netlify.app/.netlify/functions/auto-new-product-alerts'
+                        ? 'https://taharah.netlify.app/.netlify/functions/auto-new-product-alerts'
                         : '/api/new-product-notification';
                       
                       const response = await fetch(notificationUrl, {

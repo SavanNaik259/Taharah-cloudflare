@@ -124,7 +124,7 @@ exports.handler = async (event, context) => {
         if (previousStock === 0 && newStock > 0) {
           console.log(`\n📦 BACK-IN-STOCK CONDITION MET - Calling automation function...`);
           try {
-            const backInStockResponse = await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-back-in-stock-alerts', {
+            const backInStockResponse = await fetch('https://taharah.netlify.app/.netlify/functions/auto-back-in-stock-alerts', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -146,7 +146,7 @@ exports.handler = async (event, context) => {
         if (previousStock > 3 && newStock <= 3 && newStock > 0) {
           console.log(`\n⚡ LOW-STOCK CONDITION MET - Calling automation function...`);
           try {
-            const lowStockResponse = await fetch('https://royalmeenakari.netlify.app/.netlify/functions/auto-low-stock-alerts', {
+            const lowStockResponse = await fetch('https://taharah.netlify.app/.netlify/functions/auto-low-stock-alerts', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
