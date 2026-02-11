@@ -44,9 +44,10 @@
 
 .philosophy-signature {
     font-family: 'Playfair Display', serif;
-    font-size: 1.5rem;
+    font-size: 2.2rem;
     color: #1a1a1a;
-    font-style: italic;
+    font-weight: 400;
+    letter-spacing: 1px;
 }
 
 .philosophy-decoration {
