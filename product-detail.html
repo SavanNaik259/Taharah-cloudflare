@@ -954,35 +954,56 @@ background-color: #000 !important;
                 console.log('Current product ID:', currentProductId);
 
                 // Load all products from all collections using Netlify CDN
-                const categories = ['featured-collection', 'new-arrivals', 'saree-collection'];
+                const categories = [
+                    'pakistani-pret-wear', 
+                    'ready-to-wear', 
+                    'party-wear', 
+                    'modest-wear', 
+                    'featured-collection', 
+                    'new-arrivals', 
+                    'saree-collection'
+                ];
                 let allProducts = [];
 
-                for (const category of categories) {
+                // Use Promise.all for faster parallel loading
+                const fetchPromises = categories.map(async (category) => {
                     try {
                         const timestamp = Date.now();
                         const response = await fetch(`/.netlify/functions/load-products?category=${category}&t=${timestamp}`);
-
                         if (response.ok) {
                             const data = await response.json();
-                            const products = data.products || [];
-                            console.log(`Loaded ${products.length} products from ${category} via Netlify CDN`);
-                            allProducts = allProducts.concat(products);
-                        } else {
-                            console.warn(`Failed to load products from ${category} via Netlify CDN:`, response.status);
+                            return data.products || [];
                         }
                     } catch (error) {
-                        console.warn(`Error loading ${category} products via Netlify CDN:`, error);
+                        console.warn(`Error loading ${category} products:`, error);
                     }
-                }
+                    return [];
+                });
+
+                const results = await Promise.all(fetchPromises);
+                allProducts = results.flat();
 
                 console.log(`Total products loaded: ${allProducts.length}`);
 
-                // Filter out the current product
-                const filteredProducts = allProducts.filter(product => product.id !== currentProductId);
-                console.log(`Products after filtering current product: ${filteredProducts.length}`);
+                // Filter out the current product AND duplicates by ID
+                const uniqueProducts = [];
+                const seenIds = new Set();
+                
+                if (currentProductId) {
+                    seenIds.add(currentProductId);
+                }
+
+                for (const product of allProducts) {
+                    if (product.id && !seenIds.has(product.id)) {
+                        seenIds.add(product.id);
+                        uniqueProducts.push(product);
+                    }
+                }
+
+                console.log(`Unique products after filtering current product: ${uniqueProducts.length}`);
 
                 // Shuffle the products array to get random order
-                const shuffledProducts = filteredProducts.sort(() => Math.random() - 0.5);
+                const shuffledProducts = uniqueProducts.sort(() => Math.random() - 0.5);
 
                 // Take first 6 products for display
                 const productsToShow = shuffledProducts.slice(0, 6);
