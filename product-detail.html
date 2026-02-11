@@ -949,9 +949,9 @@ background-color: #000 !important;
 
                 // Get current product ID from URL or global variable
                 const urlParams = new URLSearchParams(window.location.search);
-                const currentProductId = urlParams.get('id') || (window.productDetails ? window.productDetails.id : null);
+                const currentProductId = urlParams.get('id');
 
-                console.log('Current product ID:', currentProductId);
+                console.log('Current product ID from URL:', currentProductId);
 
                 // Load all products from all collections using Netlify CDN
                 const categories = [
@@ -991,23 +991,25 @@ background-color: #000 !important;
                 
                 if (currentProductId) {
                     seenIds.add(currentProductId);
+                    console.log('Excluding current product ID:', currentProductId);
                 }
 
                 for (const product of allProducts) {
-                    if (product.id && !seenIds.has(product.id)) {
-                        seenIds.add(product.id);
+                    const productId = String(product.id);
+                    if (productId && !seenIds.has(productId)) {
+                        seenIds.add(productId);
                         uniqueProducts.push(product);
                     }
                 }
 
-                console.log(`Unique products after filtering current product: ${uniqueProducts.length}`);
+                console.log(`Unique products after filtering current product (${currentProductId}): ${uniqueProducts.length}`);
 
                 // Shuffle the products array to get random order
                 const shuffledProducts = uniqueProducts.sort(() => Math.random() - 0.5);
 
                 // Take first 6 products for display
                 const productsToShow = shuffledProducts.slice(0, 6);
-                console.log(`Products to display: ${productsToShow.length}`);
+                console.log('Products selected for display:', productsToShow.map(p => p.id));
 
                 if (productsToShow.length === 0) {
                     container.innerHTML = '<div class="no-products-message">No related products found</div>';
