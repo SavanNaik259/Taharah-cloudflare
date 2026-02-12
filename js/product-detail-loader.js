@@ -476,7 +476,7 @@ const ProductDetailLoader = (function() {
                 if (mainImg) {
                     mainImg.style.display = 'none';
                     mainImg.src = '';
-                    mainImg.alt = '';
+                    img.alt = '';
                 }
             });
         }
