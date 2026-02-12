@@ -746,6 +746,28 @@
                     <textarea id="productDescription" name="productDescription" placeholder="Enter detailed product description..." required></textarea>
                 </div>
 
+                <div class="form-group">
+                    <label>Available Sizes (Comma separated)</label>
+                    <input type="text" id="productSizes" name="productSizes" placeholder="XS, S, M, L, XL, XXL">
+                </div>
+
+                <div class="form-group">
+                    <label>Available Colours (Comma separated)</label>
+                    <input type="text" id="productColours" name="productColours" placeholder="Red, Blue, Green, Black">
+                </div>
+
+                <div class="form-group">
+                    <label>Dupatta Options</label>
+                    <div style="display: flex; gap: 20px; align-items: center; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;">
+                        <label style="margin: 0; font-weight: normal; display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" id="dupattaCotton" name="dupattaOptions" value="Cotton" style="width: auto;"> Cotton
+                        </label>
+                        <label style="margin: 0; font-weight: normal; display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" id="dupattaChiffon" name="dupattaOptions" value="Chiffon" style="width: auto;"> Chiffon
+                        </label>
+                    </div>
+                </div>
+
                 <!-- Image Compression Settings -->
                 <div class="form-group">
                     <div class="compression-settings">
