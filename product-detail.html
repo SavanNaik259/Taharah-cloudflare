@@ -1063,24 +1063,43 @@ background-color: #000 !important;
 
             console.log('Direct wishlist toggle for:', productId);
 
-            if (typeof FirebaseWishlistManager !== 'undefined') {
+            // Use window.WishlistManager as primary, fallback to FirebaseWishlistManager
+            const manager = window.WishlistManager || window.FirebaseWishlistManager || (typeof FirebaseWishlistManager !== 'undefined' ? FirebaseWishlistManager : null);
+
+            if (manager) {
                 try {
-                    if (!FirebaseWishlistManager.isUserLoggedIn()) {
+                    // Check if manager is initialized
+                    if (typeof manager.init === 'function' && !manager.isInitialized) {
+                        manager.init();
+                        manager.isInitialized = true;
+                    }
+
+                    if (typeof manager.isUserLoggedIn === 'function' && !manager.isUserLoggedIn()) {
                         if (window.showToast) window.showToast('Please login to add items to wishlist', 'error');
                         return;
                     }
 
-                    const isInWishlist = await FirebaseWishlistManager.isItemInWishlist(productId);
+                    // Try standard toggleWishlist first if it exists
+                    if (typeof manager.toggleWishlist === 'function') {
+                        await manager.toggleWishlist(productId);
+                        // Update UI if needed
+                        const isIn = typeof manager.isItemInWishlist === 'function' ? await manager.isItemInWishlist(productId) : false;
+                        btn.querySelector('i').className = isIn ? 'fas fa-heart' : 'far fa-heart';
+                        return;
+                    }
+
+                    // Fallback to manual implementation
+                    const isInWishlist = await manager.isItemInWishlist(productId);
                     let result;
 
                     if (isInWishlist) {
-                        result = await FirebaseWishlistManager.removeItem(productId);
+                        result = await manager.removeItem(productId);
                         if (result.success) {
                             btn.querySelector('i').className = 'far fa-heart';
                             if (window.showToast) window.showToast('Removed from wishlist', 'success');
                         }
                     } else {
-                        result = await FirebaseWishlistManager.addItem({
+                        result = await manager.addItem({
                             id: productId,
                             name: productName,
                             price: productPrice,
@@ -1096,7 +1115,8 @@ background-color: #000 !important;
                     if (window.showToast) window.showToast('Error updating wishlist', 'error');
                 }
             } else {
-                console.error('FirebaseWishlistManager not found');
+                console.error('Wishlist Manager not found (tried window.WishlistManager and FirebaseWishlistManager)');
+                if (window.showToast) window.showToast('Wishlist feature is currently unavailable', 'error');
             }
         };
     </script>
@@ -1242,8 +1262,8 @@ background-color: #000 !important;
             transition: transform 0.3s ease;
             min-width: 250px;
             margin-right: 20px;
-            background: transparent;
-            border-radius: 12px;
+            background: transparent !important;
+            border-radius: 15px;
             overflow: hidden;
             border: 1px solid #eee;
         }
@@ -1253,6 +1273,8 @@ background-color: #000 !important;
         .related-product-image {
             position: relative;
             height: 350px;
+            border-radius: 15px 15px 0 0;
+            overflow: hidden;
         }
         .related-product-image img {
             width: 100%;
@@ -1262,6 +1284,7 @@ background-color: #000 !important;
         .related-product-details {
             padding: 15px;
             text-align: center;
+            background: transparent !important;
         }
         .related-product-name {
             font-size: 16px;

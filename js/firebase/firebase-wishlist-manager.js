@@ -337,7 +337,7 @@ const FirebaseWishlistManager = (function() {
     }
 
     // Public API
-    return {
+    const api = {
         init,
         isUserLoggedIn,
         getItems,
@@ -345,8 +345,16 @@ const FirebaseWishlistManager = (function() {
         addItem,
         isItemInWishlist,
         removeItem,
-        clearItems
+        clearItems,
+        isInitialized: () => isInitialized
     };
+
+    // Attach to window
+    window.FirebaseWishlistManager = api;
+    // Alias for compatibility with existing code
+    window.WishlistManager = api;
+
+    return api;
 })();
 
 // Initialize when this script loads
