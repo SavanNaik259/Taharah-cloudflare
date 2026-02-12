@@ -1026,7 +1026,7 @@ background-color: #000 !important;
                             <div class="related-product-item" data-product-id="${product.id}" onclick="window.location.href='product-detail?id=${product.id}'">
                                 <div class="related-product-image">
                                     <img src="${img}" alt="${product.name}" loading="lazy">
-                                    <button class="add-to-wishlist" data-product-id="${product.id}" data-product-name="${product.name.replace(/'/g, "\\'")}" data-product-price="${product.price}" data-product-image="${img}" onclick="event.stopPropagation(); handleRelatedWishlistClick(this);"><i class="far fa-heart"></i></button>
+                                    <button class="add-to-wishlist" data-product-id="${product.id}" data-product-name="${product.name.replace(/'/g, "\\'")}" data-product-price="${product.price}" data-product-image="${img}" onclick="event.stopPropagation(); if(window.WishlistManager) window.WishlistManager.toggleWishlist('${product.id}');"><i class="far fa-heart"></i></button>
                                 </div>
                                 <div class="related-product-details">
                                     <h3 class="related-product-name">${product.name}</h3>
@@ -1053,16 +1053,6 @@ background-color: #000 !important;
         // Optimized event triggers
         document.addEventListener('DOMContentLoaded', () => setTimeout(loadYouMayAlsoLikeProducts, 500));
         window.addEventListener('productLoaded', () => loadYouMayAlsoLikeProducts());
-
-        // Global handler for related products wishlist clicks
-        window.handleRelatedWishlistClick = function(btn) {
-            if (window.WishlistManager && window.WishlistManager.toggleWishlist) {
-                const productId = btn.dataset.productId;
-                window.WishlistManager.toggleWishlist(productId);
-            } else {
-                console.warn('WishlistManager not ready');
-            }
-        };
     </script>
 
     <!-- Product Detail Loader -->
