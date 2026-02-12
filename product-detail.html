@@ -1023,7 +1023,7 @@ background-color: #000 !important;
                         const img = product.mainImage || product.image || (product.images && product.images[0]?.url) || '/images/placeholder-product.jpg';
 
                         return `
-                            <div class="product-item" data-product-id="${product.id}" data-product-price="${product.price}" data-product-name="${product.name}" data-product-image="${img}">
+                            <div class="product-item related-product-card" data-product-id="${product.id}" data-product-price="${product.price}" data-product-name="${product.name}" data-product-image="${img}">
                                 <a href="product-detail?id=${product.id}" style="text-decoration: none; color: inherit;">
                                     <div class="product-image">
                                         <img src="${img}" alt="${product.name}" loading="lazy">

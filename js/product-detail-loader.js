@@ -262,14 +262,14 @@ const ProductDetailLoader = (function() {
         }
 
         // Update product name
-        const nameElements = document.querySelectorAll('.product-title, .product-name, h1');
+        const nameElements = document.querySelectorAll('.product-detail-info .product-title, .product-detail-info .product-name, .product-detail-info h1');
         nameElements.forEach(element => {
             element.textContent = product.name;
-            console.log('Updated product name element');
+            console.log('Updated main product name element');
         });
 
         // Update product price
-        const priceElements = document.querySelectorAll('.product-price, .current-price, .price');
+        const priceElements = document.querySelectorAll('.product-detail-info .product-price, .product-detail-info .current-price, .product-detail-info .price');
         if (priceElements.length > 0) {
             const formattedPrice = new Intl.NumberFormat('en-IN', {
                 style: 'currency',
@@ -306,7 +306,7 @@ const ProductDetailLoader = (function() {
 
         // Update main product image - check multiple possible image properties
         const imageUrl = product.image || product.imageUrl || product.mainImage || (product.images && product.images[0] && product.images[0].url);
-        const mainImageElements = document.querySelectorAll('.product-main-image, .main-image img, .product-image img, .gallery-main img');
+        const mainImageElements = document.querySelectorAll('.product-detail-left .product-main-image, .product-detail-left .main-image img, .product-detail-left .gallery-main img');
 
         if (mainImageElements.length > 0 && imageUrl) {
             mainImageElements.forEach(img => {
@@ -415,8 +415,8 @@ const ProductDetailLoader = (function() {
         console.log('Updating image gallery with', images.length, 'images');
 
         // Find main image element directly and in containers
-        const directMainImages = document.querySelectorAll('.product-main-image');
-        const mainImageContainers = document.querySelectorAll('.main-image, .gallery-main');
+        const directMainImages = document.querySelectorAll('.product-detail-left .product-main-image');
+        const mainImageContainers = document.querySelectorAll('.product-detail-left .main-image, .product-detail-left .gallery-main');
 
         if (images.length > 0) {
             const mainImage = images.find(img => img.isMain) || images[0];
@@ -498,7 +498,7 @@ const ProductDetailLoader = (function() {
                         // Add click handler to change main image
                         thumbnailElement.addEventListener('click', () => {
                             // Update main image - include direct .product-main-image selector
-                            const allMainImgs = document.querySelectorAll('.product-main-image, .main-image img, .gallery-main img');
+                            const allMainImgs = document.querySelectorAll('.product-detail-left .product-main-image, .product-detail-left .main-image img, .product-detail-left .gallery-main img');
                             allMainImgs.forEach(img => {
                                 img.src = image.url;
                                 img.alt = image.alt || 'Product image';
