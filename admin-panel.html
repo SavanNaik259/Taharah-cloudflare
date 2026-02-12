@@ -2667,8 +2667,8 @@
                 <div class="card">
                     <div class="card-header">
                         <h2 class="card-title">Product Management</h2>
-                        <button class="btn btn-secondary" onclick="refreshInventoryData()">
-                            <i class="fas fa-refresh"></i>
+                        <button class="btn btn-secondary" onclick="refreshProductsData()">
+                            <i class="fas fa-sync-alt"></i>
                             Refresh
                         </button>
                     </div>
@@ -7184,6 +7184,33 @@
         function retryLoadProducts() {
             productsCache = null; // Clear cache
             loadProducts();
+        }
+
+        // New Refresh function for Products Management
+        async function refreshProductsData() {
+            console.log('Refreshing products data...');
+            const refreshBtn = event.currentTarget;
+            const refreshIcon = refreshBtn.querySelector('i');
+            
+            try {
+                refreshBtn.disabled = true;
+                refreshIcon.classList.add('fa-spin');
+                
+                // Clear cache to force fresh data
+                productsCache = null;
+                localStorage.removeItem('admin_dashboard_products');
+
+                // Load fresh products
+                await loadProducts();
+                
+                showToast('Products refreshed successfully', 'success');
+            } catch (error) {
+                console.error('Error refreshing products:', error);
+                showToast('Failed to refresh products', 'error');
+            } finally {
+                refreshBtn.disabled = false;
+                refreshIcon.classList.remove('fa-spin');
+            }
         }
 
         // Display products in grid
