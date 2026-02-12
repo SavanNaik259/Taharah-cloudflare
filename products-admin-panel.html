@@ -1463,16 +1463,14 @@
 
                         // Populating dupatta options
                         if (product.dupattaOptions && Array.isArray(product.dupattaOptions)) {
-                            const dupattaCheckboxes = [
-                                { id: 'dupattaCotton', value: 'Cotton' },
-                                { id: 'dupattaChiffon', value: 'Chiffon' },
-                                { id: 'dupattaNet', value: 'Net' },
-                                { id: 'dupattaOrganza', value: 'Organza' }
-                            ];
-                            dupattaCheckboxes.forEach(opt => {
-                                const cb = document.getElementById(opt.id);
-                                if (cb) cb.checked = product.dupattaOptions.includes(opt.value);
+                            const dupattaOptions = product.dupattaOptions;
+                            const checkboxes = document.querySelectorAll('input[name="dupattaOptions"]');
+                            checkboxes.forEach(cb => {
+                                cb.checked = dupattaOptions.includes(cb.value);
                             });
+                            // Backward compatibility for old IDs
+                            if (document.getElementById('dupattaCotton')) document.getElementById('dupattaCotton').checked = dupattaOptions.includes('Cotton');
+                            if (document.getElementById('dupattaChiffon')) document.getElementById('dupattaChiffon').checked = dupattaOptions.includes('Chiffon');
                         }
 
                         // Remove required attributes in edit mode to allow partial updates
