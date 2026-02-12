@@ -326,22 +326,23 @@
             font-size: 11px;
             background: #f8f9fa;
             text-align: center;
-            min-height: 100px;
+            min-height: 120px; /* Increased to give more space */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            padding-bottom: 45px;
+            gap: 12px; /* Increased gap */
+            padding-bottom: 50px;
         }
 
         .color-tag-select {
             width: 90%;
-            padding: 6px;
+            padding: 8px; /* Increased padding */
             font-size: 12px;
             border: 1px solid #ddd;
             border-radius: 4px;
             background: white;
+            margin-top: 5px; /* Added margin */
         }
 
         .main-image-badge {
@@ -818,13 +819,13 @@
 
                 <div class="form-group">
                     <label>Dupatta Options</label>
-                    <div style="display: flex; gap: 20px; align-items: center; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;">
-                        <label style="margin: 0; font-weight: normal; display: flex; align-items: center; gap: 5px;">
-                            <input type="checkbox" id="dupattaCotton" name="dupattaOptions" value="Cotton" style="width: auto;"> Cotton
-                        </label>
-                        <label style="margin: 0; font-weight: normal; display: flex; align-items: center; gap: 5px;">
-                            <input type="checkbox" id="dupattaChiffon" name="dupattaOptions" value="Chiffon" style="width: auto;"> Chiffon
-                        </label>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-item"><input type="checkbox" id="dupattaCotton" name="dupattaOptions" value="Cotton"> Cotton</label>
+                        <label class="checkbox-item"><input type="checkbox" id="dupattaChiffon" name="dupattaOptions" value="Chiffon"> Chiffon</label>
+                        <label class="checkbox-item"><input type="checkbox" id="dupattaNet" name="dupattaOptions" value="Net"> Net</label>
+                        <label class="checkbox-item"><input type="checkbox" id="dupattaOrganza" name="dupattaOptions" value="Organza"> Organza</label>
+                        <label class="checkbox-item"><input type="checkbox" id="dupattaSilk" name="dupattaOptions" value="Silk"> Silk</label>
+                        <label class="checkbox-item"><input type="checkbox" id="dupattaGeorgette" name="dupattaOptions" value="Georgette"> Georgette</label>
                     </div>
                 </div>
 
@@ -1294,7 +1295,13 @@
                 </label>
             `).join('');
             
-            // Also refresh image grid to update dropdowns
+            // Re-sync image colors if a selected color was removed from global selections
+            selectedImages.forEach(img => {
+                if (img.color && !checkedColours.includes(img.color) && !availableColours.includes(img.color)) {
+                    img.color = '';
+                }
+            });
+
             displayImageGrid();
         }
 
@@ -1435,7 +1442,7 @@
                         if (product.sizes && Array.isArray(product.sizes)) {
                             const sizeCheckboxes = document.querySelectorAll('#sizeCheckboxes input');
                             sizeCheckboxes.forEach(cb => {
-                                if (product.sizes.includes(cb.value)) cb.checked = true;
+                                cb.checked = product.sizes.includes(cb.value);
                             });
                         }
 
@@ -1450,16 +1457,22 @@
                             
                             const colourCheckboxes = document.querySelectorAll('#colourCheckboxes input');
                             colourCheckboxes.forEach(cb => {
-                                if (product.colours.includes(cb.value)) cb.checked = true;
+                                cb.checked = product.colours.includes(cb.value);
                             });
                         }
 
                         // Populating dupatta options
                         if (product.dupattaOptions && Array.isArray(product.dupattaOptions)) {
-                            document.getElementById('dupattaCotton').checked = product.dupattaOptions.includes('Cotton');
-                            document.getElementById('dupattaChiffon').checked = product.dupattaOptions.includes('Chiffon');
-                            document.getElementById('dupattaNet').checked = product.dupattaOptions.includes('Net');
-                            document.getElementById('dupattaOrganza').checked = product.dupattaOptions.includes('Organza');
+                            const dupattaCheckboxes = [
+                                { id: 'dupattaCotton', value: 'Cotton' },
+                                { id: 'dupattaChiffon', value: 'Chiffon' },
+                                { id: 'dupattaNet', value: 'Net' },
+                                { id: 'dupattaOrganza', value: 'Organza' }
+                            ];
+                            dupattaCheckboxes.forEach(opt => {
+                                const cb = document.getElementById(opt.id);
+                                if (cb) cb.checked = product.dupattaOptions.includes(opt.value);
+                            });
                         }
 
                         // Remove required attributes in edit mode to allow partial updates
