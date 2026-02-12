@@ -69,13 +69,13 @@
     position: absolute!important;
     top: 40px !important;
     width: 100% !important;
-    background: transparent !important;
+    background: #f5f2e9 !important;
     border-bottom: none !important;
     z-index: 1000 !important;
 }
 
 .navbar .nav-container {
-    background: transparent !important;
+    background: #f5f2e9 !important;
     padding: 10px 20px 5px 20px !important;
     max-width: 1200px !important;
     margin: 0 auto !important;
