@@ -262,30 +262,25 @@ const ProductDetailLoader = (function() {
         }
 
         // Update product name
-        const detailContainer = document.querySelector('.product-detail-container');
-        if (detailContainer) {
-            const nameElements = detailContainer.querySelectorAll('.product-title, .product-name, h1');
-            nameElements.forEach(element => {
-                element.textContent = product.name;
-                console.log('Updated main product name element');
-            });
-        }
+        const nameElements = document.querySelectorAll('.product-title, .product-name, h1');
+        nameElements.forEach(element => {
+            element.textContent = product.name;
+            console.log('Updated product name element');
+        });
 
         // Update product price
-        if (detailContainer) {
-            const priceElements = detailContainer.querySelectorAll('.product-price, .current-price, .price');
-            if (priceElements.length > 0) {
-                const formattedPrice = new Intl.NumberFormat('en-IN', {
-                    style: 'currency',
-                    currency: 'INR',
-                    minimumFractionDigits: 0
-                }).format(product.price).replace('₹', '');
+        const priceElements = document.querySelectorAll('.product-price, .current-price, .price');
+        if (priceElements.length > 0) {
+            const formattedPrice = new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                minimumFractionDigits: 0
+            }).format(product.price).replace('₹', '');
 
-                priceElements.forEach(element => {
-                    element.textContent = `Rs. ${formattedPrice}`;
-                    console.log('Updated main product price element:', `Rs. ${formattedPrice}`);
-                });
-            }
+            priceElements.forEach(element => {
+                element.textContent = `Rs. ${formattedPrice}`;
+                console.log('Updated product price element:', `Rs. ${formattedPrice}`);
+            });
         }
 
         // Update product description
@@ -311,25 +306,23 @@ const ProductDetailLoader = (function() {
 
         // Update main product image - check multiple possible image properties
         const imageUrl = product.image || product.imageUrl || product.mainImage || (product.images && product.images[0] && product.images[0].url);
-        if (detailContainer) {
-            const mainImageElements = detailContainer.querySelectorAll('.product-main-image, .main-image img, .product-image img, .gallery-main img');
+        const mainImageElements = document.querySelectorAll('.product-main-image, .main-image img, .product-image img, .gallery-main img');
 
-            if (mainImageElements.length > 0 && imageUrl) {
-                mainImageElements.forEach(img => {
-                    img.src = imageUrl;
-                    img.alt = product.name;
-                    img.style.display = 'block';
-                    console.log('Updated main product image element with URL:', imageUrl);
-                });
-            } else {
-                // Hide image elements when no image is available
-                mainImageElements.forEach(img => {
-                    img.style.display = 'none';
-                    img.src = '';
-                    img.alt = '';
-                });
-                console.log('No image URL found, hiding image elements');
-            }
+        if (mainImageElements.length > 0 && imageUrl) {
+            mainImageElements.forEach(img => {
+                img.src = imageUrl;
+                img.alt = product.name;
+                img.style.display = 'block';
+                console.log('Updated main product image element with URL:', imageUrl);
+            });
+        } else {
+            // Hide image elements when no image is available
+            mainImageElements.forEach(img => {
+                img.style.display = 'none';
+                img.src = '';
+                img.alt = '';
+            });
+            console.log('No image URL found, hiding image elements');
         }
 
         // Handle multiple images if available - avoid calling gallery update multiple times
@@ -389,13 +382,11 @@ const ProductDetailLoader = (function() {
         }
 
         // Update SKU information
-        if (detailContainer) {
+        const skuElements = document.querySelectorAll('.meta-item:nth-child(3) .meta-value');
+        if (skuElements.length > 0) {
             const skuValue = product.id || 'N/A';
-            const skuMetaItem = detailContainer.querySelector('.meta-item:nth-child(3) .meta-value');
-            if (skuMetaItem) {
-                skuMetaItem.textContent = skuValue;
-                console.log('Updated SKU to:', skuValue);
-            }
+            skuElements[0].textContent = skuValue;
+            console.log('Updated SKU to:', skuValue);
         }
 
         // Update page title
@@ -423,12 +414,9 @@ const ProductDetailLoader = (function() {
     function updateImageGallery(images) {
         console.log('Updating image gallery with', images.length, 'images');
 
-        const detailContainer = document.querySelector('.product-detail-container');
-        if (!detailContainer) return;
-
-        // Find main image element directly and in containers within the detail section
-        const directMainImages = detailContainer.querySelectorAll('.product-main-image');
-        const mainImageContainers = detailContainer.querySelectorAll('.main-image, .gallery-main');
+        // Find main image element directly and in containers
+        const directMainImages = document.querySelectorAll('.product-main-image');
+        const mainImageContainers = document.querySelectorAll('.main-image, .gallery-main');
 
         if (images.length > 0) {
             const mainImage = images.find(img => img.isMain) || images[0];
@@ -476,13 +464,13 @@ const ProductDetailLoader = (function() {
                 if (mainImg) {
                     mainImg.style.display = 'none';
                     mainImg.src = '';
-                    img.alt = '';
+                    mainImg.alt = '';
                 }
             });
         }
 
-        // Find thumbnail container within the detail section
-        const thumbnailContainers = detailContainer.querySelectorAll('.thumbnail-gallery, .product-thumbnails, .gallery-thumbs');
+        // Find thumbnail container and handle multiple images
+        const thumbnailContainers = document.querySelectorAll('.thumbnail-gallery, .product-thumbnails, .gallery-thumbs');
         console.log('Found thumbnail containers:', thumbnailContainers.length);
 
         if (thumbnailContainers.length > 0) {
@@ -509,15 +497,15 @@ const ProductDetailLoader = (function() {
 
                         // Add click handler to change main image
                         thumbnailElement.addEventListener('click', () => {
-                            // Update main image - scope to detail container
-                            const allMainImgs = detailContainer.querySelectorAll('.product-main-image, .main-image img, .gallery-main img');
+                            // Update main image - include direct .product-main-image selector
+                            const allMainImgs = document.querySelectorAll('.product-main-image, .main-image img, .gallery-main img');
                             allMainImgs.forEach(img => {
                                 img.src = image.url;
                                 img.alt = image.alt || 'Product image';
                             });
 
-                            // Update active thumbnail - scope to this container
-                            container.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
+                            // Update active thumbnail
+                            document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
                             thumbnailElement.classList.add('active');
 
                             console.log('Thumbnail clicked, updated main image to:', image.url);
