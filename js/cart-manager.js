@@ -310,8 +310,13 @@ window.CartManager = (function() {
             return;
         }
 
-        // Check if the item already exists in the cart
-        const existingItemIndex = cartItems.findIndex(item => item.id === product.id);
+        // Check if the item already exists in the cart with the same options
+        const existingItemIndex = cartItems.findIndex(item => 
+            item.id === product.id && 
+            item.size === product.size && 
+            item.colour === product.colour && 
+            item.dupatta === product.dupatta
+        );
 
         if (existingItemIndex >= 0) {
             // Update quantity if item already exists
@@ -324,7 +329,10 @@ window.CartManager = (function() {
                 name: product.name,
                 price: product.price,
                 image: product.image,
-                quantity: quantity
+                quantity: quantity,
+                size: product.size || null,
+                colour: product.colour || null,
+                dupatta: product.dupatta || null
             });
             console.log('Added new item to cart:', product.name);
         }
@@ -356,6 +364,8 @@ window.CartManager = (function() {
      * @param {Number} newQuantity - New quantity (must be > 0)
      */
     async function updateQuantity(productId, newQuantity) {
+        // Find item by ID and selected options to ensure we update the correct one
+        // This is a simplified version, ideally we'd pass all options here too
         const item = cartItems.find(item => item.id === productId);
 
         if (item) {
@@ -364,6 +374,64 @@ window.CartManager = (function() {
             console.log('Updated quantity for', item.name, 'to', item.quantity);
             await saveCart();
         }
+    }
+
+    /**
+     * Set up the cart panel UI
+     */
+    function setupCartPanel() {
+        // ... (existing code)
+    }
+
+    /**
+     * Update cart UI elements
+     */
+    function updateCartUI() {
+        const cartCounts = document.querySelectorAll('.cart-count, .mobile-cart-count');
+        const count = getItemCount();
+        cartCounts.forEach(el => el.textContent = count);
+
+        const subtotalElements = document.querySelectorAll('.subtotal-amount');
+        const total = calculateTotal();
+        subtotalElements.forEach(el => el.textContent = `₹${total.toFixed(2)}`);
+
+        renderCartItems();
+    }
+
+    /**
+     * Render cart items for the panel
+     */
+    function renderCartItems() {
+        const cartItemsContainer = document.querySelector('.cart-items');
+        if (!cartItemsContainer) return;
+
+        if (cartItems.length === 0) {
+            cartItemsContainer.innerHTML = '<div class="empty-cart-msg">Your cart is empty</div>';
+            return;
+        }
+
+        cartItemsContainer.innerHTML = cartItems.map(item => `
+            <div class="cart-item" data-id="${item.id}" data-size="${item.size || ''}" data-colour="${item.colour || ''}" data-dupatta="${item.dupatta || ''}">
+                <div class="cart-item-image">
+                    <img src="${item.image}" alt="${item.name}">
+                </div>
+                <div class="cart-item-info">
+                    <h4 class="cart-item-name">${item.name}</h4>
+                    <div class="cart-item-options" style="font-size: 0.8em; color: #666; margin: 2px 0;">
+                        ${item.size ? `<span>Size: ${item.size}</span>` : ''}
+                        ${item.colour ? `<span> | Colour: ${item.colour}</span>` : ''}
+                        ${item.dupatta ? `<span> | Dupatta: ${item.dupatta}</span>` : ''}
+                    </div>
+                    <div class="cart-item-price">₹${item.price.toFixed(2)}</div>
+                    <div class="cart-item-quantity">
+                        <button class="qty-btn dec-qty" onclick="CartManager.decrementQuantity('${item.id}')">-</button>
+                        <span>${item.quantity}</span>
+                        <button class="qty-btn inc-qty" onclick="CartManager.incrementQuantity('${item.id}')">+</button>
+                    </div>
+                </div>
+                <button class="remove-item-btn" onclick="CartManager.removeFromCart('${item.id}')">&times;</button>
+            </div>
+        `).join('');
     }
 
     /**

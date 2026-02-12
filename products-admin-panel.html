@@ -2389,12 +2389,20 @@
 
                 // Get form data
                 const formData = new FormData(productForm);
+                // Get Dupatta options
+                const dupattaOptions = [];
+                if (document.getElementById('dupattaCotton').checked) dupattaOptions.push('Cotton');
+                if (document.getElementById('dupattaChiffon').checked) dupattaOptions.push('Chiffon');
+
                 const productData = {
                     name: formData.get('productName'),
                     price: formData.get('productPrice') ? parseFloat(formData.get('productPrice')) : null,
                     stock: formData.get('productStock') !== '' ? parseInt(formData.get('productStock')) : null,
                     description: formData.get('productDescription'),
-                    category: formData.get('productCategory')
+                    category: formData.get('productCategory'),
+                    sizes: document.getElementById('productSizes').value.split(',').map(s => s.trim()).filter(s => s),
+                    colours: document.getElementById('productColours').value.split(',').map(c => c.trim()).filter(c => c),
+                    dupattaOptions: dupattaOptions
                 };
 
                 // Handle edit mode vs create mode
@@ -2407,7 +2415,10 @@
                         price: false,
                         stock: false,
                         description: false,
-                        category: false
+                        category: false,
+                        sizes: false,
+                        colours: false,
+                        dupattaOptions: false
                     };
 
                     // For edit mode, only validate fields that are actually being changed
@@ -2451,6 +2462,20 @@
                             updatedProductData.category = productData.category;
                             fieldsChanged.category = true;
                         }
+                    }
+
+                    // Update sizes, colours, and dupatta options if they changed
+                    if (JSON.stringify(productData.sizes) !== JSON.stringify(originalProductData.sizes || [])) {
+                        updatedProductData.sizes = productData.sizes;
+                        fieldsChanged.sizes = true;
+                    }
+                    if (JSON.stringify(productData.colours) !== JSON.stringify(originalProductData.colours || [])) {
+                        updatedProductData.colours = productData.colours;
+                        fieldsChanged.colours = true;
+                    }
+                    if (JSON.stringify(productData.dupattaOptions) !== JSON.stringify(originalProductData.dupattaOptions || [])) {
+                        updatedProductData.dupattaOptions = productData.dupattaOptions;
+                        fieldsChanged.dupattaOptions = true;
                     }
 
                     // Handle images - only update if there are selected images
