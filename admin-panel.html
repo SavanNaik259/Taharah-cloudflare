@@ -6,7 +6,7 @@
     <title>Taharah Professional Admin Panel</title>
     <script>
         (function() {
-            const SESSION_KEY = 'admin_session';
+            const SESSION_KEY = 'adminVerified';
             const sessionData = localStorage.getItem(SESSION_KEY);
             if (!sessionData) {
                 window.location.href = 'login.html?redirect=admin-panel';
@@ -14,7 +14,8 @@
             }
             try {
                 const session = JSON.parse(sessionData);
-                if (!session || !session.verified) {
+                const SESSION_DURATION = 24 * 60 * 60 * 1000;
+                if (!session || (Date.now() - session.timestamp > SESSION_DURATION)) {
                     window.location.href = 'login.html?redirect=admin-panel';
                 }
             } catch (e) {
