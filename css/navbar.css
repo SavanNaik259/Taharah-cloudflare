@@ -2,7 +2,7 @@
 
 /*Navbar Container */
 .navbar {
-    background: #ffffff;
+    background: var(--color-bg, #f8f8f5);
     border-bottom: 1px solid #f0f0f0;
     position: absolute;
     width: 100%;
@@ -17,11 +17,11 @@
     justify-content: space-between;
     padding: 10px 20px 5px 20px; /* Reduced bottom padding from 10px to 5px */
     max-width: 1200px;
-    margin: 10px auto 0 auto;
+    margin: 10px auto 0 0; /* Align left */
     height: 60px; /* Reduced navbar height from 65px to 60px */
     border: none;
     border-radius: 0;
-    background: #ffffff;
+    background: var(--color-bg, #f8f8f5);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
@@ -35,11 +35,11 @@
     color: #8B7355;
     text-decoration: none;
     margin-right: 20px;
-    margin-left: 15px;
+    margin-left: 0; /* Move more to left */
     margin-bottom: 0; /* Removed bottom margin */
     margin-top: -8px; /* Move logo up slightly */
     padding: 8px 0 3px 0; /* Reduced bottom padding for less height */
-    min-width: 150px;
+    min-width: 250px; /* Increased from 150px */
     order: 0;
     position: relative;
     transition: all 0.3s ease;
@@ -50,9 +50,9 @@
 }
 
 .brand-logo {
-    height: 52px;
+    height: 65px; /* Increased from 52px */
     width: auto;
-    max-width: 550px;
+    max-width: 800px; /* Increased from 550px */
     object-fit: contain;
     transition: all 0.3s ease;
 }
@@ -425,21 +425,21 @@
         width: 100%;
         position: absolute;
         z-index: 1000;
-        background: #ffffff;
+        background: var(--color-bg, #f8f8f5);
     }
 
     .nav-container {
         height: 80px; /* Increased from 60px for larger navbar */
         padding: 15px 40px; /* Increased padding for better spacing */
         max-width: 1200px;
-        margin: 10px auto 0 auto; /* Added top margin for spacing */
+        margin: 10px auto 0 0; /* Aligned left */
         width: 100%;
         display: flex;
         align-items: center;
         justify-content: space-between;
         border: 1px solid rgba(0, 0, 0, 0.1);
         border-radius: 30px;
-        background: #ffffff;
+        background: var(--color-bg, #f8f8f5);
         backdrop-filter: blur(15px);
         -webkit-backdrop-filter: blur(15px);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -534,8 +534,6 @@
         background-color: transparent !important;
     }
 
-
-
     .brand {
         order: 0;
         flex: 0 0 auto;
@@ -546,8 +544,8 @@
     }
 
     .brand-logo {
-        height: 75px; /* Increased from 65px for larger logo image */
-        max-width: 650px; /* Increased max-width to accommodate larger logo */
+        height: 100px; /* Increased from 75px */
+        max-width: 900px; /* Increased from 650px */
     }
 
     .nav-menu {
@@ -728,7 +726,6 @@
     font-size: 18px;
 }
 
-/* Tablet to Small Desktop */
 @media (max-width: 991px) {
     /* Show mobile menu elements on smaller screens */
     .mobile-special {
@@ -738,10 +735,12 @@
     .navbar {
         top: 20px;
         position: absolute;
+        background: var(--color-bg, #f8f8f5) !important;
     }
 
     .nav-container {
-        margin: 10px auto 0 auto;
+        margin: 10px auto 0 0;
+        background: var(--color-bg, #f8f8f5) !important;
     }
 
     .hamburger {
@@ -752,16 +751,17 @@
 
     .brand {
         order: 1; /* Comes after hamburger menu */
-        margin: -6px auto 0 12px; /* Move logo up slightly */
+        margin: -6px auto 0 0; /* Move logo up slightly and align left */
         padding: 8px 0 3px 0; /* Reduced bottom padding for less height */
         font-size: 36px; /* Increased font size */
         font-weight: 600; /* Slightly reduced font weight */
         text-align: left;
+        min-width: 200px; /* Increased width */
     }
 
     .brand-logo {
-        height: 70px; /* Increased size for tablet */
-        max-width: 550px; /* Increased max-width */
+        height: 80px; /* Increased from 70px */
+        max-width: 650px; /* Increased from 550px */
     }
 
     .nav-icons {
@@ -1134,24 +1134,28 @@
     .navbar {
         top: 20px;
         position: absolute;
+        background: var(--color-bg, #f8f8f5) !important;
     }
 
     .nav-container {
         padding: 10px 15px 5px 15px; /* Reduced bottom padding */
-        margin: 5px auto 0 auto;
+        margin: 5px auto 0 0;
+        background: var(--color-bg, #f8f8f5) !important;
     }
 
     .brand {
         font-size: 28px !important; /* Increased font size for mobile */
         font-weight: 600; /* Reduced font weight */
-        padding: 8px 5px 3px 5px; /* Reduced horizontal padding */
+        padding: 8px 5px 3px 0; /* Align left */
         letter-spacing: 0.5px;
         margin-top: -6px; /* Move logo up slightly */
+        margin-left: 0;
+        min-width: 180px;
     }
 
     .brand-logo {
-        height: 58px; /* Increased size for mobile */
-        max-width: 360px; /* Increased max-width */
+        height: 65px; /* Increased from 58px */
+        max-width: 450px; /* Increased from 360px */
     }
 
     .icon-link {
@@ -1190,15 +1194,16 @@
 @media (max-width: 480px) {
     .brand {
         font-size: 22px !important; /* Increased font size for very small devices */
-        min-width: auto;
+        min-width: 150px;
         letter-spacing: 0.5px;
-        padding: 8px 5px 3px 5px; /* Reduced horizontal padding */
+        padding: 8px 5px 3px 0; /* Align left */
         margin-top: -6px; /* Move logo up slightly */
+        margin-left: 0;
     }
 
     .brand-logo {
-        height: 48px; /* Increased logo height */
-        max-width: 280px; /* Increased max-width */
+        height: 55px; /* Increased from 48px */
+        max-width: 350px; /* Increased from 280px */
     }
 
     .new-arrivals-edit {
