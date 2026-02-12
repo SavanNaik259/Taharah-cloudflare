@@ -1,27 +1,26 @@
 /* Responsive Navigation Bar Styles */
 
-/*Navbar Container */
+/* Navbar Container */
 .navbar {
-    background: var(--color-bg, #f8f8f5);
+    background: #e9e6dc;
     border-bottom: 1px solid #f0f0f0;
     position: absolute;
     width: 100%;
     top: 20px;
     z-index: 1000;
-    /*padding: 0 20px;*/
 }
 
 .nav-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 20px 5px 20px; /* Reduced bottom padding from 10px to 5px */
+    padding: 10px 20px 5px 20px;
     max-width: 1200px;
-    margin: 10px auto 0 0; /* Align left */
-    height: 60px; /* Reduced navbar height from 65px to 60px */
+    margin: 10px auto 0 0;
+    height: 60px;
     border: none;
     border-radius: 0;
-    background: var(--color-bg, #f8f8f5);
+    background: #e9e6dc;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
@@ -426,7 +425,7 @@
         width: 100%;
         position: absolute;
         z-index: 1000;
-        background: var(--color-bg, #f8f8f5);
+        background: #e9e6dc;
     }
 
     .nav-container {
@@ -440,7 +439,7 @@
         justify-content: space-between;
         border: 1px solid rgba(0, 0, 0, 0.1);
         border-radius: 30px;
-        background: var(--color-bg, #f8f8f5);
+        background: #e9e6dc;
         backdrop-filter: blur(15px);
         -webkit-backdrop-filter: blur(15px);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -736,12 +735,12 @@
     .navbar {
         top: 20px;
         position: absolute;
-        background: var(--color-bg, #f8f8f5) !important;
+        background: #e9e6dc !important;
     }
 
     .nav-container {
         margin: 10px auto 0 0;
-        background: var(--color-bg, #f8f8f5) !important;
+        background: #e9e6dc !important;
     }
 
     .hamburger {
