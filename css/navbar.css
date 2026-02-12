@@ -16,7 +16,7 @@
     justify-content: space-between;
     padding: 10px 20px 5px 20px;
     max-width: 1200px;
-    margin: 10px auto 0 0;
+    margin: 10px auto; /* Centered horizontally */
     height: 60px;
     border: none;
     border-radius: 0;
@@ -33,26 +33,24 @@
     font-family: 'Playfair Display', serif;
     color: #8B7355;
     text-decoration: none;
-    margin-right: 20px;
-    margin-left: 0; /* Move more to left */
-    margin-bottom: 0; /* Removed bottom margin */
+    margin: 0 auto; /* Centered horizontally */
     margin-top: -8px; /* Move logo up slightly */
     padding: 8px 0 3px 0; /* Reduced bottom padding for less height */
-    min-width: 250px; /* Increased from 150px */
-    order: 0;
+    min-width: 250px; 
+    order: 1; /* Center position */
     position: relative;
     transition: all 0.3s ease;
     letter-spacing: 1px;
     display: flex;
     align-items: center;
+    justify-content: center; /* Center content within brand link */
     text-shadow: none;
 }
 
 .brand-logo {
-    height: 200px!important; /* Increased from 65px */
+    height: 150px!important; /* Slightly smaller for better fit */
     width: auto;
-    max-width: 400px!important;
-    margin-left:-30px!important;
+    max-width: 300px!important;
     object-fit: contain;
     transition: all 0.3s ease;
 }
@@ -69,20 +67,19 @@
 
 /* Hamburger Menu - Font Awesome Icon */
 .hamburger {
-    display: none; /* Hidden by default, shown in media query */
+    display: flex; /* Always flex */
     cursor: pointer;
     width: 30px;
     height: 30px;
     position: relative;
-    margin-right: 15px;
-    margin-top: -10px; /* Removed top margin */
+    margin-top: -10px;
     background: transparent;
     border: none;
-    padding: 8px 0 3px 0; /* Reduced bottom padding for less height */
-    z-index: 1000; /* Ensure it's above other elements */
-    display: flex;
+    padding: 8px 0 3px 0;
+    z-index: 1000;
     align-items: center;
     justify-content: center;
+    order: 0; /* Left position */
 }
 
 .hamburger i {
@@ -338,6 +335,9 @@
 .nav-icons {
     display: flex;
     align-items: center;
+    order: 2; /* Right position */
+    justify-content: flex-end;
+    min-width: 80px; /* Enough space for search and wishlist */
 }
 
 .icon-link {
@@ -429,10 +429,10 @@
     }
 
     .nav-container {
-        height: 80px; /* Increased from 60px for larger navbar */
-        padding: 15px 40px; /* Increased padding for better spacing */
+        height: 80px;
+        padding: 15px 40px;
         max-width: 1200px;
-        margin: 10px auto 0 0; /* Aligned left */
+        margin: 10px auto; /* Centered horizontally */
         width: 100%;
         display: flex;
         align-items: center;
@@ -445,122 +445,30 @@
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     }
 
-    .nav-icons {
-        display: flex !important;
-        align-items: center;
-        order: 3; /* Ensure icons appear on the right */
-    }
-
-    .icon-link {
-        display: flex !important;
-        align-items: center;
-        color: #fff !important;
-        font-size: 22px !important;
-        margin-left: 20px !important;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        position: relative;
-        padding: 8px 0 3px 0;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
-    }
-
-    .icon-link:hover {
-        color: #c59d5f !important;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-        transform: translateY(-1px);
-    }
-
-    /* Hide mobile menu elements on desktop */
-    .hamburger {
-        display: none !important;
-    }
-
-    .mobile-account-links {
-        display: none !important;
-    }
-
-    .mobile-special {
-        display: none !important;
-    }
-
-    .nav-menu {
-        position: static !important;
-        transform: none !important;
-        display: flex !important;
-        flex-direction: row !important;
-        background: transparent !important;
-        box-shadow: none !important;
-        width: auto !important;
-        height: auto !important;
-        left: auto !important;
-        flex: 1;
+    .brand {
+        order: 1; /* Center */
+        margin: -8px auto 0 auto;
+        flex: 0 0 auto;
         justify-content: center;
     }
 
-    .nav-list {
-        display: flex !important;
-        flex-direction: row !important;
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-        justify-content: center; /* Center the navigation items */
-        align-items: center;
-    }
-
-    .nav-item {
-        position: relative;
-        margin: 0 15px;
-    }
-
-    .nav-link {
-        color: #fff !important;
-        text-decoration: none;
-        font-size: 14px; /* Increased from 12px for better readability */
-        font-weight: 600;
-        padding: 30px 8px; /* Increased padding to work with larger navbar height */
-        display: block;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        transition: all 0.3s ease;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
-        border-bottom: none !important;
-        background: transparent !important;
-        width: auto !important;
-    }
-
-    .nav-link:hover {
-        color: #c59d5f !important;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-        background-color: transparent !important;
-    }
-
-    .brand {
-        order: 0;
-        flex: 0 0 auto;
-        font-size: 18px; /* Increased font size for brand name */
-        padding: 12px 0; /* Increased padding to accommodate larger size */
-        margin-left: 0; /* Remove left margin to help with centering */
-        margin-top: -8px; /* Move logo up slightly */
-    }
-
     .brand-logo {
-        height: 180px; /* Increased from 100px */
-        max-width: 650px;
+        height: 150px;
+        max-width: 300px;
     }
 
     .nav-menu {
-        order: 1;
+        order: 0; /* Moved to left/center-left */
         flex: 1;
         display: flex !important;
-        justify-content: center; /* Center the navigation menu */
+        justify-content: flex-start;
     }
 
     .nav-icons {
-        order: 2;
+        order: 2; /* Right */
         flex: 0 0 auto;
         display: flex !important;
         align-items: center;
-        margin-right: 0; /* Remove extra right margin */
     }
 }
 
