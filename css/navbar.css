@@ -50,9 +50,10 @@
 }
 
 .brand-logo {
-    height: 120px; /* Increased from 65px */
+    height: 200px!important; /* Increased from 65px */
     width: auto;
-    max-width: 550px;
+    max-width: 400px!important;
+    margin-left:-30px!important;
     object-fit: contain;
     transition: all 0.3s ease;
 }
