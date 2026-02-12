@@ -1352,6 +1352,7 @@
                                 isMain: img.isMain,
                                 alt: img.alt || product.name,
                                 name: img.alt || `${product.name} - Image`,
+                                color: img.color || '',
                                 isExisting: true // Mark as existing image
                             }));
                             mainImageIndex = product.images.findIndex(img => img.isMain);
@@ -1725,6 +1726,13 @@
             });
         }
 
+        window.updateImageColor = function(index, color) {
+            if (selectedImages[index]) {
+                selectedImages[index].color = color.trim();
+                console.log(`Updated color for image ${index}: ${selectedImages[index].color}`);
+            }
+        };
+
         function displayImageGrid() {
             // Clear the grid completely
             imageGrid.innerHTML = '';
@@ -1877,7 +1885,9 @@
                 </div>
 
                 <div class="image-info">
-                    ${displayName}${compressionInfo}
+                    <div>${displayName}</div>
+                    <input type="text" class="color-tag-input" placeholder="Assign color" value="${imageFile.color || ''}" onchange="updateImageColor(${index}, this.value)">
+                    ${compressionInfo}
                 </div>
             `;
 
@@ -2436,6 +2446,16 @@
                     const updatedProductData = {
                         ...originalProductData, // Start with original data
                         id: editProductId,
+                        images: selectedImages.map((img, index) => {
+                            const isMain = index === mainImageIndex;
+                            const imageData = {
+                                url: img.url,
+                                isMain: isMain,
+                                alt: img.alt || productData.name,
+                                color: img.color || '' // Preserving color tag
+                            };
+                            return imageData;
+                        }),
                         updatedAt: new Date().toISOString()
                     };
 
@@ -2713,7 +2733,8 @@
                 imageUrls.push({
                     url: url,
                     isMain: i === mainImageIndex,
-                    alt: `${document.getElementById('productName').value} - Image ${i + 1}`
+                    alt: `${document.getElementById('productName').value} - Image ${i + 1}`,
+                    color: file.color || ''
                 });
             }
 
