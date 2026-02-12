@@ -178,7 +178,7 @@ a {
    HEADER & NAVIGATION
    ======================================== */
 .header {
-    background-color: var(--color-bg) !important;
+    background-color: transparent !important;
     z-index: var(--z-fixed);
 }
 

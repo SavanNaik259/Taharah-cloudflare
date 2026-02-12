@@ -2,7 +2,7 @@
 
 /* Navbar Container */
 .navbar {
-    background: #f5f2e9;
+    background: #f5f2e9 !important;
     border-bottom: 1px solid #f0f0f0;
     position: absolute;
     width: 100%;
@@ -50,7 +50,8 @@
 }
 
 .brand-logo {
-    height: 150px!important; /* Slightly smaller for better fit */
+    margin-top:10px;
+    height: 250px!important; /* Slightly smaller for better fit */
     width: auto;
     max-width: 300px!important;
     object-fit: contain;
@@ -425,7 +426,7 @@
         width: 100%;
         position: absolute;
         z-index: 1000;
-        background: #f5f2e9;
+        background: #f5f2e9 !important;
     }
 
     .nav-container {
@@ -439,7 +440,7 @@
         justify-content: space-between;
         border: 1px solid rgba(0, 0, 0, 0.1);
         border-radius: 30px;
-        background: #f5f2e9;
+        background: #f5f2e9 !important;
         backdrop-filter: blur(15px);
         -webkit-backdrop-filter: blur(15px);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
