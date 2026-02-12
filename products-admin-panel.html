@@ -1030,8 +1030,7 @@
             // Protect page with authentication
             auth.onAuthStateChanged((user) => {
                 if (!user) {
-                    console.log('No user logged in, redirecting to login...');
-                    window.location.href = 'login?redirect=products-admin-panel';
+                    console.log('No user logged in (redirection disabled)');
                 } else {
                     console.log('Admin authenticated:', user.email);
                     // Check if user is admin (you can add specific admin email check here)
