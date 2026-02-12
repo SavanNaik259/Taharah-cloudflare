@@ -59,12 +59,11 @@
 
 .brand:hover {
     color: #b8905f;
-    transform: translateY(-1px);
     text-shadow: none;
 }
 
 .brand:hover .brand-logo {
-    transform: scale(1.05);
+    transform: scale(1.02);
 }
 
 /* Hamburger Menu - Font Awesome Icon */
@@ -358,7 +357,6 @@
 .icon-link:hover {
     color: #c59d5f; /* Golden hover color */
     text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-    transform: translateY(-1px);
 }
 
 /* Ensure Font Awesome icons are displayed properly */
