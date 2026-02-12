@@ -9,7 +9,7 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    margin-top: 140px; /* Push below navbar */
+    margin-top: 100px; /* Adjusted to sit right below the navbar */
 }
 
 .hero-background {
@@ -272,7 +272,7 @@
     .new-arrivals-hero {
         height: 60vh;
         min-height: 400px;
-        margin-top: 120px;
+        margin-top: 90px;
     }
 
     .products-grid .product-image {
@@ -297,7 +297,7 @@
     .new-arrivals-hero {
         height: 50vh;
         min-height: 350px;
-        margin-top: 100px;
+        margin-top: 80px;
     }
 
     .hero-title {
@@ -343,7 +343,7 @@
     .new-arrivals-hero {
         height: 45vh;
         min-height: 300px;
-        margin-top: 90px;
+        margin-top: 70px;
     }
 
     .hero-title {
