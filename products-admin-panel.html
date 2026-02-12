@@ -281,25 +281,67 @@
             background: #b8956a;
         }
 
+        /* Multi-select styling */
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            padding: 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: #fff;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .checkbox-item input {
+            width: auto;
+        }
+        .custom-option {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        .custom-option input {
+            flex: 1;
+        }
+        .add-custom-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
         .image-item .image-info {
             padding: 8px;
             font-size: 11px;
             background: #f8f9fa;
             text-align: center;
-            min-height: 80px;
+            min-height: 100px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 5px;
+            gap: 8px;
+            padding-bottom: 45px;
         }
 
-        .color-tag-input {
+        .color-tag-select {
             width: 90%;
-            padding: 4px;
-            font-size: 10px;
+            padding: 6px;
+            font-size: 12px;
             border: 1px solid #ddd;
-            border-radius: 3px;
+            border-radius: 4px;
+            background: white;
         }
 
         .main-image-badge {
@@ -757,13 +799,21 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Available Sizes (Comma separated)</label>
-                    <input type="text" id="productSizes" name="productSizes" placeholder="XS, S, M, L, XL, XXL">
+                    <label>Available Sizes</label>
+                    <div id="sizeCheckboxes" class="checkbox-grid">
+                        <!-- Populated by JS -->
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Available Colours (Comma separated)</label>
-                    <input type="text" id="productColours" name="productColours" placeholder="Red, Blue, Green, Black">
+                    <label>Available Colours</label>
+                    <div id="colourCheckboxes" class="checkbox-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                    <div class="custom-option">
+                        <input type="text" id="customColour" placeholder="Add custom colour name">
+                        <button type="button" class="add-custom-btn" onclick="addCustomColour()">Add</button>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -1220,8 +1270,54 @@
             }, 8000);
         }
 
+        const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', 'Free Size'];
+        let availableColours = ['Red', 'Blue', 'Green', 'Black', 'White', 'Pink', 'Yellow', 'Purple', 'Grey', 'Beige', 'Gold', 'Silver', 'Maroon', 'Navy Blue'];
+
+        function initCheckboxGrids() {
+            const sizeGrid = document.getElementById('sizeCheckboxes');
+            sizeGrid.innerHTML = availableSizes.map(size => `
+                <label class="checkbox-item">
+                    <input type="checkbox" name="productSizes" value="${size}"> ${size}
+                </label>
+            `).join('');
+
+            updateColourGrid();
+        }
+
+        function updateColourGrid() {
+            const colourGrid = document.getElementById('colourCheckboxes');
+            const checkedColours = Array.from(colourGrid.querySelectorAll('input:checked')).map(cb => cb.value);
+            
+            colourGrid.innerHTML = availableColours.map(colour => `
+                <label class="checkbox-item">
+                    <input type="checkbox" name="productColours" value="${colour}" ${checkedColours.includes(colour) ? 'checked' : ''} onchange="displayImageGrid()"> ${colour}
+                </label>
+            `).join('');
+            
+            // Also refresh image grid to update dropdowns
+            displayImageGrid();
+        }
+
+        window.addCustomColour = function() {
+            const input = document.getElementById('customColour');
+            const newColour = input.value.trim();
+            if (newColour && !availableColours.includes(newColour)) {
+                availableColours.push(newColour);
+                updateColourGrid();
+                input.value = '';
+                
+                // Automatically check the newly added color
+                const checkboxes = document.querySelectorAll('#colourCheckboxes input');
+                checkboxes.forEach(cb => {
+                    if (cb.value === newColour) cb.checked = true;
+                });
+                displayImageGrid();
+            }
+        };
+
         // Test connection when page loads
         document.addEventListener('DOMContentLoaded', async function() {
+            initCheckboxGrids();
             // Handle URL parameters first
             handleURLParameters();
 
@@ -1334,6 +1430,37 @@
                         document.getElementById('productStock').value = product.stock || 0;
                         document.getElementById('productDescription').value = product.description || '';
                         document.getElementById('productCategory').value = category;
+
+                        // Populating size checkboxes
+                        if (product.sizes && Array.isArray(product.sizes)) {
+                            const sizeCheckboxes = document.querySelectorAll('#sizeCheckboxes input');
+                            sizeCheckboxes.forEach(cb => {
+                                if (product.sizes.includes(cb.value)) cb.checked = true;
+                            });
+                        }
+
+                        // Populating colour checkboxes
+                        if (product.colours && Array.isArray(product.colours)) {
+                            product.colours.forEach(col => {
+                                if (!availableColours.includes(col)) {
+                                    availableColours.push(col);
+                                }
+                            });
+                            updateColourGrid();
+                            
+                            const colourCheckboxes = document.querySelectorAll('#colourCheckboxes input');
+                            colourCheckboxes.forEach(cb => {
+                                if (product.colours.includes(cb.value)) cb.checked = true;
+                            });
+                        }
+
+                        // Populating dupatta options
+                        if (product.dupattaOptions && Array.isArray(product.dupattaOptions)) {
+                            document.getElementById('dupattaCotton').checked = product.dupattaOptions.includes('Cotton');
+                            document.getElementById('dupattaChiffon').checked = product.dupattaOptions.includes('Chiffon');
+                            document.getElementById('dupattaNet').checked = product.dupattaOptions.includes('Net');
+                            document.getElementById('dupattaOrganza').checked = product.dupattaOptions.includes('Organza');
+                        }
 
                         // Remove required attributes in edit mode to allow partial updates
                         document.getElementById('productName').removeAttribute('required');
@@ -1812,6 +1939,13 @@
                 positionOptions += `<option value="${i}" ${i === displayPosition ? 'selected' : ''}>${i}</option>`;
             }
 
+            // Create color options for tag select
+            const selectedColours = Array.from(document.querySelectorAll('#colourCheckboxes input:checked')).map(cb => cb.value);
+            let colourOptions = '<option value="">No color assigned</option>';
+            selectedColours.forEach(color => {
+                colourOptions += `<option value="${color}" ${imageFile.color === color ? 'selected' : ''}>${color}</option>`;
+            });
+
             // Position label shows actual position in sequence
             const positionLabel = isMainImage ? `Main-${displayPosition}` : `${displayPosition}`;
             const positionClass = isMainImage ? 'main' : '';
@@ -1886,7 +2020,9 @@
 
                 <div class="image-info">
                     <div>${displayName}</div>
-                    <input type="text" class="color-tag-input" placeholder="Assign color" value="${imageFile.color || ''}" onchange="updateImageColor(${index}, this.value)">
+                    <select class="color-tag-select" onchange="updateImageColor(${index}, this.value)" title="Assign this image to a color">
+                        ${colourOptions}
+                    </select>
                     ${compressionInfo}
                 </div>
             `;
@@ -2410,9 +2546,10 @@
                 // Get form data
                 const formData = new FormData(productForm);
                 // Get Dupatta options
-                const dupattaOptions = [];
                 if (document.getElementById('dupattaCotton').checked) dupattaOptions.push('Cotton');
                 if (document.getElementById('dupattaChiffon').checked) dupattaOptions.push('Chiffon');
+                if (document.getElementById('dupattaNet').checked) dupattaOptions.push('Net');
+                if (document.getElementById('dupattaOrganza').checked) dupattaOptions.push('Organza');
 
                 const productData = {
                     name: formData.get('productName'),
@@ -2420,8 +2557,8 @@
                     stock: formData.get('productStock') !== '' ? parseInt(formData.get('productStock')) : null,
                     description: formData.get('productDescription'),
                     category: formData.get('productCategory'),
-                    sizes: document.getElementById('productSizes').value.split(',').map(s => s.trim()).filter(s => s),
-                    colours: document.getElementById('productColours').value.split(',').map(c => c.trim()).filter(c => c),
+                    sizes: Array.from(document.querySelectorAll('#sizeCheckboxes input:checked')).map(cb => cb.value),
+                    colours: Array.from(document.querySelectorAll('#colourCheckboxes input:checked')).map(cb => cb.value),
                     dupattaOptions: dupattaOptions
                 };
 
@@ -2672,6 +2809,9 @@
         function resetForm() {
             // Reset form fields
             productForm.reset();
+
+            // Clear checkboxes
+            document.querySelectorAll('.checkbox-grid input').forEach(cb => cb.checked = false);
 
             // Reset image selection
             selectedImages = [];
