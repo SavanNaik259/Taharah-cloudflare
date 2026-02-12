@@ -50,9 +50,9 @@
 }
 
 .brand-logo {
-    height: 65px; /* Increased from 52px */
+    height: 120px; /* Increased from 65px */
     width: auto;
-    max-width: 800px; /* Increased from 550px */
+    max-width: 1000px; /* Increased from 800px */
     object-fit: contain;
     transition: all 0.3s ease;
 }
@@ -544,8 +544,8 @@
     }
 
     .brand-logo {
-        height: 100px; /* Increased from 75px */
-        max-width: 900px; /* Increased from 650px */
+        height: 180px; /* Increased from 100px */
+        max-width: 1200px; /* Increased from 900px */
     }
 
     .nav-menu {
@@ -760,8 +760,8 @@
     }
 
     .brand-logo {
-        height: 80px; /* Increased from 70px */
-        max-width: 650px; /* Increased from 550px */
+        height: 140px; /* Increased from 80px */
+        max-width: 1000px; /* Increased from 650px */
     }
 
     .nav-icons {
