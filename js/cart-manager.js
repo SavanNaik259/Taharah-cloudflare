@@ -459,7 +459,8 @@ window.CartManager = (function() {
             document.body.insertAdjacentHTML('beforeend', cartPanelHTML);
         }
 
-        // Add cart icon to navigation
+        // Add cart icon to navigation - DISABLED: User requested removal from index
+        /*
         const navIcons = document.querySelector('.nav-icons');
         if (navIcons) {
             // Check if cart icon already exists
@@ -476,6 +477,7 @@ window.CartManager = (function() {
                 navIcons.insertAdjacentHTML('beforeend', cartIconHTML);
             }
         }
+        */
     }
 
     /**
