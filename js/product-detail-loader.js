@@ -456,6 +456,19 @@ const ProductDetailLoader = (function() {
                     colourList.querySelectorAll('.colour-btn').forEach(b => b.style.borderColor = '#ddd');
                     btn.style.borderColor = '#000';
                     window.selectedColour = btn.dataset.value;
+                    
+                    // Filter gallery images by color
+                    if (product.images && product.images.length > 0) {
+                        const filteredImages = product.images.filter(img => 
+                            !img.color || img.color.toLowerCase() === window.selectedColour.toLowerCase()
+                        );
+                        if (filteredImages.length > 0) {
+                            updateImageGallery(filteredImages);
+                        } else {
+                            // Fallback to all images if none match
+                            updateImageGallery(product.images);
+                        }
+                    }
                 });
             });
         }
