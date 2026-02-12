@@ -52,7 +52,7 @@
 .brand-logo {
     height: 120px; /* Increased from 65px */
     width: auto;
-    max-width: 1000px; /* Increased from 800px */
+    max-width: 550px;
     object-fit: contain;
     transition: all 0.3s ease;
 }
@@ -545,7 +545,7 @@
 
     .brand-logo {
         height: 180px; /* Increased from 100px */
-        max-width: 1200px; /* Increased from 900px */
+        max-width: 650px;
     }
 
     .nav-menu {
@@ -761,7 +761,7 @@
 
     .brand-logo {
         height: 140px; /* Increased from 80px */
-        max-width: 1000px; /* Increased from 650px */
+        max-width: 550px;
     }
 
     .nav-icons {
