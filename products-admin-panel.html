@@ -242,12 +242,91 @@
             flex: 0 0 200px;
             min-width: 200px;
             width: 200px;
+            display: flex;
+            flex-direction: column;
+            height: auto;
+            min-height: 400px;
         }
 
         .image-item img {
             width: 100%;
-            height: 200px;
+            height: 180px;
             object-fit: cover;
+            border-bottom: 1px solid #eee;
+        }
+
+        .image-item .image-info {
+            padding: 12px 10px;
+            font-size: 11px;
+            background: #f8f9fa;
+            text-align: left;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            border-top: 1px solid #eee;
+        }
+
+        .image-position-controls {
+            display: none;
+        }
+
+        .image-info-section {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .image-info-label {
+            font-size: 9px;
+            color: #64748b;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .color-tag-select {
+            width: 100%;
+            padding: 6px;
+            font-size: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            background: white;
+            color: #1e293b;
+        }
+
+        .position-btn {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .position-btn:hover:not(:disabled) {
+            background: #e2e8f0;
+            border-color: #94a3b8;
+        }
+
+        .position-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .position-select {
+            height: 26px;
+            padding: 0 4px;
+            font-size: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            flex-grow: 1;
         }
 
         .image-item .image-controls {
@@ -1287,21 +1366,14 @@
 
         function updateColourGrid() {
             const colourGrid = document.getElementById('colourCheckboxes');
-            const checkedColours = Array.from(colourGrid.querySelectorAll('input:checked')).map(cb => cb.value);
+            const currentChecked = Array.from(colourGrid.querySelectorAll('input:checked')).map(cb => cb.value);
             
             colourGrid.innerHTML = availableColours.map(colour => `
                 <label class="checkbox-item">
-                    <input type="checkbox" name="productColours" value="${colour}" ${checkedColours.includes(colour) ? 'checked' : ''} onchange="displayImageGrid()"> ${colour}
+                    <input type="checkbox" name="productColours" value="${colour}" ${currentChecked.includes(colour) ? 'checked' : ''} onchange="displayImageGrid()"> ${colour}
                 </label>
             `).join('');
             
-            // Re-sync image colors if a selected color was removed from global selections
-            selectedImages.forEach(img => {
-                if (img.color && !checkedColours.includes(img.color) && !availableColours.includes(img.color)) {
-                    img.color = '';
-                }
-            });
-
             displayImageGrid();
         }
 
@@ -1311,13 +1383,16 @@
             if (newColour && !availableColours.includes(newColour)) {
                 availableColours.push(newColour);
                 updateColourGrid();
-                input.value = '';
                 
                 // Automatically check the newly added color
                 const checkboxes = document.querySelectorAll('#colourCheckboxes input');
                 checkboxes.forEach(cb => {
-                    if (cb.value === newColour) cb.checked = true;
+                    if (cb.value === newColour) {
+                        cb.checked = true;
+                    }
                 });
+                
+                input.value = '';
                 displayImageGrid();
             }
         };
@@ -1867,176 +1942,93 @@
         window.updateImageColor = function(index, color) {
             if (selectedImages[index]) {
                 selectedImages[index].color = color.trim();
-                console.log(`Updated color for image ${index}: ${selectedImages[index].color}`);
             }
         };
 
         function displayImageGrid() {
-            // Clear the grid completely
             imageGrid.innerHTML = '';
-
-            if (selectedImages.length === 0) {
-                console.log('No images to display');
-                return;
-            }
-
-            console.log(`Displaying ${selectedImages.length} images in horizontal order: (Main-1), 2, 3, 4, 5, 6...`);
-            console.log(`Main image is at position ${mainImageIndex + 1}`);
-
-            // Create all image items - handle both File objects and existing URLs
+            if (selectedImages.length === 0) return;
+            const checkedColours = Array.from(document.querySelectorAll('#colourCheckboxes input:checked')).map(cb => cb.value);
             selectedImages.forEach((file, index) => {
                 const cachedDataUrl = imageCache.get(file);
-
                 if (cachedDataUrl) {
-                    // Use cached image data - instant display, no blank spaces
-                    const imageItem = createImageItem(cachedDataUrl, index, file.name || file.alt || file);
-                    imageItem.style.order = index; // Ensure correct flex order
-                    imageGrid.appendChild(imageItem);
-
-                    // Log current position for debugging
-                    const displayPos = index + 1;
-                    const isMain = index === mainImageIndex;
-                    const fileName = file.name || file.alt || 'Unknown';
-                    console.log(`Position ${displayPos}: ${fileName} ${isMain ? '(MAIN)' : ''}`);
-                } else if (file.existingUrl || file.url) {
-                    // Handle existing image URLs (edit mode) - no FileReader needed
-                    const imageUrl = file.existingUrl || file.url;
-                    const fileName = file.name || file.alt || 'Existing Image';
-
-                    // Cache the URL for consistency
-                    imageCache.set(file, imageUrl);
-
-                    const imageItem = createImageItem(imageUrl, index, fileName);
+                    const imageItem = createImageItem(cachedDataUrl, index, file.name || file.alt || file, checkedColours);
                     imageItem.style.order = index;
                     imageGrid.appendChild(imageItem);
-
-                    console.log(`Position ${index + 1}: ${fileName} (existing URL) ${index === mainImageIndex ? '(MAIN)' : ''}`);
+                } else if (file.existingUrl || file.url) {
+                    const imageUrl = file.existingUrl || file.url;
+                    const fileName = file.name || file.alt || 'Existing Image';
+                    imageCache.set(file, imageUrl);
+                    const imageItem = createImageItem(imageUrl, index, fileName, checkedColours);
+                    imageItem.style.order = index;
+                    imageGrid.appendChild(imageItem);
                 } else {
-                    // Handle new file uploads that need FileReader
-                    console.log(`Loading new file: ${file.name}`);
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         imageCache.set(file, e.target.result);
-                        const imageItem = createImageItem(e.target.result, index, file.name);
+                        const imageItem = createImageItem(e.target.result, index, file.name, checkedColours);
                         imageItem.style.order = index;
                         imageGrid.appendChild(imageItem);
-                    };
-                    reader.onerror = (e) => {
-                        console.error('FileReader error:', e);
-                        showError('Error reading image file');
                     };
                     reader.readAsDataURL(file);
                 }
             });
-
-            console.log('✅ Image grid updated with horizontal layout: (Main-1), 2, 3, 4, 5, 6...');
         }
 
-        function createImageItem(src, index, fileName) {
+        function createImageItem(src, index, fileName, checkedColours) {
             const div = document.createElement('div');
             const isMainImage = index === mainImageIndex;
-
-            // Set proper classes including main image highlight
+            const imageFile = selectedImages[index];
             div.className = `image-item ${isMainImage ? 'main-image' : ''}`;
             div.draggable = true;
             div.dataset.index = index;
-
-            // Calculate display position (1-based)
             const displayPosition = index + 1;
-
-            // Create position options for dropdown
             let positionOptions = '';
             for (let i = 1; i <= selectedImages.length; i++) {
                 positionOptions += `<option value="${i}" ${i === displayPosition ? 'selected' : ''}>${i}</option>`;
             }
-
-            // Create color options for tag select
-            const selectedColours = Array.from(document.querySelectorAll('#colourCheckboxes input:checked')).map(cb => cb.value);
-            let colourOptions = '<option value="">No color assigned</option>';
-            selectedColours.forEach(color => {
+            let colourOptions = '<option value="">Assign Color</option>';
+            checkedColours.forEach(color => {
                 colourOptions += `<option value="${color}" ${imageFile.color === color ? 'selected' : ''}>${color}</option>`;
             });
-
-            // Position label shows actual position in sequence
             const positionLabel = isMainImage ? `Main-${displayPosition}` : `${displayPosition}`;
             const positionClass = isMainImage ? 'main' : '';
-
-            // Get display name - handle both file objects and existing images
-            let displayName = fileName;
-            if (typeof fileName === 'string' && fileName.length > 20) {
-                displayName = fileName.substring(0, 17) + '...';
-            } else if (typeof fileName === 'object' && fileName.name) {
-                displayName = fileName.name.length > 20 ? fileName.name.substring(0, 17) + '...' : fileName.name;
-            } else if (typeof fileName === 'object' && fileName.alt) {
-                displayName = fileName.alt.length > 20 ? fileName.alt.substring(0, 17) + '...' : fileName.alt;
-            }
-
-            // Check if this is a compressed image
-            const imageFile = selectedImages[index];
+            let displayName = fileName || 'Image';
             const isCompressed = imageFile && imageFile.isCompressed;
-
-            // Add compressed class if applicable
-            if (isCompressed) {
-                div.classList.add('compressed');
-            }
-
-            // Create compression info for display
-            let compressionInfo = '';
-            let compressionBadge = '';
-
-            if (isCompressed && imageFile.compressionRatio) {
-                compressionBadge = `<div class="compression-badge">-${imageFile.compressionRatio}%</div>`;
-
-                const originalSize = formatFileSize(imageFile.originalSize);
-                const compressedSize = formatFileSize(imageFile.compressedSize);
-                const originalDim = imageFile.originalDimensions;
-                const newDim = imageFile.newDimensions;
-
-                compressionInfo = `\n                    <div style="font-size: 10px; color: #059669; margin-top: 2px;">
-                        ✅ ${originalSize} → ${compressedSize}<br>
-                        ${originalDim.width}×${originalDim.height} (no resize)
-                    </div>`;
-            }
-
+            let compressionBadge = isCompressed ? `<div class="compression-badge">-${imageFile.compressionRatio}%</div>` : '';
+            let compressionInfo = isCompressed ? `<div style="font-size: 10px; color: #059669; margin-top: 2px;">✅ Optimized</div>` : '';
             div.innerHTML = `
                 <img src="${src}" alt="${displayName}">
-
-                <!-- Position label showing current order -->
-                <div class="position-label ${positionClass}">
-                    ${positionLabel}
-                </div>
-
-                <!-- Compression badge -->
+                <div class="position-label ${positionClass}">${positionLabel}</div>
                 ${compressionBadge}
-
-                <!-- Image controls for main/remove -->
                 <div class="image-controls">
-                    ${isMainImage ?
-                        '<button type="button" class="control-btn main">MAIN</button>' :
-                        '<button type="button" class="control-btn" onclick="setMainImage(' + index + ')">Set Main</button>'
-                    }
+                    ${isMainImage ? '<button type="button" class="control-btn main">MAIN</button>' : '<button type="button" class="control-btn" onclick="setMainImage(' + index + ')">Set Main</button>'}
                     <button type="button" class="control-btn" onclick="removeImage(${index})">×</button>
                 </div>
-
-                <!-- Position controls for ordering -->
-                <div class="image-position-controls">
-                    <button type="button" class="position-btn" onclick="moveImage(${index}, 'up')"
-                            ${index === 0 ? 'disabled' : ''} title="Move Left">←</button>
-                    <select class="position-select" onchange="moveToPosition(${index}, this.value)" title="Change Position">
-                        ${positionOptions}
-                    </select>
-                    <button type="button" class="position-btn" onclick="moveImage(${index}, 'down')"
-                            ${index === selectedImages.length - 1 ? 'disabled' : ''} title="Move Right">→</button>
-                </div>
-
                 <div class="image-info">
-                    <div>${displayName}</div>
-                    <select class="color-tag-select" onchange="updateImageColor(${index}, this.value)" title="Assign this image to a color">
-                        ${colourOptions}
-                    </select>
+                    <div style="font-weight: 600; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${displayName}</div>
+                    <div class="image-info-section">
+                        <label class="image-info-label">Placement:</label>
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <button type="button" class="position-btn" onclick="moveImage(${index}, 'up')" ${index === 0 ? 'disabled' : ''}>←</button>
+                            <select class="position-select" onchange="moveToPosition(${index}, this.value)">${positionOptions}</select>
+                            <button type="button" class="position-btn" onclick="moveImage(${index}, 'down')" ${index === selectedImages.length - 1 ? 'disabled' : ''}>→</button>
+                        </div>
+                    </div>
+                    <div class="image-info-section">
+                        <label class="image-info-label">Color Assignment:</label>
+                        <select class="color-tag-select" onchange="updateImageColor(${index}, this.value)">${colourOptions}</select>
+                    </div>
                     ${compressionInfo}
                 </div>
             `;
+            div.addEventListener('dragstart', handleDragStart);
+            div.addEventListener('dragover', handleDragOver);
+            div.addEventListener('drop', handleDrop);
+            div.addEventListener('dragenter', handleDragEnter);
+            div.addEventListener('dragleave', handleDragLeave);
+            return div;
+        }
 
             // Add drag and drop event listeners for reordering
             div.addEventListener('dragstart', handleDragStart);
@@ -2557,6 +2549,7 @@
                 // Get form data
                 const formData = new FormData(productForm);
                 // Get Dupatta options
+                const dupattaOptions = [];
                 if (document.getElementById('dupattaCotton').checked) dupattaOptions.push('Cotton');
                 if (document.getElementById('dupattaChiffon').checked) dupattaOptions.push('Chiffon');
                 if (document.getElementById('dupattaNet').checked) dupattaOptions.push('Net');
