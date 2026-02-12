@@ -883,12 +883,23 @@ window.CartManager = (function() {
             cartItemDiv.className = 'cart-item';
             cartItemDiv.setAttribute('data-product-id', item.id);
 
+            // Construct options HTML
+            let optionsHTML = '';
+            if (item.size || item.colour || item.dupatta) {
+                optionsHTML = '<div class="cart-item-options" style="font-size: 11px; color: #666; margin-top: 4px; line-height: 1.2;">';
+                if (item.size) optionsHTML += `<span>Size: ${item.size}</span> `;
+                if (item.colour) optionsHTML += `<span>Color: ${item.colour}</span> `;
+                if (item.dupatta) optionsHTML += `<span>Dupatta: ${item.dupatta}</span>`;
+                optionsHTML += '</div>';
+            }
+
             cartItemDiv.innerHTML = `
                 <div class="cart-item-image">
                     <img src="${item.image}" alt="${item.name}" loading="lazy">
                 </div>
                 <div class="cart-item-details">
                     <div class="cart-item-name">${item.name}</div>
+                    ${optionsHTML}
                     <div class="cart-item-price" data-original-price="${item.price}">${currencySymbol}${itemPriceDisplay.toFixed(2)}</div>
                     <div class="cart-item-quantity">
                         <button class="quantity-btn decrement">-</button>
