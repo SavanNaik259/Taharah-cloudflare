@@ -389,6 +389,9 @@ const ProductDetailLoader = (function() {
             console.log('Updated SKU to:', skuValue);
         }
 
+        // Render product options (Size, Colour, Dupatta)
+        renderProductOptions(product);
+
         // Update page title
         if (product.name) {
             document.title = `${product.name} - Taharah`;
@@ -406,6 +409,78 @@ const ProductDetailLoader = (function() {
         }, 500);
 
         console.log('Product detail page updated successfully');
+    }
+
+    /**
+     * Render product options for selection
+     */
+    function renderProductOptions(product) {
+        const optionsContainer = document.getElementById('product-options');
+        if (!optionsContainer) return;
+
+        let hasOptions = false;
+
+        // Size selection
+        const sizeContainer = document.getElementById('size-selection');
+        if (product.sizes && Array.isArray(product.sizes) && product.sizes.length > 0) {
+            const sizeList = sizeContainer.querySelector('.size-options');
+            sizeList.innerHTML = product.sizes.map(size => `
+                <button class="option-btn size-btn" data-value="${size}" style="padding: 5px 15px; border: 1px solid #ddd; background: #fff; cursor: pointer; border-radius: 4px;">${size}</button>
+            `).join('');
+            sizeContainer.style.display = 'block';
+            hasOptions = true;
+
+            // Add click listeners
+            sizeList.querySelectorAll('.size-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    sizeList.querySelectorAll('.size-btn').forEach(b => b.style.borderColor = '#ddd');
+                    btn.style.borderColor = '#000';
+                    window.selectedSize = btn.dataset.value;
+                });
+            });
+        }
+
+        // Colour selection
+        const colourContainer = document.getElementById('colour-selection');
+        if (product.colours && Array.isArray(product.colours) && product.colours.length > 0) {
+            const colourList = colourContainer.querySelector('.colour-options');
+            colourList.innerHTML = product.colours.map(colour => `
+                <button class="option-btn colour-btn" data-value="${colour}" style="padding: 5px 15px; border: 1px solid #ddd; background: #fff; cursor: pointer; border-radius: 4px;">${colour}</button>
+            `).join('');
+            colourContainer.style.display = 'block';
+            hasOptions = true;
+
+            // Add click listeners
+            colourList.querySelectorAll('.colour-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    colourList.querySelectorAll('.colour-btn').forEach(b => b.style.borderColor = '#ddd');
+                    btn.style.borderColor = '#000';
+                    window.selectedColour = btn.dataset.value;
+                });
+            });
+        }
+
+        // Dupatta selection
+        const dupattaContainer = document.getElementById('dupatta-selection');
+        if (product.dupattaOptions && Array.isArray(product.dupattaOptions) && product.dupattaOptions.length > 0) {
+            const dupattaList = dupattaContainer.querySelector('.dupatta-options');
+            dupattaList.innerHTML = product.dupattaOptions.map(option => `
+                <button class="option-btn dupatta-btn" data-value="${option}" style="padding: 5px 15px; border: 1px solid #ddd; background: #fff; cursor: pointer; border-radius: 4px;">${option}</button>
+            `).join('');
+            dupattaContainer.style.display = 'block';
+            hasOptions = true;
+
+            // Add click listeners
+            dupattaList.querySelectorAll('.dupatta-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    dupattaList.querySelectorAll('.dupatta-btn').forEach(b => b.style.borderColor = '#ddd');
+                    btn.style.borderColor = '#000';
+                    window.selectedDupatta = btn.dataset.value;
+                });
+            });
+        }
+
+        optionsContainer.style.display = hasOptions ? 'block' : 'none';
     }
 
     /**

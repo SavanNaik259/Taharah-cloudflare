@@ -576,8 +576,27 @@ window.CartManager = (function() {
                 if (productContainer) {
                     const productId = productContainer.dataset.productId;
 
-                    // Check if we're on a product detail page
+                    // Get selected options if on product detail page
                     const isProductDetailPage = document.querySelector('.product-detail-container') !== null;
+                    let selectedSize = window.selectedSize;
+                    let selectedColour = window.selectedColour;
+                    let selectedDupatta = window.selectedDupatta;
+
+                    // Validate options if they are required
+                    if (isProductDetailPage) {
+                        const hasSizes = document.getElementById('size-selection')?.style.display !== 'none';
+                        const hasColours = document.getElementById('colour-selection')?.style.display !== 'none';
+                        const hasDupatta = document.getElementById('dupatta-selection')?.style.display !== 'none';
+
+                        if ((hasSizes && !selectedSize) || (hasColours && !selectedColour) || (hasDupatta && !selectedDupatta)) {
+                            if (window.showToast) {
+                                window.showToast('Please select all required options (Size, Colour, Dupatta)', 'error');
+                            } else {
+                                alert('Please select all required options (Size, Colour, Dupatta)');
+                            }
+                            return;
+                        }
+                    }
 
                     // Get product name - avoid placeholder text
                     let productName = '';
