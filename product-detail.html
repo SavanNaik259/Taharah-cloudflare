@@ -1023,10 +1023,17 @@ background-color: #000 !important;
                         const img = product.mainImage || product.image || (product.images && product.images[0]?.url) || '/images/placeholder-product.jpg';
 
                         return `
-                            <div class="related-product-item" data-product-id="${product.id}" onclick="window.location.href='product-detail?id=${product.id}'">
+                            <div class="related-product-item" data-product-id="${product.id}">
                                 <div class="related-product-image">
                                     <img src="${img}" alt="${product.name}" loading="lazy">
-                                    <button class="add-to-wishlist related-add-to-wishlist" data-product-id="${product.id}" data-product-name="${product.name.replace(/'/g, "\\'")}" data-product-price="${product.price}" data-product-image="${img}" onclick="event.stopPropagation(); window.toggleWishlistDirectly(this);"><i class="far fa-heart"></i></button>
+                                    <button class="add-to-wishlist related-add-to-wishlist" 
+                                        data-product-id="${product.id}" 
+                                        data-product-name="${product.name.replace(/'/g, "\\'")}" 
+                                        data-product-price="${product.price}" 
+                                        data-product-image="${img}" 
+                                        onclick="event.stopPropagation();">
+                                        <i class="far fa-heart"></i>
+                                    </button>
                                 </div>
                                 <div class="related-product-details">
                                     <h3 class="related-product-name">${product.name}</h3>
@@ -1037,10 +1044,14 @@ background-color: #000 !important;
                     }).join('');
                     
                     lastLoadedRelatedProductId = currentProductId;
-                }
-
-                if (window.WishlistManager?.initializeWishlistButtons) {
-                    setTimeout(() => window.WishlistManager.initializeWishlistButtons(), 100);
+                    
+                    // Re-attach wishlist event listeners using the centralized WishlistManager
+                    if (typeof WishlistManager !== 'undefined' && WishlistManager.updateWishlistUI) {
+                        setTimeout(() => {
+                            WishlistManager.updateWishlistUI();
+                            console.log('Wishlist UI updated for related products');
+                        }, 200);
+                    }
                 }
 
             } catch (error) {
