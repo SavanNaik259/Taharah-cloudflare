@@ -1,0 +1,715 @@
+     1	<!DOCTYPE html>
+     2	<html lang="en">
+     3	<head>
+     4	    
+     5	    
+     6	    <meta charset="UTF-8">
+     7	    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+     8	    
+     9	    <!-- SEO Meta Tags -->
+    10	    <title>About Us - Taharah | Our Story & Heritage</title>
+    11	    <meta name="description" content="Learn about Taharah's rich heritage in traditional Pakistani fashion. Discover our story of preserving and celebrating ethnic craftsmanship." />
+    12	    <meta name="keywords" content="taharah about, pakistani fashion heritage, traditional fashion craftsmanship, ethnic wear artisans" />
+    13	    
+    14	    <!-- Favicon -->
+    15	    <link rel="icon" type="image/png" href="images/logos/taharah.png" />
+    16	    <link rel="apple-touch-icon" href="images/logos/taharah.png" />
+    17	    
+    18	    <!-- Open Graph -->
+    19	    <meta property="og:type" content="website" />
+    20	    <meta property="og:url" content="https://taharah.in/about-us" />
+    21	    <meta property="og:title" content="About Taharah - Our Story & Heritage" />
+    22	    <meta property="og:description" content="Learn about Taharah's rich heritage in traditional Pakistani fashion craftsmanship." />
+    23	    <meta property="og:image" content="https://taharah.in/images/logos/taharah.png" />
+    24	    
+    25	    <!-- Canonical URL -->
+    26	    <link rel="canonical" href="https://taharah.in/about-us" />
+    27	    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpLGCJKypKP/lX+/Pvw2DNA" crossorigin="anonymous">
+    28	    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    29	    <!-- Flaticon CSS for bottom nav icons -->
+    30	    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-thin-straight/css/uicons-thin-straight.css'>
+    31	    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-solid-straight/css/uicons-solid-straight.css'>
+    32	    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-straight/css/uicons-regular-straight.css'>
+    33	    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:wght@300;400;500;700&display=swap" rel="stylesheet">
+    34	    <link href="https://fonts.cdnfonts.com/css/futura-pt" rel="stylesheet">
+    35	    <link rel="stylesheet" href="css/styles.css?v=1.0.4">
+    36	    <link rel="stylesheet" href="css/responsive.css?v=1.0.4">
+    37	    <link rel="stylesheet" href="css/navbar.css?v=1.1.3">
+    38	    <link rel="stylesheet" href="css/cart.css?v=1.0.2">
+    39	    <link rel="stylesheet" href="css/shop.css?v=1.0.2">
+    40	    <link rel="stylesheet" href="css/search.css">
+    41	    <link rel="stylesheet" href="css/currency-converter.css?v=1.0.0">
+    42	    <link rel="stylesheet" href="css/language-selector.css?v=1.0.0">
+    43	    <!-- Firebase SDK -->
+    44	    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    45	    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    46	    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    47	
+    48	    <!-- Unified Firebase Configuration -->
+    49	    <script src="js/firebase-config.js"></script>
+    50	    <script>
+    51	      // Initialize Firebase with unified configuration
+    52	      if (window.firebaseConfig) {
+    53	        firebase.initializeApp(window.firebaseConfig);
+    54	        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+    55	          .catch(error => {
+    56	            console.error("Auth persistence error:", error);
+    57	          });
+    58	        console.log('✅ About Us page: Firebase initialized with unified config');
+    59	      } else {
+    60	        console.error('❌ About Us page: Firebase config not loaded');
+    61	      }
+    62	    </script>
+    63	
+    64	
+    65	    <style>
+    66	        /* Zeol-inspired About Page Styles */
+    67	        :root {
+    68	            --zeol-font-serif: "Playfair Display", serif;
+    69	            --zeol-font-sans: "Futura PT", "Lato", sans-serif;
+    70	            --zeol-text-color: #333;
+    71	            --zeol-light-text: #666;
+    72	        }
+    73	
+    74	        body {
+    75	            font-family: var(--zeol-font-sans);
+    76	            color: var(--zeol-text-color);
+    77	            line-height: 1.6;
+    78	            background-color: #fff;
+    79	        }
+    80	
+    81	        .about-section {
+    82	            padding: 0;
+    83	            margin-top: 80px; /* Adjust based on navbar height */
+    84	        }
+    85	
+    86	        .about-hero {
+    87	            position: relative;
+    88	            height: 400px;
+    89	            background-image: url("images/IMG-20260213-WA0018.jpg");
+    90	            background-size: cover;
+    91	            background-position: center;
+    92	            display: flex;
+    93	            align-items: center;
+    94	            justify-content: center;
+    95	            text-align: center;
+    96	            color: #fff;
+    97	        }
+    98	
+    99	        .about-hero::before {
+   100	            content: "";
+   101	            position: absolute;
+   102	            top: 0;
+   103	            left: 0;
+   104	            right: 0;
+   105	            bottom: 0;
+   106	            background: rgba(0, 0, 0, 0.4);
+   107	            z-index: 1;
+   108	        }
+   109	
+   110	        .about-hero h1 {
+   111	            font-family: var(--zeol-font-serif);
+   112	            font-size: 48px;
+   113	            position: relative;
+   114	            z-index: 2;
+   115	            font-weight: 400;
+   116	            letter-spacing: 1px;
+   117	        }
+   118	
+   119	        .content-block {
+   120	            max-width: 1000px;
+   121	            margin: 60px auto;
+   122	            padding: 0 20px;
+   123	        }
+   124	
+   125	        .section-label {
+   126	            text-transform: uppercase;
+   127	            font-size: 14px;
+   128	            letter-spacing: 2px;
+   129	            color: var(--zeol-light-text);
+   130	            margin-bottom: 20px;
+   131	            display: block;
+   132	        }
+   133	
+   134	        .main-heading {
+   135	            font-family: var(--zeol-font-serif);
+   136	            font-size: 36px;
+   137	            line-height: 1.3;
+   138	            margin-bottom: 40px;
+   139	            color: #000;
+   140	            font-weight: 400;
+   141	        }
+   142	
+   143	        .vision-mission-grid {
+   144	            display: grid;
+   145	            grid-template-columns: 1fr;
+   146	            gap: 40px;
+   147	            margin-bottom: 60px;
+   148	        }
+   149	
+   150	        .vm-item h3 {
+   151	            font-family: var(--zeol-font-serif);
+   152	            font-size: 24px;
+   153	            margin-bottom: 15px;
+   154	            color: #000;
+   155	            font-weight: 400;
+   156	        }
+   157	
+   158	        .vm-item p {
+   159	            font-size: 16px;
+   160	            color: var(--zeol-light-text);
+   161	            line-height: 1.8;
+   162	        }
+   163	
+   164	        .journey-section {
+   165	            background-color: #fff;
+   166	            padding: 60px 0;
+   167	        }
+   168	
+   169	        .journey-heading {
+   170	            font-family: var(--zeol-font-serif);
+   171	            font-size: 32px;
+   172	            margin-bottom: 30px;
+   173	            font-weight: 400;
+   174	        }
+   175	
+   176	        .journey-image {
+   177	            width: 100%;
+   178	            margin-bottom: 40px;
+   179	        }
+   180	
+   181	        .journey-image img {
+   182	            width: 100%;
+   183	            height: auto;
+   184	            display: block;
+   185	        }
+   186	
+   187	        .journey-text {
+   188	            font-size: 16px;
+   189	            color: var(--zeol-light-text);
+   190	            line-height: 1.8;
+   191	            text-align: justify;
+   192	        }
+   193	
+   194	        @media (max-width: 768px) {
+   195	            .about-hero {
+   196	                height: 300px;
+   197	            }
+   198	            .about-hero h1 {
+   199	                font-size: 32px;
+   200	            }
+   201	            .main-heading {
+   202	                font-size: 28px;
+   203	            }
+   204	        }
+   205	    </style>
+   206	
+   207	    <!-- Analytics Tracking - Load AFTER Firebase is ready -->
+   208	    <script>
+   209	        // Wait for Firebase to be fully initialized before loading analytics
+   210	        function loadAnalyticsScript() {
+   211	            if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+   212	                console.log('🔥 Firebase ready, loading analytics script...');
+   213	                const script = document.createElement('script');
+   214	                script.src = 'js/nazakat-analytics.js?v=1.0.1';
+   215	                script.onload = function() {
+   216	                    console.log('📊 Analytics script loaded successfully');
+   217	                };
+   218	                script.onerror = function() {
+   219	                    console.error('❌ Failed to load analytics script');
+   220	                };
+   221	                document.head.appendChild(script);
+   222	            } else {
+   223	                console.log('⏳ Firebase not ready, retrying in 500ms...');
+   224	                setTimeout(loadAnalyticsScript, 500);
+   225	            }
+   226	        }
+   227	
+   228	        // Start loading analytics after a brief delay to ensure Firebase init
+   229	        setTimeout(loadAnalyticsScript, 1000);
+   230	    </script>
+   231	
+   232	    <!-- WhatsApp Tooltip Script -->
+   233	    <script src="js/whatsapp-tooltip.js"></script>
+   234	</head>
+   235	<body>
+   236	<!-- Header -->
+   237	    <header class="header">
+   238	        <!-- Promo Banner -->
+   239	        <div class="promo-banner">
+   240	            <p class="banner-text"></p>
+   241	        </div>
+   242	
+   243	
+   244	        <!-- New Responsive Navigation -->
+   245	        <nav class="navbar">
+   246	            <div class="nav-container">
+   247	                <!-- Logo -->
+   248	                <a href="/index" class="brand">
+   249	                    <img src="images/logos/taharah-navbar.png" alt="Taharah" class="brand-logo">
+   250	                </a>
+   251	
+   252	
+   253	                <!-- Mobile Toggle Button - Match RIDHI MEHRA design -->
+   254	                <div class="hamburger" id="navToggle"><img src="images/icons/bars-staggered (2).png" alt="Taharah"style="width: 25px; height: 25px;">
+   255	                </div>
+   256	
+   257	                <!-- Navigation Icons - Exact match to RIDHI MEHRA design -->
+   258	                <div class="nav-icons">
+   259	                    <a href="#" class="icon-link search-icon">
+   260	                        <img src="images/icons/search.png" alt="Search" style="width: 20px; height: 20px;">
+   261	                    </a>
+   262	                    <a href="#" class="icon-link wishlist-icon-container wishlist-toggle">
+   263	                        <img src="images/icons/heart.png" alt="Wishlist" style="width: 20px; height: 20px;">
+   264	                        <div class="wishlist-count">0</div>
+   265	                    </a>
+   266	                </div>
+   267	            </div>
+   268	        </nav>
+   269	
+   270	        <!-- Navigation Links - Moved outside nav-container to avoid backdrop-filter containing block -->
+   271	        <div class="nav-menu" id="navMenu">
+   272	            <!-- Close button for mobile menu in the top right corner -->
+   273	
+   274	            <i id="closeMenu" class="fa-solid fa-xmark meenu-close" onclick="closeMobileMenu()" style="font-size: 24px; margin-left: 90%; color: #333;" ></i>
+   275	
+   276	
+   277	          <!-- "  <button class="menu-close fa fa-times" ></button>-->
+   278	
+   279	            <ul class="nav-list">
+   280	                <li class="nav-item"><a href="/index" class="nav-link" data-translate="home">Home</a></li>
+   281	                <li class="nav-item"><a href="/new-arrivals" class="nav-link" data-translate="new_arrivals">New Arrivals</a></li>
+   282	                <li class="nav-item dropdown">
+   283	                    <a href="#" class="nav-link dropdown-toggle"><span data-translate="categories">Collections</span> <i class="fas fa-chevron-down"></i></a>
+   284	                    <ul class="dropdown-menu">
+   285	                      <!--  <li><a href="/all-collection" data-translate="all_collections">All Collection</a></li>-->
+   286	                        <li><a href="/pakistani-pret-wear" data-translate-dynamic>Pakistani Pret Wear</a></li>
+   287	
+   288	
+   289	                        <li><a href="/ready-to-wear" data-translate="featured">Ready to Wear</a></li>
+   290	                        
+   291	                        <li><a href="/modest-wear" data-translate-dynamic>Modest Wear</a></li>
+   292	                        <li><a href="/party-wear" data-translate-dynamic>Party Wear</a></li>
+   293	                        <!--<li class="dropdown-submenu">
+   294	                            <a href="#"><span data-translate="earrings">Earrings</span> <i class="fas fa-chevron-right"></i></a>
+   295	                            <ul class="dropdown-submenu-list">
+   296	                                <li><a href="/gold-earrings" data-translate-dynamic>Gold Earrings</a></li>
+   297	                                <li><a href="/silver-earrings" data-translate-dynamic>Silver Earrings</a></li>
+   298	                                <li><a href="/meenakari-earrings" data-translate-dynamic>Meenakari Earrings</a></li>
+   299	                            </ul>
+   300	                        </li>
+   301	                        <li class="dropdown-submenu">
+   302	                            <a href="#"><span data-translate="bangles">Bangles</span> <i class="fas fa-chevron-right"></i></a>
+   303	                            <ul class="dropdown-submenu-list">
+   304	                                <li><a href="/gold-bangles" data-translate-dynamic>Gold Bangles</a></li>
+   305	                                <li><a href="/silver-bangles" data-translate-dynamic>Silver Bangles</a></li>
+   306	                                <li><a href="/meenakari-bangles" data-translate-dynamic>Meenakari Bangles</a></li>
+   307	                            </ul>
+   308	                        </li>
+   309	                        <li class="dropdown-submenu">
+   310	                            <a href="#"><span data-translate="rings">Rings</span> <i class="fas fa-chevron-right"></i></a>
+   311	                            <ul class="dropdown-submenu-list">
+   312	                                <li><a href="/gold-rings" data-translate-dynamic>Gold Rings</a></li>
+   313	                                <li><a href="/silver-rings" data-translate-dynamic>Silver Rings</a></li>
+   314	                                <li><a href="/meenakari-rings" data-translate-dynamic>Meenakari Rings</a></li>
+   315	                            </ul>
+   316	                        </li>-->
+   317	                    </ul>
+   318	                </li>
+   319	                <li class="nav-item"><a href="/about-us" class="nav-link" data-translate="about_us">About</a></li>
+   320	                <li class="nav-item"><a href="#customer-reviews" class="nav-link" data-translate-dynamic>Testimonials</a></li>
+   321	                <!-- <li class="nav-item"><a href="/book-appointment" class="nav-link" data-translate-dynamic>Book Appointment</a></li> -->
+   322	                <li class="nav-item"><a href="#" class="nav-link" data-translate-dynamic>Order Track</a></li>
+   323	                <li><a href="/contact-us" class="nav-link" data-translate="contact_us">Contact</a></li>
+   324	            </ul>
+   325	
+   326	            <!-- Mobile account links in separate div after Contact -->
+   327	            <div class="mobile-account-links mobile-special">
+   328	                <a href="#" class="mobile-account-link wishlist-toggle">
+   329	                    <img src="images/icons/heart.png" alt="Cart" style="width: 18px; height: 18px;"> &nbsp;   <span data-translate="wishlist">Wishlist</span> (<span class="mobile-wishlist-count">0</span>)
+   330	                </a>
+   331	
+   332	            </div>
+   333	        </div>
+   334	    </header>
+   335	
+   336	    <!-- Overlay for menu background -->
+   337	    <div class="menu-overlay" id="menuOverlay"></div>
+   338	
+   339	    <!-- About Hero Section -->
+   340	    <section class="about-hero">
+   341	        <div class="container">
+   342	            <div class="about-hero-content">
+   343	                <h1>About Taharah</h1>
+   344	                <p>Exquisite Pakistani Fashion - Handcrafted Pret Wear | Party Wear | Modest Wear - Premium Quality Craftsmanship</p>
+   345	            </div>
+   346	        </div>
+   347	    </section>
+   348	
+   349	    <!-- Founder Section -->
+   350	    <section class="founder-section">
+   351	        <div class="founder-container">
+   352	            <div class="founder-image">
+   353	                <img src="images/IMG-20260213-WA0018.jpg" alt="Taharah - Premium Pakistani Fashion" onerror="this.src='images/product-placeholder.jpg'">
+   354	            </div>
+   355	            <div class="founder-content">
+   356	                <h2>Taharah</h2>
+   357	                <div class="title">Elegance & Excellence in Pakistani Fashion</div>
+   358	                <p>At Taharah, we bring you the finest collection of Pakistani fashion. Based in Kerala, India, we specialize in high-quality pret wear, party wear, and modest wear that reflects the rich cultural heritage and contemporary trends of Pakistani attire.</p>
+   359	                <p>Our commitment to authentic designs and premium fabrics ensures that every piece in our collection is a masterpiece of craftsmanship and style.</p>
+   360	                <p>Every dress in our collection reflects artistic brilliance and the timeless beauty of traditional designs, crafted to perfection for women who appreciate elegance and quality.</p>
+   361	            </div>
+   362	        </div>
+   363	    </section>
+   364	
+   365	    <!-- Values Section -->
+   366	    <section class="values-section">
+   367	        <div class="container">
+   368	            <div class="values-heading">
+   369	                <h2>What We Offer</h2>
+   370	                <p>From exquisite party wear to daily pret, every garment reflects our commitment to excellence and premium craftsmanship</p>
+   371	            </div>
+   372	
+   373	            <div class="values-grid">
+   374	                <div class="value-card">
+   375	                    <div class="value-icon">
+   376	                        <i class="fas fa-certificate"></i>
+   377	                    </div>
+   378	                    <h3>Authentic And Pure</h3>
+   379	                    <p>Every product is crafted with original fabrics and premium artistry. We guarantee authenticity and quality in every thread, ensuring that traditional designs are preserved and honored.</p>
+   380	                </div>
+   381	
+   382	                <div class="value-card">
+   383	                    <div class="value-icon">
+   384	                        <i class="fas fa-globe-americas"></i>
+   385	                    </div>
+   386	                    <h3>All India Free Shipping Available</h3>
+   387	                    <p>We provide free shipping across all of India. Currently, we do not offer worldwide shipping services.</p>
+   388	                </div>
+   389	
+   390	                <div class="value-card">
+   391	                    <div class="value-icon">
+   392	                        <i class="fas fa-gem"></i>
+   393	                    </div>
+   394	                    <h3>Exclusive Designs</h3>
+   395	                    <p>Unique collections that bring luxury and tradition together. Each design is carefully curated to offer something special - pieces that you won't find anywhere else.</p>
+   396	                </div>
+   397	            </div>
+   398	        </div>
+   399	    </section>
+   400	
+   401	    <!-- Mission Section -->
+   402	    <section class="mission-section">
+   403	        <div class="mission-content">
+   404	            <h2>Our Mission</h2>
+   405	            <p>Taharah is more than just a fashion brand – it is a destination for those seeking the finest Pakistani fashion, blending traditional grace with modern appeal.</p>
+   406	            <p>We aim to provide the most exquisite collection of pret and party wear, creating garments that make every woman feel confident and beautiful.</p>
+   407	            <p>Our commitment extends beyond creating beautiful clothes – we are dedicated to providing an exceptional shopping experience and ensuring that our heritage-inspired designs continue to inspire for years to come.</p>
+   408	        </div>
+   409	    </section>
+   410	
+   411	    <!-- WhatsApp Button -->
+   412	
+   413	
+   414	    <!-- WhatsApp Tooltip Script -->
+   415	    <script src="js/whatsapp-tooltip.js"></script>
+   416	
+   417	
+   418	
+   419	
+   420	
+   421	
+   422	    <!-- Search Scripts -->
+   423	    <script src="js/search-manager.js"></script>
+   424	    <script src="js/search-ui.js"></script>
+   425	
+   426	    <!-- Core JS Files -->
+   427	    <script src="js/navigation.js?v=1.0.4"></script>
+   428	    <script src="js/banner-rotator.js?v=1.0.1"></script>
+   429	    <script src="js/error-handler.js"></script>
+   430	    <script src="js/firebase/firebase-auth.js"></script>
+   431	    <script src="js/cart-local-storage.js?v=1.0.0"></script>
+   432	    <script src="js/firebase/firebase-cart-manager.js?v=1.0.0"></script>
+   433	    <script src="js/cart-manager.js?v=1.0.1"></script>
+   434	    <script src="js/wishlist-local-storage.js?v=1.0.0"></script>
+   435	    <script src="js/firebase/firebase-wishlist-manager.js?v=1.0.0"></script>
+   436	    <script src="js/wishlist-manager.js?v=1.0.0"></script>
+   437	    <script src="js/main.js"></script>
+   438	
+   439	    <!-- Initialize search after all scripts are loaded -->
+   440	    <script>
+   441	        document.addEventListener('DOMContentLoaded', function() {
+   442	            // Ensure search functionality is working
+   443	            setTimeout(() => {
+   444	                if (typeof SearchManager !== 'undefined') {
+   445	                    console.log('SearchManager available');
+   446	                }
+   447	                if (typeof SearchUI !== 'undefined') {
+   448	                    console.log('SearchUI available');
+   449	                }
+   450	
+   451	                // Manual search icon setup as backup
+   452	                const searchIcon = document.querySelector('.search-icon');
+   453	                if (searchIcon && !searchIcon.hasAttribute('data-search-attached')) {
+   454	                    searchIcon.addEventListener('click', function(e) {
+   455	                        e.preventDefault();
+   456	                        console.log('Manual search icon click handler triggered');
+   457	                        if (typeof SearchUI !== 'undefined' && SearchUI.openSearch) {
+   458	                            SearchUI.openSearch();
+   459	                        }
+   460	                    });
+   461	                    searchIcon.setAttribute('data-search-attached', 'true');
+   462	                    console.log('Manual search icon handler attached');
+   463	                }
+   464	            }, 500);
+   465	        });
+   466	    </script>
+   467	
+   468	    <!-- Firebase Authentication Check -->
+   469	    <script>
+   470	      const FirebaseAuth = window.FirebaseAuth;
+   471	
+   472	      function handleAuthentication() {
+   473	        const FirebaseAuth = window.FirebaseAuth;
+   474	
+   475	        if (!FirebaseAuth) {
+   476	          console.warn('FirebaseAuth module not yet available, retrying...');
+   477	          setTimeout(handleAuthentication, 100);
+   478	          return;
+   479	        }
+   480	
+   481	        const userIcon = document.getElementById('user-icon');
+   482	
+   483	        if (userIcon) {
+   484	          try {
+   485	            const currentUser = firebase.auth().currentUser;
+   486	
+   487	            if (currentUser) {
+   488	              console.log("Firebase user is logged in:", currentUser.uid);
+   489	              userIcon.href = "profile";
+   490	              userIcon.classList.add('logged-in');
+   491	            } else {
+   492	              if (FirebaseAuth.isLoggedIn()) {
+   493	                console.log("User is logged in from session");
+   494	                userIcon.href = "profile";
+   495	                userIcon.classList.add('logged-in');
+   496	              } else {
+   497	                console.log("No user session found");
+   498	                userIcon.href = "login";
+   499	                userIcon.classList.remove('logged-in');
+   500	              }
+   501	            }
+   502	          } catch (error) {
+   503	            console.error('Error checking authentication state:', error);
+   504	            userIcon.href = "login";
+   505	            userIcon.classList.remove('logged-in');
+   506	          }
+   507	        }
+   508	      }
+   509	
+   510	      document.addEventListener('DOMContentLoaded', handleAuthentication);
+   511	
+   512	      FirebaseAuth.observeAuthState((user) => {
+   513	        const userIcon = document.getElementById('user-icon');
+   514	
+   515	        if (userIcon) {
+   516	          if (user) {
+   517	            console.log("Auth state: User is signed in:", user.uid);
+   518	
+   519	            FirebaseAuth.saveSession({
+   520	              uid: user.uid,
+   521	              email: user.email,
+   522	              displayName: user.displayName || 'User',
+   523	              photoURL: user.photoURL,
+   524	              loggedIn: true
+   525	            });
+   526	
+   527	            userIcon.href = "profile";
+   528	            userIcon.classList.add('logged-in');
+   529	          } else {
+   530	            console.log("Auth state: User is signed out");
+   531	            FirebaseAuth.clearSession();
+   532	            userIcon.href = "login";
+   533	            userIcon.classList.remove('logged-in');
+   534	          }
+   535	        }
+   536	      });
+   537	    </script>
+   538	
+   539	
+   540	
+   541	    <!-- Bottom Navigation Bar -->
+   542	
+   543	    <!-- Footer Toggle Script -->
+   544	
+   545	
+   546	    <!-- Minimalist Collapsible Footer -->
+   547	
+   548	
+   549	    <!-- Bottom Navigation Bar (Mobile Only) -->
+   550	
+   551	
+   552	    <!-- Footer Toggle Script -->
+   553	
+   554	
+   555	
+   556	    <!-- Minimalist Collapsible Footer -->
+   557	
+   558	
+   559	    <!-- Bottom Navigation Bar (Mobile Only) -->
+   560	
+   561	
+   562	    <!-- Footer Toggle Script -->
+   563	
+   564	
+   565	
+   566	    <!-- Minimalist Collapsible Footer -->
+   567	    <footer class="footer-minimalist">
+   568	        <div class="container">
+   569	            <!-- Info Section -->
+   570	            <div class="footer-section">
+   571	                <button class="footer-toggle" data-section="info-content">
+   572	                    <span class="footer-title" data-translate="info">Info</span>
+   573	                    <i class="fas fa-chevron-down"></i>
+   574	                </button>
+   575	                <div class="footer-content" id="info-content">
+   576	                    <ul>
+   577	                        <li><a href="/about-us" data-translate="about_us">About Us</a></li>
+   578	                        <li><a href="terms-conditions#shipping-and-delivery" data-translate-dynamic>Shipping Policy</a></li>
+   579	                        <li><a href="terms-conditions#returns-and-refunds" data-translate-dynamic>Returns & Exchanges</a></li>
+   580	                        <li><a href="/terms-conditions" data-translate-dynamic>Terms and Conditions</a></li>
+   581	                        <li><a href="/privacy-policy" data-translate-dynamic>Privacy Policy</a></li>
+   582	                    </ul>
+   583	                </div>
+   584	            </div>
+   585	
+   586	            <!-- Categories Section -->
+   587	            <div class="footer-section">
+   588	                <button class="footer-toggle" data-section="categories-content">
+   589	                    <span class="footer-title" data-translate="categories">Categories</span>
+   590	                    <i class="fas fa-chevron-down"></i>
+   591	                </button>
+   592	                <div class="footer-content" id="categories-content">
+   593	                    <ul>
+   594	                        <li><a href="/pakistani-pret-wear">Pakistani Pret Wear</a></li>
+   595	                        <li><a href="/ready-to-wear">Ready to Wear</a></li>
+   596	                        <li><a href="/party-wear">Party Wear</a></li>
+   597	                        <li><a href="/modest-wear">Modest Wear</a></li>
+   598	                    </ul>
+   599	                </div>
+   600	            </div>
+   601	
+   602	            <!-- Collection Section -->
+   603	            <div class="footer-section">
+   604	                <button class="footer-toggle" data-section="collection-content">
+   605	                    <span class="footer-title" data-translate-dynamic>Collection</span>
+   606	                    <i class="fas fa-chevron-down"></i>
+   607	                </button>
+   608	                <div class="footer-content" id="collection-content">
+   609	                    <ul>
+   610	                        <li><a href="/new-arrivals">New Arrivals</a></li>
+   611	                        <li><a href="/pakistani-pret-wear">Pakistani Pret Wear</a></li>
+   612	                        <li><a href="/ready-to-wear">Ready to Wear</a></li>
+   613	                        <li><a href="/party-wear">Party Wear</a></li>
+   614	                        <li><a href="/modest-wear">Modest Wear</a></li>
+   615	                    </ul>
+   616	                </div>
+   617	            </div>
+   618	
+   619	            <!-- Exclusive Benefits Section -->
+   620	            <div class="footer-section">
+   621	                <button class="footer-toggle" data-section="benefits-content">
+   622	                    <span class="footer-title" data-translate-dynamic>Exclusive benefits</span>
+   623	                    <i class="fas fa-chevron-down"></i>
+   624	                </button>
+   625	                <div class="footer-content" id="benefits-content">
+   626	                    <ul>
+   627	                        <li><a href="#" data-translate-dynamic>Personal Styling</a></li>
+   628	                    </ul>
+   629	                </div>
+   630	            </div>
+   631	
+   632	            <!-- Social Media Icons Section -->
+   633	            <div class="footer-social-section">
+   634	                <h3 class="social-section-title" data-translate="follow_social">Follow us on social media</h3>
+   635	                <div class="social-icons-container">
+   636	                    <a href="https://www.instagram.com" target="_blank" class="social-icon-link">
+   637	    <section class="about-section">
+   638	        <div class="about-hero">
+   639	            <h1>About Us</h1>
+   640	        </div>
+   641	
+   642	        <div class="content-block">
+   643	            <span class="section-label">SOME WORDS ABOUT US</span>
+   644	            <h2 class="main-heading">Celebrating Culture Through Timeless Ethnic Wear</h2>
+   645	
+   646	            <div class="vision-mission-grid">
+   647	                <div class="vm-item">
+   648	                    <h3>Vision</h3>
+   649	                    <p>To redefine ethnic fashion by blending traditional craftsmanship with contemporary design — inspiring elegance and confidence in every woman.</p>
+   650	                </div>
+   651	                <div class="vm-item">
+   652	                    <h3>Mission</h3>
+   653	                    <p>To create thoughtfully designed Pakistani and Indian suits that honor heritage, embrace modernity, and deliver quality, comfort, and timeless style with every piece.</p>
+   654	                </div>
+   655	            </div>
+   656	
+   657	            <div class="journey-section">
+   658	                <span class="section-label">OUR JOURNEY, YOUR STYLE</span>
+   659	                <h2 class="journey-heading">Where Every Suit Tells a Story</h2>
+   660	                <div class="journey-image">
+   661	                    <img src="images/about-journey.jpg" alt="Our Journey">
+   662	                </div>
+   663	                <div class="journey-text">
+   664	                    <p>Zoel started in 2020 in Kerala, with a simple idea — to bring modest and stylish clothing to women, mainly focusing on Pakistani suits and partywear. We didn’t have a big setup or a team in the beginning. We just had a small collection, a lot of hope, and the support of a few loyal customers who trusted us from day one. Step by step, order by order, Zoel began to grow. What started with a few pieces has now become something much bigger. Today, we’ve delivered over 1 lakh+ products across India, and we are grateful to have 1 lakh+ happy customers who continue to support us like family. More than anything, we’re proud of the connection we’ve built.</p>
+   665	                </div>
+   666	            </div>
+   667	        </div>
+   668	    </section>
+   669	        </div>
+   670	        <div class="bottom-nav-item language-selector-wrapper">
+   671	            <span id="selected-language-flag" class="language-flag-display">🇬🇧</span>
+   672	            <span id="selected-language-code" class="language-code-display">EN</span>
+   673	            <select id="language-selector" class="language-select" onchange="LanguageTranslator.changeLanguage(this.value)">
+   674	                <option value="en">EN</option>
+   675	                <option value="hi">HI</option>
+   676	                <option value="es">ES</option>
+   677	                <option value="fr">FR</option>
+   678	                <option value="ar">AR</option>
+   679	                <option value="de">DE</option>
+   680	            </select>
+   681	        </div>
+   682	        <a href="#" class="bottom-nav-item" id="bottomNavCart">
+   683	            <i class="fi fi-rs-shopping-bag"></i>
+   684	            <span data-translate="bag">Bag</span>
+   685	        </a>
+   686	    </nav>
+   687	
+   688	    <!-- Footer Toggle Script -->
+   689	    <script src="js/footer-toggle.js"></script>
+   690	
+   691	    <!-- Bottom Navigation Cart Handler Script -->
+   692	    <script>
+   693	        document.addEventListener('DOMContentLoaded', function() {
+   694	            const bottomNavCart = document.getElementById('bottomNavCart');
+   695	            if (bottomNavCart) {
+   696	                bottomNavCart.addEventListener('click', function(e) {
+   697	                    e.preventDefault();
+   698	                    if (typeof openCart === 'function') {
+   699	                        openCart();
+   700	                    } else {
+   701	                        window.location.href = 'checkout';
+   702	                    }
+   703	                });
+   704	            }
+   705	        });
+   706	    </script>
+   707	
+   708	    <!-- Currency Converter -->
+   709	    <script src="js/currency-converter.js?v=1.0.0"></script>
+   710	
+   711	    <!-- Language Translator -->
+   712	    <script src="js/language-translator.js?v=1.0.0"></script>
+   713	
+   714	</body>
+   715	</html>

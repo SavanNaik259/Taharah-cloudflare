@@ -63,16 +63,27 @@
 
 
     <style>
-        /* Scoped Zeol-inspired About Page Styles */
-        .about-section-new {
-            padding: 0;
-            margin-top: 0;
-            background: #fff;
-            position: relative;
-            z-index: 1;
+        /* Zeol-inspired About Page Styles */
+        :root {
+            --zeol-font-serif: "Playfair Display", serif;
+            --zeol-font-sans: "Futura PT", "Lato", sans-serif;
+            --zeol-text-color: #333;
+            --zeol-light-text: #666;
         }
 
-        .about-hero-new {
+        body {
+            font-family: var(--zeol-font-sans);
+            color: var(--zeol-text-color);
+            line-height: 1.6;
+            background-color: #fff;
+        }
+
+        .about-section {
+            padding: 0;
+            margin-top: 80px; /* Adjust based on navbar height */
+        }
+
+        .about-hero {
             position: relative;
             height: 400px;
             background-image: url("images/IMG-20260213-WA0018.jpg");
@@ -85,7 +96,7 @@
             color: #fff;
         }
 
-        .about-hero-new::before {
+        .about-hero::before {
             content: "";
             position: absolute;
             top: 0;
@@ -96,35 +107,32 @@
             z-index: 1;
         }
 
-        .about-hero-new h1 {
-            font-family: 'Playfair Display', serif;
+        .about-hero h1 {
+            font-family: var(--zeol-font-serif);
             font-size: 48px;
             position: relative;
             z-index: 2;
             font-weight: 400;
             letter-spacing: 1px;
-            color: #fff !important;
-            margin: 0;
         }
 
-        .content-block-new {
+        .content-block {
             max-width: 1000px;
             margin: 60px auto;
             padding: 0 20px;
         }
 
-        .section-label-new {
+        .section-label {
             text-transform: uppercase;
             font-size: 14px;
             letter-spacing: 2px;
-            color: #666;
+            color: var(--zeol-light-text);
             margin-bottom: 20px;
             display: block;
-            font-family: 'Futura PT', sans-serif;
         }
 
-        .main-heading-new {
-            font-family: 'Playfair Display', serif;
+        .main-heading {
+            font-family: var(--zeol-font-serif);
             font-size: 36px;
             line-height: 1.3;
             margin-bottom: 40px;
@@ -132,76 +140,69 @@
             font-weight: 400;
         }
 
-        .vision-mission-grid-new {
+        .vision-mission-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 40px;
             margin-bottom: 60px;
         }
 
-        .vm-item-new h3 {
-            font-family: 'Playfair Display', serif;
+        .vm-item h3 {
+            font-family: var(--zeol-font-serif);
             font-size: 24px;
             margin-bottom: 15px;
             color: #000;
             font-weight: 400;
         }
 
-        .vm-item-new p {
+        .vm-item p {
             font-size: 16px;
-            color: #666;
+            color: var(--zeol-light-text);
             line-height: 1.8;
-            font-family: 'Futura PT', sans-serif;
         }
 
-        .journey-section-new {
+        .journey-section {
             background-color: #fff;
             padding: 60px 0;
         }
 
-        .journey-heading-new {
-            font-family: 'Playfair Display', serif;
+        .journey-heading {
+            font-family: var(--zeol-font-serif);
             font-size: 32px;
             margin-bottom: 30px;
             font-weight: 400;
-            color: #000;
         }
 
-        .journey-image-new {
+        .journey-image {
             width: 100%;
             margin-bottom: 40px;
         }
 
-        .journey-image-new img {
+        .journey-image img {
             width: 100%;
             height: auto;
             display: block;
         }
 
-        .journey-text-new {
+        .journey-text {
             font-size: 16px;
-            color: #666;
+            color: var(--zeol-light-text);
             line-height: 1.8;
             text-align: justify;
-            font-family: 'Futura PT', sans-serif;
         }
 
         @media (max-width: 768px) {
-            .about-hero-new {
+            .about-hero {
                 height: 300px;
             }
-            .about-hero-new h1 {
+            .about-hero h1 {
                 font-size: 32px;
             }
-            .main-heading-new {
+            .main-heading {
                 font-size: 28px;
-            }
-            .vision-mission-grid-new {
-                grid-template-columns: 1fr;
             }
         }
     </style>
-
 
     <!-- Analytics Tracking - Load AFTER Firebase is ready -->
     <script>
@@ -335,38 +336,79 @@
     <!-- Overlay for menu background -->
     <div class="menu-overlay" id="menuOverlay"></div>
 
-    <section class="about-section-new">
-        <div class="about-hero-new">
-            <h1>About Us</h1>
+    <!-- About Hero Section -->
+    <section class="about-hero">
+        <div class="container">
+            <div class="about-hero-content">
+                <h1>About Taharah</h1>
+                <p>Exquisite Pakistani Fashion - Handcrafted Pret Wear | Party Wear | Modest Wear - Premium Quality Craftsmanship</p>
+            </div>
         </div>
+    </section>
 
-        <div class="content-block-new">
-            <span class="section-label-new">SOME WORDS ABOUT US</span>
-            <h2 class="main-heading-new">Celebrating Culture Through Timeless Ethnic Wear</h2>
+    <!-- Founder Section -->
+    <section class="founder-section">
+        <div class="founder-container">
+            <div class="founder-image">
+                <img src="images/IMG-20260213-WA0018.jpg" alt="Taharah - Premium Pakistani Fashion" onerror="this.src='images/product-placeholder.jpg'">
+            </div>
+            <div class="founder-content">
+                <h2>Taharah</h2>
+                <div class="title">Elegance & Excellence in Pakistani Fashion</div>
+                <p>At Taharah, we bring you the finest collection of Pakistani fashion. Based in Kerala, India, we specialize in high-quality pret wear, party wear, and modest wear that reflects the rich cultural heritage and contemporary trends of Pakistani attire.</p>
+                <p>Our commitment to authentic designs and premium fabrics ensures that every piece in our collection is a masterpiece of craftsmanship and style.</p>
+                <p>Every dress in our collection reflects artistic brilliance and the timeless beauty of traditional designs, crafted to perfection for women who appreciate elegance and quality.</p>
+            </div>
+        </div>
+    </section>
 
-            <div class="vision-mission-grid-new">
-                <div class="vm-item-new">
-                    <h3>Vision</h3>
-                    <p>To redefine ethnic fashion by blending traditional craftsmanship with contemporary design — inspiring elegance and confidence in every woman.</p>
-                </div>
-                <div class="vm-item-new">
-                    <h3>Mission</h3>
-                    <p>To create thoughtfully designed Pakistani and Indian suits that honor heritage, embrace modernity, and deliver quality, comfort, and timeless style with every piece.</p>
-                </div>
+    <!-- Values Section -->
+    <section class="values-section">
+        <div class="container">
+            <div class="values-heading">
+                <h2>What We Offer</h2>
+                <p>From exquisite party wear to daily pret, every garment reflects our commitment to excellence and premium craftsmanship</p>
             </div>
 
-            <div class="journey-section-new">
-                <span class="section-label-new">OUR JOURNEY, YOUR STYLE</span>
-                <h2 class="journey-heading-new">Where Every Suit Tells a Story</h2>
-                <div class="journey-image-new">
-                    <img src="images/about-journey.jpg" alt="Our Journey">
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <h3>Authentic And Pure</h3>
+                    <p>Every product is crafted with original fabrics and premium artistry. We guarantee authenticity and quality in every thread, ensuring that traditional designs are preserved and honored.</p>
                 </div>
-                <div class="journey-text-new">
-                    <p>Zoel started in 2020 in Kerala, with a simple idea — to bring modest and stylish clothing to women, mainly focusing on Pakistani suits and partywear. We didn’t have a big setup or a team in the beginning. We just had a small collection, a lot of hope, and the support of a few loyal customers who trusted us from day one. Step by step, order by order, Zoel began to grow. What started with a few pieces has now become something much bigger. Today, we’ve delivered over 1 lakh+ products across India, and we are grateful to have 1 lakh+ happy customers who continue to support us like family. More than anything, we’re proud of the connection we’ve built.</p>
+
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-globe-americas"></i>
+                    </div>
+                    <h3>All India Free Shipping Available</h3>
+                    <p>We provide free shipping across all of India. Currently, we do not offer worldwide shipping services.</p>
+                </div>
+
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-gem"></i>
+                    </div>
+                    <h3>Exclusive Designs</h3>
+                    <p>Unique collections that bring luxury and tradition together. Each design is carefully curated to offer something special - pieces that you won't find anywhere else.</p>
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- Mission Section -->
+    <section class="mission-section">
+        <div class="mission-content">
+            <h2>Our Mission</h2>
+            <p>Taharah is more than just a fashion brand – it is a destination for those seeking the finest Pakistani fashion, blending traditional grace with modern appeal.</p>
+            <p>We aim to provide the most exquisite collection of pret and party wear, creating garments that make every woman feel confident and beautiful.</p>
+            <p>Our commitment extends beyond creating beautiful clothes – we are dedicated to providing an exceptional shopping experience and ensuring that our heritage-inspired designs continue to inspire for years to come.</p>
+        </div>
+    </section>
+
+    <!-- WhatsApp Button -->
 
 
     <!-- WhatsApp Tooltip Script -->
