@@ -17,19 +17,18 @@ document.addEventListener('DOMContentLoaded', async function() {
     console.log('Found products grid element:', productsGrid);
 
     try {
-        // Load products directly from Firebase without depending on external loaders
+        // Load products directly from Firebase
         const products = await loadNewArrivalsProductsDirect();
 
-        console.log('Raw products received:', products);
-        console.log('Products array length:', products ? products.length : 'null/undefined');
-
         if (products && products.length > 0) {
-            console.log(`Loaded ${products.length} new arrivals products for page`);
-            displayAllProducts(products);
-            setupSortUI(products);
+            console.log(`Loaded ${products.length} new arrivals products`);
+            // Use the unified handler to display and manage products
+            if (window.FilterSortHandler) {
+                window.FilterSortHandler.setProducts(products);
+            } else {
+                displayAllProducts(products);
+            }
         } else {
-            console.log('No new arrivals products found - showing empty state');
-            console.log('Products value:', products);
             showEmptyState();
         }
     } catch (error) {

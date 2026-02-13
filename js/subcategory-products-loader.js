@@ -199,28 +199,19 @@ const SubcategoryProductsLoader = (function() {
             const products = await loadSubcategoryProducts(category);
 
             if (products.length > 0) {
-                // Hide loader before showing products - dynamic category ID
+                // Hide loader
                 const loaderPage = document.getElementById(`${category}-loader`);
                 if (loaderPage) {
                     loaderPage.classList.remove('show');
                     loaderPage.style.display = 'none';
                 }
                 
-                const productsHTML = products.map(product => generateProductHTML(product)).join('');
-                productsGrid.innerHTML = productsHTML;
-
-                // Convert prices to user's selected currency
-                if (typeof window.CurrencyConverter !== 'undefined') {
-                    window.CurrencyConverter.convertAllPrices();
-                }
-
-                // Setup wishlist event listeners
-
-                // Update wishlist button states
-                if (typeof window.WishlistManager !== 'undefined') {
-                    setTimeout(() => {
-                        window.WishlistManager.updateWishlistButtonsState();
-                    }, 100);
+                // Use unified handler
+                if (window.FilterSortHandler) {
+                    window.FilterSortHandler.setProducts(products);
+                } else {
+                    const productsHTML = products.map(product => generateProductHTML(product)).join('');
+                    productsGrid.innerHTML = productsHTML;
                 }
             } else {
                 // Hide loader when no products
