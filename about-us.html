@@ -284,24 +284,21 @@
     <!-- Side Cart Panel -->
     <div id="auricCartPanel" class="cart-panel">
       <div class="cart-panel-header">
-        <h2 data-translate="shopping_bag">Shopping Bag</h2>
-        <button id="closeCartPanel" class="close-cart-btn"><i class="fas fa-times"></i></button>
+        <h3 data-translate="shopping_bag">Your Shopping Bag</h3>
+        <button class="close-cart-btn">×</button>
       </div>
-      <div class="cart-panel-body" id="cartPanelItems">
-        <!-- Cart items will be loaded here -->
-        <div class="empty-cart-message">
-          <p data-translate="cart_empty">Your bag is empty</p>
-          <a href="/new-arrivals" class="btn-shop-now" data-translate="shop_now">Shop Now</a>
-        </div>
+      <div class="cart-items">
+        <!-- Cart items will be inserted here by JavaScript -->
+        <div class="empty-cart-message" data-translate="your_cart_empty">Your cart is empty</div>
       </div>
       <div class="cart-panel-footer">
         <div class="cart-panel-subtotal">
-          <span data-translate="subtotal">Subtotal</span>
-          <span id="cartPanelSubtotalAmount">₹0</span>
+          <span data-translate="subtotal">Subtotal:</span>
+          <span class="subtotal-amount">₹0.00</span>
         </div>
         <div class="cart-panel-buttons">
-          <a href="/checkout" class="btn-checkout" data-translate="checkout">Checkout</a>
-          <button id="viewCartBtn" class="btn-view-cart" data-translate="view_bag">View Bag</button>
+          <button class="view-cart-btn continue-shopping-btn" data-translate="continue_shopping">Continue Shopping</button>
+          <a href="/checkout" class="checkout-btn" data-translate="checkout">Checkout</a>
         </div>
       </div>
     </div>
