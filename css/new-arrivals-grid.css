@@ -110,7 +110,7 @@
 }
 
 .navbar .hamburger img {
-    filter: brightness(0) invert(1) !important;
+    filter: brightness(0) !important;
 }
 
 /* Main Products Grid Container - FIXED */
