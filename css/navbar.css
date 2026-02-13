@@ -1,3 +1,17 @@
+/* Language Selector Styles */
+.language-selector-wrapper {
+    display: none !important;
+}
+
+.bottom-nav-item.language-selector-wrapper {
+    display: none !important;
+}
+
+/* Currency Converter Styles */
+.currency-converter-wrapper {
+    display: none !important;
+}
+
 /* Responsive Navigation Bar Styles */
 
 /* Navbar Container */
