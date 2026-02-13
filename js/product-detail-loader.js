@@ -652,7 +652,7 @@ const ProductDetailLoader = (function() {
 
                     uniqueImages.forEach((image, index) => {
                         const thumbnailElement = document.createElement('div');
-                        thumbnailElement.className = `thumbnail ${image.isMain ? 'active' : ''}`;
+                        thumbnailElement.className = `thumbnail thumbnail-item ${image.isMain || index === 0 ? 'active' : ''}`;
                         thumbnailElement.innerHTML = `
                             ${image.url ? `<img src="${image.url}" alt="${image.alt || `View ${index + 1}`}" loading="lazy">` : ''}
                         `;
@@ -667,8 +667,14 @@ const ProductDetailLoader = (function() {
                             });
 
                             // Update active thumbnail
-                            document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
+                            document.querySelectorAll('.thumbnail, .thumbnail-item').forEach(thumb => {
+                                thumb.classList.remove('active');
+                                thumb.style.opacity = '0.6';
+                                thumb.style.borderColor = 'transparent';
+                            });
                             thumbnailElement.classList.add('active');
+                            thumbnailElement.style.opacity = '1';
+                            thumbnailElement.style.borderColor = '#000';
 
                             console.log('Thumbnail clicked, updated main image to:', image.url);
                         });
