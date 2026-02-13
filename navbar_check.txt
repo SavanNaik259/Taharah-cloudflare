@@ -1,0 +1,101 @@
+   235	<!-- Header -->
+   236	    <header class="header">
+   237	        <!-- Promo Banner -->
+   238	        <div class="promo-banner">
+   239	            <p class="banner-text"></p>
+   240	        </div>
+   241	
+   242	
+   243	        <!-- New Responsive Navigation -->
+   244	        <nav class="navbar">
+   245	            <div class="nav-container">
+   246	                <!-- Logo -->
+   247	                <a href="/index" class="brand">
+   248	                    <img src="images/logos/taharah-navbar.png" alt="Taharah" class="brand-logo">
+   249	                </a>
+   250	
+   251	
+   252	                <!-- Mobile Toggle Button - Match RIDHI MEHRA design -->
+   253	                <div class="hamburger" id="navToggle"><img src="images/icons/bars-staggered (2).png" alt="Taharah"style="width: 25px; height: 25px;">
+   254	                </div>
+   255	
+   256	                <!-- Navigation Icons - Exact match to RIDHI MEHRA design -->
+   257	                <div class="nav-icons">
+   258	                    <a href="#" class="icon-link search-icon">
+   259	                        <img src="images/icons/search.png" alt="Search" style="width: 20px; height: 20px;">
+   260	                    </a>
+   261	                    <a href="#" class="icon-link wishlist-icon-container wishlist-toggle">
+   262	                        <img src="images/icons/heart.png" alt="Wishlist" style="width: 20px; height: 20px;">
+   263	                        <div class="wishlist-count">0</div>
+   264	                    </a>
+   265	                </div>
+   266	            </div>
+   267	        </nav>
+   268	
+   269	        <!-- Navigation Links - Moved outside nav-container to avoid backdrop-filter containing block -->
+   270	        <div class="nav-menu" id="navMenu">
+   271	            <!-- Close button for mobile menu in the top right corner -->
+   272	
+   273	            <i id="closeMenu" class="fa-solid fa-xmark meenu-close" onclick="closeMobileMenu()" style="font-size: 24px; margin-left: 90%; color: #333;" ></i>
+   274	
+   275	
+   276	          <!-- "  <button class="menu-close fa fa-times" ></button>-->
+   277	
+   278	            <ul class="nav-list">
+   279	                <li class="nav-item"><a href="/index" class="nav-link" data-translate="home">Home</a></li>
+   280	                <li class="nav-item"><a href="/new-arrivals" class="nav-link" data-translate="new_arrivals">New Arrivals</a></li>
+   281	                <li class="nav-item dropdown">
+   282	                    <a href="#" class="nav-link dropdown-toggle"><span data-translate="categories">Collections</span> <i class="fas fa-chevron-down"></i></a>
+   283	                    <ul class="dropdown-menu">
+   284	                      <!--  <li><a href="/all-collection" data-translate="all_collections">All Collection</a></li>-->
+   285	                        <li><a href="/pakistani-pret-wear" data-translate-dynamic>Pakistani Pret Wear</a></li>
+   286	
+   287	
+   288	                        <li><a href="/ready-to-wear" data-translate="featured">Ready to Wear</a></li>
+   289	                        
+   290	                        <li><a href="/modest-wear" data-translate-dynamic>Modest Wear</a></li>
+   291	                        <li><a href="/party-wear" data-translate-dynamic>Party Wear</a></li>
+   292	                        <!--<li class="dropdown-submenu">
+   293	                            <a href="#"><span data-translate="earrings">Earrings</span> <i class="fas fa-chevron-right"></i></a>
+   294	                            <ul class="dropdown-submenu-list">
+   295	                                <li><a href="/gold-earrings" data-translate-dynamic>Gold Earrings</a></li>
+   296	                                <li><a href="/silver-earrings" data-translate-dynamic>Silver Earrings</a></li>
+   297	                                <li><a href="/meenakari-earrings" data-translate-dynamic>Meenakari Earrings</a></li>
+   298	                            </ul>
+   299	                        </li>
+   300	                        <li class="dropdown-submenu">
+   301	                            <a href="#"><span data-translate="bangles">Bangles</span> <i class="fas fa-chevron-right"></i></a>
+   302	                            <ul class="dropdown-submenu-list">
+   303	                                <li><a href="/gold-bangles" data-translate-dynamic>Gold Bangles</a></li>
+   304	                                <li><a href="/silver-bangles" data-translate-dynamic>Silver Bangles</a></li>
+   305	                                <li><a href="/meenakari-bangles" data-translate-dynamic>Meenakari Bangles</a></li>
+   306	                            </ul>
+   307	                        </li>
+   308	                        <li class="dropdown-submenu">
+   309	                            <a href="#"><span data-translate="rings">Rings</span> <i class="fas fa-chevron-right"></i></a>
+   310	                            <ul class="dropdown-submenu-list">
+   311	                                <li><a href="/gold-rings" data-translate-dynamic>Gold Rings</a></li>
+   312	                                <li><a href="/silver-rings" data-translate-dynamic>Silver Rings</a></li>
+   313	                                <li><a href="/meenakari-rings" data-translate-dynamic>Meenakari Rings</a></li>
+   314	                            </ul>
+   315	                        </li>-->
+   316	                    </ul>
+   317	                </li>
+   318	                <li class="nav-item"><a href="/about-us" class="nav-link" data-translate="about_us">About</a></li>
+   319	                <li class="nav-item"><a href="#customer-reviews" class="nav-link" data-translate-dynamic>Testimonials</a></li>
+   320	                <!-- <li class="nav-item"><a href="/book-appointment" class="nav-link" data-translate-dynamic>Book Appointment</a></li> -->
+   321	                <li class="nav-item"><a href="#" class="nav-link" data-translate-dynamic>Order Track</a></li>
+   322	                <li><a href="/contact-us" class="nav-link" data-translate="contact_us">Contact</a></li>
+   323	            </ul>
+   324	
+   325	            <!-- Mobile account links in separate div after Contact -->
+   326	            <div class="mobile-account-links mobile-special">
+   327	                <a href="#" class="mobile-account-link wishlist-toggle">
+   328	                    <img src="images/icons/heart.png" alt="Cart" style="width: 18px; height: 18px;"> &nbsp;   <span data-translate="wishlist">Wishlist</span> (<span class="mobile-wishlist-count">0</span>)
+   329	                </a>
+   330	
+   331	            </div>
+   332	        </div>
+   333	    </header>
+   334	
+   335	    <!-- Overlay for menu background -->
