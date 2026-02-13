@@ -278,6 +278,29 @@ document.addEventListener('DOMContentLoaded', function() {
     // Setup search icon after DOM is loaded
     setupSearchIcon();
 
+    /**
+     * Setup bottom navigation cart button
+     */
+    function setupBottomNavCart() {
+        const bottomNavCart = document.getElementById('bottomNavCart');
+        if (bottomNavCart) {
+            bottomNavCart.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Bottom nav cart clicked');
+                if (typeof CartManager !== 'undefined' && CartManager.toggleCartPanel) {
+                    CartManager.toggleCartPanel();
+                } else if (window.toggleCart) {
+                    window.toggleCart();
+                } else {
+                    console.warn('CartManager not available for bottom nav');
+                }
+            });
+            console.log('Bottom nav cart handler attached');
+        }
+    }
+
+    setupBottomNavCart();
+
     // User icon authentication state management
     const userIcon = document.getElementById('user-icon');
 
