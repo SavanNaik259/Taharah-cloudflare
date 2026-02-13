@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Banner content array
     const bannerContents = [
-        'Free shipping on orders over ₹2,000',
-        'New arrivals for the festive season - <a href="new-arrivals">View Collection</a>'
+        '•Free shipping for all your orders•',
+        '•New arrivals for the festive season•'
     ];
 
     // Function to get banner content with translation support
