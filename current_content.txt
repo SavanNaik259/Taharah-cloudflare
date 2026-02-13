@@ -1,0 +1,74 @@
+    <!-- About Hero Section -->
+    <section class="about-hero">
+        <div class="container">
+            <div class="about-hero-content">
+                <h1>About Taharah</h1>
+                <p>Exquisite Pakistani Fashion - Handcrafted Pret Wear | Party Wear | Modest Wear - Premium Quality Craftsmanship</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Founder Section -->
+    <section class="founder-section">
+        <div class="founder-container">
+            <div class="founder-image">
+                <img src="images/IMG-20260213-WA0018.jpg" alt="Taharah - Premium Pakistani Fashion" onerror="this.src='images/product-placeholder.jpg'">
+            </div>
+            <div class="founder-content">
+                <h2>Taharah</h2>
+                <div class="title">Elegance & Excellence in Pakistani Fashion</div>
+                <p>At Taharah, we bring you the finest collection of Pakistani fashion. Based in Kerala, India, we specialize in high-quality pret wear, party wear, and modest wear that reflects the rich cultural heritage and contemporary trends of Pakistani attire.</p>
+                <p>Our commitment to authentic designs and premium fabrics ensures that every piece in our collection is a masterpiece of craftsmanship and style.</p>
+                <p>Every dress in our collection reflects artistic brilliance and the timeless beauty of traditional designs, crafted to perfection for women who appreciate elegance and quality.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Values Section -->
+    <section class="values-section">
+        <div class="container">
+            <div class="values-heading">
+                <h2>What We Offer</h2>
+                <p>From exquisite party wear to daily pret, every garment reflects our commitment to excellence and premium craftsmanship</p>
+            </div>
+
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <h3>Authentic And Pure</h3>
+                    <p>Every product is crafted with original fabrics and premium artistry. We guarantee authenticity and quality in every thread, ensuring that traditional designs are preserved and honored.</p>
+                </div>
+
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-globe-americas"></i>
+                    </div>
+                    <h3>All India Free Shipping Available</h3>
+                    <p>We provide free shipping across all of India. Currently, we do not offer worldwide shipping services.</p>
+                </div>
+
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-gem"></i>
+                    </div>
+                    <h3>Exclusive Designs</h3>
+                    <p>Unique collections that bring luxury and tradition together. Each design is carefully curated to offer something special - pieces that you won't find anywhere else.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mission Section -->
+    <section class="mission-section">
+        <div class="mission-content">
+            <h2>Our Mission</h2>
+            <p>Taharah is more than just a fashion brand – it is a destination for those seeking the finest Pakistani fashion, blending traditional grace with modern appeal.</p>
+            <p>We aim to provide the most exquisite collection of pret and party wear, creating garments that make every woman feel confident and beautiful.</p>
+            <p>Our commitment extends beyond creating beautiful clothes – we are dedicated to providing an exceptional shopping experience and ensuring that our heritage-inspired designs continue to inspire for years to come.</p>
+        </div>
+    </section>
+
+    <!-- WhatsApp Button -->
+
