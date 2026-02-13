@@ -546,7 +546,7 @@
 
     <!-- Bottom Navigation Bar -->
     <nav class="bottom-nav">
-        <a href="index" class="bottom-nav-item active">
+        <a href="/index" class="bottom-nav-item active">
             <i class="fi fi-rs-home"></i>
             <span data-translate="home">Home</span>
         </a>
@@ -554,7 +554,7 @@
             <i class="fi fi-rs-shop"></i>
             <span data-translate="shop">Shop</span>
         </a>
-        <a href="login" class="bottom-nav-item">
+        <a href="/login" class="bottom-nav-item">
             <i class="fi fi-rs-user"></i>
             <span data-translate="account">Account</span>
         </a>
@@ -589,6 +589,26 @@
         </a>
     </nav>
 
+    <!-- Footer Toggle Script -->
+    <script src="js/footer-toggle.js"></script>
+
+    <!-- Bottom Navigation Cart Handler Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const bottomNavCart = document.getElementById('bottomNavCart');
+            if (bottomNavCart) {
+                bottomNavCart.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (typeof openCart === 'function') {
+                        openCart();
+                    } else {
+                        window.location.href = 'checkout';
+                    }
+                });
+            }
+        });
+    </script>
+
     <!-- Search Scripts -->
     <script src="js/search-manager.js"></script>
     <script src="js/search-ui.js"></script>
@@ -605,46 +625,11 @@
     <script src="js/firebase/firebase-wishlist-manager.js?v=1.0.0"></script>
     <script src="js/wishlist-manager.js?v=1.0.0"></script>
     <script src="js/main.js"></script>
-    <script src="js/footer-toggle.js"></script>
     <script src="js/currency-converter.js?v=1.0.0"></script>
     <script src="js/language-translator.js?v=1.0.0"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Cart functionality for bottom nav
-            const bottomNavCart = document.getElementById('bottomNavCart');
-            if (bottomNavCart) {
-                bottomNavCart.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    if (typeof openCart === 'function') {
-                        openCart();
-                    } else if (typeof toggleCart === 'function') {
-                        toggleCart();
-                    } else {
-                        const cartPanel = document.getElementById('auricCartPanel');
-                        const cartOverlay = document.getElementById('auricCartOverlay');
-                        if (cartPanel && cartOverlay) {
-                            cartPanel.classList.add('active');
-                            cartOverlay.classList.add('active');
-                        }
-                    }
-                });
-            }
-
-            // Close cart panel
-            const closeCartBtn = document.getElementById('closeCartPanel');
-            const cartOverlay = document.getElementById('auricCartOverlay');
-            if (closeCartBtn && cartOverlay) {
-                [closeCartBtn, cartOverlay].forEach(el => {
-                    el.addEventListener('click', function() {
-                        const cartPanel = document.getElementById('auricCartPanel');
-                        const overlay = document.getElementById('auricCartOverlay');
-                        cartPanel.classList.remove('active');
-                        overlay.classList.remove('active');
-                    });
-                });
-            }
-
             // Search functionality
             const searchIcon = document.querySelector('.search-icon');
             if (searchIcon) {
