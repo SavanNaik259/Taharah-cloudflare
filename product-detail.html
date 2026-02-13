@@ -363,34 +363,70 @@ background-color: #000 !important;
                         </div>
                     </div>
 
+                    <div class="product-description" style="margin-top: 20px; font-size: 0.95rem; color: #444; line-height: 1.6;">
+                        <p id="top-description"></p>
+                    </div>
+
                     <div class="product-actions">
                         <button class="add-to-cart-btn">ADD TO CART</button>
                         <button class="buy-now-btn">BUY NOW</button>
                         <button class="add-to-wishlist-btn"><i class="fas fa-heart"></i> ADD TO WISHLIST</button>
                     </div>
+
+                    <!-- Aesthetic Info Sections -->
+                    <div class="aesthetic-info-sections" style="margin-top: 30px; border-top: 1px solid #eee;">
+                        <div class="info-item" style="padding: 15px 0; border-bottom: 1px solid #eee;">
+                            <div style="display: flex; align-items: center; gap: 12px; cursor: pointer;" onclick="toggleAestheticSection('shipping-info')">
+                                <i class="fas fa-truck" style="font-size: 1.1rem; color: #333;"></i>
+                                <span style="font-family: 'Futura PT', sans-serif; font-weight: 500; font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">Free Shipping and Delivery Details</span>
+                                <i class="fas fa-chevron-down" style="margin-left: auto; font-size: 0.7rem; color: #999;"></i>
+                            </div>
+                            <div id="shipping-info" style="display: none; padding-top: 12px; font-size: 0.9rem; color: #666; line-height: 1.5;">
+                                <p>Standard delivery takes 3-7 business days. We provide tracking information via email once your order has been dispatched.</p>
+                            </div>
+                        </div>
+
+                        <div class="info-item" style="padding: 15px 0; border-bottom: 1px solid #eee;">
+                            <div style="display: flex; align-items: center; gap: 12px; cursor: pointer;" onclick="toggleAestheticSection('return-info')">
+                                <i class="fas fa-exchange-alt" style="font-size: 1.1rem; color: #333;"></i>
+                                <span style="font-family: 'Futura PT', sans-serif; font-weight: 500; font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">Return and Exchange</span>
+                                <i class="fas fa-chevron-down" style="margin-left: auto; font-size: 0.7rem; color: #999;"></i>
+                            </div>
+                            <div id="return-info" style="display: none; padding-top: 12px; font-size: 0.9rem; color: #666; line-height: 1.5;">
+                                <p>We offer a 7-day return and exchange policy for unused items with original tags. Please contact our support team to initiate the process.</p>
+                            </div>
+                        </div>
+
+                        <div class="info-item" style="padding: 15px 0; border-bottom: 1px solid #eee;">
+                            <div style="display: flex; align-items: center; gap: 12px; cursor: pointer;" onclick="toggleAestheticSection('care-info')">
+                                <i class="fas fa-leaf" style="font-size: 1.1rem; color: #333;"></i>
+                                <span style="font-family: 'Futura PT', sans-serif; font-weight: 500; font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">Care Guide</span>
+                                <i class="fas fa-chevron-down" style="margin-left: auto; font-size: 0.7rem; color: #999;"></i>
+                            </div>
+                            <div id="care-info" style="display: none; padding-top: 12px; font-size: 0.9rem; color: #666; line-height: 1.5;">
+                                <p>Dry clean recommended. Gentle hand wash in cold water with mild detergent. Do not bleach. Iron on low heat.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                        function toggleAestheticSection(id) {
+                            const content = document.getElementById(id);
+                            const icon = content.previousElementSibling.querySelector('.fa-chevron-down, .fa-chevron-up');
+                            const isOpen = content.style.display === 'block';
+                            
+                            content.style.display = isOpen ? 'none' : 'block';
+                            if (icon) {
+                                icon.classList.toggle('fa-chevron-down', isOpen);
+                                icon.classList.toggle('fa-chevron-up', !isOpen);
+                            }
+                        }
+                    </script>
                 </div>
             </div>
         </div>
 
-        <!-- Product details in horizontal layout below -->
-        <div class="product-details-horizontal">
-            <div class="product-description">
-                <h3>Product Description</h3>
-                <p></p>
-            </div>
-        </div>
-
-        <!-- Product Reviews Section -->
-        <div class="product-reviews-section" style="display: none;">
-            <div class="container">
-                <h2 class="section-title">Customer Reviews</h2>
-                <div id="reviews-container">
-                    <!-- Reviews will be loaded here by JavaScript -->
-                </div>
-            </div>
-        </div>
-
-        <!-- You May Also Like Section -->
+        <!-- Related Products Section -->
         <section class="you-may-also-like full-width-section">
             <div class="container">
                 <h2 class="section-title">You May Also Like</h2>
@@ -399,40 +435,26 @@ background-color: #000 !important;
                 <!-- Products will be loaded dynamically by JavaScript -->
                 <div class="loading-message">Loading related products...</div>
             </div>
-
-                <!-- Product Item 5 --
-                <div class="product-item" data-product-id="GLBR-11">
-                    <div class="product-image">
-                        <img src="images/product-category/IMG_20250504_150322.jpg" alt="Gold Bracelet">
-                        <button class="add-to-wishlist" data-product-id="GLBR-11" data-product-name="Gold Bracelet" data-product-price="42999" data-product-image="images/product-category/IMG_20250504_150322.jpg"><i class="far fa-heart"></i></button>
-
-                    </div>
-                    <div class="product-details">
-                        <h3 class="product-name">Gold Bracelet</h3>
-                        <div class="product-pricing">
-                            <span class="current-price">₹42999.00</span>
-
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Product Item 6 --
-                <div class="product-item" data-product-id="SLAT-12">
-                    <div class="product-image">
-                        <img src="images/product-category/IMG_20250504_150336.jpg" alt="Silver Anklet">
-                        <button class="add-to-wishlist" data-product-id="SLAT-12" data-product-name="Silver Anklet" data-product-price="15499" data-product-image="images/product-category/IMG_20250504_150336.jpg"><i class="far fa-heart"></i></button>
-
-                    </div>
-                    <div class="product-details">
-                        <h3 class="product-name">Silver Anklet</h3>
-                        <div class="product-pricing">
-                            <span class="current-price">₹15499.00</span>
-
-                        </div>
-                    </div>
-                </div>-->
-            </div>
         </section>
+
+        <script>
+            // Ensure product description is populated in the top section too
+            const originalLoadProduct = window.loadProductDetails;
+            if (originalLoadProduct) {
+                // This is a placeholder for actual hook if needed, 
+                // but usually we can just target the ID in the existing JS
+            }
+            
+            // Mutation observer to sync description if needed
+            const observer = new MutationObserver((mutations) => {
+                const horizontalDesc = document.querySelector('.product-description p');
+                const topDesc = document.getElementById('top-description');
+                if (horizontalDesc && topDesc && horizontalDesc.innerText && !topDesc.innerText) {
+                    topDesc.innerText = horizontalDesc.innerText;
+                }
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        </script>
     </main>
 
     <!-- Minimalist Collapsible Footer -->
