@@ -511,9 +511,11 @@ const ProductDetailLoader = (function() {
                         );
                         if (filteredImages.length > 0) {
                             updateImageGallery(filteredImages);
+                            setupScrollButtons(filteredImages);
                         } else {
                             // Fallback to all images if none match
                             updateImageGallery(product.images);
+                            setupScrollButtons(product.images);
                         }
                     }
                 });
