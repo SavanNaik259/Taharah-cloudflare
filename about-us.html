@@ -320,9 +320,6 @@
                         <img src="images/icons/heart.png" alt="Wishlist" style="width: 20px; height: 20px;">
                         <div class="wishlist-count">0</div>
                     </a>
-                    <a href="/profile" class="icon-link" id="user-icon">
-                        <img src="images/icons/user.png" alt="Account" style="width: 20px; height: 20px;">
-                    </a>
                 </div>
             </div>
         </nav>
@@ -549,91 +546,6 @@
     <script src="js/currency-converter.js?v=1.0.0"></script>
     <script src="js/language-translator.js?v=1.0.0"></script>
 
-    <script>
-      // Wait for FirebaseAuth to be available and handle authentication
-      function handleAuthentication() {
-        const FirebaseAuth = window.FirebaseAuth;
-
-        if (!FirebaseAuth) {
-          console.warn('FirebaseAuth module not yet available, retrying...');
-          setTimeout(handleAuthentication, 100);
-          return;
-        }
-
-        // Handle user authentication state
-        const userIcon = document.getElementById('user-icon');
-
-        if (userIcon) {
-          try {
-            // First check current Firebase user
-            const currentUser = firebase.auth().currentUser;
-
-            if (currentUser) {
-              // Firebase user is logged in
-              console.log("Firebase user is logged in:", currentUser.uid);
-              userIcon.href = "profile";
-              userIcon.classList.add('logged-in');
-            } else {
-              // No current Firebase user, check session
-              if (FirebaseAuth.isLoggedIn()) {
-                // User is logged in according to session
-                console.log("User is logged in from session");
-                userIcon.href = "profile";
-                userIcon.classList.add('logged-in');
-              } else {
-                // No session found
-                console.log("No user session found");
-                userIcon.href = "login";
-                userIcon.classList.remove('logged-in');
-              }
-            }
-          } catch (error) {
-            console.error('Error checking authentication state:', error);
-            userIcon.href = "#";
-            userIcon.classList.remove('logged-in');
-          }
-        }
-
-        // Set up auth state observer for real-time updates
-        try {
-          FirebaseAuth.observeAuthState((user) => {
-            // Get the reference to the user icon again, since this may run at a different time
-            const userIcon = document.getElementById('user-icon');
-
-            // Only proceed if userIcon exists
-            if (userIcon) {
-              if (user) {
-                // User is signed in, update icon to go to profile
-                console.log("Auth state: User is signed in:", user.uid);
-
-                // Save session data in case it was missing
-                FirebaseAuth.saveSession({
-                  uid: user.uid,
-                  email: user.email,
-                  displayName: user.displayName || 'User',
-                  photoURL: user.photoURL,
-                  loggedIn: true
-                });
-
-                userIcon.href = "profile";
-                userIcon.classList.add('logged-in');
-              } else {
-                // User is not signed in, keep login link
-                console.log("Auth state: User is signed out");
-                FirebaseAuth.clearSession();
-                userIcon.href = "login";
-                userIcon.classList.remove('logged-in');
-              }
-            }
-          });
-        } catch (error) {
-          console.error('Error setting up auth state observer:', error);
-        }
-      }
-
-      // Start authentication handling when DOM is ready
-      document.addEventListener('DOMContentLoaded', handleAuthentication);
-    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Cart functionality for bottom nav
