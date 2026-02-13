@@ -45,12 +45,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Create continuous scrolling content
     function createScrollingBanner() {
         // Combine both banner messages with separator
-        const combinedContent = bannerContents.map((content, index) => getBannerContent(index)).join(' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ');
+        const combinedContent = bannerContents.map((content, index) => getBannerContent(index)).join(' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ');
         
         // Duplicate the content multiple times to ensure continuous visibility
-        const scrollContent = combinedContent + ' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ' + 
-                             combinedContent + ' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ' + 
-                             combinedContent + ' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ' + 
+        const scrollContent = combinedContent + ' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ' + 
+                             combinedContent + ' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ' + 
+                             combinedContent + ' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ' + 
                              combinedContent;
         
         bannerText.innerHTML = scrollContent;
