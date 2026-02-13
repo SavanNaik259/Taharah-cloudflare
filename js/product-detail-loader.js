@@ -351,80 +351,6 @@ const ProductDetailLoader = (function() {
             setupScrollButtons(singleImageArr);
         }
 
-    function setupScrollButtons(images) {
-        const prevBtn = document.getElementById('prev-product-image');
-        const nextBtn = document.getElementById('next-product-image');
-        
-        if (!prevBtn || !nextBtn) return;
-
-        if (images.length <= 1) {
-            prevBtn.style.display = 'none';
-            nextBtn.style.display = 'none';
-            return;
-        }
-
-        prevBtn.style.display = 'flex';
-        nextBtn.style.display = 'flex';
-
-        let currentIndex = 0;
-
-        const updateImage = (index) => {
-            const mainImg = document.querySelector('.product-main-image, .product-detail-left .main-image img, .product-detail-left .gallery-main img');
-            if (mainImg && images[index]) {
-                mainImg.src = images[index].url;
-                currentIndex = index; // Sync current index
-                
-                // Highlight corresponding thumbnail if it exists
-                const thumbnails = document.querySelectorAll('.thumbnail, .thumbnail-item');
-                thumbnails.forEach((thumb, i) => {
-                    const thumbImg = thumb.querySelector('img');
-                    if (thumbImg) {
-                        const isMatch = thumbImg.src === images[index].url;
-                        thumb.classList.toggle('active', isMatch);
-                        thumb.style.opacity = isMatch ? '1' : '0.6';
-                        thumb.style.borderColor = isMatch ? '#000' : 'transparent';
-                        
-                        // Scroll thumbnail into view if needed
-                        if (isMatch) {
-                            thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                        }
-                    }
-                });
-            }
-        };
-
-        // Reset click handlers to avoid stacking
-        prevBtn.onclick = (e) => {
-            if (e) e.preventDefault();
-            currentIndex = (currentIndex - 1 + images.length) % images.length;
-            updateImage(currentIndex);
-        };
-
-        nextBtn.onclick = (e) => {
-            if (e) e.preventDefault();
-            currentIndex = (currentIndex + 1) % images.length;
-            updateImage(currentIndex);
-        };
-        
-        // Listen for thumbnail clicks to sync currentIndex
-        const thumbnailContainers = document.querySelectorAll('.thumbnail-gallery, .product-thumbnails, .gallery-thumbs');
-        thumbnailContainers.forEach(thumbnailContainer => {
-            if (thumbnailContainer) {
-                thumbnailContainer.addEventListener('click', (e) => {
-                    const thumb = e.target.closest('.thumbnail, .thumbnail-item');
-                    if (thumb) {
-                        const thumbImg = thumb.querySelector('img');
-                        if (thumbImg) {
-                            currentIndex = images.findIndex(img => img.url === thumbImg.src);
-                            if (currentIndex === -1) currentIndex = 0;
-                            updateImage(currentIndex);
-                        }
-                    }
-                });
-            }
-        });
-    }
-
         // Update category information
         const categoryElements = document.querySelectorAll('.meta-value');
         if (categoryElements.length > 0) {
@@ -528,16 +454,23 @@ const ProductDetailLoader = (function() {
                     btn.style.borderColor = '#000';
                     window.selectedColour = btn.dataset.value;
                     
+                    console.log('Color selected:', window.selectedColour);
+                    
                     // Filter gallery images by color
                     if (product.images && product.images.length > 0) {
-                        const filteredImages = product.images.filter(img => 
-                            !img.color || img.color.toLowerCase() === window.selectedColour.toLowerCase()
-                        );
+                        const filteredImages = product.images.filter(img => {
+                            if (!img.color || !window.selectedColour) return false;
+                            return img.color.trim().toLowerCase() === window.selectedColour.trim().toLowerCase();
+                        });
+                        
+                        console.log('Filtered images for color:', window.selectedColour, filteredImages.length);
+                        
                         if (filteredImages.length > 0) {
                             updateImageGallery(filteredImages);
                             setupScrollButtons(filteredImages);
                         } else {
-                            // Fallback to all images if none match
+                            // Fallback if no images match color tag exactly
+                            // Check if any images have NO color tag and treat them as universal or just show all
                             updateImageGallery(product.images);
                             setupScrollButtons(product.images);
                         }
@@ -675,6 +608,9 @@ const ProductDetailLoader = (function() {
                             thumbnailElement.style.opacity = '1';
                             thumbnailElement.style.borderColor = '#000';
 
+                            // Sync internal scroll index
+                            if (window.updateScrollIndex) window.updateScrollIndex(index);
+                            
                             console.log('Thumbnail clicked, updated main image to:', image.url);
                         });
 
@@ -689,6 +625,77 @@ const ProductDetailLoader = (function() {
         } else {
             console.log('No thumbnail containers found');
         }
+    }
+
+    function setupScrollButtons(images) {
+        const prevBtn = document.getElementById('prev-product-image');
+        const nextBtn = document.getElementById('next-product-image');
+        
+        if (!prevBtn || !nextBtn) return;
+
+        // Reset display
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+
+        if (!images || images.length <= 1) {
+            console.log('Scroll buttons hidden - single image variant');
+            return;
+        }
+
+        const uniqueImages = images.filter((img, index, self) => 
+            index === self.findIndex(i => i.url === img.url)
+        );
+
+        if (uniqueImages.length <= 1) return;
+
+        prevBtn.style.display = 'flex';
+        nextBtn.style.display = 'flex';
+        
+        let currentIndex = 0;
+
+        const updateUI = (index) => {
+            if (!uniqueImages[index]) return;
+            const targetUrl = uniqueImages[index].url;
+            
+            // Update all main image elements
+            const mainImgs = document.querySelectorAll('.product-main-image, .product-detail-left .main-image img, .product-detail-left .gallery-main img');
+            mainImgs.forEach(img => { img.src = targetUrl; });
+
+            // Update thumbnails
+            const thumbnails = document.querySelectorAll('.thumbnail, .thumbnail-item');
+            thumbnails.forEach((thumb) => {
+                const thumbImg = thumb.querySelector('img');
+                if (thumbImg) {
+                    const thumbUrl = thumbImg.src;
+                    const isMatch = thumbUrl === targetUrl || thumbUrl.endsWith(targetUrl);
+                    thumb.classList.toggle('active', isMatch);
+                    thumb.style.opacity = isMatch ? '1' : '0.6';
+                    thumb.style.borderColor = isMatch ? '#000' : 'transparent';
+                    if (isMatch) thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }
+            });
+        };
+
+        // Expose index sync to thumbnails
+        window.updateScrollIndex = (index) => {
+            currentIndex = index;
+            updateUI(currentIndex);
+        };
+
+        prevBtn.onclick = (e) => {
+            e.preventDefault();
+            currentIndex = (currentIndex - 1 + uniqueImages.length) % uniqueImages.length;
+            updateUI(currentIndex);
+        };
+
+        nextBtn.onclick = (e) => {
+            e.preventDefault();
+            currentIndex = (currentIndex + 1) % uniqueImages.length;
+            updateUI(currentIndex);
+        };
+
+        // Set initial state
+        updateUI(0);
     }
 
     /**
@@ -814,6 +821,7 @@ const ProductDetailLoader = (function() {
         init,
         loadAndDisplayProduct,
         getProductIdFromURL,
+        loadAndDisplayProduct: loadAndDisplayProduct,
         loadProductData
     };
 })();
