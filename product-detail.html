@@ -305,7 +305,9 @@ background-color: #000 !important;
         <div class="product-detail-container" data-product-id="EM-ST-2025">
             <!-- Left side: Image gallery -->
             <div class="product-detail-left">
-                <div class="main-image-container" style="height: 650px !important; min-height: 450px !important;">
+                <div class="main-image-container" style="height: 650px !important; min-height: 450px !important; position: relative;">
+                    <button id="prev-product-image" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); z-index: 10; background: rgba(255,255,255,0.7); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"><i class="fas fa-chevron-left"></i></button>
+                    <button id="next-product-image" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); z-index: 10; background: rgba(255,255,255,0.7); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"><i class="fas fa-chevron-right"></i></button>
                     <img class="product-main-image" style="display: none;">
                     <div class="image-zoom-overlay" style="display: none;">
                         <img src="" alt="Zoomed Image" class="zoomed-image">
@@ -452,8 +454,8 @@ background-color: #000 !important;
 
         <!-- Size Chart Modal -->
         <div id="sizeChartModal" class="size-chart-modal" style="display: flex; visibility: hidden; opacity: 0; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); align-items: center; justify-content: center; transition: opacity 0.3s ease, visibility 0.3s ease;">
-            <div class="modal-content" style="position: relative; margin: auto; padding: 0; width: 90%; max-width: 800px; background-color: #fff; box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19); transform: scale(0.7); transition: transform 0.3s ease;">
-                <span onclick="closeSizeChart()" style="position: absolute; right: 15px; top: 10px; color: #000; font-size: 28px; font-weight: bold; cursor: pointer; z-index: 10001;">&times;</span>
+            <div class="modal-content" style="position: relative; margin: auto; padding: 0; width: 90%; max-width: 800px; background-color: #fff; box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19); transform: scale(0.7); transition: transform 0.3s ease; max-height: 90vh; overflow-y: auto;">
+                <span onclick="closeSizeChart()" style="position: absolute; right: 15px; top: 10px; color: #000; font-size: 28px; font-weight: bold; cursor: pointer; z-index: 10001; background: white; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">&times;</span>
                 <img src="images/sizechart.jpg" alt="Size Chart" style="width: 100%; height: auto; display: block;">
             </div>
         </div>

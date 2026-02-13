@@ -336,23 +336,68 @@ const ProductDetailLoader = (function() {
                 console.log(`Removed ${product.images.length - uniqueImages.length} duplicate images from product data`);
             }
             updateImageGallery(uniqueImages);
+            
+            // Set up scroll buttons
+            setupScrollButtons(uniqueImages);
         } else if (product.image) {
             // Single image fallback
             console.log('Product has single image, creating gallery');
-            updateImageGallery([{
+            const singleImageArr = [{
                 url: product.image,
                 isMain: true,
                 alt: product.name
-            }]);
-        } else if (product.mainImage) {
-            // Admin panel single image fallback
-            console.log('Product has mainImage, creating gallery');
-            updateImageGallery([{
-                url: product.mainImage,
-                isMain: true,
-                alt: product.name
-            }]);
+            }];
+            updateImageGallery(singleImageArr);
+            setupScrollButtons(singleImageArr);
         }
+
+    function setupScrollButtons(images) {
+        const prevBtn = document.getElementById('prev-product-image');
+        const nextBtn = document.getElementById('next-product-image');
+        
+        if (!prevBtn || !nextBtn || images.length <= 1) {
+            if (prevBtn) prevBtn.style.display = 'none';
+            if (nextBtn) nextBtn.style.display = 'none';
+            return;
+        }
+
+        prevBtn.style.display = 'flex';
+        nextBtn.style.display = 'flex';
+
+        let currentIndex = 0;
+
+        const updateImage = (index) => {
+            const mainImg = document.querySelector('.product-main-image');
+            if (mainImg && images[index]) {
+                mainImg.src = images[index].url;
+                // Highlight corresponding thumbnail if it exists
+                const thumbnails = document.querySelectorAll('.thumbnail-item');
+                thumbnails.forEach((thumb, i) => {
+                    thumb.style.opacity = i === index ? '1' : '0.6';
+                    thumb.style.borderColor = i === index ? '#000' : 'transparent';
+                });
+            }
+        };
+
+        prevBtn.onclick = () => {
+            currentIndex = (currentIndex - 1 + images.length) % images.length;
+            updateImage(currentIndex);
+        };
+
+        nextBtn.onclick = () => {
+            currentIndex = (currentIndex + 1) % images.length;
+            updateImage(currentIndex);
+        };
+        
+        // Listen for thumbnail clicks to sync currentIndex
+        document.querySelector('.product-thumbnails').addEventListener('click', (e) => {
+            const thumb = e.target.closest('.thumbnail-item');
+            if (thumb) {
+                const thumbs = Array.from(document.querySelectorAll('.thumbnail-item'));
+                currentIndex = thumbs.indexOf(thumb);
+            }
+        });
+    }
 
         // Update category information
         const categoryElements = document.querySelectorAll('.meta-value');
