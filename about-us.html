@@ -285,7 +285,7 @@
     <div id="auricCartPanel" class="cart-panel">
       <div class="cart-panel-header">
         <h3 data-translate="shopping_bag">Your Shopping Bag</h3>
-        <button class="close-cart-btn">×</button>
+        <button class="close-cart-btn" onclick="closeCartPanel()">×</button>
       </div>
       <div class="cart-items">
         <!-- Cart items will be inserted here by JavaScript -->
@@ -297,12 +297,41 @@
           <span class="subtotal-amount">₹0.00</span>
         </div>
         <div class="cart-panel-buttons">
-          <button class="view-cart-btn continue-shopping-btn" data-translate="continue_shopping">Continue Shopping</button>
+          <button class="view-cart-btn continue-shopping-btn" data-translate="continue_shopping" onclick="closeCartPanel()">Continue Shopping</button>
           <a href="/checkout" class="checkout-btn" data-translate="checkout">Checkout</a>
         </div>
       </div>
     </div>
-    <div id="auricCartOverlay" class="cart-panel-overlay"></div>
+    <div id="auricCartOverlay" class="cart-panel-overlay" onclick="closeCartPanel()"></div>
+
+    <script>
+      /**
+       * Direct function to close the cart panel
+       * Used as a fallback if the global CartManager is not yet initialized
+       */
+      function closeCartPanel() {
+          console.log('Closing cart panel via direct function');
+          
+          // Try using CartManager first
+          if (window.CartManager && typeof window.CartManager.closeCartPanel === 'function') {
+              window.CartManager.closeCartPanel();
+              return;
+          }
+          
+          // Direct DOM manipulation fallback
+          const cartPanel = document.getElementById('auricCartPanel');
+          const cartOverlay = document.getElementById('auricCartOverlay');
+          
+          if (cartPanel) cartPanel.classList.remove('active');
+          if (cartOverlay) cartOverlay.classList.remove('active');
+          
+          // Restore scrolling
+          document.body.style.overflow = '';
+      }
+      
+      // Also register as global closeCart if not exists
+      if (!window.closeCart) window.closeCart = closeCartPanel;
+    </script>
 
     <!-- Header -->
     <header class="header">
