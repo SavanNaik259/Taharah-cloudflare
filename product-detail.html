@@ -375,10 +375,72 @@ background-color: #000 !important;
         <!-- Product details in horizontal layout below -->
         <div class="product-details-horizontal">
             <div class="product-description">
-                <h3>Product Description</h3>
-                <p></p>
+                <div class="product-shipping-delivery" style="margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; color: #333; font-size: 0.9rem;">
+                        <i class="fas fa-truck"></i>
+                        <span>Free Shipping and Delivery Details</span>
+                        <i class="far fa-question-circle" style="color: #999; font-size: 0.8rem;"></i>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; color: #333; font-size: 0.9rem;">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Return and Exchange</span>
+                        <i class="far fa-question-circle" style="color: #999; font-size: 0.8rem;"></i>
+                    </div>
+                </div>
+
+                <div class="details-accordion">
+                    <div class="accordion-item" style="border-bottom: 1px solid #eee;">
+                        <button class="accordion-header" style="width: 100%; padding: 15px 0; background: none; border: none; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-family: 'Futura PT', sans-serif; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">
+                            <span>Description</span>
+                            <i class="fas fa-chevron-right" style="font-size: 0.8rem;"></i>
+                        </button>
+                        <div class="accordion-content" style="padding-bottom: 15px;">
+                            <p id="horizontal-description"></p>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item" style="border-bottom: 1px solid #eee;">
+                        <button class="accordion-header" style="width: 100%; padding: 15px 0; background: none; border: none; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-family: 'Futura PT', sans-serif; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">
+                            <span>Care Guide</span>
+                            <i class="fas fa-chevron-right" style="font-size: 0.8rem;"></i>
+                        </button>
+                        <div class="accordion-content" style="padding-bottom: 15px; display: none;">
+                            <p>• Hand wash separately in cold water.<br>
+                               • Use mild detergent.<br>
+                               • Iron at moderate temperature.<br>
+                               • Do not bleach or tumble dry.</p>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item" style="border-bottom: 1px solid #eee;">
+                        <button class="accordion-header" style="width: 100%; padding: 15px 0; background: none; border: none; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-family: 'Futura PT', sans-serif; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">
+                            <span>Shipping and Exchange</span>
+                            <i class="fas fa-chevron-right" style="font-size: 0.8rem;"></i>
+                        </button>
+                        <div class="accordion-content" style="padding-bottom: 15px; display: none;">
+                            <p>• Orders are usually dispatched within 2-3 business days.<br>
+                               • Free shipping on all prepaid orders.<br>
+                               • Returns/Exchanges are accepted within 7 days of delivery.<br>
+                               • Items must be unused with original tags intact.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <script>
+            document.querySelectorAll('.accordion-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const content = header.nextElementSibling;
+                    const icon = header.querySelector('i');
+                    const isOpen = content.style.display !== 'none';
+                    
+                    content.style.display = isOpen ? 'none' : 'block';
+                    icon.classList.toggle('fa-chevron-right', isOpen);
+                    icon.classList.toggle('fa-chevron-down', !isOpen);
+                });
+            });
+        </script>
 
         <!-- Product Reviews Section -->
         <div class="product-reviews-section" style="display: none;">
