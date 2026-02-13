@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Banner content array
     const bannerContents = [
         '•Free shipping for all your orders•',
-        '•New arrivals for the festive season•'
+        '•New arrivals for the festive season• - <a href="new-arrivals">View Collection</a>'
     ];
 
     // Function to get banner content with translation support
