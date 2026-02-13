@@ -379,12 +379,14 @@ const ProductDetailLoader = (function() {
             }
         };
 
-        prevBtn.onclick = () => {
+        prevBtn.onclick = (e) => {
+            if (e) e.preventDefault();
             currentIndex = (currentIndex - 1 + images.length) % images.length;
             updateImage(currentIndex);
         };
 
-        nextBtn.onclick = () => {
+        nextBtn.onclick = (e) => {
+            if (e) e.preventDefault();
             currentIndex = (currentIndex + 1) % images.length;
             updateImage(currentIndex);
         };
