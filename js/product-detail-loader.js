@@ -372,6 +372,8 @@ const ProductDetailLoader = (function() {
             const mainImg = document.querySelector('.product-main-image');
             if (mainImg && images[index]) {
                 mainImg.src = images[index].url;
+                currentIndex = index; // Sync current index
+                
                 // Highlight corresponding thumbnail if it exists
                 const thumbnails = document.querySelectorAll('.thumbnail-item');
                 thumbnails.forEach((thumb, i) => {
@@ -380,6 +382,11 @@ const ProductDetailLoader = (function() {
                         const isMatch = thumbImg.src === images[index].url;
                         thumb.style.opacity = isMatch ? '1' : '0.6';
                         thumb.style.borderColor = isMatch ? '#000' : 'transparent';
+                        
+                        // Scroll thumbnail into view if needed
+                        if (isMatch) {
+                            thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                        }
                     }
                 });
             }
