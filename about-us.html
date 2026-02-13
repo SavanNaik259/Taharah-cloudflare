@@ -260,6 +260,11 @@
                 <div class="search-results-grid" id="searchResultsGrid">
                     <!-- Search results will be populated here -->
                 </div>
+
+                <div class="search-no-results" id="searchNoResults" style="display: none;">
+                    <h3 data-translate="no_products_found">No results found</h3>
+                    <p data-translate-dynamic>Try adjusting your search or browse our collections</p>
+                </div>
             </div>
         </div>
     </div>
@@ -347,30 +352,6 @@
                         
                         <li><a href="/modest-wear" data-translate-dynamic>Modest Wear</a></li>
                         <li><a href="/party-wear" data-translate-dynamic>Party Wear</a></li>
-                        <!--<li class="dropdown-submenu">
-                            <a href="#"><span data-translate="earrings">Earrings</span> <i class="fas fa-chevron-right"></i></a>
-                            <ul class="dropdown-submenu-list">
-                                <li><a href="/gold-earrings" data-translate-dynamic>Gold Earrings</a></li>
-                                <li><a href="/silver-earrings" data-translate-dynamic>Silver Earrings</a></li>
-                                <li><a href="/meenakari-earrings" data-translate-dynamic>Meenakari Earrings</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown-submenu">
-                            <a href="#"><span data-translate="bangles">Bangles</span> <i class="fas fa-chevron-right"></i></a>
-                            <ul class="dropdown-submenu-list">
-                                <li><a href="/gold-bangles" data-translate-dynamic>Gold Bangles</a></li>
-                                <li><a href="/silver-bangles" data-translate-dynamic>Silver Bangles</a></li>
-                                <li><a href="/meenakari-bangles" data-translate-dynamic>Meenakari Bangles</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown-submenu">
-                            <a href="#"><span data-translate="rings">Rings</span> <i class="fas fa-chevron-right"></i></a>
-                            <ul class="dropdown-submenu-list">
-                                <li><a href="/gold-rings" data-translate-dynamic>Gold Rings</a></li>
-                                <li><a href="/silver-rings" data-translate-dynamic>Silver Rings</a></li>
-                                <li><a href="/meenakari-rings" data-translate-dynamic>Meenakari Rings</a></li>
-                            </ul>
-                        </li>-->
                     </ul>
                 </li>
                 <li class="nav-item"><a href="/about-us" class="nav-link" data-translate="about_us">About</a></li>
@@ -425,14 +406,23 @@
         </div>
     </section>
 
-    <footer class="footer">
-        <div class="footer-container">
-            <!-- Brand Section -->
-            <div class="footer-section brand-section">
-                <a href="index" class="footer-logo">
-                    <img src="images/logos/taharah.png" alt="Taharah Logo">
-                </a>
-                <p class="footer-description" data-translate="footer_desc">Taharah brings you the finest selection of Pakistani fashion, blending traditional craftsmanship with contemporary elegance. Our collections are curated for the modern woman who values heritage and style.</p>
+    <footer class="footer-minimalist">
+        <div class="container">
+            <!-- Info Section -->
+            <div class="footer-section">
+                <button class="footer-toggle" data-section="info-content">
+                    <span class="footer-title" data-translate="info">Info</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="footer-content" id="info-content">
+                    <ul>
+                        <li><a href="/about-us" data-translate="about_us">About Us</a></li>
+                        <li><a href="terms-conditions#shipping-and-delivery" data-translate-dynamic>Shipping Policy</a></li>
+                        <li><a href="terms-conditions#returns-and-refunds" data-translate-dynamic>Returns & Exchanges</a></li>
+                        <li><a href="/terms-conditions" data-translate-dynamic>Terms and Conditions</a></li>
+                        <li><a href="/privacy-policy" data-translate-dynamic>Privacy Policy</a></li>
+                    </ul>
+                </div>
             </div>
 
             <!-- Categories Section -->
@@ -442,16 +432,32 @@
                     <i class="fas fa-chevron-down"></i>
                 </button>
                 <div class="footer-content" id="categories-content">
-                    <ul class="footer-links">
-                        <li><a href="pakistani-pret-wear" data-translate-dynamic>Pakistani Pret Wear</a></li>
-                        <li><a href="ready-to-wear" data-translate="featured">Ready to Wear</a></li>
-                        <li><a href="modest-wear" data-translate-dynamic>Modest Wear</a></li>
-                        <li><a href="party-wear" data-translate-dynamic>Party Wear</a></li>
+                    <ul>
+                        <li class="category-with-sub">
+                            <div class="category-item-header">
+                                <a href="/pakistani-pret-wear" data-translate="Pakistani Pret Wear">Pakistani Pret Wear</a>
+                            </div>
+                        </li>
+                        <li class="category-with-sub">
+                            <div class="category-item-header">
+                                <a href="/ready-to-wear" data-translate="Ready to Wear">Ready to Wear</a>
+                            </div>
+                        </li>
+                        <li class="category-with-sub">
+                            <div class="category-item-header">
+                                <a href="/modest-wear" data-translate-dynamic>Modest Wear</a>
+                            </div>
+                        </li>
+                                    <li class="category-with-sub">
+                                        <div class="category-item-header">
+                                            <a href="/party-wear" data-translate-dynamic>Party wear</a>
+                                        </div>
+                                    </li>
                     </ul>
                 </div>
             </div>
 
-            <!-- Collections Section -->
+            <!-- Collection Section -->
             <div class="footer-section">
                 <button class="footer-toggle" data-section="collection-content">
                     <span class="footer-title" data-translate-dynamic>Collection</span>
@@ -459,9 +465,11 @@
                 </button>
                 <div class="footer-content" id="collection-content">
                     <ul>
-                        <li><a href="all-collection" data-translate="all_collections">All Collection</a></li>
-                        <li><a href="featured-collection" data-translate="featured">Featured Collection</a></li>
-                        <li><a href="new-arrivals" data-translate="new_arrivals">New Arrivals</a></li>
+                        <li><a href="/new-arrivals" data-translate="new_arrivals">New Arrivals</a></li>
+                        <li><a href="/pakistani-pret-wear">Pakistani Pret Wear</a></li>
+                        <li><a href="/ready-to-wear">Ready to Wear</a></li>
+                        <li><a href="/party-wear">Party Wear</a></li>
+                        <li><a href="/modest-wear">Modest Wear</a></li>
                     </ul>
                 </div>
             </div>
@@ -473,80 +481,77 @@
                     <i class="fas fa-chevron-down"></i>
                 </button>
                 <div class="footer-content" id="benefits-content">
-                    <p data-translate-dynamic>Sign up for early access, exclusive offers and more.</p>
-                    <a href="signup" class="footer-signup-link" data-translate="signup">SIGN UP</a>
-                </div>
-            </div>
-
-            <!-- Info Section -->
-            <div class="footer-section">
-                <button class="footer-toggle" data-section="info-content">
-                    <span class="footer-title" data-translate="info">Info</span>
-                    <i class="fas fa-chevron-down"></i>
-                </button>
-                <div class="footer-content" id="info-content">
                     <ul>
-                        <li><a href="about-us" data-translate="about_us">About Us</a></li>
-                        <li><a href="contact-us" data-translate="contact_us">Contact Us</a></li>
-                        <li><a href="privacy-policy" data-translate="privacy_policy">Privacy Policy</a></li>
-                        <li><a href="terms-conditions" data-translate="terms_conditions">Terms & Conditions</a></li>
+                        <li><a href="#" data-translate-dynamic>Personal Styling</a></li>
                     </ul>
                 </div>
             </div>
-        </div>
 
-        <!-- Social Media Icons Section -->
-        <div class="footer-social-section">
-            <h3 class="social-section-title" data-translate="follow_social">Follow us on social media</h3>
-            <div class="social-icons-container">
-                <a href="https://www.instagram.com/taharahofficial_?igsh=MTdpdTRvdTBiMDh1dQ==" target="_blank" class="social-icon-link">
-                    <i class="fab fa-instagram"></i>
-                </a>
-                <a href="https://wa.me/918589920686" target="_blank" class="social-icon-link">
-                    <i class="fab fa-whatsapp"></i>
-                </a>
+            <!-- Social Media Icons Section -->
+            <div class="footer-social-section">
+                <h3 class="social-section-title" data-translate="follow_social">Follow us on social media</h3>
+                <div class="social-icons-container">
+                    <a href="https://www.instagram.com/taharahofficial_?igsh=MTdpdTRvdTBiMDh1dQ==" target="_blank" class="social-icon-link">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://www.facebook.com" target="_blank" class="social-icon-link">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    
+                </div>
             </div>
-        </div>
 
-        <!-- Download Our App Section -->
-        <div class="footer-app-section">
-            <h3 class="app-section-title" data-translate="download_app">Download Our App</h3>
-            <div class="app-buttons-container">
-                <a href="#" class="app-store-button">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="Download on App Store">
-                </a>
-                <a href="#" class="google-play-button">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play">
-                </a>
+            <!-- Download Our App Section -->
+            <div class="footer-app-section">
+                <h3 class="app-section-title" data-translate="download_app">Download Our App</h3>
+                <div class="app-buttons-container">
+                    <a href="#" class="app-store-button">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="Download on App Store">
+                    </a>
+                    <a href="#" class="google-play-button">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play">
+                    </a>
+                </div>
             </div>
-        </div>
 
-        <div class="footer-bottom">
+            <div class="footer-bottom">
             <div class="container">
                 <div class="footer-info">
                     <div class="copyright">
-                        <p data-translate-dynamic>&copy; <span id="currentYear"></span> Taharah. All rights reserved. | Developed by <a href="https://savannaik.netlify.app/" target="_blank" style="color: #9c7c38; text-decoration: none; font-weight: 500;">Savan Naik</a></p>
-                        <script>
-                            document.getElementById("currentYear").textContent = new Date().getFullYear();
-                        </script>
+                        <p data-translate-dynamic>&copy; <span id="currentYear"></span> Taharah. All rights reserved. | Developed by <a href="https://..netlify.app/" target="_blank" style="color: #9c7c38; text-decoration: none; font-weight: 500;">Savan Naik</a></p>
+                    <script>
+                        document.getElementById("currentYear").textContent = new Date().getFullYear();
+                    </script>
                     </div>
-                    <div class="payment-icons">
+
+                    <div class="footer-links">
+                        <a href="/terms-conditions" data-translate-dynamic>Terms and Conditions</a>
+                        <a href="/privacy-policy" data-translate-dynamic>Privacy Policy</a>
+                    </div>
+
+                    <div class="payment-methods">
+                        <span><i class="fab fa-cc-amex"></i></span>
+                        <span><i class="fab fa-cc-discover"></i></span>
+                        <span><i class="fab fa-google-pay"></i></span>
                         <span><i class="fab fa-cc-mastercard"></i></span>
+                        <span><i class="fab fa-cc-paypal"></i></span>
+                        <span class="union-pay">UP</span>
                         <span><i class="fab fa-cc-visa"></i></span>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     </footer>
 
     <!-- WhatsApp Button -->
-    <a href="https://wa.me/918589920686?text=Hi! I would like to know more about your services. Can you help me?" class="whatsapp-btn">
-        <i class="fab fa-whatsapp"></i>
-    </a>
+      <a href="https://wa.me/918589920686?text=Hi! I would like to know more about your collection. Can you help me?" class="whatsapp-btn">
+          <i class="fab fa-whatsapp"></i>
+      </a>
 
     <!-- Bottom Navigation Bar -->
     <nav class="bottom-nav">
-        <a href="/index" class="bottom-nav-item active">
+        <a href="/index" class="bottom-nav-item">
             <i class="fi fi-rs-home"></i>
             <span data-translate="home">Home</span>
         </a>
@@ -589,69 +594,13 @@
         </a>
     </nav>
 
-    <!-- Footer Toggle Script -->
-    <script src="js/footer-toggle.js"></script>
-
-    <!-- Bottom Navigation Cart Handler Script -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const bottomNavCart = document.getElementById('bottomNavCart');
-            if (bottomNavCart) {
-                bottomNavCart.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    if (typeof openCart === 'function') {
-                        openCart();
-                    } else {
-                        window.location.href = 'checkout';
-                    }
-                });
-            }
-        });
-    </script>
-
-    <!-- Search Scripts -->
-    <script src="js/search-manager.js"></script>
-    <script src="js/search-ui.js"></script>
-
-    <!-- Core JS Files -->
+    <!-- Navigation scripts -->
     <script src="js/navigation.js?v=1.0.4"></script>
-    <script src="js/banner-rotator.js?v=1.0.1"></script>
-    <script src="js/error-handler.js"></script>
-    <script src="js/firebase/firebase-auth.js"></script>
-    <script src="js/cart-local-storage.js?v=1.0.0"></script>
-    <script src="js/firebase/firebase-cart-manager.js?v=1.0.0"></script>
-    <script src="js/cart-manager.js?v=1.0.1"></script>
-    <script src="js/wishlist-local-storage.js?v=1.0.0"></script>
-    <script src="js/firebase/firebase-wishlist-manager.js?v=1.0.0"></script>
-    <script src="js/wishlist-manager.js?v=1.0.0"></script>
-    <script src="js/main.js"></script>
-    <script src="js/currency-converter.js?v=1.0.0"></script>
-    <script src="js/language-translator.js?v=1.0.0"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Search functionality
-            const searchIcon = document.querySelector('.search-icon');
-            if (searchIcon) {
-                searchIcon.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    if (typeof SearchUI !== 'undefined' && SearchUI.openSearch) {
-                        SearchUI.openSearch();
-                    } else {
-                        const searchOverlay = document.getElementById('searchOverlay');
-                        if (searchOverlay) searchOverlay.classList.add('active');
-                    }
-                });
-            }
-
-            const searchCloseBtn = document.getElementById('searchCloseBtn');
-            if (searchCloseBtn) {
-                searchCloseBtn.addEventListener('click', function() {
-                    const searchOverlay = document.getElementById('searchOverlay');
-                    if (searchOverlay) searchOverlay.classList.remove('active');
-                });
-            }
-        });
-    </script>
+    <script src="js/footer-toggle.js"></script>
+    <script src="js/currency-converter.js?v=1.0.1"></script>
+    <script src="js/language-selector.js?v=1.0.1"></script>
+    <script src="js/cart.js?v=1.0.4"></script>
+    <script src="js/wishlist.js?v=1.0.1"></script>
+    <script src="js/search.js?v=1.0.1"></script>
 </body>
 </html>
