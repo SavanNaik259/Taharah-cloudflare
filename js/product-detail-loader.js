@@ -369,17 +369,18 @@ const ProductDetailLoader = (function() {
         let currentIndex = 0;
 
         const updateImage = (index) => {
-            const mainImg = document.querySelector('.product-main-image');
+            const mainImg = document.querySelector('.product-main-image, .product-detail-left .main-image img, .product-detail-left .gallery-main img');
             if (mainImg && images[index]) {
                 mainImg.src = images[index].url;
                 currentIndex = index; // Sync current index
                 
                 // Highlight corresponding thumbnail if it exists
-                const thumbnails = document.querySelectorAll('.thumbnail-item');
+                const thumbnails = document.querySelectorAll('.thumbnail, .thumbnail-item');
                 thumbnails.forEach((thumb, i) => {
                     const thumbImg = thumb.querySelector('img');
                     if (thumbImg) {
                         const isMatch = thumbImg.src === images[index].url;
+                        thumb.classList.toggle('active', isMatch);
                         thumb.style.opacity = isMatch ? '1' : '0.6';
                         thumb.style.borderColor = isMatch ? '#000' : 'transparent';
                         
@@ -406,24 +407,22 @@ const ProductDetailLoader = (function() {
         };
         
         // Listen for thumbnail clicks to sync currentIndex
-        const thumbnailContainer = document.querySelector('.product-thumbnails');
-        if (thumbnailContainer) {
-            // Remove old listener if any (by cloning or just being careful with delegation)
-            const newThumbnailContainer = thumbnailContainer.cloneNode(true);
-            thumbnailContainer.parentNode.replaceChild(newThumbnailContainer, thumbnailContainer);
-            
-            newThumbnailContainer.addEventListener('click', (e) => {
-                const thumb = e.target.closest('.thumbnail-item');
-                if (thumb) {
-                    const thumbImg = thumb.querySelector('img');
-                    if (thumbImg) {
-                        currentIndex = images.findIndex(img => img.url === thumbImg.src);
-                        if (currentIndex === -1) currentIndex = 0;
-                        updateImage(currentIndex);
+        const thumbnailContainers = document.querySelectorAll('.thumbnail-gallery, .product-thumbnails, .gallery-thumbs');
+        thumbnailContainers.forEach(thumbnailContainer => {
+            if (thumbnailContainer) {
+                thumbnailContainer.addEventListener('click', (e) => {
+                    const thumb = e.target.closest('.thumbnail, .thumbnail-item');
+                    if (thumb) {
+                        const thumbImg = thumb.querySelector('img');
+                        if (thumbImg) {
+                            currentIndex = images.findIndex(img => img.url === thumbImg.src);
+                            if (currentIndex === -1) currentIndex = 0;
+                            updateImage(currentIndex);
+                        }
                     }
-                }
-            });
-        }
+                });
+            }
+        });
     }
 
         // Update category information
