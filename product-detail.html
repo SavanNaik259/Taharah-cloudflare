@@ -350,7 +350,10 @@ background-color: #000 !important;
 
                     <div id="product-options" class="product-options-container" style="margin: 20px 0; padding: 15px; border-top: 1px solid #eee;">
                         <div id="size-selection" class="option-group" style="margin-bottom: 15px; display: none;">
-                            <label style="display: block; font-weight: bold; margin-bottom: 8px;">Select Size:</label>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <label style="font-weight: bold; margin: 0;">Select Size:</label>
+                                <a href="javascript:void(0)" onclick="openSizeChart()" style="font-size: 0.85rem; color: #000; text-decoration: underline; font-family: 'Futura PT', sans-serif;">Size Chart</a>
+                            </div>
                             <div class="size-options" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
                         </div>
                         <div id="colour-selection" class="option-group" style="margin-bottom: 15px; display: none;">
@@ -446,6 +449,32 @@ background-color: #000 !important;
                 </div>
             </div>
         </div>
+
+        <!-- Size Chart Modal -->
+        <div id="sizeChartModal" class="size-chart-modal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); align-items: center; justify-content: center;">
+            <div class="modal-content" style="position: relative; margin: auto; padding: 0; width: 90%; max-width: 800px; background-color: #fff; box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);">
+                <span onclick="closeSizeChart()" style="position: absolute; right: 15px; top: 10px; color: #000; font-size: 28px; font-weight: bold; cursor: pointer; z-index: 10001;">&times;</span>
+                <img src="images/sizechart.jpg" alt="Size Chart" style="width: 100%; height: auto; display: block;">
+            </div>
+        </div>
+
+        <script>
+            function openSizeChart() {
+                document.getElementById('sizeChartModal').style.display = 'flex';
+                document.body.style.overflow = 'hidden'; // Prevent scrolling
+            }
+            function closeSizeChart() {
+                document.getElementById('sizeChartModal').style.display = 'none';
+                document.body.style.overflow = 'auto'; // Restore scrolling
+            }
+            // Close modal when clicking outside of the content
+            window.onclick = function(event) {
+                const modal = document.getElementById('sizeChartModal');
+                if (event.target == modal) {
+                    closeSizeChart();
+                }
+            }
+        </script>
 
         <!-- Related Products Section -->
         <section class="you-may-also-like full-width-section">
