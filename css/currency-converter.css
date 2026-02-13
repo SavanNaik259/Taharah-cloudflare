@@ -4,7 +4,7 @@
 
 /* Currency selector in bottom navigation */
 .currency-selector-wrapper {
-    display: flex !important;
+    display: none !important;
     flex-direction: column;
     align-items: center;
     justify-content: center;
