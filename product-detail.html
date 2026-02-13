@@ -376,47 +376,41 @@ background-color: #000 !important;
                     <!-- Aesthetic Info Sections -->
                     <div class="aesthetic-info-sections" style="margin-top: 30px; border-top: 1px solid #eee;">
                         <div class="info-item" style="border-bottom: 1px solid #eee;">
-                            <div class="info-header" onclick="toggleAestheticSection('shipping-info')" style="padding: 15px 0; display: flex; align-items: center; gap: 12px; cursor: pointer;">
-                                <i class="fas fa-truck" style="font-size: 1.1rem; color: #333;"></i>
-                                <span style="font-family: 'Futura PT', sans-serif; font-weight: 500; font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">Free Shipping and Delivery Details</span>
-                                <i class="fas fa-chevron-down toggle-icon" style="margin-left: auto; font-size: 0.7rem; color: #999; transition: transform 0.3s ease;"></i>
+                            <div class="info-header" onclick="toggleAestheticSection('description-info')" style="padding: 15px 0; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                                <span style="font-family: 'Futura PT', sans-serif; font-weight: 500; font-size: 0.95rem; color: #000;">Description</span>
+                                <i class="fas fa-chevron-right toggle-icon" style="font-size: 0.8rem; color: #333; transition: transform 0.3s ease;"></i>
                             </div>
-                            <div id="shipping-info" class="info-content" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease;">
+                            <div id="description-info" class="info-content" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;">
                                 <div style="padding-bottom: 15px; font-size: 0.9rem; color: #666; line-height: 1.6;">
-                                    <p>• <strong>Regions:</strong> We deliver all across India.</p>
-                                    <p>• <strong>Shipping Charges:</strong> We offer <strong>FREE SHIPPING</strong> on all orders across India.</p>
-                                    <p>• <strong>Delivery Time:</strong> Standard orders take 6–8 working days after dispatch. Orders with stitching services require 10–12 working days.</p>
-                                    <p>• <strong>Tracking:</strong> You will receive tracking details via email once your order is dispatched.</p>
+                                    <p id="bottom-description"></p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="info-item" style="border-bottom: 1px solid #eee;">
-                            <div class="info-header" onclick="toggleAestheticSection('return-info')" style="padding: 15px 0; display: flex; align-items: center; gap: 12px; cursor: pointer;">
-                                <i class="fas fa-exchange-alt" style="font-size: 1.1rem; color: #333;"></i>
-                                <span style="font-family: 'Futura PT', sans-serif; font-weight: 500; font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">Return and Exchange</span>
-                                <i class="fas fa-chevron-down toggle-icon" style="margin-left: auto; font-size: 0.7rem; color: #999; transition: transform 0.3s ease;"></i>
+                            <div class="info-header" onclick="toggleAestheticSection('care-info')" style="padding: 15px 0; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                                <span style="font-family: 'Futura PT', sans-serif; font-weight: 500; font-size: 0.95rem; color: #000;">Care Guide</span>
+                                <i class="fas fa-chevron-right toggle-icon" style="font-size: 0.8rem; color: #333; transition: transform 0.3s ease;"></i>
                             </div>
-                            <div id="return-info" class="info-content" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease;">
-                                <div style="padding-bottom: 15px; font-size: 0.9rem; color: #666; line-height: 1.6;">
-                                    <p>• <strong>Policy:</strong> No Exchange, No Return, No Refund. Orders once placed cannot be cancelled.</p>
-                                    <p>• <strong>Replacements:</strong> Applicable only if damaged or defective products are received.</p>
-                                    <p>• <strong>Mandatory Requirement:</strong> An <strong>unboxing video</strong> of the product is mandatory for any replacement claims.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="info-item" style="border-bottom: 1px solid #eee;">
-                            <div class="info-header" onclick="toggleAestheticSection('care-info')" style="padding: 15px 0; display: flex; align-items: center; gap: 12px; cursor: pointer;">
-                                <i class="fas fa-leaf" style="font-size: 1.1rem; color: #333;"></i>
-                                <span style="font-family: 'Futura PT', sans-serif; font-weight: 500; font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">Care Guide</span>
-                                <i class="fas fa-chevron-down toggle-icon" style="margin-left: auto; font-size: 0.7rem; color: #999; transition: transform 0.3s ease;"></i>
-                            </div>
-                            <div id="care-info" class="info-content" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease;">
+                            <div id="care-info" class="info-content" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;">
                                 <div style="padding-bottom: 15px; font-size: 0.9rem; color: #666; line-height: 1.6;">
                                     <p>• <strong>Cleaning:</strong> Dry clean highly recommended for handcrafted Pakistani fashion pieces.</p>
                                     <p>• <strong>Washing:</strong> If necessary, gentle hand wash in cold water with mild detergent. Do not soak.</p>
                                     <p>• <strong>Maintenance:</strong> Do not bleach. Iron on low heat on the reverse side. Store in a cool, dry place away from direct sunlight.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-item" style="border-bottom: 1px solid #eee;">
+                            <div class="info-header" onclick="toggleAestheticSection('shipping-info')" style="padding: 15px 0; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                                <span style="font-family: 'Futura PT', sans-serif; font-weight: 500; font-size: 0.95rem; color: #000;">Shipping and Exchange</span>
+                                <i class="fas fa-chevron-right toggle-icon" style="font-size: 0.8rem; color: #333; transition: transform 0.3s ease;"></i>
+                            </div>
+                            <div id="shipping-info" class="info-content" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;">
+                                <div style="padding-bottom: 15px; font-size: 0.9rem; color: #666; line-height: 1.6;">
+                                    <p>• <strong>Shipping:</strong> We offer <strong>FREE SHIPPING</strong> on all orders across India. Standard delivery takes 6–8 working days.</p>
+                                    <p>• <strong>Returns/Exchange:</strong> No Exchange, No Return, No Refund. Orders once placed cannot be cancelled.</p>
+                                    <p>• <strong>Replacements:</strong> Applicable only if damaged or defective products are received. An unboxing video is mandatory.</p>
                                 </div>
                             </div>
                         </div>
@@ -434,7 +428,7 @@ background-color: #000 !important;
                                 content.style.maxHeight = '0px';
                                 icon.style.transform = 'rotate(0deg)';
                             } else {
-                                // Close other open sections first (optional, for accordion effect)
+                                // Close other open sections
                                 document.querySelectorAll('.info-content').forEach(item => {
                                     item.style.maxHeight = '0px';
                                     const itemIcon = item.previousElementSibling.querySelector('.toggle-icon');
@@ -442,9 +436,21 @@ background-color: #000 !important;
                                 });
                                 
                                 content.style.maxHeight = content.scrollHeight + 'px';
-                                icon.style.transform = 'rotate(180deg)';
+                                icon.style.transform = 'rotate(90deg)';
                             }
                         }
+
+                        // Sync descriptions
+                        document.addEventListener('DOMContentLoaded', () => {
+                            const observer = new MutationObserver((mutations) => {
+                                const topDesc = document.getElementById('top-description');
+                                const bottomDesc = document.getElementById('bottom-description');
+                                if (topDesc && bottomDesc && topDesc.innerText && !bottomDesc.innerText) {
+                                    bottomDesc.innerText = topDesc.innerText;
+                                }
+                            });
+                            observer.observe(document.body, { childList: true, subtree: true });
+                        });
                     </script>
                 </div>
             </div>
