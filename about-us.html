@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
     
@@ -233,7 +231,66 @@
     <script src="js/whatsapp-tooltip.js"></script>
 </head>
 <body>
-<!-- Header -->
+    <!-- Search Overlay -->
+    <div class="search-overlay" id="searchOverlay">
+        <div class="search-container">
+            <div class="search-header">
+                <div class="search-input-container">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search for Pakistani suits, pret, or modest wear..." data-translate-placeholder="search">
+                    <i class="fas fa-search search-input-icon"></i>
+                </div>
+                <button class="search-close-btn" id="searchCloseBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="search-filters">
+                <button class="search-filter-btn active" data-filter="all" data-translate="all">All</button>
+                <button class="search-filter-btn" data-filter="ready-to-wear" data-translate="ready_to_wear">Ready to Wear</button>
+                <button class="search-filter-btn" data-filter="pret-wear" data-translate="pret_wear">Pret Wear</button>
+                <button class="search-filter-btn" data-filter="party-wear" data-translate="party_wear">Party Wear</button>
+            </div>
+
+            <div class="search-content">
+                <div class="search-results-header">
+                    <span class="search-results-count" data-translate-dynamic>0 results found</span>
+                    <button class="search-clear-btn" data-translate-dynamic>Clear all</button>
+                </div>
+
+                <div class="search-results-grid" id="searchResultsGrid">
+                    <!-- Search results will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Side Cart Panel -->
+    <div id="auricCartPanel" class="cart-panel">
+      <div class="cart-panel-header">
+        <h2 data-translate="shopping_bag">Shopping Bag</h2>
+        <button id="closeCartPanel" class="close-cart-btn"><i class="fi fi-rs-cross"></i></button>
+      </div>
+      <div class="cart-panel-body" id="cartPanelItems">
+        <!-- Cart items will be loaded here -->
+        <div class="empty-cart-message">
+          <p data-translate="cart_empty">Your bag is empty</p>
+          <a href="/new-arrivals" class="btn-shop-now" data-translate="shop_now">Shop Now</a>
+        </div>
+      </div>
+      <div class="cart-panel-footer">
+        <div class="cart-panel-subtotal">
+          <span data-translate="subtotal">Subtotal</span>
+          <span id="cartPanelSubtotalAmount">₹0</span>
+        </div>
+        <div class="cart-panel-buttons">
+          <a href="/checkout" class="btn-checkout" data-translate="checkout">Checkout</a>
+          <button id="viewCartBtn" class="btn-view-cart" data-translate="view_bag">View Bag</button>
+        </div>
+      </div>
+    </div>
+    <div id="auricCartOverlay" class="cart-panel-overlay"></div>
+
+    <!-- Header -->
     <header class="header">
         <!-- Promo Banner -->
         <div class="promo-banner">
@@ -267,14 +324,9 @@
             </div>
         </nav>
 
-        <!-- Navigation Links - Moved outside nav-container to avoid backdrop-filter containing block -->
+        <!-- Navigation Links -->
         <div class="nav-menu" id="navMenu">
-            <!-- Close button for mobile menu in the top right corner -->
-
             <i id="closeMenu" class="fa-solid fa-xmark meenu-close" onclick="closeMobileMenu()" style="font-size: 24px; margin-left: 90%; color: #333;" ></i>
-
-
-          <!-- "  <button class="menu-close fa fa-times" ></button>-->
 
             <ul class="nav-list">
                 <li class="nav-item"><a href="/index" class="nav-link" data-translate="home">Home</a></li>
@@ -282,240 +334,161 @@
                 <li class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle"><span data-translate="categories">Collections</span> <i class="fas fa-chevron-down"></i></a>
                     <ul class="dropdown-menu">
-                      <!--  <li><a href="/all-collection" data-translate="all_collections">All Collection</a></li>-->
                         <li><a href="/pakistani-pret-wear" data-translate-dynamic>Pakistani Pret Wear</a></li>
-
-
                         <li><a href="/ready-to-wear" data-translate="featured">Ready to Wear</a></li>
-                        
                         <li><a href="/modest-wear" data-translate-dynamic>Modest Wear</a></li>
                         <li><a href="/party-wear" data-translate-dynamic>Party Wear</a></li>
-                        <!--<li class="dropdown-submenu">
-                            <a href="#"><span data-translate="earrings">Earrings</span> <i class="fas fa-chevron-right"></i></a>
-                            <ul class="dropdown-submenu-list">
-                                <li><a href="/gold-earrings" data-translate-dynamic>Gold Earrings</a></li>
-                                <li><a href="/silver-earrings" data-translate-dynamic>Silver Earrings</a></li>
-                                <li><a href="/meenakari-earrings" data-translate-dynamic>Meenakari Earrings</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown-submenu">
-                            <a href="#"><span data-translate="bangles">Bangles</span> <i class="fas fa-chevron-right"></i></a>
-                            <ul class="dropdown-submenu-list">
-                                <li><a href="/gold-bangles" data-translate-dynamic>Gold Bangles</a></li>
-                                <li><a href="/silver-bangles" data-translate-dynamic>Silver Bangles</a></li>
-                                <li><a href="/meenakari-bangles" data-translate-dynamic>Meenakari Bangles</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown-submenu">
-                            <a href="#"><span data-translate="rings">Rings</span> <i class="fas fa-chevron-right"></i></a>
-                            <ul class="dropdown-submenu-list">
-                                <li><a href="/gold-rings" data-translate-dynamic>Gold Rings</a></li>
-                                <li><a href="/silver-rings" data-translate-dynamic>Silver Rings</a></li>
-                                <li><a href="/meenakari-rings" data-translate-dynamic>Meenakari Rings</a></li>
-                            </ul>
-                        </li>-->
                     </ul>
                 </li>
-                <li class="nav-item"><a href="/about-us" class="nav-link" data-translate="about_us">About</a></li>
+                <li class="nav-item"><a href="/about-us" class="nav-link active" data-translate="about_us">About</a></li>
                 <li class="nav-item"><a href="#customer-reviews" class="nav-link" data-translate-dynamic>Testimonials</a></li>
-                <!-- <li class="nav-item"><a href="/book-appointment" class="nav-link" data-translate-dynamic>Book Appointment</a></li> -->
                 <li class="nav-item"><a href="#" class="nav-link" data-translate-dynamic>Order Track</a></li>
                 <li><a href="/contact-us" class="nav-link" data-translate="contact_us">Contact</a></li>
             </ul>
 
-            <!-- Mobile account links in separate div after Contact -->
             <div class="mobile-account-links mobile-special">
                 <a href="#" class="mobile-account-link wishlist-toggle">
                     <img src="images/icons/heart.png" alt="Cart" style="width: 18px; height: 18px;"> &nbsp;   <span data-translate="wishlist">Wishlist</span> (<span class="mobile-wishlist-count">0</span>)
                 </a>
-
             </div>
         </div>
     </header>
 
-    <!-- Overlay for menu background -->
     <div class="menu-overlay" id="menuOverlay"></div>
 
-    <style>
-        /* Scoped Zeol-inspired About Page Styles */
-        .about-section-new {
-            padding: 0;
-            margin-top: 0;
-            background: #fff;
-            position: relative;
-            z-index: 1;
-        }
-
-        .about-hero-new {
-            position: relative;
-            height: 400px;
-            background-image: url("images/IMG-20260213-WA0018.jpg");
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: #fff;
-        }
-
-        .about-hero-new::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: 1;
-        }
-
-        .about-hero-new h1 {
-            font-family: "Playfair Display", serif;
-            font-size: 48px;
-            position: relative;
-            z-index: 2;
-            font-weight: 400;
-            letter-spacing: 1px;
-            color: #fff !important;
-            margin: 0;
-        }
-
-        .content-block-new {
-            max-width: 1000px;
-            margin: 60px auto;
-            padding: 0 20px;
-        }
-
-        .section-label-new {
-            text-transform: uppercase;
-            font-size: 14px;
-            letter-spacing: 2px;
-            color: #666;
-            margin-bottom: 20px;
-            display: block;
-            font-family: "Futura PT", sans-serif;
-        }
-
-        .main-heading-new {
-            font-family: "Playfair Display", serif;
-            font-size: 36px;
-            line-height: 1.3;
-            margin-bottom: 40px;
-            color: #000;
-            font-weight: 400;
-        }
-
-        .vision-mission-grid-new {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            margin-bottom: 60px;
-        }
-
-        .vm-item-new h3 {
-            font-family: "Playfair Display", serif;
-            font-size: 24px;
-            margin-bottom: 15px;
-            color: #000;
-            font-weight: 400;
-        }
-
-        .vm-item-new p {
-            font-size: 16px;
-            color: #666;
-            line-height: 1.8;
-            font-family: "Futura PT", sans-serif;
-        }
-
-        .journey-section-new {
-            background-color: #fff;
-            padding: 60px 0;
-        }
-
-        .journey-heading-new {
-            font-family: "Playfair Display", serif;
-            font-size: 32px;
-            margin-bottom: 30px;
-            font-weight: 400;
-            color: #000;
-        }
-
-        .journey-image-new {
-            width: 100%;
-            margin-bottom: 40px;
-        }
-
-        .journey-image-new img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-
-        .journey-text-new {
-            font-size: 16px;
-            color: #666;
-            line-height: 1.8;
-            text-align: justify;
-            font-family: "Futura PT", sans-serif;
-        }
-
-        @media (max-width: 768px) {
-            .about-hero-new {
-                height: 300px;
-            }
-            .about-hero-new h1 {
-                font-size: 32px;
-            }
-            .main-heading-new {
-                font-size: 28px;
-            }
-            .vision-mission-grid-new {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-    <section class="about-section-new">
-        <div class="about-hero-new">
+    <section class="about-section">
+        <div class="about-hero">
             <h1>About Us</h1>
         </div>
 
-        <div class="content-block-new">
-            <span class="section-label-new">SOME WORDS ABOUT US</span>
-            <h2 class="main-heading-new">Celebrating Culture Through Timeless Ethnic Wear</h2>
+        <div class="content-block">
+            <span class="section-label">SOME WORDS ABOUT US</span>
+            <h2 class="main-heading">Celebrating Culture Through Timeless Ethnic Wear</h2>
 
-            <div class="vision-mission-grid-new">
-                <div class="vm-item-new">
+            <div class="vision-mission-grid">
+                <div class="vm-item">
                     <h3>Vision</h3>
                     <p>To redefine ethnic fashion by blending traditional craftsmanship with contemporary design — inspiring elegance and confidence in every woman.</p>
                 </div>
-                <div class="vm-item-new">
+                <div class="vm-item">
                     <h3>Mission</h3>
                     <p>To create thoughtfully designed Pakistani and Indian suits that honor heritage, embrace modernity, and deliver quality, comfort, and timeless style with every piece.</p>
                 </div>
             </div>
 
-            <div class="journey-section-new">
-                <span class="section-label-new">OUR JOURNEY, YOUR STYLE</span>
-                <h2 class="journey-heading-new">Where Every Suit Tells a Story</h2>
-                <div class="journey-image-new">
+            <div class="journey-section">
+                <span class="section-label">OUR JOURNEY, YOUR STYLE</span>
+                <h2 class="journey-heading">Where Every Suit Tells a Story</h2>
+                <div class="journey-image">
                     <img src="images/about-journey.jpg" alt="Our Journey">
                 </div>
-                <div class="journey-text-new">
+                <div class="journey-text">
                     <p>Zoel started in 2020 in Kerala, with a simple idea — to bring modest and stylish clothing to women, mainly focusing on Pakistani suits and partywear. We didn’t have a big setup or a team in the beginning. We just had a small collection, a lot of hope, and the support of a few loyal customers who trusted us from day one. Step by step, order by order, Zoel began to grow. What started with a few pieces has now become something much bigger. Today, we’ve delivered over 1 lakh+ products across India, and we are grateful to have 1 lakh+ happy customers who continue to support us like family. More than anything, we’re proud of the connection we’ve built.</p>
                 </div>
             </div>
         </div>
     </section>
 
+    <footer class="footer-minimalist">
+        <div class="footer-container">
+            <div class="footer-section">
+                <button class="footer-toggle" data-section="info-content">
+                    <span class="footer-title" data-translate="info">Info</span>
+                    <i class="fas fa-plus"></i>
+                </button>
+                <div class="footer-content" id="info-content">
+                    <ul class="footer-links-list">
+                        <li><a href="/about-us" data-translate="about_us">About Us</a></li>
+                        <li><a href="/contact-us" data-translate="contact_us">Contact Us</a></li>
+                        <li><a href="/privacy-policy" data-translate="privacy_policy">Privacy Policy</a></li>
+                        <li><a href="/terms-conditions" data-translate="terms_conditions">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-section">
+                <button class="footer-toggle" data-section="categories-content">
+                    <span class="footer-title" data-translate="categories">Categories</span>
+                    <i class="fas fa-plus"></i>
+                </button>
+                <div class="footer-content" id="categories-content">
+                    <ul class="footer-links-list">
+                        <li><a href="/new-arrivals" data-translate="new_arrivals">New Arrivals</a></li>
+                        <li><a href="/pakistani-pret-wear">Pakistani Pret Wear</a></li>
+                        <li><a href="/ready-to-wear">Ready to Wear</a></li>
+                        <li><a href="/modest-wear">Modest Wear</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-section">
+                <button class="footer-toggle" data-section="collection-content">
+                    <span class="footer-title" data-translate-dynamic>Collection</span>
+                    <i class="fas fa-plus"></i>
+                </button>
+                <div class="footer-content" id="collection-content">
+                    <ul class="footer-links-list">
+                        <li><a href="/party-wear">Party Wear</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-section">
+                <button class="footer-toggle" data-section="benefits-content">
+                    <span class="footer-title" data-translate-dynamic>Exclusive benefits</span>
+                    <i class="fas fa-plus"></i>
+                </button>
+                <div class="footer-content" id="benefits-content">
+                    <p data-translate-dynamic>Sign up for early access, exclusive offers and more.</p>
+                </div>
+            </div>
+        </div>
+        <div class="footer-social-section">
+            <div class="social-icons-container">
+                <a href="https://www.instagram.com/taharahofficial_?igsh=MTdpdTRvdTBiMDh1dQ==" target="_blank" class="social-icon-link"><i class="fab fa-instagram"></i></a>
+                <a href="https://wa.me/918589920686" target="_blank" class="social-icon-link"><i class="fab fa-whatsapp"></i></a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p class="copyright-text">&copy; 2026 Taharah. All Rights Reserved.</p>
+        </div>
+    </footer>
 
-    <!-- WhatsApp Tooltip Script -->
-    <script src="js/whatsapp-tooltip.js"></script>
-
-
-
-
-
+    <nav class="bottom-nav">
+        <a href="/index" class="bottom-nav-item">
+            <i class="fi fi-rs-home"></i>
+            <span data-translate="home">Home</span>
+        </a>
+        <a href="/pakistani-pret-wear" class="bottom-nav-item">
+            <i class="fi fi-rs-apps"></i>
+            <span data-translate="categories">Collections</span>
+        </a>
+        <a href="/login" class="bottom-nav-item">
+            <i class="fi fi-rs-user"></i>
+            <span data-translate="account">Account</span>
+        </a>
+        <div class="bottom-nav-item currency-selector-wrapper">
+            <span id="selected-currency-symbol" class="currency-symbol-display">₹</span>
+            <span id="selected-currency-code" class="currency-code-display">INR</span>
+            <select id="currency-selector" class="currency-select">
+                <option value="INR">INR</option>
+                <option value="USD">USD</option>
+                <option value="AED">AED</option>
+                <option value="GBP">GBP</option>
+                <option value="EUR">EUR</option>
+                <option value="SAR">SAR</option>
+            </select>
+        </div>
+        <div class="bottom-nav-item language-selector-wrapper">
+            <span id="selected-language-flag" class="language-flag-display">🇬🇧</span>
+            <span id="selected-language-code" class="language-code-display">EN</span>
+            <select id="language-selector" class="language-select">
+                <option value="en">EN</option>
+                <option value="hi">HI</option>
+            </select>
+        </div>
+        <a href="#" class="bottom-nav-item" id="bottomNavCart">
+            <i class="fi fi-rs-shopping-bag"></i>
+            <span data-translate="bag">Bag</span>
+        </a>
+    </nav>
 
     <!-- Search Scripts -->
     <script src="js/search-manager.js"></script>
@@ -533,491 +506,68 @@
     <script src="js/firebase/firebase-wishlist-manager.js?v=1.0.0"></script>
     <script src="js/wishlist-manager.js?v=1.0.0"></script>
     <script src="js/main.js"></script>
-
-    <!-- Initialize search after all scripts are loaded -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Ensure search functionality is working
-            setTimeout(() => {
-                if (typeof SearchManager !== 'undefined') {
-                    console.log('SearchManager available');
-                }
-                if (typeof SearchUI !== 'undefined') {
-                    console.log('SearchUI available');
-                }
-
-                // Manual search icon setup as backup
-                const searchIcon = document.querySelector('.search-icon');
-                if (searchIcon && !searchIcon.hasAttribute('data-search-attached')) {
-                    searchIcon.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        console.log('Manual search icon click handler triggered');
-                        if (typeof SearchUI !== 'undefined' && SearchUI.openSearch) {
-                            SearchUI.openSearch();
-                        }
-                    });
-                    searchIcon.setAttribute('data-search-attached', 'true');
-                    console.log('Manual search icon handler attached');
-                }
-            }, 500);
-        });
-    </script>
-
-    <!-- Firebase Authentication Check -->
-    <script>
-      const FirebaseAuth = window.FirebaseAuth;
-
-      function handleAuthentication() {
-        const FirebaseAuth = window.FirebaseAuth;
-
-        if (!FirebaseAuth) {
-          console.warn('FirebaseAuth module not yet available, retrying...');
-          setTimeout(handleAuthentication, 100);
-          return;
-        }
-
-        const userIcon = document.getElementById('user-icon');
-
-        if (userIcon) {
-          try {
-            const currentUser = firebase.auth().currentUser;
-
-            if (currentUser) {
-              console.log("Firebase user is logged in:", currentUser.uid);
-              userIcon.href = "profile";
-              userIcon.classList.add('logged-in');
-            } else {
-              if (FirebaseAuth.isLoggedIn()) {
-                console.log("User is logged in from session");
-                userIcon.href = "profile";
-                userIcon.classList.add('logged-in');
-              } else {
-                console.log("No user session found");
-                userIcon.href = "login";
-                userIcon.classList.remove('logged-in');
-              }
-            }
-          } catch (error) {
-            console.error('Error checking authentication state:', error);
-            userIcon.href = "login";
-            userIcon.classList.remove('logged-in');
-          }
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', handleAuthentication);
-
-      FirebaseAuth.observeAuthState((user) => {
-        const userIcon = document.getElementById('user-icon');
-
-        if (userIcon) {
-          if (user) {
-            console.log("Auth state: User is signed in:", user.uid);
-
-            FirebaseAuth.saveSession({
-              uid: user.uid,
-              email: user.email,
-              displayName: user.displayName || 'User',
-              photoURL: user.photoURL,
-              loggedIn: true
-            });
-
-            userIcon.href = "profile";
-            userIcon.classList.add('logged-in');
-          } else {
-            console.log("Auth state: User is signed out");
-            FirebaseAuth.clearSession();
-            userIcon.href = "login";
-            userIcon.classList.remove('logged-in');
-          }
-        }
-      });
-    </script>
-
-
-
-    <!-- Bottom Navigation Bar -->
-
-    <!-- Footer Toggle Script -->
-
-
-    <!-- Minimalist Collapsible Footer -->
-
-
-    <!-- Bottom Navigation Bar (Mobile Only) -->
-
-
-    <!-- Footer Toggle Script -->
-
-
-
-    <!-- Minimalist Collapsible Footer -->
-
-
-    <!-- Bottom Navigation Bar (Mobile Only) -->
-
-
-    <!-- Footer Toggle Script -->
-
-
-
-    <!-- Minimalist Collapsible Footer -->
-    <footer class="footer-minimalist">
-        <div class="container">
-            <!-- Info Section -->
-            <div class="footer-section">
-                <button class="footer-toggle" data-section="info-content">
-                    <span class="footer-title" data-translate="info">Info</span>
-                    <i class="fas fa-chevron-down"></i>
-                </button>
-                <div class="footer-content" id="info-content">
-                    <ul>
-                        <li><a href="/about-us" data-translate="about_us">About Us</a></li>
-                        <li><a href="terms-conditions#shipping-and-delivery" data-translate-dynamic>Shipping Policy</a></li>
-                        <li><a href="terms-conditions#returns-and-refunds" data-translate-dynamic>Returns & Exchanges</a></li>
-                        <li><a href="/terms-conditions" data-translate-dynamic>Terms and Conditions</a></li>
-                        <li><a href="/privacy-policy" data-translate-dynamic>Privacy Policy</a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Categories Section -->
-            <div class="footer-section">
-                <button class="footer-toggle" data-section="categories-content">
-                    <span class="footer-title" data-translate="categories">Categories</span>
-                    <i class="fas fa-chevron-down"></i>
-                </button>
-                <div class="footer-content" id="categories-content">
-                    <ul>
-                        <li class="category-with-sub">
-                            <div class="category-item-header">
-                                <a href="/pakistani-pret-wear" data-translate="Pakistani Pret Wear">Pakistani Pret Wear</a>
-                               <!-- <i class="fas fa-plus category-toggle-icon"></i>-->
-                            </div>
-                          <!--  <ul class="subcategory-list">
-                                <li><a href="/gold-necklace" data-translate-dynamic>Gold Necklace</a></li>
-                                <li><a href="/silver-necklace" data-translate-dynamic>Silver Necklace</a></li>
-                                <li><a href="/meenakari-necklace" data-translate-dynamic>Meenakari Necklace</a></li>
-                            </ul>-->
-                        </li>
-                        <li class="category-with-sub">
-                            <div class="category-item-header">
-                                <a href="/ready-to-wear" data-translate="Ready to Wear">Ready to Wear</a>
-                              <!--  <i class="fas fa-plus category-toggle-icon"></i>-->
-                            </div>
-                          <!--  <ul class="subcategory-list">
-                                <li><a href="/gold-earrings" data-translate-dynamic>Gold Earrings</a></li>
-                                <li><a href="/silver-earrings" data-translate-dynamic>Silver Earrings</a></li>
-                                <li><a href="/meenakari-earrings" data-translate-dynamic>Meenakari Earrings</a></li>
-                            </ul>-->
-                        </li>
-                        <li class="category-with-sub">
-                            <div class="category-item-header">
-                                <a href="/modest-wear" data-translate-dynamic>Modest Wear</a>
-                              <!--  <i class="fas fa-plus category-toggle-icon"></i>-->
-                            </div>
-                          <!--  <ul class="subcategory-list">
-                                <li><a href="/gold-bangles" data-translate-dynamic>Gold Bangles</a></li>
-                                <li><a href="/silver-bangles" data-translate-dynamic>Silver Bangles</a></li>
-                                <li><a href="/meenakari-bangles" data-translate-dynamic>Meenakari Bangles</a></li>
-                            </ul>-->
-                        </li>
-                                    <li class="category-with-sub">
-                                        <div class="category-item-header">
-                                            <a href="/party-wear" data-translate-dynamic>Party wear</a>
-                                          <!--  <i class="fas fa-plus category-toggle-icon"></i>-->
-                                        </div>
-                                      <!--  <ul class="subcategory-list">
-                                            <li><a href="/gold-bangles" data-translate-dynamic>Gold Bangles</a></li>
-                                            <li><a href="/silver-bangles" data-translate-dynamic>Silver Bangles</a></li>
-                                            <li><a href="/meenakari-bangles" data-translate-dynamic>Meenakari Bangles</a></li>
-                                        </ul>-->
-                                    </li>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Collection Section -->
-            <div class="footer-section">
-                <button class="footer-toggle" data-section="collection-content">
-                    <span class="footer-title" data-translate-dynamic>Collection</span>
-                    <i class="fas fa-chevron-down"></i>
-                </button>
-                <div class="footer-content" id="collection-content">
-                    <ul>
-                        <!--<li><a href="/all-collection" data-translate="all_collections">All Collection</a></li>
-                        <li><a href="/featured-collection" data-translate="featured">Ready to Wear</a></li>-->
-                        <li><a href="/new-arrivals" data-translate="new_arrivals">New Arrivals</a></li>
-                        <li><a href="/pakistani-pret-wear">Pakistani Pret Wear</a></li>
-                        <li><a href="/ready-to-wear">Ready to Wear</a></li>
-                        <li><a href="/party-wear">Party Wear</a></li>
-                        <li><a href="/modest-wear">Modest Wear</a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Exclusive Benefits Section -->
-            <div class="footer-section">
-                <button class="footer-toggle" data-section="benefits-content">
-                    <span class="footer-title" data-translate-dynamic>Exclusive benefits</span>
-                    <i class="fas fa-chevron-down"></i>
-                </button>
-                <div class="footer-content" id="benefits-content">
-                    <ul>
-                        <li><a href="#" data-translate-dynamic>Personal Styling</a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Social Media Icons Section -->
-            <div class="footer-social-section">
-                <h3 class="social-section-title" data-translate="follow_social">Follow us on social media</h3>
-                <div class="social-icons-container">
-                    <a href="https://www.instagram.com/taharahofficial_?igsh=MTdpdTRvdTBiMDh1dQ==" target="_blank" class="social-icon-link">
-                        <i class="fab fa-instagram"></i>
-                    </a>
-                    <a href="https://www.facebook.com" target="_blank" class="social-icon-link">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-                    
-                </div>
-            </div>
-
-            <!-- Download Our App Section -->
-            <div class="footer-app-section">
-                <h3 class="app-section-title" data-translate="download_app">Download Our App</h3>
-                <div class="app-buttons-container">
-                    <a href="#" class="app-store-button">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="Download on App Store">
-                    </a>
-                    <a href="#" class="google-play-button">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play">
-                    </a>
-                </div>
-            </div>
-
-            <div class="footer-bottom">
-            <div class="container">
-                <div class="footer-info">
-                    <div class="copyright">
-                        <p data-translate-dynamic>&copy; <span id="currentYear"></span> Taharah. All rights reserved. | Developed by <a href="https://..netlify.app/" target="_blank" style="color: #9c7c38; text-decoration: none; font-weight: 500;">Savan Naik</a></p>
-                    <script>
-                        document.getElementById("currentYear").textContent = new Date().getFullYear();
-                    </script>
-                    </div>
-
-                    <div class="footer-links">
-                        <a href="/terms-conditions" data-translate-dynamic>Terms and Conditions</a>
-                        <a href="/privacy-policy" data-translate-dynamic>Privacy Policy</a>
-                    </div>
-
-                    <div class="payment-methods">
-                        <span><i class="fab fa-cc-amex"></i></span>
-                        <span><i class="fab fa-cc-discover"></i></span>
-                        <span><i class="fab fa-google-pay"></i></span>
-                        <span><i class="fab fa-cc-mastercard"></i></span>
-                        <span><i class="fab fa-cc-paypal"></i></span>
-                        <span class="union-pay">UP</span>
-                        <span><i class="fab fa-cc-visa"></i></span>
-                    </div>
-                </div>
-            </div>
-            </div>
-        </div>
-    </footer>
-    <nav class="bottom-nav">
-        <a href="/index" class="bottom-nav-item active">
-            <i class="fi fi-rs-home"></i>
-            <span data-translate="home">Home</span>
-        </a>
-        <a href="/pakistani-pret-wear" class="bottom-nav-item">
-            <i class="fi fi-rs-shop"></i>
-            <span data-translate="shop">Shop</span>
-        </a>
-        <a href="/login" class="bottom-nav-item">
-            <i class="fi fi-rs-user"></i>
-            <span data-translate="account">Account</span>
-        </a>
-        <div class="bottom-nav-item currency-selector-wrapper">
-            <span id="selected-currency-flag" class="currency-flag-display">🇮🇳</span>
-            <span id="selected-currency-code" class="currency-code-display">INR</span>
-            <select id="currency-selector" class="currency-select" onchange="CurrencyConverter.changeCurrency(this.value)">
-                <option value="INR">INR</option>
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-                <option value="GBP">GBP</option>
-                <option value="AED">AED</option>
-                <option value="CAD">CAD</option>
-                <option value="AUD">AUD</option>
-            </select>
-        </div>
-        <div class="bottom-nav-item language-selector-wrapper">
-            <span id="selected-language-flag" class="language-flag-display">🇬🇧</span>
-            <span id="selected-language-code" class="language-code-display">EN</span>
-            <select id="language-selector" class="language-select" onchange="LanguageTranslator.changeLanguage(this.value)">
-                <option value="en">EN</option>
-                <option value="hi">HI</option>
-                <option value="es">ES</option>
-                <option value="fr">FR</option>
-                <option value="ar">AR</option>
-                <option value="de">DE</option>
-            </select>
-        </div>
-        <a href="#" class="bottom-nav-item" id="bottomNavCart">
-            <i class="fi fi-rs-shopping-bag"></i>
-            <span data-translate="bag">Bag</span>
-        </a>
-    </nav>
-
-    <script>
-      // Network status monitoring
-      let isOnline = navigator.onLine;
-      window.addEventListener('online', () => {
-        console.log('Network connection restored');
-        isOnline = true;
-        document.dispatchEvent(new CustomEvent('network-status-changed', { detail: { online: true } }));
-      });
-      window.addEventListener('offline', () => {
-        console.log('Network connection lost');
-        isOnline = false;
-        document.dispatchEvent(new CustomEvent('network-status-changed', { detail: { online: false } }));
-      });
-    </script>
-
-    <!-- Navigation scripts -->
-    <script src="js/navigation.js?v=1.0.4"></script>
-    <script src="js/auto-slider.js?v=1.0.1"></script>
-    <script src="js/banner-rotator.js"></script>
-
-    <!-- Global Error Handler - Place this before any other scripts -->
-    <script src="js/error-handler.js"></script>
     <script src="js/footer-toggle.js"></script>
-
-    <!-- WhatsApp Tooltip Auto-Show -->
-    <script src="js/whatsapp-tooltip.js"></script>
-
-    <!-- Out of Stock Handler -->
-    <script src="js/out-of-stock-handler.js?v=1.0.0"></script>
-    <script src="js/banner-rotator.js"></script>
-    <!-- Search functionality - load in correct order -->
-    <script src="js/search-manager.js"></script>
-    <script src="js/search-ui.js"></script>
-
-    <!-- Initialize search after all scripts are loaded -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Ensure search functionality is working
-            setTimeout(() => {
-                if (typeof SearchManager !== 'undefined') {
-                    console.log('SearchManager available');
-                }
-                if (typeof SearchUI !== 'undefined') {
-                    console.log('SearchUI available');
-                }
-
-                // Manual search icon setup as backup
-                const searchIcon = document.querySelector('.search-icon');
-                if (searchIcon && !searchIcon.hasAttribute('data-search-attached')) {
-                    searchIcon.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        console.log('Manual search icon click handler triggered');
-                        if (typeof SearchUI !== 'undefined' && SearchUI.openSearch) {
-                            SearchUI.openSearch();
-                        }
-                    });
-                    searchIcon.setAttribute('data-search-attached', 'true');
-                    console.log('Manual search icon handler attached');
-                }
-            }, 500);
-        });
-    </script>
-    <!-- Interactive Product Showcase -->
-    <script src="js/interactive-showcase.js?v=2.0.5"></script>
-
-    <!-- Language Translator -->
+    <script src="js/currency-converter.js?v=1.0.0"></script>
     <script src="js/language-translator.js?v=1.0.0"></script>
 
-    <!-- First Visit Banner Modal -->
-    <script src="js/first-visit-banner.js?v=1.0.0"></script>
-
-    <!-- Notification Manager (uses existing Firebase 9.6.10 initialization) -->
-    <script src="js/firebase/notification-manager.js"></script>
-
-    <!-- Notification Banner Initialization -->
     <script>
-        // Initialize notification system when DOM is ready
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                // Check if user already has notification permission
-                const hasPermission = Notification.permission === 'granted';
-                const hasDismissed = localStorage.getItem('notification-banner-dismissed');
-
-                // Show banner after 5 seconds if notifications are not enabled and user hasn't dismissed
-                if (!hasPermission && !hasDismissed) {
-                    setTimeout(() => {
-                        const banner = document.getElementById('notificationBanner');
-                        banner.classList.add('show');
-                    }, 5000);
-                }
-
-                // Enable Notifications button
-                document.getElementById('enableNotifications').addEventListener('click', async () => {
-                    try {
-                        console.log('🔔 User clicked Enable Notifications button');
-                        
-                        // Initialize notification manager
-                        const initialized = await notificationManager.init();
-                        
-                        if (initialized === false) {
-                            console.error('❌ Notification manager initialization failed');
-                            alert('Unable to enable notifications.\n\nPossible reasons:\n- Browser doesn\'t support notifications\n- Service Workers not available\n- VAPID key not configured\n\nPlease check browser settings and try again.');
-                            return;
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cart functionality for bottom nav
+            const bottomNavCart = document.getElementById('bottomNavCart');
+            if (bottomNavCart) {
+                bottomNavCart.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (typeof openCart === 'function') {
+                        openCart();
+                    } else if (typeof toggleCart === 'function') {
+                        toggleCart();
+                    } else {
+                        const cartPanel = document.getElementById('auricCartPanel');
+                        const cartOverlay = document.getElementById('auricCartOverlay');
+                        if (cartPanel && cartOverlay) {
+                            cartPanel.classList.add('active');
+                            cartOverlay.classList.add('active');
                         }
-
-                        console.log('✅ Notification manager initialized successfully');
-
-                        // Request permission and get token
-                        const token = await notificationManager.requestPermissionAndGetToken();
-                        
-                        // Hide banner after browser permission dialog is resolved
-                        const banner = document.getElementById('notificationBanner');
-                        banner.classList.add('hide');
-                        localStorage.setItem('notification-banner-dismissed', 'true');
-                        
-                        if (token) {
-                            console.log('📍 Token received, saving to Firestore...');
-                            
-                            // Save token to Firestore
-                            await notificationManager.saveToken(token);
-                            
-                            console.log('✅ Token saved successfully');
-                            
-                            // Setup listener for foreground messages
-                            notificationManager.setupMessageListener((notification) => {
-                                console.log('Foreground notification received:', notification);
-                            });
-                        }
-                    } catch (error) {
-                        console.error('❌ Error enabling notifications:', error);
                     }
                 });
+            }
 
-                // Dismiss button
-                document.getElementById('dismissNotifications').addEventListener('click', () => {
-                    const banner = document.getElementById('notificationBanner');
-                    banner.classList.add('hide');
-                    localStorage.setItem('notification-banner-dismissed', 'true');
+            // Close cart panel
+            const closeCartBtn = document.getElementById('closeCartPanel');
+            const cartOverlay = document.getElementById('auricCartOverlay');
+            if (closeCartBtn && cartOverlay) {
+                [closeCartBtn, cartOverlay].forEach(el => {
+                    el.addEventListener('click', function() {
+                        const cartPanel = document.getElementById('auricCartPanel');
+                        const overlay = document.getElementById('auricCartOverlay');
+                        cartPanel.classList.remove('active');
+                        overlay.classList.remove('active');
+                    });
                 });
+            }
 
-            } catch (error) {
-                console.error('Error initializing notification banner:', error);
+            // Search functionality
+            const searchIcon = document.querySelector('.search-icon');
+            if (searchIcon) {
+                searchIcon.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (typeof SearchUI !== 'undefined' && SearchUI.openSearch) {
+                        SearchUI.openSearch();
+                    } else {
+                        const searchOverlay = document.getElementById('searchOverlay');
+                        if (searchOverlay) searchOverlay.classList.add('active');
+                    }
+                });
+            }
+
+            const searchCloseBtn = document.getElementById('searchCloseBtn');
+            if (searchCloseBtn) {
+                searchCloseBtn.addEventListener('click', function() {
+                    const searchOverlay = document.getElementById('searchOverlay');
+                    if (searchOverlay) searchOverlay.classList.remove('active');
+                });
             }
         });
     </script>
-    <!-- Firebase Messaging for Push Notifications -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js"></script>
-    <!-- Notification Registration Manager -->
-    <script src="js/notification-registration.js"></script>
-  </body>
+</body>
 </html>
