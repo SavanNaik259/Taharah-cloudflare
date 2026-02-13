@@ -162,9 +162,21 @@
         .vm-item h3 {
             font-family: var(--zeol-font-serif);
             font-size: 24px;
-            margin-bottom: 15px;
+            margin-bottom: 25px;
             color: #000;
             font-weight: 400;
+            position: relative;
+            display: inline-block;
+        }
+
+        .vm-item h3::after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 2px;
+            background-color: var(--color-accent);
+            bottom: -8px;
+            left: 0;
         }
 
         .vm-item p {
