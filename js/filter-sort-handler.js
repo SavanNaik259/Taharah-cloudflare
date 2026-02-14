@@ -167,18 +167,14 @@ const FilterSortHandler = (function() {
         // Ensure price is numeric for all products
         sorted.forEach(p => {
             if (typeof p.price === 'string') {
-                // Remove everything except numbers and decimal point
-                const cleanPrice = p.price.replace(/[^\d.]/g, '');
-                p.price_numeric = parseFloat(cleanPrice) || 0;
-            } else {
-                p.price_numeric = parseFloat(p.price) || 0;
+                p.price = parseFloat(p.price.replace(/[^\d.]/g, '')) || 0;
             }
         });
         
         if (currentSort === 'price-low-high') {
-            sorted.sort((a, b) => (a.price_numeric || 0) - (b.price_numeric || 0));
+            sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
         } else if (currentSort === 'price-high-low') {
-            sorted.sort((a, b) => (b.price_numeric || 0) - (a.price_numeric || 0));
+            sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
         } else if (currentSort === 'newest') {
             sorted.sort((a, b) => {
                 const getTime = (p) => {

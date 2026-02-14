@@ -74,18 +74,16 @@ function sortProducts(products, sortBy) {
     // Normalize price to numeric before sorting
     productsCopy.forEach(p => {
         if (typeof p.price === 'string') {
-            p.price_numeric = parseFloat(p.price.replace(/[^\d.]/g, '')) || 0;
-        } else {
-            p.price_numeric = parseFloat(p.price) || 0;
+            p.price = parseFloat(p.price.replace(/[^\d.]/g, '')) || 0;
         }
     });
     
     switch (sortBy) {
         case 'price-low-high':
-            return productsCopy.sort((a, b) => (a.price_numeric || 0) - (b.price_numeric || 0));
+            return productsCopy.sort((a, b) => (a.price || 0) - (b.price || 0));
             
         case 'price-high-low':
-            return productsCopy.sort((a, b) => (b.price_numeric || 0) - (a.price_numeric || 0));
+            return productsCopy.sort((a, b) => (b.price || 0) - (a.price || 0));
             
         case 'newest':
             return productsCopy.sort((a, b) => {

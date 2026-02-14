@@ -312,20 +312,16 @@ const SubcategoryProductsLoader = (function() {
                 
             case 'price-low-high':
                 return productsCopy.sort((a, b) => {
-                    const getPrice = (p) => {
-                        if (typeof p.price === 'string') return parseFloat(p.price.replace(/[^\d.]/g, '')) || 0;
-                        return parseFloat(p.price) || 0;
-                    };
-                    return getPrice(a) - getPrice(b);
+                    const priceA = typeof a.price === 'string' ? parseFloat(a.price.replace(/[^\d.]/g, '')) : parseFloat(a.price);
+                    const priceB = typeof b.price === 'string' ? parseFloat(b.price.replace(/[^\d.]/g, '')) : parseFloat(b.price);
+                    return (priceA || 0) - (priceB || 0);
                 });
                 
             case 'price-high-low':
                 return productsCopy.sort((a, b) => {
-                    const getPrice = (p) => {
-                        if (typeof p.price === 'string') return parseFloat(p.price.replace(/[^\d.]/g, '')) || 0;
-                        return parseFloat(p.price) || 0;
-                    };
-                    return getPrice(b) - getPrice(a);
+                    const priceA = typeof a.price === 'string' ? parseFloat(a.price.replace(/[^\d.]/g, '')) : parseFloat(a.price);
+                    const priceB = typeof b.price === 'string' ? parseFloat(b.price.replace(/[^\d.]/g, '')) : parseFloat(b.price);
+                    return (priceB || 0) - (priceA || 0);
                 });
             default:
                 return productsCopy;
