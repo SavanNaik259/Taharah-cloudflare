@@ -71,26 +71,41 @@ function sortProducts(products, sortBy) {
     
     const productsCopy = [...products];
     
+    // Normalize price to numeric before sorting
+    productsCopy.forEach(p => {
+        if (typeof p.price === 'string') {
+            p.price = parseFloat(p.price.replace(/[^\d.]/g, '')) || 0;
+        }
+    });
+    
     switch (sortBy) {
         case 'price-low-high':
-            return productsCopy.sort((a, b) => {
-                const priceA = parseFloat(a.price);
-                const priceB = parseFloat(b.price);
-                return priceA - priceB;
-            });
+            return productsCopy.sort((a, b) => (a.price || 0) - (b.price || 0));
             
         case 'price-high-low':
-            return productsCopy.sort((a, b) => {
-                const priceA = parseFloat(a.price);
-                const priceB = parseFloat(b.price);
-                return priceB - priceA;
-            });
+            return productsCopy.sort((a, b) => (b.price || 0) - (a.price || 0));
             
         case 'newest':
             return productsCopy.sort((a, b) => {
-                const dateA = new Date(a.date || 0);
-                const dateB = new Date(b.date || 0);
-                return dateB - dateA;
+                const getTime = (p) => {
+                    if (typeof p.uploadedAt === 'number') return p.uploadedAt;
+                    if (typeof p.createdAt === 'number') return p.createdAt;
+                    if (typeof p.timestamp === 'number') return p.timestamp;
+                    if (typeof p.date === 'number') return p.date;
+
+                    const val = p.uploadedAt || p.createdAt || p.timestamp || p.date;
+                    if (val) {
+                        const date = new Date(val);
+                        const time = date.getTime();
+                        if (!isNaN(time)) return time;
+                    }
+                    
+                    const idMatch = p.id?.match(/-(\d{13})-/);
+                    if (idMatch) return parseInt(idMatch[1]);
+                    
+                    return 0;
+                };
+                return getTime(b) - getTime(a);
             });
             
         case 'featured':

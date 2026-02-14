@@ -310,7 +310,19 @@ const SubcategoryProductsLoader = (function() {
                     return getTime(b) - getTime(a);
                 });
                 
-            case 'featured':
+            case 'price-low-high':
+                return productsCopy.sort((a, b) => {
+                    const priceA = typeof a.price === 'string' ? parseFloat(a.price.replace(/[^\d.]/g, '')) : parseFloat(a.price);
+                    const priceB = typeof b.price === 'string' ? parseFloat(b.price.replace(/[^\d.]/g, '')) : parseFloat(b.price);
+                    return (priceA || 0) - (priceB || 0);
+                });
+                
+            case 'price-high-low':
+                return productsCopy.sort((a, b) => {
+                    const priceA = typeof a.price === 'string' ? parseFloat(a.price.replace(/[^\d.]/g, '')) : parseFloat(a.price);
+                    const priceB = typeof b.price === 'string' ? parseFloat(b.price.replace(/[^\d.]/g, '')) : parseFloat(b.price);
+                    return (priceB || 0) - (priceA || 0);
+                });
             default:
                 return productsCopy;
         }
