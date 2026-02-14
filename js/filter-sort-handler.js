@@ -25,7 +25,19 @@ const FilterSortHandler = (function() {
                 featuredSortOption.remove();
             }
 
-            // Set default active option to newest
+            // Determine if we should remove "Newest Arrivals" from sort dropdown
+            const path = window.location.pathname;
+            const pageName = path.split('/').pop().replace('.html', '') || 'index';
+            const pagesToRemoveNewest = ['new-arrivals', 'pakistani-pret-wear', 'party-wear', 'modest-wear', 'ready-to-wear'];
+            
+            if (pagesToRemoveNewest.includes(pageName)) {
+                const newestSortOption = sortDropdown.querySelector('[data-sort="newest"]');
+                if (newestSortOption) {
+                    newestSortOption.remove();
+                }
+            }
+
+            // Set default active option to newest (or first available if newest removed)
             const initialSortOptions = sortDropdown.querySelectorAll('.sort-dropdown-option');
             let newestOptionFound = false;
             initialSortOptions.forEach(opt => {
@@ -37,13 +49,16 @@ const FilterSortHandler = (function() {
                 }
             });
 
-            // If newest option doesn't exist in dropdown, add it
-            if (!newestOptionFound) {
+            // If newest option doesn't exist in dropdown and we're NOT on a page where it should be removed, add it
+            if (!newestOptionFound && !pagesToRemoveNewest.includes(pageName)) {
                 const newestOption = document.createElement('div');
                 newestOption.className = 'sort-dropdown-option active';
                 newestOption.dataset.sort = 'newest';
                 newestOption.textContent = 'Newest Arrivals';
                 sortDropdown.prepend(newestOption);
+            } else if (!newestOptionFound && pagesToRemoveNewest.includes(pageName) && initialSortOptions.length > 0) {
+                // If we removed newest, make the first remaining option active
+                initialSortOptions[0].classList.add('active');
             }
 
             sortOption.addEventListener('click', function(e) {
