@@ -217,8 +217,8 @@ const FilterSortHandler = (function() {
         }
 
         // Initialize with newest products
-        // applySort('newest'); // Comment out auto-apply to prevent flash/load issues
-        
+        applySort('newest');
+
         console.log('Filter and Sort Handler initialized');
     }
 
@@ -237,79 +237,46 @@ const FilterSortHandler = (function() {
         let products = [];
         
         // Get products from appropriate loader
-        try {
-            if (pageName === 'all-collection') {
-                if (typeof AllCollectionLoader !== 'undefined') {
-                    products = await AllCollectionLoader.loadAllProducts();
-                }
-            } else if (pageName === 'featured-collection' || pageName === 'ready-to-wear') {
-                if (typeof FeaturedCollectionLoader !== 'undefined') {
-                    products = await FeaturedCollectionLoader.loadFeaturedProducts();
-                } else if (typeof SubcategoryProductsLoader !== 'undefined') {
-                    products = await SubcategoryProductsLoader.loadSubcategoryProducts(pageName);
-                }
-            } else if (pageName === 'new-arrivals') {
-                if (typeof NewArrivalsPageLoader !== 'undefined' && NewArrivalsPageLoader.loadNewArrivalsProductsDirect) {
-                    products = await NewArrivalsPageLoader.loadNewArrivalsProductsDirect();
-                } else if (typeof SubcategoryProductsLoader !== 'undefined') {
-                    products = await SubcategoryProductsLoader.loadSubcategoryProducts(pageName);
-                }
-            } else if (['pakistani-pret-wear', 'modest-wear', 'party-wear'].includes(pageName)) {
-                if (typeof SubcategoryProductsLoader !== 'undefined') {
-                    products = await SubcategoryProductsLoader.loadSubcategoryProducts(pageName);
-                }
-            } else {
-                const categories = [
-                    'gold-necklace', 'silver-necklace', 'meenakari-necklace',
-                    'gold-earrings', 'silver-earrings', 'meenakari-earrings',
-                    'gold-bangles', 'silver-bangles', 'meenakari-bangles',
-                    'gold-rings', 'silver-rings', 'meenakari-rings'
-                ];
-                if (categories.includes(pageName) && typeof SubcategoryProductsLoader !== 'undefined') {
-                    products = await SubcategoryProductsLoader.loadSubcategoryProducts(pageName);
-                }
+        if (pageName === 'all-collection') {
+            if (typeof AllCollectionLoader !== 'undefined') {
+                products = await AllCollectionLoader.loadAllProducts();
             }
-        } catch (error) {
-            console.error('Error fetching products for sorting:', error);
+        } else if (pageName === 'featured-collection') {
+            if (typeof FeaturedCollectionLoader !== 'undefined') {
+                products = await FeaturedCollectionLoader.loadFeaturedProducts();
+            }
+        } else if (pageName === 'new-arrivals') {
+            if (typeof NewArrivalsPageLoader !== 'undefined') {
+                products = await NewArrivalsPageLoader.loadNewArrivalsProducts();
+            }
+        } else if (pageName === 'pakistani-pret-wear' || pageName === 'ready-to-wear' || pageName === 'modest-wear' || pageName === 'party-wear') {
+            if (typeof SubcategoryProductsLoader !== 'undefined') {
+                products = await SubcategoryProductsLoader.loadSubcategoryProducts(pageName);
+            }
+        } else {
+            // Check if it's a known subcategory
+            const categories = [
+                'gold-necklace', 'silver-necklace', 'meenakari-necklace',
+                'gold-earrings', 'silver-earrings', 'meenakari-earrings',
+                'gold-bangles', 'silver-bangles', 'meenakari-bangles',
+                'gold-rings', 'silver-rings', 'meenakari-rings'
+            ];
+            
+            if (categories.includes(pageName) && typeof SubcategoryProductsLoader !== 'undefined') {
+                products = await SubcategoryProductsLoader.loadSubcategoryProducts(pageName);
+            }
         }
 
-        // FALLBACK: If API fails or products array empty, try extracting from DOM
-        if (!products || products.length === 0) {
-            console.log('No products from API, trying DOM extraction fallback...');
-            products = extractProductsFromDOM();
-        }
-
-        if (!products || products.length === 0) {
-            console.warn('No products found to sort');
+        if (products.length === 0) {
+            console.warn('No products to sort');
             return;
         }
 
-        // Sort products
+        // Sort products (only price sorting, featured/newest handled by filter modal)
         const sortedProducts = sortProducts(products, sortBy);
         
         // Display sorted products
         displayProducts(sortedProducts);
-    }
-
-    /**
-     * Fallback: Extract product data from the existing DOM elements
-     */
-    function extractProductsFromDOM() {
-        const productElements = document.querySelectorAll('.product-item');
-        const products = [];
-        
-        productElements.forEach(el => {
-            const id = el.dataset.productId;
-            const price = parseFloat(el.dataset.productPrice);
-            const name = el.querySelector('.product-name')?.textContent || '';
-            const image = el.querySelector('img')?.src || '';
-            
-            if (id && !isNaN(price)) {
-                products.push({ id, price, name, image });
-            }
-        });
-        
-        return products;
     }
 
     /**
@@ -376,32 +343,28 @@ const FilterSortHandler = (function() {
             return;
         }
 
+        if (products.length === 0) {
+            productsGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; padding: 40px;">No products found</p>';
+            return;
+        }
+
         // Generate product HTML
         const productsHTML = products.map(product => generateProductHTML(product)).join('');
         productsGrid.innerHTML = productsHTML;
-
-        // CRITICAL: Convert currency after redrawing
-        if (typeof window.CurrencyConverter !== 'undefined' && window.CurrencyConverter.convertAllPrices) {
-            window.CurrencyConverter.convertAllPrices();
-        }
 
         // CRITICAL: Populate global price cache BEFORE currency conversion
         // This ensures Level 0 price extraction works in wishlist-manager
         products.forEach(product => {
             if (window.PRODUCT_PRICES_CACHE) {
                 window.PRODUCT_PRICES_CACHE.set(product.id, product.price);
+                console.log('📦 Cached price for', product.id, ':', product.price, 'INR');
             }
         });
 
         // Reinitialize wishlist listeners
         if (typeof window.WishlistManager !== 'undefined') {
             setTimeout(() => {
-                if (window.WishlistManager.updateWishlistButtonsState) {
-                    window.WishlistManager.updateWishlistButtonsState();
-                }
-                if (window.WishlistManager.updateWishlistUI) {
-                    window.WishlistManager.updateWishlistUI();
-                }
+                window.WishlistManager.updateWishlistButtonsState();
             }, 100);
         }
     }

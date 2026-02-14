@@ -384,10 +384,9 @@ const SubcategoryProductsLoader = (function() {
             'gold-rings': 'gold-rings',
             'silver-rings': 'silver-rings',
             'meenakari-rings': 'meenakari-rings',
-            'pakistani-pret-wear': 'pakistani-pret-wear',
-            'modest-wear': 'modest-wear',
-            'party-wear': 'party-wear',
-            'ready-to-wear': 'ready-to-wear'
+            'pakistani-pret-wear': 'gold-bangles',
+            'modest-wear': 'gold-earrings',
+            'party-wear': 'gold-necklace'
         };
 
         const category = categoryMap[pageName];
