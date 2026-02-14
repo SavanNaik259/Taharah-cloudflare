@@ -241,15 +241,23 @@ const FilterSortHandler = (function() {
             if (typeof AllCollectionLoader !== 'undefined') {
                 products = await AllCollectionLoader.loadAllProducts();
             }
-        } else if (pageName === 'featured-collection') {
-            if (typeof FeaturedCollectionLoader !== 'undefined') {
+        } else if (pageName === 'featured-collection' || pageName === 'ready-to-wear') {
+            if (typeof FeaturedCollectionLoader !== 'undefined' && typeof BridalProductsLoader !== 'undefined') {
+                products = await BridalProductsLoader.loadBridalProducts();
+            } else if (typeof FeaturedCollectionLoader !== 'undefined' && FeaturedCollectionLoader.loadFeaturedProducts) {
                 products = await FeaturedCollectionLoader.loadFeaturedProducts();
+            } else if (typeof SubcategoryProductsLoader !== 'undefined' && pageName === 'ready-to-wear') {
+                products = await SubcategoryProductsLoader.loadSubcategoryProducts('ready-to-wear');
             }
         } else if (pageName === 'new-arrivals') {
-            if (typeof NewArrivalsPageLoader !== 'undefined') {
+            if (typeof NewArrivalsPageLoader !== 'undefined' && typeof loadNewArrivalsProductsDirect === 'function') {
+                products = await loadNewArrivalsProductsDirect();
+            } else if (typeof NewArrivalsPageLoader !== 'undefined' && NewArrivalsPageLoader.loadNewArrivalsProducts) {
                 products = await NewArrivalsPageLoader.loadNewArrivalsProducts();
+            } else if (typeof NewArrivalsProductsLoader !== 'undefined') {
+                products = await NewArrivalsProductsLoader.loadNewArrivalsProducts();
             }
-        } else if (pageName === 'pakistani-pret-wear' || pageName === 'ready-to-wear' || pageName === 'modest-wear' || pageName === 'party-wear') {
+        } else if (pageName === 'pakistani-pret-wear' || pageName === 'modest-wear' || pageName === 'party-wear') {
             if (typeof SubcategoryProductsLoader !== 'undefined') {
                 // Map page name to category if needed
                 const categoryMap = {
