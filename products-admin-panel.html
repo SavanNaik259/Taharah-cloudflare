@@ -1188,7 +1188,6 @@
             }
             storage = firebase.storage();
             auth = firebase.auth();
-            db = firebase.firestore();
             
             // Protect page with authentication
             auth.onAuthStateChanged((user) => {
@@ -1353,157 +1352,6 @@
 
         const availableSizes = ['36', '38', '40', '42', '44', '46', '48', '50', '52', '54', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL', 'Free Size'];
         let availableColours = ['Red', 'Blue', 'Green', 'Black', 'White', 'Pink', 'Yellow', 'Purple', 'Grey', 'Beige', 'Gold', 'Silver', 'Maroon', 'Navy Blue'];
-        let categorySubcategories = {};
-
-        async function handleCategoryChange() {
-            const category = document.getElementById('productCategory').value;
-            const subcategoryGroup = document.getElementById('subcategoryGroup');
-            
-            if (!category) {
-                subcategoryGroup.style.display = 'none';
-                return;
-            }
-
-            subcategoryGroup.style.display = 'block';
-            await loadSubcategories(category);
-        }
-
-        async function loadSubcategories(category) {
-            const subcategorySelect = document.getElementById('productSubcategory');
-            subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
-
-            try {
-                // Try local storage
-                const localData = localStorage.getItem(`subcategories_${category}`);
-                if (localData) {
-                    const subs = JSON.parse(localData);
-                    populateSubcategorySelect(subs);
-                }
-
-                // Load from Firestore
-                const doc = await db.collection('settings').doc('subcategories').get();
-                if (doc.exists) {
-                    const data = doc.data();
-                    const subs = data[category] || [];
-                    categorySubcategories[category] = subs;
-                    localStorage.setItem(`subcategories_${category}`, JSON.stringify(subs));
-                    populateSubcategorySelect(subs);
-                }
-            } catch (error) {
-                console.error('Error loading subcategories:', error);
-            }
-        }
-
-        function populateSubcategorySelect(subs) {
-            const subcategorySelect = document.getElementById('productSubcategory');
-            const currentValue = subcategorySelect.value;
-            subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>' + 
-                subs.map(sub => `<option value="${sub}" ${sub === currentValue ? 'selected' : ''}>${sub}</option>`).join('');
-        }
-
-        async function addNewSubcategory() {
-            const category = document.getElementById('productCategory').value;
-            const input = document.getElementById('customSubcategory');
-            const newSub = input.value.trim();
-
-            if (!category || !newSub) return;
-
-            if (!categorySubcategories[category]) categorySubcategories[category] = [];
-            if (!categorySubcategories[category].includes(newSub)) {
-                categorySubcategories[category].push(newSub);
-                try {
-                    await db.collection('settings').doc('subcategories').set({
-                        [category]: categorySubcategories[category]
-                    }, { merge: true });
-                    localStorage.setItem(`subcategories_${category}`, JSON.stringify(categorySubcategories[category]));
-                    populateSubcategorySelect(categorySubcategories[category]);
-                    document.getElementById('productSubcategory').value = newSub;
-                    input.value = '';
-                } catch (error) {
-                    console.error('Error saving subcategory:', error);
-                }
-            }
-        }
-        let categorySubcategories = {};
-
-        async function handleCategoryChange() {
-            const category = document.getElementById('productCategory').value;
-            const subcategoryGroup = document.getElementById('subcategoryGroup');
-            const subcategorySelect = document.getElementById('productSubcategory');
-            
-            if (!category) {
-                subcategoryGroup.style.display = 'none';
-                return;
-            }
-
-            subcategoryGroup.style.display = 'block';
-            await loadSubcategories(category);
-        }
-
-        async function loadSubcategories(category) {
-            const subcategorySelect = document.getElementById('productSubcategory');
-            subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
-
-            try {
-                // Try to load from local storage first for speed
-                const localData = localStorage.getItem(`subcategories_${category}`);
-                if (localData) {
-                    const subs = JSON.parse(localData);
-                    populateSubcategorySelect(subs);
-                }
-
-                // Load from Firestore
-                const doc = await db.collection('settings').doc('subcategories').get();
-                if (doc.exists) {
-                    const data = doc.data();
-                    const subs = data[category] || [];
-                    categorySubcategories[category] = subs;
-                    localStorage.setItem(`subcategories_${category}`, JSON.stringify(subs));
-                    populateSubcategorySelect(subs);
-                }
-            } catch (error) {
-                console.error('Error loading subcategories:', error);
-            }
-        }
-
-        function populateSubcategorySelect(subs) {
-            const subcategorySelect = document.getElementById('productSubcategory');
-            const currentValue = subcategorySelect.value;
-            
-            subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>' + 
-                subs.map(sub => `<option value="${sub}" ${sub === currentValue ? 'selected' : ''}>${sub}</option>`).join('');
-        }
-
-        async function addNewSubcategory() {
-            const category = document.getElementById('productCategory').value;
-            const input = document.getElementById('customSubcategory');
-            const newSub = input.value.trim();
-
-            if (!category || !newSub) return;
-
-            if (!categorySubcategories[category]) {
-                categorySubcategories[category] = [];
-            }
-
-            if (!categorySubcategories[category].includes(newSub)) {
-                categorySubcategories[category].push(newSub);
-                
-                try {
-                    await db.collection('settings').doc('subcategories').set({
-                        [category]: categorySubcategories[category]
-                    }, { merge: true });
-                    
-                    localStorage.setItem(`subcategories_${category}`, JSON.stringify(categorySubcategories[category]));
-                    populateSubcategorySelect(categorySubcategories[category]);
-                    document.getElementById('productSubcategory').value = newSub;
-                    input.value = '';
-                    showSuccess('Subcategory added successfully');
-                } catch (error) {
-                    console.error('Error saving subcategory:', error);
-                    showError('Failed to save subcategory to database');
-                }
-            }
-        }
 
         function initCheckboxGrids() {
             const sizeGrid = document.getElementById('sizeCheckboxes');
@@ -2703,7 +2551,6 @@
                     stock: formData.get('productStock') !== '' ? parseInt(formData.get('productStock')) : null,
                     description: formData.get('productDescription'),
                     category: formData.get('productCategory'),
-                    subcategory: formData.get('productSubcategory'),
                     sizes: Array.from(document.querySelectorAll('#sizeCheckboxes input:checked')).map(cb => cb.value),
                     colours: Array.from(document.querySelectorAll('#colourCheckboxes input:checked')).map(cb => cb.value),
                     dupattaOptions: dupattaOptions
