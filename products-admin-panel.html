@@ -2704,8 +2704,26 @@
                     }
                 });
 
+                const name = document.getElementById('productName').value.trim();
+                const price = document.getElementById('productPrice').value;
+                const stock = document.getElementById('productStock').value;
+                const category = document.getElementById('productCategory').value;
+                const description = document.getElementById('productDescription').value.trim();
+                
+                // Get sizes
+                const sizes = [];
+                document.querySelectorAll('#sizeCheckboxes input:checked').forEach(cb => {
+                    sizes.push(cb.value);
+                });
+
+                // Get colours
+                const colours = [];
+                document.querySelectorAll('#colourCheckboxes input:checked').forEach(cb => {
+                    colours.push(cb.value);
+                });
+
                 const productData = {
-                    id: isEditMode ? editProductId : generateProductId(category, name, price),
+                    id: isEditMode ? editProductId : '', // Will be set/generated below
                     name: name,
                     price: parseFloat(price),
                     stock: parseInt(stock),
@@ -2716,9 +2734,9 @@
                     colours: colours,
                     materials: materialVariants,
                     dupattaOptions: dupattaOptions,
-                    images: finalImageUrls,
-                    mainImage: finalImageUrls[mainImageIndex] || finalImageUrls[0],
-                    allImages: finalImageUrls,
+                    images: [], // Will be set below
+                    mainImage: '', // Will be set below
+                    allImages: [], // Will be set below
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString(),
                     status: 'active'
