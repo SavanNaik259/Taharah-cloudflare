@@ -242,15 +242,11 @@ const FilterSortHandler = (function() {
                 if (typeof AllCollectionLoader !== 'undefined') {
                     products = await AllCollectionLoader.loadAllProducts();
                 }
-            } else if (pageName === 'ready-to-wear') {
+            } else if (pageName === 'featured-collection' || pageName === 'ready-to-wear') {
                 if (typeof FeaturedCollectionLoader !== 'undefined') {
                     products = await FeaturedCollectionLoader.loadFeaturedProducts();
                 } else if (typeof SubcategoryProductsLoader !== 'undefined') {
                     products = await SubcategoryProductsLoader.loadSubcategoryProducts(pageName);
-                }
-            } else if (pageName === 'featured-collection') {
-                if (typeof FeaturedCollectionLoader !== 'undefined') {
-                    products = await FeaturedCollectionLoader.loadFeaturedProducts();
                 }
             } else if (pageName === 'new-arrivals') {
                 if (typeof NewArrivalsPageLoader !== 'undefined' && NewArrivalsPageLoader.loadNewArrivalsProductsDirect) {
