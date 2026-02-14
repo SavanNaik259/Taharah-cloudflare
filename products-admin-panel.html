@@ -1231,7 +1231,6 @@
             }
             storage = firebase.storage();
             auth = firebase.auth();
-            const db = firebase.firestore(); // Explicitly initialize Firestore
             
             // Protect page with authentication
             auth.onAuthStateChanged((user) => {
@@ -1319,14 +1318,15 @@
                     if (doc.exists) {
                         globalSubcategories = doc.data();
                         console.log('Subcategories loaded from Firestore:', globalSubcategories);
+                        localStorage.setItem('persistentSubcategories', JSON.stringify(globalSubcategories));
                     } else {
-                        console.log('No subcategories found in Firestore');
-                        globalSubcategories = {};
+                        console.log('No subcategories found in Firestore, checking localStorage');
+                        globalSubcategories = JSON.parse(localStorage.getItem('persistentSubcategories') || '{}');
                     }
                 }
             } catch (error) {
                 console.error('Error fetching subcategories:', error);
-                globalSubcategories = {};
+                globalSubcategories = JSON.parse(localStorage.getItem('persistentSubcategories') || '{}');
             }
         }
 
@@ -1347,11 +1347,13 @@
                     
                     await subRef.set(updatedData, { merge: true });
                     console.log('Subcategories saved to Firestore');
+                    localStorage.setItem('persistentSubcategories', JSON.stringify(updatedData));
                 }
             } catch (error) {
                 console.error('Error saving subcategories:', error);
+                localStorage.setItem('persistentSubcategories', JSON.stringify(globalSubcategories));
                 // Enhanced error message
-                showError(`Sync failed: ${error.message}. Please check your internet and Firebase rules.`);
+                showError(`Sync failed: ${error.message}. Saved locally.`);
             }
         }
 
