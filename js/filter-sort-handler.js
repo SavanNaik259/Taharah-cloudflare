@@ -77,8 +77,17 @@ const FilterSortHandler = (function() {
 
         if (clearFilterBtn) {
             clearFilterBtn.addEventListener('click', () => {
+                console.log('Clear filters clicked');
                 const newestRadio = document.querySelector('input[name="filter-sort"][value="newest"]');
                 if (newestRadio) newestRadio.checked = true;
+                
+                // Reset sort dropdown UI
+                const dropdownOptions = document.querySelectorAll('.sort-dropdown-option');
+                dropdownOptions.forEach(opt => {
+                    if (opt.dataset.sort === 'newest') opt.classList.add('active');
+                    else opt.classList.remove('active');
+                });
+
                 currentSort = 'newest';
                 applySortAndFilter();
                 closeFilterModalAnimation();
@@ -137,6 +146,7 @@ const FilterSortHandler = (function() {
      * Set products and apply current sort
      */
     function setProducts(products) {
+        console.log('FilterSortHandler: Received', products.length, 'products');
         currentProducts = products;
         applySortAndFilter();
     }
@@ -145,19 +155,66 @@ const FilterSortHandler = (function() {
      * Apply sort and update display
      */
     function applySortAndFilter() {
-        if (!currentProducts || currentProducts.length === 0) return;
+        if (!currentProducts || currentProducts.length === 0) {
+            console.log('No products to sort/filter');
+            return;
+        }
 
+        console.log('Applying sort and filter. Current sort:', currentSort);
+        
         let sorted = [...currentProducts];
         
         if (currentSort === 'price-low-high') {
-            sorted.sort((a, b) => (parseFloat(a.price) || 0) - (parseFloat(b.price) || 0));
+            sorted.sort((a, b) => {
+                const priceA = parseFloat(a.price) || 0;
+                const priceB = parseFloat(b.price) || 0;
+                return priceA - priceB;
+            });
         } else if (currentSort === 'price-high-low') {
-            sorted.sort((a, b) => (parseFloat(b.price) || 0) - (parseFloat(a.price) || 0));
+            sorted.sort((a, b) => {
+                const priceA = parseFloat(a.price) || 0;
+                const priceB = parseFloat(b.price) || 0;
+                return priceB - priceA;
+            });
         } else if (currentSort === 'newest') {
             sorted.sort((a, b) => {
-                const dateA = a.uploadedAt || a.createdAt || a.timestamp || 0;
-                const dateB = b.uploadedAt || b.createdAt || b.timestamp || 0;
-                return dateB - dateA;
+                const getTime = (p) => {
+                    // 1. Try numeric timestamp directly
+                    if (typeof p.uploadedAt === 'number') return p.uploadedAt;
+                    if (typeof p.createdAt === 'number') return p.createdAt;
+                    if (typeof p.timestamp === 'number') return p.timestamp;
+
+                    // 2. Try ISO string or date string
+                    const val = p.uploadedAt || p.createdAt || p.timestamp;
+                    if (val) {
+                        const date = new Date(val);
+                        const time = date.getTime();
+                        if (!isNaN(time)) return time;
+                        
+                        // 3. Try parsing string as integer
+                        if (typeof val === 'string' && /^\d+$/.test(val)) {
+                            return parseInt(val);
+                        }
+                    }
+                    
+                    // 4. Fallback to ID timestamp extraction (e.g. NEW-1770825559144-...)
+                    const idMatch = p.id?.match(/-(\d{13})-/) || p.id?.match(/-(\d{10})-/);
+                    if (idMatch) return parseInt(idMatch[1]);
+                    
+                    // 5. Last resort: check if ID itself starts or ends with timestamp
+                    const idParts = p.id?.split('-');
+                    if (idParts) {
+                        for (const part of idParts) {
+                            if (/^\d{13}$/.test(part) || /^\d{10}$/.test(part)) return parseInt(part);
+                        }
+                    }
+                    
+                    return 0;
+                };
+                
+                const timeA = getTime(a);
+                const timeB = getTime(b);
+                return timeB - timeA;
             });
         }
 
@@ -168,6 +225,8 @@ const FilterSortHandler = (function() {
      * Display products in grid
      */
     function displayProducts(products) {
+        console.log('Displaying products. Count:', products.length);
+        
         // First, check if we should even be displaying products here
         // Some pages might have their own specialized display logic
         const path = window.location.pathname;
