@@ -199,10 +199,17 @@ const FilterSortHandler = (function() {
         if (applyFilterBtn) {
             applyFilterBtn.addEventListener('click', function() {
                 const selectedFilter = document.querySelector('input[name="filter-sort"]:checked');
+                const selectedSubcategory = document.querySelector('input[name="subcategory"]:checked');
+                
                 if (selectedFilter) {
                     currentFilter = selectedFilter.value;
-                    applySort(currentFilter);
                 }
+                
+                // Get subcategory if selected
+                const subcategory = selectedSubcategory ? selectedSubcategory.value : null;
+                
+                applySort(currentSort, subcategory);
+                
                 if (filterModal && filterModal.classList.contains('active')) {
                     filterModal.classList.add('closing');
                     
@@ -232,15 +239,65 @@ const FilterSortHandler = (function() {
         }
 
         // Initialize with newest products
+        setupSubcategoryFilters();
         applySort('newest');
 
         console.log('Filter and Sort Handler initialized');
     }
 
     /**
+     * Setup subcategory filters in the modal
+     */
+    function setupSubcategoryFilters() {
+        const path = window.location.pathname;
+        let pageName = path.split('/').pop().replace('.html', '') || 'index';
+        
+        // Map page names to their storage category names
+        const categoryMap = {
+            'pakistani-pret-wear': 'gold-bangles',
+            'modest-wear': 'gold-earrings',
+            'party-wear': 'gold-necklace',
+            'ready-to-wear': 'ready-to-wear',
+            'new-arrivals': 'new-arrivals'
+        };
+        
+        const category = categoryMap[pageName] || pageName;
+        const SUBCATEGORIES_KEY = 'persistentSubcategories';
+        const subcategoriesData = JSON.parse(localStorage.getItem(SUBCATEGORIES_KEY) || '{}');
+        const categorySubs = subcategoriesData[category] || [];
+        
+        const filterModalBody = document.querySelector('.filter-modal-body');
+        if (!filterModalBody || categorySubs.length === 0) return;
+        
+        // Check if subcategory section already exists
+        if (document.getElementById('subcategoryFilterSection')) return;
+        
+        const subcategorySection = document.createElement('div');
+        subcategorySection.id = 'subcategoryFilterSection';
+        subcategorySection.className = 'filter-section';
+        subcategorySection.style.marginTop = '20px';
+        
+        subcategorySection.innerHTML = `
+            <h3>Subcategories</h3>
+            <div class="filter-options">
+                <label class="filter-option-label">
+                    <input type="radio" name="subcategory" value="all" checked> All
+                </label>
+                ${categorySubs.map(sub => `
+                    <label class="filter-option-label">
+                        <input type="radio" name="subcategory" value="${sub}"> ${sub}
+                    </label>
+                `).join('')}
+            </div>
+        `;
+        
+        filterModalBody.appendChild(subcategorySection);
+    }
+
+    /**
      * Apply sort to products (only for price sorting from dropdown)
      */
-    async function applySort(sortBy) {
+    async function applySort(sortBy, subcategory = null) {
         console.log('Applying sort:', sortBy);
 
         // Determine which loader to use based on page
@@ -304,7 +361,13 @@ const FilterSortHandler = (function() {
         }
 
         // Sort products
-        const sortedProducts = sortProducts(products, sortBy);
+        let sortedProducts = sortProducts(products, sortBy);
+        
+        // Apply subcategory filter if selected
+        if (subcategory && subcategory !== 'all') {
+            console.log('Filtering by subcategory:', subcategory);
+            sortedProducts = sortedProducts.filter(p => p.subcategory === subcategory);
+        }
         
         // Display sorted products
         displayProducts(sortedProducts);
@@ -339,8 +402,8 @@ const FilterSortHandler = (function() {
             case 'newest':
                 return productsCopy.sort((a, b) => {
                     // Use uploadedAt timestamp if available, otherwise use createdAt or id
-                    const dateA = a.uploadedAt || a.createdAt || a.timestamp || 0;
-                    const dateB = b.uploadedAt || b.createdAt || b.timestamp || 0;
+                    const dateA = new Date(a.uploadedAt || a.createdAt || a.timestamp || 0).getTime();
+                    const dateB = new Date(b.uploadedAt || b.createdAt || b.timestamp || 0).getTime();
                     return dateB - dateA; // Newest first
                 });
 
