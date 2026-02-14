@@ -250,7 +250,7 @@ const FilterSortHandler = (function() {
                 products = await SubcategoryProductsLoader.loadSubcategoryProducts('ready-to-wear');
             }
         } else if (pageName === 'new-arrivals') {
-            if (typeof NewArrivalsPageLoader !== 'undefined' && typeof loadNewArrivalsProductsDirect === 'function') {
+            if (typeof loadNewArrivalsProductsDirect === 'function') {
                 products = await loadNewArrivalsProductsDirect();
             } else if (typeof NewArrivalsPageLoader !== 'undefined' && NewArrivalsPageLoader.loadNewArrivalsProducts) {
                 products = await NewArrivalsPageLoader.loadNewArrivalsProducts();
@@ -369,8 +369,18 @@ const FilterSortHandler = (function() {
             return;
         }
 
+        // Determine which generator to use
+        const path = window.location.pathname;
+        const pageName = path.split('/').pop().replace('.html', '') || 'index';
+        
         // Generate product HTML
-        const productsHTML = products.map(product => generateProductHTML(product)).join('');
+        const productsHTML = products.map(product => {
+            if (pageName === 'new-arrivals') {
+                return generateNewArrivalsProductHTML(product);
+            }
+            return generateProductHTML(product);
+        }).join('');
+        
         productsGrid.innerHTML = productsHTML;
 
         // CRITICAL: Populate global price cache BEFORE currency conversion
@@ -386,8 +396,42 @@ const FilterSortHandler = (function() {
         if (typeof window.WishlistManager !== 'undefined') {
             setTimeout(() => {
                 window.WishlistManager.updateWishlistButtonsState();
+                if (window.WishlistManager.updateWishlistUI) {
+                    window.WishlistManager.updateWishlistUI();
+                }
             }, 100);
         }
+    }
+
+    /**
+     * Generate HTML for a new arrivals product item
+     */
+    function generateNewArrivalsProductHTML(product) {
+        const originalPrice = parseFloat(product.price) || 0;
+        const formattedPrice = typeof product.price === 'number' ? 
+            product.price.toLocaleString('en-IN') : 
+            `${product.price}`.replace('₹', '').replace('Rs.', '').trim();
+            
+        const imageUrl = product.image || product.imageUrl || '';
+
+        return `
+            <div class="product-item" data-product-id="${product.id}" data-product-price="${originalPrice}" style="background: none;">
+                <a href="product-detail?id=${product.id}" style="text-decoration: none; color: inherit;">
+                    <div class="product-image">
+                        ${imageUrl ? `<img src="${imageUrl}" alt="${product.name}" loading="lazy">` : ''}
+                        <button class="add-to-wishlist" data-product-id="${product.id}" data-product-price="${originalPrice}">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">${product.name}</h3>
+                        <div class="product-pricing">
+                            <span class="current-price" data-original-price="${originalPrice}">Rs. ${formattedPrice}</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        `;
     }
 
     /**
