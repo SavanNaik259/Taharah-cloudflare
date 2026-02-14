@@ -216,24 +216,24 @@ const FilterSortHandler = (function() {
             minimumFractionDigits: 0
         }).format(originalPrice).replace('₹', '');
 
-        return \`
-            <div class="product-item" data-product-id="\${product.id}" data-product-price="\${originalPrice}">
-                <a href="product-detail?id=\${product.id}" style="text-decoration: none; color: inherit;">
+        return `
+            <div class="product-item" data-product-id="${product.id}" data-product-price="${originalPrice}">
+                <a href="product-detail?id=${product.id}" style="text-decoration: none; color: inherit;">
                     <div class="product-image">
-                        <img src="\${product.image}" alt="\${product.name}" loading="lazy">
-                        <button class="add-to-wishlist" data-product-id="\${product.id}" data-product-price="\${originalPrice}">
+                        <img src="${product.image}" alt="${product.name}" loading="lazy">
+                        <button class="add-to-wishlist" data-product-id="${product.id}" data-product-price="${originalPrice}">
                             <i class="far fa-heart"></i>
                         </button>
                     </div>
                     <div class="product-details">
-                        <h3 class="product-name">\${product.name}</h3>
+                        <h3 class="product-name">${product.name}</h3>
                         <div class="product-pricing">
-                            <span class="current-price" data-original-price="\${originalPrice}">Rs. \${formattedPrice}</span>
+                            <span class="current-price" data-original-price="${originalPrice}">Rs. ${formattedPrice}</span>
                         </div>
                     </div>
                 </a>
             </div>
-        \`;
+        `;
     }
 
     return { init, setProducts };
