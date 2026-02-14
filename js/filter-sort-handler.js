@@ -248,7 +248,7 @@ const FilterSortHandler = (function() {
     /**
      * Setup subcategory filters in the modal
      */
-    function setupSubcategoryFilters() {
+    async function setupSubcategoryFilters() {
         const path = window.location.pathname;
         let pageName = path.split('/').pop().replace('.html', '') || 'index';
         
@@ -262,9 +262,28 @@ const FilterSortHandler = (function() {
         };
         
         const category = categoryMap[pageName] || pageName;
-        const SUBCATEGORIES_KEY = 'persistentSubcategories';
-        const subcategoriesData = JSON.parse(localStorage.getItem(SUBCATEGORIES_KEY) || '{}');
-        const categorySubs = subcategoriesData[category] || [];
+        
+        let categorySubs = [];
+        try {
+            // Try fetching from Firestore first for shared persistence
+            if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+                const db = firebase.firestore();
+                const doc = await db.collection('settings').doc('subcategories').get();
+                if (doc.exists) {
+                    const subcategoriesData = doc.data();
+                    categorySubs = subcategoriesData[category] || [];
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching subcategories from Firestore:', error);
+        }
+
+        // Fallback to localStorage if Firestore fails or is empty
+        if (categorySubs.length === 0) {
+            const SUBCATEGORIES_KEY = 'persistentSubcategories';
+            const subcategoriesData = JSON.parse(localStorage.getItem(SUBCATEGORIES_KEY) || '{}');
+            categorySubs = subcategoriesData[category] || [];
+        }
         
         console.log(`Subcategories for ${category}:`, categorySubs);
 
