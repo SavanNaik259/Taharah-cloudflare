@@ -846,7 +846,7 @@
 
                 <div class="form-group">
                     <label for="productCategory">Category</label>
-                    <select id="productCategory" name="productCategory" required>
+                    <select id="productCategory" name="productCategory" required onchange="handleCategoryChange()">
                         <option value="">Select Category</option>
                         
                         <option value="new-arrivals">New Arrivals</option>
@@ -871,6 +871,17 @@
                             <option value="meenakari-rings">Meenakari Rings</option>
                         </optgroup>-->
                     </select>
+                </div>
+
+                <div class="form-group" id="subcategoryGroup" style="display: none;">
+                    <label for="productSubcategory">Subcategory</label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <select id="productSubcategory" name="productSubcategory" style="flex: 1;">
+                            <option value="">Select Subcategory</option>
+                        </select>
+                        <input type="text" id="newSubcategory" placeholder="Add new subcategory" style="flex: 1;">
+                        <button type="button" class="add-custom-btn" onclick="addNewSubcategory()">Add</button>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -1295,6 +1306,56 @@
             }
         }
 
+        // Subcategory management
+        const SUBCATEGORIES_KEY = 'persistentSubcategories';
+        let subcategoriesData = JSON.parse(localStorage.getItem(SUBCATEGORIES_KEY) || '{}');
+
+        function handleCategoryChange() {
+            const category = document.getElementById('productCategory').value;
+            const subcategoryGroup = document.getElementById('subcategoryGroup');
+            const subcategorySelect = document.getElementById('productSubcategory');
+            
+            if (category) {
+                subcategoryGroup.style.display = 'block';
+                updateSubcategoryOptions(category);
+            } else {
+                subcategoryGroup.style.display = 'none';
+            }
+        }
+
+        function updateSubcategoryOptions(category) {
+            const subcategorySelect = document.getElementById('productSubcategory');
+            const categorySubs = subcategoriesData[category] || [];
+            
+            subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>' + 
+                categorySubs.map(sub => `<option value="${sub}">${sub}</option>`).join('');
+        }
+
+        function addNewSubcategory() {
+            const category = document.getElementById('productCategory').value;
+            const newSubInput = document.getElementById('newSubcategory');
+            const newSub = newSubInput.value.trim();
+            
+            if (!category) {
+                showError('Please select a category first');
+                return;
+            }
+            
+            if (newSub) {
+                if (!subcategoriesData[category]) {
+                    subcategoriesData[category] = [];
+                }
+                
+                if (!subcategoriesData[category].includes(newSub)) {
+                    subcategoriesData[category].push(newSub);
+                    localStorage.setItem(SUBCATEGORIES_KEY, JSON.stringify(subcategoriesData));
+                    updateSubcategoryOptions(category);
+                    document.getElementById('productSubcategory').value = newSub;
+                }
+                newSubInput.value = '';
+            }
+        }
+
         // Handle URL parameters for category pre-selection
         function handleURLParameters() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -1307,6 +1368,7 @@
                 if (categorySelect) {
                     categorySelect.value = category;
                     console.log('Category pre-selected:', category);
+                    handleCategoryChange(); // Trigger subcategory display
                 }
             }
 
@@ -2613,6 +2675,7 @@
                     stock: formData.get('productStock') !== '' ? parseInt(formData.get('productStock')) : null,
                     description: formData.get('productDescription'),
                     category: formData.get('productCategory'),
+                    subcategory: document.getElementById('productSubcategory').value,
                     sizes: Array.from(document.querySelectorAll('#sizeCheckboxes input:checked')).map(cb => cb.value),
                     colours: Array.from(document.querySelectorAll('#colourCheckboxes input:checked')).map(cb => cb.value),
                     dupattaOptions: dupattaOptions,
