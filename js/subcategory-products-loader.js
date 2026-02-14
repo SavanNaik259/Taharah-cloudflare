@@ -188,7 +188,10 @@ const SubcategoryProductsLoader = (function() {
      * Update products grid for current page
      */
     async function updateProductsGrid(category) {
-        const productsGrid = document.getElementById('products-grid') || document.querySelector('.products-grid');
+        // Use a more specific grid ID for some pages if they exist
+        const productsGrid = document.getElementById('featured-collection-products-grid') || 
+                            document.getElementById('products-grid') || 
+                            document.querySelector('.products-grid');
 
         if (!productsGrid) {
             console.warn('Products grid not found');
