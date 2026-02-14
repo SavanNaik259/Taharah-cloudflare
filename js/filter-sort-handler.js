@@ -265,7 +265,7 @@ const FilterSortHandler = (function() {
         
         let categorySubs = [];
         try {
-            // Try fetching from Firestore first for shared persistence
+            // Fetch from Firestore for shared persistence
             if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
                 const db = firebase.firestore();
                 const doc = await db.collection('settings').doc('subcategories').get();
@@ -278,7 +278,7 @@ const FilterSortHandler = (function() {
             console.error('Error fetching subcategories from Firestore:', error);
         }
 
-        // Fallback to localStorage if Firestore fails or is empty
+        // Fallback to localStorage
         if (categorySubs.length === 0) {
             const SUBCATEGORIES_KEY = 'persistentSubcategories';
             const subcategoriesData = JSON.parse(localStorage.getItem(SUBCATEGORIES_KEY) || '{}');
@@ -288,18 +288,13 @@ const FilterSortHandler = (function() {
         console.log(`Subcategories for ${category}:`, categorySubs);
 
         const filterModalBody = document.querySelector('.filter-modal-body');
-        if (!filterModalBody) {
-            console.warn('Filter modal body not found');
-            return;
-        }
+        if (!filterModalBody) return;
 
-        if (categorySubs.length === 0) {
-            console.log('No subcategories found for this category');
-            return;
-        }
-        
-        // Check if subcategory section already exists
-        if (document.getElementById('subcategoryFilterSection')) return;
+        // Clear existing subcategory section if any
+        const existingSection = document.getElementById('subcategoryFilterSection');
+        if (existingSection) existingSection.remove();
+
+        if (categorySubs.length === 0) return;
         
         const subcategorySection = document.createElement('div');
         subcategorySection.id = 'subcategoryFilterSection';

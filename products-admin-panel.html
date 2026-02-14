@@ -1306,14 +1306,48 @@
             }
         }
 
-        // Subcategory management
-        const SUBCATEGORIES_KEY = 'persistentSubcategories';
-        let subcategoriesData = JSON.parse(localStorage.getItem(SUBCATEGORIES_KEY) || '{}');
+        // Global variable to store subcategories fetched from Firestore
+        let globalSubcategories = {};
+
+        // Fetch subcategories from Firestore on load
+        async function fetchSubcategoriesFromFirestore() {
+            try {
+                if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+                    const db = firebase.firestore();
+                    const doc = await db.collection('settings').doc('subcategories').get();
+                    if (doc.exists) {
+                        globalSubcategories = doc.data();
+                        console.log('Subcategories loaded from Firestore:', globalSubcategories);
+                        localStorage.setItem('persistentSubcategories', JSON.stringify(globalSubcategories));
+                    } else {
+                        console.log('No subcategories found in Firestore, checking localStorage');
+                        globalSubcategories = JSON.parse(localStorage.getItem('persistentSubcategories') || '{}');
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching subcategories:', error);
+                globalSubcategories = JSON.parse(localStorage.getItem('persistentSubcategories') || '{}');
+            }
+        }
+
+        async function saveSubcategoriesToFirestore() {
+            try {
+                if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+                    const db = firebase.firestore();
+                    await db.collection('settings').doc('subcategories').set(globalSubcategories);
+                    console.log('Subcategories saved to Firestore');
+                    localStorage.setItem('persistentSubcategories', JSON.stringify(globalSubcategories));
+                }
+            } catch (error) {
+                console.error('Error saving subcategories:', error);
+                localStorage.setItem('persistentSubcategories', JSON.stringify(globalSubcategories));
+                alert('Saved locally, but failed to sync with cloud.');
+            }
+        }
 
         function handleCategoryChange() {
             const category = document.getElementById('productCategory').value;
             const subcategoryGroup = document.getElementById('subcategoryGroup');
-            const subcategorySelect = document.getElementById('productSubcategory');
             
             if (category) {
                 subcategoryGroup.style.display = 'block';
@@ -1323,15 +1357,16 @@
             }
         }
 
-        function updateSubcategoryOptions(category) {
+        async function updateSubcategoryOptions(category) {
             const subcategorySelect = document.getElementById('productSubcategory');
-            const categorySubs = subcategoriesData[category] || [];
+            await fetchSubcategoriesFromFirestore();
+            const categorySubs = globalSubcategories[category] || [];
             
             subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>' + 
                 categorySubs.map(sub => `<option value="${sub}">${sub}</option>`).join('');
         }
 
-        function addNewSubcategory() {
+        async function addNewSubcategory() {
             const category = document.getElementById('productCategory').value;
             const newSubInput = document.getElementById('newSubcategory');
             const newSub = newSubInput.value.trim();
@@ -1342,13 +1377,13 @@
             }
             
             if (newSub) {
-                if (!subcategoriesData[category]) {
-                    subcategoriesData[category] = [];
+                if (!globalSubcategories[category]) {
+                    globalSubcategories[category] = [];
                 }
                 
-                if (!subcategoriesData[category].includes(newSub)) {
-                    subcategoriesData[category].push(newSub);
-                    localStorage.setItem(SUBCATEGORIES_KEY, JSON.stringify(subcategoriesData));
+                if (!globalSubcategories[category].includes(newSub)) {
+                    globalSubcategories[category].push(newSub);
+                    await saveSubcategoriesToFirestore();
                     updateSubcategoryOptions(category);
                     document.getElementById('productSubcategory').value = newSub;
                 }
