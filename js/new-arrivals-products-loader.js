@@ -344,34 +344,30 @@ const NewArrivalsProductsLoader = (function() {
      * Sort products by selected criteria
      */
     function sortProducts(products, sortBy) {
-        console.log('New Arrivals Loader: Sorting products by:', sortBy);
+        console.log('Sorting products by:', sortBy);
 
         const productsCopy = [...products];
 
         switch (sortBy) {
             case 'price-low-high':
-                return productsCopy.sort((a, b) => (parseFloat(a.price) || 0) - (parseFloat(b.price) || 0));
+                return productsCopy.sort((a, b) => {
+                    const priceA = parseFloat(a.price);
+                    const priceB = parseFloat(b.price);
+                    return priceA - priceB;
+                });
 
             case 'price-high-low':
-                return productsCopy.sort((a, b) => (parseFloat(b.price) || 0) - (parseFloat(a.price) || 0));
+                return productsCopy.sort((a, b) => {
+                    const priceA = parseFloat(a.price);
+                    const priceB = parseFloat(b.price);
+                    return priceB - priceA;
+                });
 
             case 'newest':
                 return productsCopy.sort((a, b) => {
-                    const getVal = (p) => {
-                        if (p.uploadedAt) return p.uploadedAt;
-                        if (p.createdAt) return p.createdAt;
-                        if (p.timestamp) return p.timestamp;
-                        if (p.date) {
-                            const d = new Date(p.date).getTime();
-                            return isNaN(d) ? 0 : d;
-                        }
-                        if (p.id && typeof p.id === 'string') {
-                            const match = p.id.match(/\d{10,}/);
-                            if (match) return parseInt(match[0]);
-                        }
-                        return 0;
-                    };
-                    return getVal(b) - getVal(a);
+                    const dateA = a.uploadedAt || a.createdAt || a.timestamp || a.date || (a.id ? parseInt(a.id) : 0) || 0;
+                    const dateB = b.uploadedAt || b.createdAt || b.timestamp || b.date || (b.id ? parseInt(b.id) : 0) || 0;
+                    return dateB - dateA;
                 });
 
             case 'featured':

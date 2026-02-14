@@ -291,7 +291,6 @@ const FilterSortHandler = (function() {
      * Sort products by criteria
      */
     function sortProducts(products, sortBy) {
-        console.log('Sorting products by criteria:', sortBy);
         const productsCopy = [...products];
 
         switch (sortBy) {
@@ -311,28 +310,15 @@ const FilterSortHandler = (function() {
 
             case 'newest':
                 return productsCopy.sort((a, b) => {
-                    // Comprehensive date detection
-                    // Priority: uploadedAt > createdAt > timestamp > date > numeric part of ID
-                    const getVal = (p) => {
-                        if (p.uploadedAt) return p.uploadedAt;
-                        if (p.createdAt) return p.createdAt;
-                        if (p.timestamp) return p.timestamp;
-                        if (p.date) {
-                            const d = new Date(p.date).getTime();
-                            return isNaN(d) ? 0 : d;
-                        }
-                        // Fallback to ID if it contains a timestamp (common in this project)
-                        if (p.id && typeof p.id === 'string') {
-                            const match = p.id.match(/\d{10,}/);
-                            if (match) return parseInt(match[0]);
-                        }
-                        return 0;
-                    };
-                    return getVal(b) - getVal(a); // Newest first
+                    // Use uploadedAt timestamp if available, otherwise use createdAt or timestamp or id
+                    const dateA = a.uploadedAt || a.createdAt || a.timestamp || a.date || (a.id ? parseInt(a.id) : 0) || 0;
+                    const dateB = b.uploadedAt || b.createdAt || b.timestamp || b.date || (b.id ? parseInt(b.id) : 0) || 0;
+                    return dateB - dateA; // Newest first
                 });
 
             case 'featured':
             default:
+                // Return original order (featured)
                 return productsCopy;
         }
     }
