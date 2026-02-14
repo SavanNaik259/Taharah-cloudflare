@@ -68,30 +68,34 @@ function setupSortUI(products) {
  * Sort products by selected criteria
  */
 function sortProducts(products, sortBy) {
-    console.log('Sorting products by:', sortBy);
+    console.log('New Arrivals Page Loader: Sorting products by:', sortBy);
     
     const productsCopy = [...products];
     
     switch (sortBy) {
         case 'price-low-high':
-            return productsCopy.sort((a, b) => {
-                const priceA = parseFloat(a.price);
-                const priceB = parseFloat(b.price);
-                return priceA - priceB;
-            });
+            return productsCopy.sort((a, b) => (parseFloat(a.price) || 0) - (parseFloat(b.price) || 0));
             
         case 'price-high-low':
-            return productsCopy.sort((a, b) => {
-                const priceA = parseFloat(a.price);
-                const priceB = parseFloat(b.price);
-                return priceB - priceA;
-            });
+            return productsCopy.sort((a, b) => (parseFloat(b.price) || 0) - (parseFloat(a.price) || 0));
             
         case 'newest':
             return productsCopy.sort((a, b) => {
-                const dateA = new Date(a.date || 0);
-                const dateB = new Date(b.date || 0);
-                return dateB - dateA;
+                const getVal = (p) => {
+                    if (p.uploadedAt) return p.uploadedAt;
+                    if (p.createdAt) return p.createdAt;
+                    if (p.timestamp) return p.timestamp;
+                    if (p.date) {
+                        const d = new Date(p.date).getTime();
+                        return isNaN(d) ? 0 : d;
+                    }
+                    if (p.id && typeof p.id === 'string') {
+                        const match = p.id.match(/\d{10,}/);
+                        if (match) return parseInt(match[0]);
+                    }
+                    return 0;
+                };
+                return getVal(b) - getVal(a);
             });
             
         case 'featured':
