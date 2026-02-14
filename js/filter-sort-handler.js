@@ -183,9 +183,10 @@ const FilterSortHandler = (function() {
                     if (typeof p.uploadedAt === 'number') return p.uploadedAt;
                     if (typeof p.createdAt === 'number') return p.createdAt;
                     if (typeof p.timestamp === 'number') return p.timestamp;
+                    if (typeof p.date === 'number') return p.date;
 
                     // 2. Try ISO string or date string
-                    const val = p.uploadedAt || p.createdAt || p.timestamp;
+                    const val = p.uploadedAt || p.createdAt || p.timestamp || p.date;
                     if (val) {
                         const date = new Date(val);
                         const time = date.getTime();
@@ -214,6 +215,10 @@ const FilterSortHandler = (function() {
                 
                 const timeA = getTime(a);
                 const timeB = getTime(b);
+                
+                // If both times are 0 (not found), maintain relative order or sort by ID as fallback
+                if (timeA === 0 && timeB === 0) return 0;
+                
                 return timeB - timeA;
             });
         }
