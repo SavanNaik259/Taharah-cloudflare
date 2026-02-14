@@ -342,27 +342,8 @@
     <script src="js/footer-toggle.js"></script>
 
     <!-- Filter and Sort Handler -->
-<script src="js/subcategory-products-loader.js"></script>
+    <script src="js/subcategory-products-loader.js"></script>
     <script src="js/filter-sort-handler.js?v=1.1.0"></script>
-
-    <!-- Featured Collection Products Loader -->
-    <script>
-        // Featured Collection Products Loader
-        const FeaturedCollectionLoader = (function() {
-            let storage;
-            let isInitialized = false;
-            let cachedProducts = null;
-            let lastFetchTime = 0;
-            let cachedETag = null;
-            const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours cache for optimal CDN usage
-            const SHORT_CACHE_DURATION = 60 * 60 * 1000; // 1 hour for localStorage to reduce bandwidth
-            const MAX_PRODUCTS_TO_FETCH = 12; // Limit products fetched
-
-            /**
-             * Initialize Firebase Storage connection
-             */
-            function init() {
-                try {
 
     <!-- Core JS Files -->
     <script src="js/navigation.js?v=1.0.4"></script>

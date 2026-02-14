@@ -12,7 +12,13 @@ const FilterSortHandler = (function() {
      * Initialize filter and sort UI
      */
     function init() {
+        if (window.FilterSortHandlerInitialized) {
+            console.log('Unified Filter and Sort Handler already initialized, skipping...');
+            return;
+        }
+        
         console.log('Initializing Unified Filter and Sort Handler...');
+        window.FilterSortHandlerInitialized = true;
 
         const sortOption = document.getElementById('sortOption');
         const sortDropdown = document.getElementById('sortDropdown');
@@ -233,4 +239,10 @@ const FilterSortHandler = (function() {
     return { init, setProducts };
 })();
 
-document.addEventListener('DOMContentLoaded', () => FilterSortHandler.init());
+// Robust initialization handling different document ready states
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => FilterSortHandler.init());
+} else {
+    // Document is already ready, initialize immediately
+    FilterSortHandler.init();
+}
