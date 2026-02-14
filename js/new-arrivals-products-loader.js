@@ -365,8 +365,8 @@ const NewArrivalsProductsLoader = (function() {
 
             case 'newest':
                 return productsCopy.sort((a, b) => {
-                    const dateA = new Date(a.date || 0);
-                    const dateB = new Date(b.date || 0);
+                    const dateA = a.uploadedAt || a.createdAt || a.timestamp || a.date || (a.id ? parseInt(a.id) : 0) || 0;
+                    const dateB = b.uploadedAt || b.createdAt || b.timestamp || b.date || (b.id ? parseInt(b.id) : 0) || 0;
                     return dateB - dateA;
                 });
 
