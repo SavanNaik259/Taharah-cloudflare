@@ -351,16 +351,16 @@ const NewArrivalsProductsLoader = (function() {
         switch (sortBy) {
             case 'price-low-high':
                 return productsCopy.sort((a, b) => {
-                    const priceA = typeof a.price === 'string' ? parseFloat(a.price.replace(/[^\d.]/g, '')) : parseFloat(a.price);
-                    const priceB = typeof b.price === 'string' ? parseFloat(b.price.replace(/[^\d.]/g, '')) : parseFloat(b.price);
-                    return (priceA || 0) - (priceB || 0);
+                    const priceA = parseFloat(a.price);
+                    const priceB = parseFloat(b.price);
+                    return priceA - priceB;
                 });
 
             case 'price-high-low':
                 return productsCopy.sort((a, b) => {
-                    const priceA = typeof a.price === 'string' ? parseFloat(a.price.replace(/[^\d.]/g, '')) : parseFloat(a.price);
-                    const priceB = typeof b.price === 'string' ? parseFloat(b.price.replace(/[^\d.]/g, '')) : parseFloat(b.price);
-                    return (priceB || 0) - (priceA || 0);
+                    const priceA = parseFloat(a.price);
+                    const priceB = parseFloat(b.price);
+                    return priceB - priceA;
                 });
 
             case 'newest':
