@@ -289,25 +289,9 @@ const SubcategoryProductsLoader = (function() {
                 
             case 'newest':
                 return productsCopy.sort((a, b) => {
-                    const getTime = (p) => {
-                        if (typeof p.uploadedAt === 'number') return p.uploadedAt;
-                        if (typeof p.createdAt === 'number') return p.createdAt;
-                        if (typeof p.timestamp === 'number') return p.timestamp;
-                        if (typeof p.date === 'number') return p.date;
-
-                        const val = p.uploadedAt || p.createdAt || p.timestamp || p.date;
-                        if (val) {
-                            const date = new Date(val);
-                            const time = date.getTime();
-                            if (!isNaN(time)) return time;
-                        }
-                        
-                        const idMatch = p.id?.match(/-(\d{13})-/);
-                        if (idMatch) return parseInt(idMatch[1]);
-                        
-                        return 0;
-                    };
-                    return getTime(b) - getTime(a);
+                    const dateA = new Date(a.date || 0);
+                    const dateB = new Date(b.date || 0);
+                    return dateB - dateA;
                 });
                 
             case 'featured':
