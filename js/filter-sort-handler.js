@@ -265,17 +265,16 @@ const FilterSortHandler = (function() {
         
         let categorySubs = [];
         try {
-            // Fetch from Firestore for shared persistence
-            if (typeof firebase !== 'undefined') {
-                const db = firebase.firestore();
-                const doc = await db.collection('settings').doc('subcategories').get();
-                if (doc.exists) {
-                    const subcategoriesData = doc.data();
-                    categorySubs = subcategoriesData[category] || [];
+            // Fetch from Storage via Netlify Function for shared persistence
+            const response = await fetch(`/.netlify/functions/load-subcategories?category=${category}&cacheBust=${Date.now()}`);
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && Array.isArray(data.subcategories)) {
+                    categorySubs = data.subcategories;
                 }
             }
         } catch (error) {
-            console.error('Error fetching subcategories from Firestore:', error);
+            console.error('Error fetching subcategories from Storage:', error);
         }
 
         // Fallback to searching products if no explicit subcategory list is found

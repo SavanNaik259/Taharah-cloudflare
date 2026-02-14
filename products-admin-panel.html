@@ -2762,27 +2762,21 @@
                     status: 'active'
                 };
 
-                // Sync subcategory to Firestore settings for filter dropdown
+                // Sync subcategory to Storage via Netlify Function
                 if (productData.subcategory && productData.subcategory.trim() !== "") {
                     try {
-                        console.log("Syncing subcategory to Firestore...");
-                        const db = firebase.firestore();
-                        const subRef = db.collection('settings').doc('subcategories');
-                        const doc = await subRef.get();
-                        let allSubs = {};
-                        if (doc.exists) {
-                            allSubs = doc.data();
-                        }
-                        if (!allSubs[category]) {
-                            allSubs[category] = [];
-                        }
-                        if (!allSubs[category].includes(productData.subcategory)) {
-                            allSubs[category].push(productData.subcategory);
-                            await subRef.set(allSubs, { merge: true });
-                            console.log("Subcategory synced to Firestore successfully");
-                        }
+                        console.log("Syncing subcategory via Netlify Function...");
+                        await fetch('/.netlify/functions/sync-subcategories', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                category: category,
+                                subcategory: productData.subcategory
+                            })
+                        });
+                        console.log("Subcategory sync request sent");
                     } catch (syncError) {
-                        console.warn("Failed to sync subcategory to cloud settings, but product will still be saved:", syncError);
+                        console.warn("Failed to sync subcategory, but product will still be saved:", syncError);
                     }
                 }
 
