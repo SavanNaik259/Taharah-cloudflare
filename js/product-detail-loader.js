@@ -481,7 +481,47 @@ const ProductDetailLoader = (function() {
 
         // Dupatta selection
         const dupattaContainer = document.getElementById('dupatta-selection');
-        if (product.dupattaOptions && Array.isArray(product.dupattaOptions) && product.dupattaOptions.length > 0) {
+        if (product.materialVariants && Array.isArray(product.materialVariants) && product.materialVariants.length > 0) {
+            const dupattaList = dupattaContainer.querySelector('.dupatta-options');
+            dupattaList.innerHTML = product.materialVariants.map(variant => `
+                <button class="option-btn material-btn" data-name="${variant.name}" data-price="${variant.price}" style="padding: 5px 15px; border: 1px solid #ddd; background: #fff; cursor: pointer; border-radius: 4px;">${variant.name} - Rs. ${variant.price}</button>
+            `).join('');
+            dupattaContainer.style.display = 'block';
+            hasOptions = true;
+
+            // Add click listeners
+            dupattaList.querySelectorAll('.material-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    dupattaList.querySelectorAll('.material-btn').forEach(b => b.style.borderColor = '#ddd');
+                    btn.style.borderColor = '#000';
+                    window.selectedDupatta = btn.dataset.name;
+                    window.selectedPrice = parseFloat(btn.dataset.price);
+                    
+                    // Update price display
+                    const priceElements = document.querySelectorAll('.product-detail-info .product-price, .product-detail-info .current-price, .product-detail-info .price');
+                    const formattedPrice = new Intl.NumberFormat('en-IN', {
+                        style: 'currency',
+                        currency: 'INR',
+                        minimumFractionDigits: 0
+                    }).format(window.selectedPrice).replace('₹', '');
+
+                    priceElements.forEach(element => {
+                        element.textContent = `Rs. ${formattedPrice}`;
+                    });
+                    
+                    // Update global product details for cart
+                    if (window.productDetails) {
+                        window.productDetails.price = window.selectedPrice;
+                        window.productDetails.dupatta = window.selectedDupatta;
+                    }
+                });
+            });
+            
+            // Auto-select first material
+            const firstBtn = dupattaList.querySelector('.material-btn');
+            if (firstBtn) firstBtn.click();
+
+        } else if (product.dupattaOptions && Array.isArray(product.dupattaOptions) && product.dupattaOptions.length > 0) {
             const dupattaList = dupattaContainer.querySelector('.dupatta-options');
             dupattaList.innerHTML = product.dupattaOptions.map(option => `
                 <button class="option-btn dupatta-btn" data-value="${option}" style="padding: 5px 15px; border: 1px solid #ddd; background: #fff; cursor: pointer; border-radius: 4px;">${option}</button>

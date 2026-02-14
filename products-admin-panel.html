@@ -897,6 +897,18 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Fabric / Material Pricing (Material - Price)</label>
+                    <div id="material-variants-container">
+                        <div class="material-variant" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                            <input type="text" placeholder="Material (e.g. Chiffon)" class="material-name">
+                            <input type="number" placeholder="Price (e.g. 1450)" class="material-price">
+                            <button type="button" class="remove-variant-btn" style="background:#ef4444; color:white; border:none; border-radius:4px; padding:0 10px;">&times;</button>
+                        </div>
+                    </div>
+                    <button type="button" id="add-material-variant-btn" class="add-custom-btn" style="margin-top:5px;">+ Add Material Option</button>
+                </div>
+
+                <div class="form-group">
                     <label>Dupatta Options</label>
                     <div class="checkbox-grid">
                         <label class="checkbox-item"><input type="checkbox" id="dupattaCotton" name="dupattaOptions" value="Cotton"> Cotton</label>
@@ -1022,6 +1034,26 @@
     </div>
 
     <script>
+        // Material variants management
+        document.getElementById('add-material-variant-btn').addEventListener('click', () => {
+            const container = document.getElementById('material-variants-container');
+            const div = document.createElement('div');
+            div.className = 'material-variant';
+            div.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px;';
+            div.innerHTML = `
+                <input type="text" placeholder="Material (e.g. Chiffon)" class="material-name">
+                <input type="number" placeholder="Price (e.g. 1450)" class="material-price">
+                <button type="button" class="remove-variant-btn" style="background:#ef4444; color:white; border:none; border-radius:4px; padding:0 10px;">&times;</button>
+            `;
+            container.appendChild(div);
+        });
+
+        document.getElementById('material-variants-container').addEventListener('click', (e) => {
+            if (e.target.classList.contains('remove-variant-btn')) {
+                e.target.parentElement.remove();
+            }
+        });
+
         // Admin verification system for products panel
         const ADMIN_CODE = '5634';
         const SESSION_KEY = 'adminVerified';
@@ -2545,15 +2577,26 @@
                 if (document.getElementById('dupattaNet').checked) dupattaOptions.push('Net');
                 if (document.getElementById('dupattaOrganza').checked) dupattaOptions.push('Organza');
 
+                // Get Material Variants
+                const materialVariants = [];
+                document.querySelectorAll('.material-variant').forEach(variant => {
+                    const name = variant.querySelector('.material-name').value.trim();
+                    const price = parseFloat(variant.querySelector('.material-price').value);
+                    if (name && !isNaN(price)) {
+                        materialVariants.push({ name, price });
+                    }
+                });
+
                 const productData = {
                     name: formData.get('productName'),
-                    price: formData.get('productPrice') ? parseFloat(formData.get('productPrice')) : null,
+                    price: materialVariants.length > 0 ? materialVariants[0].price : (formData.get('productPrice') ? parseFloat(formData.get('productPrice')) : null),
                     stock: formData.get('productStock') !== '' ? parseInt(formData.get('productStock')) : null,
                     description: formData.get('productDescription'),
                     category: formData.get('productCategory'),
                     sizes: Array.from(document.querySelectorAll('#sizeCheckboxes input:checked')).map(cb => cb.value),
                     colours: Array.from(document.querySelectorAll('#colourCheckboxes input:checked')).map(cb => cb.value),
-                    dupattaOptions: dupattaOptions
+                    dupattaOptions: dupattaOptions,
+                    materialVariants: materialVariants
                 };
 
                 // Handle edit mode vs create mode
