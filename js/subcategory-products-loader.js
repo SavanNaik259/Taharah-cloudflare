@@ -133,14 +133,7 @@ const SubcategoryProductsLoader = (function() {
                 } else if (!product.image && product.images && product.images.length > 0) {
                     product.image = product.images[0].url;
                 }
-                
-                // Ensure date fields are preserved for sorting
-                return {
-                    ...product,
-                    createdAt: product.createdAt,
-                    uploadedAt: product.uploadedAt,
-                    timestamp: product.timestamp
-                };
+                return product;
             }).filter(product => product.name && product.price && product.image);
 
             // Cache results

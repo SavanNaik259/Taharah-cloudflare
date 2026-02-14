@@ -175,10 +175,7 @@ async function loadNewArrivalsProductsDirect() {
             image: productImage,
             category: product.category,
             stock: product.stock,
-            description: product.description,
-            createdAt: product.createdAt,
-            uploadedAt: product.uploadedAt,
-            timestamp: product.timestamp
+            description: product.description
         };
     });
 
