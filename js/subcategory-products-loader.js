@@ -306,6 +306,12 @@ const SubcategoryProductsLoader = (function() {
      * Setup sort UI for subcategory pages
      */
     function setupSortUI(category) {
+        // Use the unified FilterSortHandler instead of local setup if available
+        if (typeof FilterSortHandler !== 'undefined') {
+            console.log('Using unified FilterSortHandler for subcategory page');
+            return;
+        }
+
         const sortSelect = document.getElementById('sortSelect');
         
         if (!sortSelect) {

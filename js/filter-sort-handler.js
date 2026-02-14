@@ -230,7 +230,7 @@ const FilterSortHandler = (function() {
 
         // Determine which loader to use based on page
         const path = window.location.pathname;
-        const pageName = path.split('/').pop().replace('.html', '') || 'index';
+        let pageName = path.split('/').pop().replace('.html', '') || 'index';
         
         console.log('Current page detected for filtering:', pageName);
         
@@ -251,7 +251,15 @@ const FilterSortHandler = (function() {
             }
         } else if (pageName === 'pakistani-pret-wear' || pageName === 'ready-to-wear' || pageName === 'modest-wear' || pageName === 'party-wear') {
             if (typeof SubcategoryProductsLoader !== 'undefined') {
-                products = await SubcategoryProductsLoader.loadSubcategoryProducts(pageName);
+                // Map page name to category if needed
+                const categoryMap = {
+                    'pakistani-pret-wear': 'gold-bangles',
+                    'modest-wear': 'gold-earrings',
+                    'party-wear': 'gold-necklace',
+                    'ready-to-wear': 'ready-to-wear'
+                };
+                const category = categoryMap[pageName] || pageName;
+                products = await SubcategoryProductsLoader.loadSubcategoryProducts(category);
             }
         } else {
             // Check if it's a known subcategory
@@ -272,11 +280,16 @@ const FilterSortHandler = (function() {
             return;
         }
 
-        // Sort products (only price sorting, featured/newest handled by filter modal)
+        // Sort products
         const sortedProducts = sortProducts(products, sortBy);
         
         // Display sorted products
         displayProducts(sortedProducts);
+        
+        // Convert prices to user's selected currency
+        if (typeof window.CurrencyConverter !== 'undefined') {
+            window.CurrencyConverter.convertAllPrices();
+        }
     }
 
     /**
