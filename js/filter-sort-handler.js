@@ -225,7 +225,10 @@ const FilterSortHandler = (function() {
         }
 
         // Initialize with newest products
-        applySort('newest');
+        // Delayed initial sort to ensure products are loaded
+        setTimeout(() => {
+            applySort('newest');
+        }, 1500);
 
         console.log('Filter and Sort Handler initialized');
     }
@@ -245,42 +248,51 @@ const FilterSortHandler = (function() {
         let products = [];
         
         // Get products from appropriate loader
-        if (pageName === 'all-collection') {
-            if (typeof AllCollectionLoader !== 'undefined') {
-                products = await AllCollectionLoader.loadAllProducts();
+        try {
+            if (pageName === 'all-collection') {
+                if (typeof AllCollectionLoader !== 'undefined') {
+                    products = await AllCollectionLoader.loadAllProducts();
+                }
+            } else if (pageName === 'featured-collection' || pageName === 'ready-to-wear') {
+                // Use FeaturedCollectionLoader for both as they share the same logic in this project
+                if (typeof FeaturedCollectionLoader !== 'undefined') {
+                    products = await FeaturedCollectionLoader.loadFeaturedProducts();
+                } else if (typeof SubcategoryProductsLoader !== 'undefined') {
+                    products = await SubcategoryProductsLoader.loadSubcategoryProducts(pageName);
+                }
+            } else if (pageName === 'new-arrivals') {
+                if (typeof NewArrivalsPageLoader !== 'undefined' && NewArrivalsPageLoader.loadNewArrivalsProductsDirect) {
+                    products = await NewArrivalsPageLoader.loadNewArrivalsProductsDirect();
+                } else if (typeof SubcategoryProductsLoader !== 'undefined') {
+                    products = await SubcategoryProductsLoader.loadSubcategoryProducts(pageName);
+                }
+            } else if (['pakistani-pret-wear', 'modest-wear', 'party-wear'].includes(pageName)) {
+                if (typeof SubcategoryProductsLoader !== 'undefined') {
+                    products = await SubcategoryProductsLoader.loadSubcategoryProducts(pageName);
+                }
+            } else {
+                // Check if it's a known subcategory
+                const categories = [
+                    'gold-necklace', 'silver-necklace', 'meenakari-necklace',
+                    'gold-earrings', 'silver-earrings', 'meenakari-earrings',
+                    'gold-bangles', 'silver-bangles', 'meenakari-bangles',
+                    'gold-rings', 'silver-rings', 'meenakari-rings'
+                ];
+                
+                if (categories.includes(pageName) && typeof SubcategoryProductsLoader !== 'undefined') {
+                    products = await SubcategoryProductsLoader.loadSubcategoryProducts(pageName);
+                }
             }
-        } else if (pageName === 'featured-collection') {
-            if (typeof FeaturedCollectionLoader !== 'undefined') {
-                products = await FeaturedCollectionLoader.loadFeaturedProducts();
-            }
-        } else if (pageName === 'new-arrivals') {
-            if (typeof NewArrivalsPageLoader !== 'undefined') {
-                products = await NewArrivalsPageLoader.loadNewArrivalsProducts();
-            }
-        } else if (pageName === 'pakistani-pret-wear' || pageName === 'ready-to-wear' || pageName === 'modest-wear' || pageName === 'party-wear') {
-            if (typeof SubcategoryProductsLoader !== 'undefined') {
-                products = await SubcategoryProductsLoader.loadSubcategoryProducts(pageName);
-            }
-        } else {
-            // Check if it's a known subcategory
-            const categories = [
-                'gold-necklace', 'silver-necklace', 'meenakari-necklace',
-                'gold-earrings', 'silver-earrings', 'meenakari-earrings',
-                'gold-bangles', 'silver-bangles', 'meenakari-bangles',
-                'gold-rings', 'silver-rings', 'meenakari-rings'
-            ];
-            
-            if (categories.includes(pageName) && typeof SubcategoryProductsLoader !== 'undefined') {
-                products = await SubcategoryProductsLoader.loadSubcategoryProducts(pageName);
-            }
+        } catch (error) {
+            console.error('Error fetching products for sorting:', error);
         }
 
-        if (products.length === 0) {
-            console.warn('No products to sort');
+        if (!products || products.length === 0) {
+            console.warn('No products to sort for page:', pageName);
             return;
         }
 
-        // Sort products (only price sorting, featured/newest handled by filter modal)
+        // Sort products
         const sortedProducts = sortProducts(products, sortBy);
         
         // Display sorted products
@@ -343,9 +355,9 @@ const FilterSortHandler = (function() {
     function displayProducts(products) {
         // Find the products grid
         const grids = [
-            'all-collection-products-grid',
-            'featured-collection-products-grid',
             'new-arrivals-products-grid',
+            'featured-collection-products-grid',
+            'all-collection-products-grid',
             'gold-necklace-products-grid',
             'products-grid'
         ];
@@ -353,15 +365,19 @@ const FilterSortHandler = (function() {
         let productsGrid = null;
         for (const gridId of grids) {
             productsGrid = document.getElementById(gridId);
-            if (productsGrid) break;
+            if (productsGrid) {
+                console.log('Found products grid by ID:', gridId);
+                break;
+            }
         }
 
         if (!productsGrid) {
             productsGrid = document.querySelector('.products-grid');
+            if (productsGrid) console.log('Found products grid by class');
         }
 
         if (!productsGrid) {
-            console.warn('Products grid not found');
+            console.warn('Products grid not found on this page');
             return;
         }
 
@@ -374,19 +390,28 @@ const FilterSortHandler = (function() {
         const productsHTML = products.map(product => generateProductHTML(product)).join('');
         productsGrid.innerHTML = productsHTML;
 
+        // Convert prices to user's selected currency
+        if (typeof window.CurrencyConverter !== 'undefined' && window.CurrencyConverter.convertAllPrices) {
+            window.CurrencyConverter.convertAllPrices();
+        }
+
         // CRITICAL: Populate global price cache BEFORE currency conversion
         // This ensures Level 0 price extraction works in wishlist-manager
         products.forEach(product => {
             if (window.PRODUCT_PRICES_CACHE) {
                 window.PRODUCT_PRICES_CACHE.set(product.id, product.price);
-                console.log('📦 Cached price for', product.id, ':', product.price, 'INR');
             }
         });
 
         // Reinitialize wishlist listeners
         if (typeof window.WishlistManager !== 'undefined') {
             setTimeout(() => {
-                window.WishlistManager.updateWishlistButtonsState();
+                if (window.WishlistManager.updateWishlistButtonsState) {
+                    window.WishlistManager.updateWishlistButtonsState();
+                }
+                if (window.WishlistManager.updateWishlistUI) {
+                    window.WishlistManager.updateWishlistUI();
+                }
             }, 100);
         }
     }
@@ -395,24 +420,25 @@ const FilterSortHandler = (function() {
      * Generate product HTML
      */
     function generateProductHTML(product) {
+        const originalPrice = parseFloat(product.price) || 0;
         const formattedPrice = new Intl.NumberFormat('en-IN', {
             style: 'currency',
             currency: 'INR',
             minimumFractionDigits: 0
-        }).format(product.price).replace('₹', '');
+        }).format(originalPrice).replace('₹', '');
 
         return `
-            <div class="product-item" data-product-id="${product.id}" data-product-price="${product.price}" data-product-name="${product.name}" data-product-image="${product.image}">
+            <div class="product-item" data-product-id="${product.id}" data-product-price="${originalPrice}" data-product-name="${product.name}" data-product-image="${product.image}">
                 <a href="product-detail?id=${product.id}" style="text-decoration: none; color: inherit;">
                     <div class="product-image">
                         <img src="${product.image}" alt="${product.name}" loading="lazy">
-                        <button class="add-to-wishlist" data-product-id="${product.id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-image="${product.image}" >
+                        <button class="add-to-wishlist" data-product-id="${product.id}" data-product-name="${product.name}" data-product-price="${originalPrice}" data-product-image="${product.image}" >
                             <i class="far fa-heart"></i>
                         </button>
                     </div>
                     <div class="product-details">
                         <h3 class="product-name">${product.name}</h3>
-                        <div class="current-price" data-original-price="${product.price}">Rs. ${formattedPrice}</div>
+                        <div class="current-price" data-original-price="${originalPrice}">Rs. ${formattedPrice}</div>
                     </div>
                 </a>
             </div>
