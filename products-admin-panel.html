@@ -1334,14 +1334,26 @@
             try {
                 if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
                     const db = firebase.firestore();
-                    await db.collection('settings').doc('subcategories').set(globalSubcategories);
+                    // Merge with existing data to prevent overwriting other categories
+                    const subRef = db.collection('settings').doc('subcategories');
+                    const doc = await subRef.get();
+                    let existingData = {};
+                    if (doc.exists) {
+                        existingData = doc.data();
+                    }
+                    
+                    // Merge globalSubcategories into existingData
+                    const updatedData = { ...existingData, ...globalSubcategories };
+                    
+                    await subRef.set(updatedData, { merge: true });
                     console.log('Subcategories saved to Firestore');
-                    localStorage.setItem('persistentSubcategories', JSON.stringify(globalSubcategories));
+                    localStorage.setItem('persistentSubcategories', JSON.stringify(updatedData));
                 }
             } catch (error) {
                 console.error('Error saving subcategories:', error);
                 localStorage.setItem('persistentSubcategories', JSON.stringify(globalSubcategories));
-                alert('Saved locally, but failed to sync with cloud.');
+                // Enhanced error message
+                showError(`Sync failed: ${error.message}. Saved locally.`);
             }
         }
 
