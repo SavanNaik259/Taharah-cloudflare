@@ -113,14 +113,6 @@ const FilterSortHandler = (function() {
                     applySort(currentSort);
                 });
             });
-
-            // Handle Filter Modal Radio Buttons
-            const filterSortRadios = document.querySelectorAll('input[name="filter-sort"]');
-            filterSortRadios.forEach(radio => {
-                radio.addEventListener('change', function() {
-                    currentFilter = this.value;
-                });
-            });
         }
 
         // Filter modal
@@ -310,9 +302,9 @@ const FilterSortHandler = (function() {
 
             case 'newest':
                 return productsCopy.sort((a, b) => {
-                    // Use uploadedAt timestamp if available, otherwise use createdAt or timestamp or id
-                    const dateA = a.uploadedAt || a.createdAt || a.timestamp || a.date || (a.id ? parseInt(a.id) : 0) || 0;
-                    const dateB = b.uploadedAt || b.createdAt || b.timestamp || b.date || (b.id ? parseInt(b.id) : 0) || 0;
+                    // Use uploadedAt timestamp if available, otherwise use createdAt or id
+                    const dateA = a.uploadedAt || a.createdAt || a.timestamp || 0;
+                    const dateB = b.uploadedAt || b.createdAt || b.timestamp || 0;
                     return dateB - dateA; // Newest first
                 });
 

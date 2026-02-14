@@ -291,8 +291,8 @@ const SubcategoryProductsLoader = (function() {
                 
             case 'newest':
                 return productsCopy.sort((a, b) => {
-                    const dateA = a.uploadedAt || a.createdAt || a.timestamp || a.date || (a.id ? parseInt(a.id) : 0) || 0;
-                    const dateB = b.uploadedAt || b.createdAt || b.timestamp || b.date || (b.id ? parseInt(b.id) : 0) || 0;
+                    const dateA = new Date(a.date || 0);
+                    const dateB = new Date(b.date || 0);
                     return dateB - dateA;
                 });
                 
@@ -384,10 +384,9 @@ const SubcategoryProductsLoader = (function() {
             'gold-rings': 'gold-rings',
             'silver-rings': 'silver-rings',
             'meenakari-rings': 'meenakari-rings',
-            'pakistani-pret-wear': 'pakistani-pret-wear',
-            'modest-wear': 'modest-wear',
-            'party-wear': 'party-wear',
-            'ready-to-wear': 'ready-to-wear'
+            'pakistani-pret-wear': 'gold-bangles',
+            'modest-wear': 'gold-earrings',
+            'party-wear': 'gold-necklace'
         };
 
         const category = categoryMap[pageName];
