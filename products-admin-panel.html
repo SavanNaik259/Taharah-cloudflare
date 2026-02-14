@@ -1379,7 +1379,8 @@
         }
 
         async function addNewSubcategory() {
-            const category = document.getElementById('productCategory').value;
+            const categorySelect = document.getElementById('productCategory');
+            const category = categorySelect.value;
             const newSubInput = document.getElementById('newSubcategory');
             const newSub = newSubInput.value.trim();
             
@@ -1389,6 +1390,9 @@
             }
             
             if (newSub) {
+                // Fetch first to ensure we have latest data
+                await fetchSubcategoriesFromFirestore();
+
                 if (!globalSubcategories[category]) {
                     globalSubcategories[category] = [];
                 }
@@ -1396,6 +1400,10 @@
                 if (!globalSubcategories[category].includes(newSub)) {
                     globalSubcategories[category].push(newSub);
                     await saveSubcategoriesToFirestore();
+                    updateSubcategoryOptions(category);
+                    document.getElementById('productSubcategory').value = newSub;
+                } else {
+                    // Even if it exists, update options and select it
                     updateSubcategoryOptions(category);
                     document.getElementById('productSubcategory').value = newSub;
                 }
