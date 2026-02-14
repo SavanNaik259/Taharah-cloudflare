@@ -254,9 +254,9 @@ const FilterSortHandler = (function() {
         
         // Map page names to their storage category names
         const categoryMap = {
-            'pakistani-pret-wear': 'pakistani-pret-wear',
-            'modest-wear': 'modest-wear',
-            'party-wear': 'party-wear',
+            'pakistani-pret-wear': 'gold-bangles',
+            'modest-wear': 'gold-earrings',
+            'party-wear': 'gold-necklace',
             'ready-to-wear': 'ready-to-wear',
             'new-arrivals': 'new-arrivals'
         };
@@ -266,7 +266,7 @@ const FilterSortHandler = (function() {
         let categorySubs = [];
         try {
             // Fetch from Firestore for shared persistence
-            if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+            if (typeof firebase !== 'undefined') {
                 const db = firebase.firestore();
                 const doc = await db.collection('settings').doc('subcategories').get();
                 if (doc.exists) {
@@ -278,11 +278,24 @@ const FilterSortHandler = (function() {
             console.error('Error fetching subcategories from Firestore:', error);
         }
 
-        // Fallback to localStorage
+        // Fallback to searching products if no explicit subcategory list is found
         if (categorySubs.length === 0) {
-            const SUBCATEGORIES_KEY = 'persistentSubcategories';
-            const subcategoriesData = JSON.parse(localStorage.getItem(SUBCATEGORIES_KEY) || '{}');
-            categorySubs = subcategoriesData[category] || [];
+            try {
+                // Determine which loader to use to get products
+                let products = [];
+                if (pageName === 'new-arrivals' && typeof NewArrivalsProductsLoader !== 'undefined') {
+                    products = await NewArrivalsProductsLoader.loadNewArrivalsProducts();
+                } else if (typeof SubcategoryProductsLoader !== 'undefined') {
+                    products = await SubcategoryProductsLoader.loadSubcategoryProducts(category);
+                }
+
+                if (products && products.length > 0) {
+                    const uniqueSubs = [...new Set(products.map(p => p.subcategory).filter(s => s && s.trim() !== ""))];
+                    categorySubs = uniqueSubs;
+                }
+            } catch (pError) {
+                console.error('Error extracting subcategories from products:', pError);
+            }
         }
         
         console.log(`Subcategories for ${category}:`, categorySubs);

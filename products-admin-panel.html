@@ -2724,6 +2724,30 @@
                     status: 'active'
                 };
 
+                // Sync subcategory to Firestore settings for filter dropdown
+                if (productData.subcategory && productData.subcategory.trim() !== "") {
+                    try {
+                        console.log("Syncing subcategory to Firestore...");
+                        const db = firebase.firestore();
+                        const subRef = db.collection('settings').doc('subcategories');
+                        const doc = await subRef.get();
+                        let allSubs = {};
+                        if (doc.exists) {
+                            allSubs = doc.data();
+                        }
+                        if (!allSubs[category]) {
+                            allSubs[category] = [];
+                        }
+                        if (!allSubs[category].includes(productData.subcategory)) {
+                            allSubs[category].push(productData.subcategory);
+                            await subRef.set(allSubs, { merge: true });
+                            console.log("Subcategory synced to Firestore successfully");
+                        }
+                    } catch (syncError) {
+                        console.warn("Failed to sync subcategory to cloud settings, but product will still be saved:", syncError);
+                    }
+                }
+
                 // Handle edit mode vs create mode
                 if (isEditMode && editProductId && originalProductData) {
                     console.log('Updating existing product:', editProductId);
