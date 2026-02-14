@@ -254,9 +254,9 @@ const FilterSortHandler = (function() {
         
         // Map page names to their storage category names
         const categoryMap = {
-            'pakistani-pret-wear': 'gold-bangles',
-            'modest-wear': 'gold-earrings',
-            'party-wear': 'gold-necklace',
+            'pakistani-pret-wear': 'pakistani-pret-wear',
+            'modest-wear': 'modest-wear',
+            'party-wear': 'party-wear',
             'ready-to-wear': 'ready-to-wear',
             'new-arrivals': 'new-arrivals'
         };
@@ -266,8 +266,18 @@ const FilterSortHandler = (function() {
         const subcategoriesData = JSON.parse(localStorage.getItem(SUBCATEGORIES_KEY) || '{}');
         const categorySubs = subcategoriesData[category] || [];
         
+        console.log(`Subcategories for ${category}:`, categorySubs);
+
         const filterModalBody = document.querySelector('.filter-modal-body');
-        if (!filterModalBody || categorySubs.length === 0) return;
+        if (!filterModalBody) {
+            console.warn('Filter modal body not found');
+            return;
+        }
+
+        if (categorySubs.length === 0) {
+            console.log('No subcategories found for this category');
+            return;
+        }
         
         // Check if subcategory section already exists
         if (document.getElementById('subcategoryFilterSection')) return;

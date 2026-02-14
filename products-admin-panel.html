@@ -2670,16 +2670,23 @@
                 });
 
                 const productData = {
-                    name: formData.get('productName'),
-                    price: materialVariants.length > 0 ? materialVariants[0].price : (formData.get('productPrice') ? parseFloat(formData.get('productPrice')) : null),
-                    stock: formData.get('productStock') !== '' ? parseInt(formData.get('productStock')) : null,
-                    description: formData.get('productDescription'),
-                    category: formData.get('productCategory'),
+                    id: isEditMode ? editProductId : generateProductId(category, name, price),
+                    name: name,
+                    price: parseFloat(price),
+                    stock: parseInt(stock),
+                    category: category,
                     subcategory: document.getElementById('productSubcategory').value,
-                    sizes: Array.from(document.querySelectorAll('#sizeCheckboxes input:checked')).map(cb => cb.value),
-                    colours: Array.from(document.querySelectorAll('#colourCheckboxes input:checked')).map(cb => cb.value),
+                    description: description,
+                    sizes: sizes,
+                    colours: colours,
+                    materials: materialVariants,
                     dupattaOptions: dupattaOptions,
-                    materialVariants: materialVariants
+                    images: finalImageUrls,
+                    mainImage: finalImageUrls[mainImageIndex] || finalImageUrls[0],
+                    allImages: finalImageUrls,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    status: 'active'
                 };
 
                 // Handle edit mode vs create mode
