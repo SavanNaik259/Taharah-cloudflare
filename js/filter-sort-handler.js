@@ -18,7 +18,8 @@ const FilterSortHandler = (function() {
         }
         
         console.log('Initializing Unified Filter and Sort Handler...');
-        
+        window.FilterSortHandlerInitialized = true;
+
         const sortOption = document.getElementById('sortOption');
         const sortDropdown = document.getElementById('sortDropdown');
         const filterOption = document.getElementById('filterOption');
@@ -27,17 +28,9 @@ const FilterSortHandler = (function() {
         const applyFilterBtn = document.getElementById('applyFilterBtn');
         const clearFilterBtn = document.getElementById('clearFilterBtn');
 
-        console.log('Elements found:', {
-            sortOption: !!sortOption,
-            sortDropdown: !!sortDropdown,
-            filterOption: !!filterOption,
-            filterModal: !!filterModal
-        });
-
         // Sort Dropdown Toggle
         if (sortOption && sortDropdown) {
             sortOption.addEventListener('click', function(e) {
-                console.log('Sort option clicked');
                 e.stopPropagation();
                 toggleSortDropdown();
             });
@@ -46,7 +39,6 @@ const FilterSortHandler = (function() {
             const sortOptions = sortDropdown.querySelectorAll('.sort-dropdown-option');
             sortOptions.forEach(option => {
                 option.addEventListener('click', function(e) {
-                    console.log('Sort dropdown option clicked:', this.dataset.sort);
                     e.stopPropagation();
                     sortOptions.forEach(opt => opt.classList.remove('active'));
                     this.classList.add('active');
@@ -59,17 +51,11 @@ const FilterSortHandler = (function() {
 
         // Filter Modal Toggle
         if (filterOption && filterModal) {
-            filterOption.addEventListener('click', () => {
-                console.log('Filter option clicked');
-                filterModal.classList.add('active');
-            });
+            filterOption.addEventListener('click', () => filterModal.classList.add('active'));
         }
 
         if (closeFilterModal && filterModal) {
-            closeFilterModal.addEventListener('click', () => {
-                console.log('Close filter modal clicked');
-                closeFilterModalAnimation();
-            });
+            closeFilterModal.addEventListener('click', () => closeFilterModalAnimation());
         }
 
         if (applyFilterBtn) {
@@ -110,7 +96,6 @@ const FilterSortHandler = (function() {
         });
 
         console.log('Unified Filter and Sort Handler initialized');
-        window.FilterSortHandlerInitialized = true;
     }
 
     function toggleSortDropdown() {
@@ -255,17 +240,9 @@ const FilterSortHandler = (function() {
 })();
 
 // Robust initialization handling different document ready states
-function attemptInit() {
-    console.log('Attempting to initialize FilterSortHandler. ReadyState:', document.readyState);
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => FilterSortHandler.init());
+} else {
+    // Document is already ready, initialize immediately
     FilterSortHandler.init();
 }
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', attemptInit);
-} else {
-    attemptInit();
-}
-
-// Backup initialization after a short delay
-setTimeout(attemptInit, 1000);
-setTimeout(attemptInit, 3000);
