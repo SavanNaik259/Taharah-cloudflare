@@ -79,18 +79,21 @@ document.addEventListener('DOMContentLoaded', function() {
         // Only apply for mobile view
         if (window.innerWidth <= 991) {
             e.preventDefault();
+            e.stopPropagation();
 
             const dropdown = this.closest('.dropdown');
-
-            // Close all other dropdowns first
-            document.querySelectorAll('.dropdown.active').forEach(item => {
-                if (item !== dropdown) {
+            
+            // If already active, just close it
+            if (dropdown.classList.contains('active')) {
+                dropdown.classList.remove('active');
+            } else {
+                // Close all other dropdowns first
+                document.querySelectorAll('.dropdown.active').forEach(item => {
                     item.classList.remove('active');
-                }
-            });
-
-            // Toggle active class on dropdown
-            dropdown.classList.toggle('active');
+                });
+                // Open this one
+                dropdown.classList.add('active');
+            }
         }
     }
 
