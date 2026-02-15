@@ -2780,6 +2780,7 @@
                         category: false,
                         sizes: false,
                         colours: false,
+                        materials: false,
                         dupattaOptions: false
                     };
 
@@ -2844,6 +2845,10 @@
                     if (JSON.stringify(productData.colours) !== JSON.stringify(originalProductData.colours || [])) {
                         updatedProductData.colours = productData.colours;
                         fieldsChanged.colours = true;
+                    }
+                    if (JSON.stringify(productData.materials) !== JSON.stringify(originalProductData.materials || [])) {
+                        updatedProductData.materials = productData.materials;
+                        fieldsChanged.materials = true;
                     }
                     if (JSON.stringify(productData.dupattaOptions) !== JSON.stringify(originalProductData.dupattaOptions || [])) {
                         updatedProductData.dupattaOptions = productData.dupattaOptions;
