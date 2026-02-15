@@ -932,6 +932,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     itemTotalDisplay = window.CurrencyConverter.convertPrice(itemTotal);
                 }
 
+                // Determine category from SKU (if available) or prefix
+                let category = 'Uncategorized';
+                if (item.id) {
+                    if (item.id.startsWith('PAK-')) category = 'Pakistani Pret Wear';
+                    else if (item.id.startsWith('RTW-')) category = 'Ready to Wear';
+                    else if (item.id.startsWith('PTY-')) category = 'Party Wear';
+                    else if (item.id.startsWith('MOD-')) category = 'Modest Wear';
+                    else if (item.id.startsWith('NW-')) category = 'New Arrivals';
+                }
+
                 return {
                     id: item.id,
                     name: item.name,
@@ -942,7 +952,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     priceDisplay: itemPriceDisplay,
                     totalDisplay: itemTotalDisplay,
                     // Only include image if it exists
-                    image: item.image || ''
+                    image: item.image || '',
+                    // Include custom options
+                    size: item.size || null,
+                    colour: item.colour || null,
+                    dupatta: item.dupatta || null,
+                    category: category
                 };
             }),
             orderTotal: calculateTotal(cartItems),
