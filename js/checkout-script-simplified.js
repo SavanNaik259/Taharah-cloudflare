@@ -487,7 +487,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 itemTotalDisplay = window.CurrencyConverter.convertPrice(itemTotal);
             }
 
-            /**  HTML for order summary (compact version for sidebar)
+            // HTML for order summary (compact version for sidebar)
             summaryHTML += `
                 <div class="card mb-2 cart-item" data-item-id="${item.id}">
                     <div class="card-body">
@@ -564,7 +564,7 @@ document.addEventListener('DOMContentLoaded', function() {
             orderTotalElement.textContent = `${currencySymbol}${totalDisplay.toFixed(2)}`;
             orderTotalElement.dataset.originalPrice = total; // Store original price for currency conversion
         }
-*/
+
         // Add event listeners to quantity buttons
         setupQuantityControls(items);
         
