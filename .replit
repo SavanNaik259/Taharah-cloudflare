@@ -31,15 +31,6 @@ task = "workflow.run"
 args = "Server"
 
 [[workflows.workflow]]
-name = "Start Website"
-author = 47556237
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "node run-server.js"
-
-[[workflows.workflow]]
 name = "Server"
 author = "agent"
 
