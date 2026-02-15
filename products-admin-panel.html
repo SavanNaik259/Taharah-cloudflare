@@ -2724,8 +2724,9 @@
                 const materialVariants = [];
                 document.querySelectorAll('.material-variant').forEach(variant => {
                     const name = variant.querySelector('.material-name').value.trim();
-                    const price = parseFloat(variant.querySelector('.material-price').value);
-                    if (name && !isNaN(price)) {
+                    const priceInput = variant.querySelector('.material-price');
+                    const price = priceInput && priceInput.value ? parseFloat(priceInput.value) : null;
+                    if (name && price !== null && !isNaN(price)) {
                         materialVariants.push({ name, price });
                     }
                 });
