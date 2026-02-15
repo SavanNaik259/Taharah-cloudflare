@@ -479,9 +479,56 @@ const ProductDetailLoader = (function() {
             });
         }
 
+        // Material selection (New implementation for separate pricing)
+        const materialContainer = document.getElementById('material-selection');
+        if (materialContainer && product.materials && Array.isArray(product.materials) && product.materials.length > 0) {
+            const materialList = materialContainer.querySelector('.material-options');
+            materialList.innerHTML = product.materials.map((variant, index) => `
+                <button class="option-btn material-btn ${index === 0 ? 'selected' : ''}" 
+                    data-name="${variant.name}" 
+                    data-price="${variant.price}" 
+                    style="padding: 5px 15px; border: 1px solid ${index === 0 ? '#000' : '#ddd'}; background: #fff; cursor: pointer; border-radius: 4px; font-family: 'Futura PT', sans-serif;">
+                    ${variant.name}
+                </button>
+            `).join('');
+            materialContainer.style.display = 'block';
+            hasOptions = true;
+
+            // Set initial price from first material if available
+            if (product.materials[0]) {
+                const firstMaterial = product.materials[0];
+                window.selectedMaterial = firstMaterial.name;
+                window.selectedPrice = firstMaterial.price;
+                updatePriceDisplay(firstMaterial.price);
+            }
+
+            // Add click listeners
+            materialList.querySelectorAll('.material-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    materialList.querySelectorAll('.material-btn').forEach(b => {
+                        b.style.borderColor = '#ddd';
+                        b.classList.remove('selected');
+                    });
+                    btn.style.borderColor = '#000';
+                    btn.classList.add('selected');
+                    
+                    window.selectedMaterial = btn.dataset.name;
+                    window.selectedPrice = parseFloat(btn.dataset.price);
+                    
+                    updatePriceDisplay(window.selectedPrice);
+                    
+                    // Update global product details for cart
+                    if (window.productDetails) {
+                        window.productDetails.price = window.selectedPrice;
+                        window.productDetails.material = window.selectedMaterial;
+                    }
+                });
+            });
+        }
+
         // Dupatta selection
         const dupattaContainer = document.getElementById('dupatta-selection');
-        if (product.materialVariants && Array.isArray(product.materialVariants) && product.materialVariants.length > 0) {
+        if (dupattaContainer && product.materialVariants && Array.isArray(product.materialVariants) && product.materialVariants.length > 0) {
             const dupattaList = dupattaContainer.querySelector('.dupatta-options');
             dupattaList.innerHTML = product.materialVariants.map(variant => `
                 <button class="option-btn material-btn" data-name="${variant.name}" data-price="${variant.price}" style="padding: 5px 15px; border: 1px solid #ddd; background: #fff; cursor: pointer; border-radius: 4px;">${variant.name} - Rs. ${variant.price}</button>
@@ -497,17 +544,7 @@ const ProductDetailLoader = (function() {
                     window.selectedDupatta = btn.dataset.name;
                     window.selectedPrice = parseFloat(btn.dataset.price);
                     
-                    // Update price display
-                    const priceElements = document.querySelectorAll('.product-detail-info .product-price, .product-detail-info .current-price, .product-detail-info .price');
-                    const formattedPrice = new Intl.NumberFormat('en-IN', {
-                        style: 'currency',
-                        currency: 'INR',
-                        minimumFractionDigits: 0
-                    }).format(window.selectedPrice).replace('₹', '');
-
-                    priceElements.forEach(element => {
-                        element.textContent = `Rs. ${formattedPrice}`;
-                    });
+                    updatePriceDisplay(window.selectedPrice);
                     
                     // Update global product details for cart
                     if (window.productDetails) {
@@ -521,7 +558,7 @@ const ProductDetailLoader = (function() {
             const firstBtn = dupattaList.querySelector('.material-btn');
             if (firstBtn) firstBtn.click();
 
-        } else if (product.dupattaOptions && Array.isArray(product.dupattaOptions) && product.dupattaOptions.length > 0) {
+        } else if (dupattaContainer && product.dupattaOptions && Array.isArray(product.dupattaOptions) && product.dupattaOptions.length > 0) {
             const dupattaList = dupattaContainer.querySelector('.dupatta-options');
             dupattaList.innerHTML = product.dupattaOptions.map(option => `
                 <button class="option-btn dupatta-btn" data-value="${option}" style="padding: 5px 15px; border: 1px solid #ddd; background: #fff; cursor: pointer; border-radius: 4px;">${option}</button>
@@ -537,6 +574,29 @@ const ProductDetailLoader = (function() {
                     window.selectedDupatta = btn.dataset.value;
                 });
             });
+        }
+
+        function updatePriceDisplay(price) {
+            const priceElements = document.querySelectorAll('.product-detail-info .product-price, .product-detail-info .current-price, .product-detail-info .price-value');
+            const formattedPrice = new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                minimumFractionDigits: 0
+            }).format(price).replace('₹', '');
+
+            priceElements.forEach(element => {
+                element.textContent = `Rs. ${formattedPrice}`;
+                // Also update the data-original-price for currency conversion
+                element.setAttribute('data-original-price', price);
+                if (element.classList.contains('current-price')) {
+                    element.dataset.originalPrice = price;
+                }
+            });
+
+            // Trigger currency conversion if available
+            if (window.CurrencyConverter && typeof window.CurrencyConverter.convertAllPrices === 'function') {
+                window.CurrencyConverter.convertAllPrices();
+            }
         }
 
         optionsContainer.style.display = hasOptions ? 'block' : 'none';
