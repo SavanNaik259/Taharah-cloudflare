@@ -578,9 +578,11 @@ window.CartManager = (function() {
 
                     // Get selected options if on product detail page
                     const isProductDetailPage = document.querySelector('.product-detail-container') !== null;
-                    let selectedSize = window.selectedSize;
-                    let selectedColour = window.selectedColour;
-                    let selectedDupatta = window.selectedDupatta;
+                    
+                    // Improved extraction: check for active buttons if window variables aren't set
+                    let selectedSize = window.selectedSize || document.querySelector('.size-btn.active')?.dataset.size;
+                    let selectedColour = window.selectedColour || document.querySelector('.colour-btn.active')?.dataset.colour;
+                    let selectedDupatta = window.selectedDupatta || document.querySelector('.dupatta-btn.active')?.dataset.dupatta;
 
                     // Validate options if they are required
                     if (isProductDetailPage) {
@@ -589,16 +591,13 @@ window.CartManager = (function() {
                         const hasDupatta = document.getElementById('dupatta-selection')?.style.display !== 'none';
 
                         if ((hasSizes && !selectedSize) || (hasColours && !selectedColour) || (hasDupatta && !selectedDupatta)) {
-                            if (window.showToast) {
-                                window.showToast('Please select all required options (Size, Colour, Dupatta)', 'error');
-                            } else {
-                                alert('Please select all required options (Size, Colour, Dupatta)');
-                            }
+                            const showToast = window.showToast || function(msg, type) { alert(msg); };
+                            showToast('Please select all required options (Size, Colour, Dupatta)', 'error');
                             return;
                         }
                     }
 
-                    // Get product name - avoid placeholder text
+                    // Get product name
                     let productName = '';
                     const nameElements = [
                         productContainer.querySelector('.product-name'),
@@ -615,48 +614,43 @@ window.CartManager = (function() {
                         }
                     }
 
-                    // Check if we have valid product name and it's not a loading placeholder
-                    if (!productName || productName.trim() === '' || 
-                        productName === 'Loading Product...' || 
-                        productName === 'Product' ||
-                        productName === 'Loading...' ||
-                        productName.includes('Loading')) {
-                        console.warn('Product not fully loaded yet, please wait...');
-
-                        if (isProductDetailPage) {
-                            // Try to show a toast notification if available
-                            const showToast = window.showToast || function(msg, type) {
-                                alert(msg);
-                            };
-                            showToast('Please wait for product details to load completely', 'info');
-                        }
-
+                    if (!productName || productName.trim() === '' || productName.includes('Loading')) {
+                        const showToast = window.showToast || function(msg, type) { alert(msg); };
+                        showToast('Please wait for product details to load completely', 'info');
                         return;
                     }
 
-                    // Get price - CRITICAL: ALWAYS use original INR price, never converted display price!
+                    // Get price
                     let price = 0;
-
-                    // CRITICAL FIX: Priority 1 - Use global product details (product detail page)
                     if (isProductDetailPage && window.productDetails && window.productDetails.price) {
                         price = window.productDetails.price;
-                        console.log('✅ CART: Using global product details ORIGINAL INR price:', price);
-                    }
-                    // Priority 2 - Check for data-original-price attribute (has original INR)
-                    else if (productContainer.dataset.originalPrice) {
+                    } else if (productContainer.dataset.originalPrice) {
                         price = parseFloat(productContainer.dataset.originalPrice);
-                        console.log('✅ CART: Using data-original-price from container:', price);
-                    }
-                    // Priority 3 - Check for data-product-price attribute on the product container
-                    else if (productContainer.dataset.productPrice) {
+                    } else if (productContainer.dataset.productPrice) {
                         price = parseFloat(productContainer.dataset.productPrice);
-                        console.log('✅ CART: Using data-product-price from container:', price);
-                    } 
-                    // Priority 4 - Check price cache for original prices
-                    else if (productId && window.PRODUCT_PRICES_CACHE && window.PRODUCT_PRICES_CACHE.has(productId)) {
+                    } else if (productId && window.PRODUCT_PRICES_CACHE && window.PRODUCT_PRICES_CACHE.has(productId)) {
                         price = window.PRODUCT_PRICES_CACHE.get(productId);
-                        console.log('✅ CART: Using cached original price:', price);
                     }
+
+                    // Get image
+                    let image = productContainer.dataset.productImage || document.querySelector('.product-main-image')?.src;
+
+                    // Construct product data with all options
+                    const productData = {
+                        id: productId,
+                        name: productName,
+                        price: price,
+                        image: image,
+                        size: selectedSize || null,
+                        colour: selectedColour || null,
+                        dupatta: selectedDupatta || null,
+                        category: document.querySelector('.meta-item:last-child .meta-value')?.textContent.trim() || null
+                    };
+
+                    console.log('✅ Adding product to cart with full details:', productData);
+                    addToCart(productData, 1);
+                }
+            }
                     // Priority 5 - Fallback: Check for data-original-price on price element
                     else {
                         let priceElem = null;

@@ -944,6 +944,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     price: item.price,
                     quantity: item.quantity,
                     total: itemTotal,
+                    size: item.size || '',
+                    colour: item.colour || '',
+                    dupatta: item.dupatta || '',
+                    category: item.category || '',
                     // Include converted prices for email display
                     priceDisplay: itemPriceDisplay,
                     totalDisplay: itemTotalDisplay,
