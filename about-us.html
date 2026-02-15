@@ -73,6 +73,159 @@
 
 
     <style>
+        .promo-banner{
+            margin-bottom: 40px;
+        }
+          /* Login page specific styles - Force black navigation elements */
+
+      /* Navigation links in desktop */
+      .nav-link {
+          color: #000 !important;
+      }
+
+      /* Navigation links hover state */
+      .nav-link:hover {
+          color: #333 !important;
+      }
+/* Dropdown arrow icons */
+      .dropdown-toggle i {
+          color: #000 !important;
+      }
+
+      /* Mobile menu close button */
+      .meenu-close {
+          color: #000 !important;
+      }
+
+      /* Mobile navigation links */
+      .mobile-account-link {
+          color: #000 !important;
+      }
+
+      /* Mobile navigation link text */
+      .mobile-account-links .mobile-account-link {
+          color: #000 !important;
+      }
+
+      /* Navigation icons - all icon images */
+      .nav-icons .icon-link img {
+          filter: brightness(0) !important;
+      }
+
+      /* Hamburger menu icon */
+      .hamburger img {
+          filter: brightness(0) !important;
+      }
+
+      /* Cart and wishlist count badges *
+      .cart-count,
+      .wishlist-count,
+      .mobile-cart-count,
+      .mobile-wishlist-count {
+          background-color: #000 !important;
+          color: #fff !important;
+      }
+
+      /* Mobile navigation link text */
+      .mobile-account-links .mobile-account-link {
+          color: #000 !important;
+      }
+
+      .mobile-wishlist-count, .mobile-cart-count {
+          color: #fff !important;
+      }
+
+      /* Dropdown menu items */
+      .dropdown-menu li a {
+          color: #000 !important;
+      }
+
+      /* Dropdown menu items hover */
+      .dropdown-menu li a:hover {
+          color: #333 !important;
+          background-color: #f5f5f5 !important;
+      }
+
+      /* Mobile menu background text color */
+      .nav-menu {
+          color: #000 !important;
+      }
+
+      /* Ensure all text in mobile menu is black */
+      .nav-menu * {
+          color: #000 !important;
+      }
+
+      /* Mobile account links images */
+      .mobile-account-link img {
+          filter: brightness(0) !important;
+      }
+        .navbar {
+            top: 30px!important;
+        }
+
+      /* Hide mobile menu close button on large devices */
+      @media (min-width: 769px) {
+          #closeMenu {
+              display: none !important;
+          }
+      }
+
+      /* Add top spacing to login section */
+      .auth-container {
+          margin-top: 200px !important;
+      }
+
+      /* Responsive spacing for different screen sizes */
+      @media (max-width: 768px) {
+          .auth-container {
+              margin-top: 180px !important;
+          }
+}
+
+      /* Remove shadow from navigation links on large devices */
+      @media (min-width: 769px) {
+          .nav-link {
+              text-shadow: none !important;
+              box-shadow: none !important;
+          }
+
+          .nav-link:hover {
+              text-shadow: none !important;
+              box-shadow: none !important;
+          }
+        }
+
+        /* Additional currency symbol support */
+        .price-currency {
+            font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Arial Unicode MS', 'Noto Sans', sans-serif !important;
+            font-feature-settings: "tnum";
+            -webkit-font-feature-settings: "tnum";
+        }
+
+        /* Ensure all price elements use proper font stack */
+        .current-price, .original-price, .arrival-price, .featured-price,
+        .price-value, .subtotal-amount, .product-pricing span {
+            font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Arial Unicode MS', 'Noto Sans', sans-serif !important;
+        }
+
+        /* Cart icon styling */
+        .cart-icon-container img {
+            transition: transform 0.2s ease;
+        }
+
+        .cart-icon-container:hover img {
+            transform: scale(1.1);
+        }
+
+        /* Hide mobile menu close button on large devices */
+        @media (min-width: 769px) {
+            #closeMenu,
+            .meenu-close,
+            i#closeMenu.fa-solid.fa-xmark {
+                display: none !important;
+            }
+        }
         /* Zeol-inspired About Page Styles */
         :root {
             --zeol-font-serif: "Playfair Display", serif;
@@ -267,6 +420,64 @@
     <script src="js/wishlist-local-storage.js?v=1.0.0"></script>
     <script src="js/wishlist-manager.js?v=1.0.0"></script>
     <script src="js/main.js"></script>
+
+    <!-- Mobile Menu Functionality Fix -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ensure mobile menu close button works
+            window.closeMobileMenu = function() {
+                const navMenu = document.getElementById('navMenu');
+                const menuOverlay = document.getElementById('menuOverlay');
+                const navToggle = document.getElementById('navToggle');
+                
+                if (navMenu) navMenu.classList.remove('active');
+                if (menuOverlay) menuOverlay.classList.remove('active');
+                if (navToggle) navToggle.classList.remove('open');
+                document.body.style.overflow = '';
+            };
+
+            // Double check navToggle existence
+            const navToggle = document.getElementById('navToggle');
+            if (navToggle) {
+                navToggle.addEventListener('click', function() {
+                    const navMenu = document.getElementById('navMenu');
+                    const menuOverlay = document.getElementById('menuOverlay');
+                    if (navMenu) navMenu.classList.toggle('active');
+                    if (menuOverlay) menuOverlay.classList.toggle('active');
+                    this.classList.toggle('open');
+                    
+                    if (navMenu && navMenu.classList.contains('active')) {
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        document.body.style.overflow = '';
+                    }
+                });
+            }
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ensure search and cart functionality is working
+            setTimeout(() => {
+                if (typeof SearchManager !== 'undefined') {
+                    console.log('SearchManager available');
+                }
+                
+                // Manual search icon setup as backup
+                const searchIcon = document.querySelector('.search-icon');
+                if (searchIcon && !searchIcon.hasAttribute('data-search-attached')) {
+                    searchIcon.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        if (typeof SearchUI !== 'undefined' && SearchUI.openSearch) {
+                            SearchUI.openSearch();
+                        }
+                    });
+                    searchIcon.setAttribute('data-search-attached', 'true');
+                }
+            }, 500);
+        });
+    </script>
 </head>
 <body>
     <!-- Search Overlay -->
