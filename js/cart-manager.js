@@ -399,19 +399,13 @@ window.CartManager = (function() {
         let displayTotal = total;
         
         if (window.CurrencyConverter) {
-            const currentCurrency = window.CurrencyConverter.getCurrentCurrency();
             currencySymbol = window.CurrencyConverter.getCurrencySymbol();
             displayTotal = window.CurrencyConverter.convertPrice(total);
-            
-            // Force Rs. for INR
-            if (currentCurrency === 'INR') {
-                currencySymbol = 'Rs.';
-            }
         }
         
         subtotalElements.forEach(el => {
-            if (currencySymbol === 'Rs.') {
-                el.textContent = `Rs. ${Math.round(displayTotal).toLocaleString('en-IN')}`;
+            if (currencySymbol === '₹') {
+                el.textContent = `Rs. ${displayTotal.toLocaleString('en-IN')}`;
             } else {
                 el.textContent = `${currencySymbol}${displayTotal.toFixed(2)}`;
             }
@@ -435,13 +429,7 @@ window.CartManager = (function() {
         // Get currency symbol from CurrencyConverter if available
         let currencySymbol = '₹';
         if (window.CurrencyConverter) {
-            const currentCurrency = window.CurrencyConverter.getCurrentCurrency();
             currencySymbol = window.CurrencyConverter.getCurrencySymbol();
-            
-            // Force Rs. for INR
-            if (currentCurrency === 'INR') {
-                currencySymbol = 'Rs.';
-            }
         }
 
         cartItemsContainer.innerHTML = cartItems.map(item => {
@@ -453,13 +441,9 @@ window.CartManager = (function() {
                 itemTotal = window.CurrencyConverter.convertPrice(itemTotal);
             }
 
-            const formattedPrice = currencySymbol === 'Rs.' ? 
-                `Rs. ${Math.round(itemPrice).toLocaleString('en-IN')}` : 
+            const formattedPrice = currencySymbol === '₹' ? 
+                `Rs. ${itemPrice.toLocaleString('en-IN')}` : 
                 `${currencySymbol}${itemPrice.toFixed(2)}`;
-                
-            const formattedTotal = currencySymbol === 'Rs.' ? 
-                `Rs. ${Math.round(itemTotal).toLocaleString('en-IN')}` : 
-                `${currencySymbol}${itemTotal.toFixed(2)}`;
 
             return `
             <div class="cart-item" data-id="${item.id}" data-size="${item.size || ''}" data-colour="${item.colour || ''}" data-dupatta="${item.dupatta || ''}">
@@ -479,7 +463,6 @@ window.CartManager = (function() {
                         <span>${item.quantity}</span>
                         <button class="qty-btn inc-qty" onclick="CartManager.incrementQuantity('${item.id}')">+</button>
                     </div>
-                    <div class="cart-item-total" style="font-weight: bold; margin-top: 5px;">${formattedTotal}</div>
                 </div>
                 <button class="remove-item-btn" onclick="CartManager.removeFromCart('${item.id}')">&times;</button>
             </div>
