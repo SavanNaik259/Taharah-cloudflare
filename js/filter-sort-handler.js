@@ -241,10 +241,7 @@ const FilterSortHandler = (function() {
 
         // Initialize with newest products
         setupSubcategoryFilters();
-        // Delay initial sort slightly to ensure subcategories are loaded if they come from products
-        setTimeout(() => {
-            applySort('newest');
-        }, 500);
+        applySort('newest');
 
         console.log('Filter and Sort Handler initialized');
     }
@@ -281,21 +278,20 @@ const FilterSortHandler = (function() {
             console.error('Error fetching subcategories from Storage:', error);
         }
 
-        // Fallback to searching products if no explicit subcategory list is found
         if (categorySubs.length === 0) {
             try {
                 // Determine which loader to use to get products
                 let products = [];
                 if (pageName === 'new-arrivals' && typeof NewArrivalsProductsLoader !== 'undefined') {
                     products = await NewArrivalsProductsLoader.loadNewArrivalsProducts();
-                } else if ((pageName === 'ready-to-wear' || pageName === 'featured-collection') && typeof FeaturedCollectionLoader !== 'undefined' && FeaturedCollectionLoader.loadFeaturedProducts) {
+                } else if ((pageName === 'ready-to-wear' || pageName === 'featured-collection') && typeof FeaturedCollectionLoader !== 'undefined') {
                     products = await FeaturedCollectionLoader.loadFeaturedProducts();
                 } else if (typeof SubcategoryProductsLoader !== 'undefined') {
                     products = await SubcategoryProductsLoader.loadSubcategoryProducts(category);
                 }
 
                 if (products && products.length > 0) {
-                    const uniqueSubs = [...new Set(products.map(p => (p.subcategory || p.subCategory || '').trim()).filter(s => s !== ""))];
+                    const uniqueSubs = [...new Set(products.map(p => p.subcategory || p.subCategory).filter(s => s && s.trim() !== ""))];
                     categorySubs = uniqueSubs;
                 }
             } catch (pError) {

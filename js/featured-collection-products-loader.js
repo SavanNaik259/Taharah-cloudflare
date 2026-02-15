@@ -145,11 +145,6 @@ const BridalProductsLoader = (function() {
     }
 
     async function updateProductsGrid(forceRefresh = false) {
-        // Initialize subcategory filters in the UI when the grid is updated
-        if (typeof FilterSortHandler !== 'undefined' && FilterSortHandler.setupSubcategoryFilters) {
-            FilterSortHandler.setupSubcategoryFilters();
-        }
-        
         const products = await loadBridalProducts(forceRefresh);
         displayProducts(products);
     }
