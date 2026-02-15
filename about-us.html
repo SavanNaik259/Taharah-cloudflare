@@ -412,6 +412,41 @@ background-color: #000 !important;
     <script src="js/wishlist-manager.js?v=1.0.0"></script>
     <script src="js/main.js"></script>
 
+    <!-- Mobile Menu Functionality Fix -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ensure mobile menu close button works
+            window.closeMobileMenu = function() {
+                const navMenu = document.getElementById('navMenu');
+                const menuOverlay = document.getElementById('menuOverlay');
+                const navToggle = document.getElementById('navToggle');
+                
+                if (navMenu) navMenu.classList.remove('active');
+                if (menuOverlay) menuOverlay.classList.remove('active');
+                if (navToggle) navToggle.classList.remove('open');
+                document.body.style.overflow = '';
+            };
+
+            // Double check navToggle existence
+            const navToggle = document.getElementById('navToggle');
+            if (navToggle) {
+                navToggle.addEventListener('click', function() {
+                    const navMenu = document.getElementById('navMenu');
+                    const menuOverlay = document.getElementById('menuOverlay');
+                    if (navMenu) navMenu.classList.toggle('active');
+                    if (menuOverlay) menuOverlay.classList.toggle('active');
+                    this.classList.toggle('open');
+                    
+                    if (navMenu && navMenu.classList.contains('active')) {
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        document.body.style.overflow = '';
+                    }
+                });
+            }
+        });
+    </script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Ensure search and cart functionality is working
@@ -608,9 +643,10 @@ background-color: #000 !important;
         </div>
     </header>
 
+    <!-- Overlay for menu background -->
     <div class="menu-overlay" id="menuOverlay"></div>
 
-    <section class="about-section">
+    <div class="search-overlay" id="searchOverlay">
         <div class="about-hero">
             <h1>About Us</h1>
         </div>
