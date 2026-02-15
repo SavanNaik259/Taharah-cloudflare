@@ -203,29 +203,45 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function updateAccountIcon() {
         const accountIconLink = document.querySelector('#user-icon');
-        if (!accountIconLink) return;
-
+        const bottomNavAccountLink = document.querySelector('.bottom-nav-item i.fi-rs-user')?.parentElement || 
+                                   document.querySelector('.bottom-nav-item[href="login"]') || 
+                                   document.querySelector('.bottom-nav-item[href="profile"]');
+        
+        console.log('Updating account icons. Bottom nav link found:', !!bottomNavAccountLink);
+        
         // Check if user is logged in using the proper FirebaseAuth method
         let isLoggedIn = false;
 
         if (window.FirebaseAuth && typeof window.FirebaseAuth.isLoggedIn === 'function') {
-            // Use the proper authentication check that includes email verification
             isLoggedIn = window.FirebaseAuth.isLoggedIn();
         } else if (window.firebase && window.firebase.auth && window.firebase.auth().currentUser) {
-            // Fallback to basic Firebase auth check (but this doesn't check email verification)
-            const user = window.firebase.auth().currentUser;
-            // For now, assume logged in if user exists (the login function handles verification)
-            isLoggedIn = !!user;
+            isLoggedIn = !!window.firebase.auth().currentUser;
         }
 
         if (isLoggedIn) {
-            // User is logged in and verified, show profile link
-            accountIconLink.href = 'profile';
-            accountIconLink.classList.add('logged-in');
+            // Update top nav icon
+            if (accountIconLink) {
+                accountIconLink.href = 'profile';
+                accountIconLink.classList.add('logged-in');
+            }
+            // Update bottom nav icon
+            if (bottomNavAccountLink) {
+                bottomNavAccountLink.href = 'profile';
+                bottomNavAccountLink.classList.add('logged-in');
+                console.log('Bottom nav link set to profile');
+            }
         } else {
-            // User is not logged in or not verified, show login link
-            accountIconLink.href = 'login';
-            accountIconLink.classList.remove('logged-in');
+            // Update top nav icon
+            if (accountIconLink) {
+                accountIconLink.href = 'login';
+                accountIconLink.classList.remove('logged-in');
+            }
+            // Update bottom nav icon
+            if (bottomNavAccountLink) {
+                bottomNavAccountLink.href = 'login';
+                bottomNavAccountLink.classList.remove('logged-in');
+                console.log('Bottom nav link set to login');
+            }
         }
     }
 
@@ -303,35 +319,64 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // User icon authentication state management
     const userIcon = document.getElementById('user-icon');
+    const bottomNavAccount = document.querySelector('.bottom-nav-item i.fi-rs-user')?.parentElement || 
+                             document.querySelector('.bottom-nav-item[href="login"]') || 
+                             document.querySelector('.bottom-nav-item[href="profile"]');
 
     // Check auth state immediately without observer to prevent race conditions
-    if (userIcon) {
+    if (userIcon || bottomNavAccount) {
         // Use synchronous session check first
         const isLoggedIn = typeof FirebaseAuth !== 'undefined' && FirebaseAuth.isLoggedIn();
 
         if (isLoggedIn) {
-            userIcon.href = "profile";
-            userIcon.classList.add('logged-in');
-            console.log("Auth state changed in navigation:", "logged in");
+            if (userIcon) {
+                userIcon.href = "profile";
+                userIcon.classList.add('logged-in');
+            }
+            if (bottomNavAccount) {
+                bottomNavAccount.href = "profile";
+                bottomNavAccount.classList.add('logged-in');
+            }
+            console.log("Auth state initialized in navigation: logged in");
         } else {
-            userIcon.href = "login";
-            userIcon.classList.remove('logged-in');
-            console.log("Auth state changed in navigation:", "logged out");
+            if (userIcon) {
+                userIcon.href = "login";
+                userIcon.classList.remove('logged-in');
+            }
+            if (bottomNavAccount) {
+                bottomNavAccount.href = "login";
+                bottomNavAccount.classList.remove('logged-in');
+            }
+            console.log("Auth state initialized in navigation: logged out");
         }
 
         // Set up auth state observer for real-time updates
         if (typeof FirebaseAuth !== 'undefined' && FirebaseAuth.observeAuthState) {
             FirebaseAuth.observeAuthState(function(user) {
+                const currentBottomNav = document.querySelector('.bottom-nav-item i.fi-rs-user')?.parentElement || 
+                                       document.querySelector('.bottom-nav-item[href="login"]') || 
+                                       document.querySelector('.bottom-nav-item[href="profile"]');
+                
                 if (user) {
-                    // User is signed in, update icon to go to profile
-                    console.log("Auth state updated in navigation:", "logged in");
-                    userIcon.href = "profile";
-                    userIcon.classList.add('logged-in');
+                    console.log("Auth state updated in navigation: logged in");
+                    if (userIcon) {
+                        userIcon.href = "profile";
+                        userIcon.classList.add('logged-in');
+                    }
+                    if (currentBottomNav) {
+                        currentBottomNav.href = "profile";
+                        currentBottomNav.classList.add('logged-in');
+                    }
                 } else {
-                    // User is not signed in, update icon to go to login
-                    console.log("Auth state updated in navigation:", "logged out");
-                    userIcon.href = "login";
-                    userIcon.classList.remove('logged-in');
+                    console.log("Auth state updated in navigation: logged out");
+                    if (userIcon) {
+                        userIcon.href = "login";
+                        userIcon.classList.remove('logged-in');
+                    }
+                    if (currentBottomNav) {
+                        currentBottomNav.href = "login";
+                        currentBottomNav.classList.remove('logged-in');
+                    }
                 }
             });
         }
