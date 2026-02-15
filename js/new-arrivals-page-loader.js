@@ -175,6 +175,7 @@ async function loadNewArrivalsProductsDirect() {
             price: product.price,
             image: productImage,
             category: product.category,
+            subcategory: product.subcategory || product.subCategory || '',
             stock: product.stock,
             description: product.description
         };
@@ -192,7 +193,7 @@ async function loadNewArrivalsProductsDirect() {
 /**
  * Display all products in the grid layout
  */
-function displayAllProducts(products) {
+function displayAllProducts(products, subcategory = null) {
     const productsGrid = document.getElementById('new-arrivals-products-grid');
 
     if (!productsGrid) {
@@ -200,11 +201,32 @@ function displayAllProducts(products) {
         return;
     }
 
+    // Apply subcategory filter if selected
+    if (subcategory && subcategory !== 'all') {
+        console.log('Filtering by subcategory:', subcategory);
+        products = products.filter(p => {
+            const pSub = (p.subcategory || '').trim().toLowerCase();
+            const sSub = subcategory.trim().toLowerCase();
+            return pSub === sSub;
+        });
+    }
+
     // Remove loading state
     productsGrid.classList.remove('loading');
 
     // Clear existing content
     productsGrid.innerHTML = '';
+
+    if (products.length === 0) {
+        productsGrid.innerHTML = `
+            <div class="no-products-message" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                <i class="fas fa-search" style="font-size: 48px; color: #6D3E25; margin-bottom: 20px;"></i>
+                <h3 style="color: #6D3E25; margin-bottom: 10px;">No Products Found</h3>
+                <p style="color: #666;">We couldn't find any products matching your selected filter.</p>
+            </div>
+        `;
+        return;
+    }
 
     // Create product HTML for each product
     products.forEach((product, index) => {
