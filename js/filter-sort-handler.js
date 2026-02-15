@@ -287,14 +287,10 @@ const FilterSortHandler = (function() {
                     products = await NewArrivalsProductsLoader.loadNewArrivalsProducts();
                 } else if (typeof SubcategoryProductsLoader !== 'undefined') {
                     products = await SubcategoryProductsLoader.loadSubcategoryProducts(category);
-                } else if ((pageName === 'featured-collection' || pageName === 'ready-to-wear') && typeof FeaturedCollectionLoader !== 'undefined') {
-                    products = await FeaturedCollectionLoader.loadFeaturedProducts();
                 }
 
                 if (products && products.length > 0) {
-                    const uniqueSubs = [...new Set(products.map(p => {
-                        return (p.subcategory || p.subCategory || "").trim();
-                    }).filter(s => s !== ""))];
+                    const uniqueSubs = [...new Set(products.map(p => p.subcategory).filter(s => s && s.trim() !== ""))];
                     categorySubs = uniqueSubs;
                 }
             } catch (pError) {
@@ -414,15 +410,8 @@ const FilterSortHandler = (function() {
         }
         
         // Display sorted products
-        if (pageName === 'new-arrivals') {
-             // Try multiple ways to display products on new-arrivals page
-             if (typeof NewArrivalsProductsLoader !== 'undefined' && NewArrivalsProductsLoader.displayAllProducts) {
-                NewArrivalsProductsLoader.displayAllProducts(sortedProducts, subcategory);
-             } else if (typeof NewArrivalsPageLoader !== 'undefined' && NewArrivalsPageLoader.displayProducts) {
-                NewArrivalsPageLoader.displayProducts(sortedProducts);
-             } else {
-                displayProducts(sortedProducts);
-             }
+        if (pageName === 'new-arrivals' && typeof NewArrivalsProductsLoader !== 'undefined' && NewArrivalsProductsLoader.displayAllProducts) {
+            NewArrivalsProductsLoader.displayAllProducts(sortedProducts, subcategory);
         } else if ((pageName === 'featured-collection' || pageName === 'ready-to-wear') && typeof FeaturedCollectionLoader !== 'undefined' && FeaturedCollectionLoader.displayProducts) {
             FeaturedCollectionLoader.displayProducts(sortedProducts, subcategory);
         } else {
