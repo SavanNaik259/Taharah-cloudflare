@@ -97,13 +97,13 @@ const BridalProductsLoader = (function() {
      * Display products in the grid
      */
     function displayProducts(products, subcategory = null) {
-        const grid = document.getElementById('featuredCollectionProductContainer') || document.getElementById('products-grid');
+        const grid = document.getElementById('featuredCollectionProductContainer') || document.getElementById('products-grid') || document.getElementById('featured-collection-products-grid');
         if (!grid) return;
 
         if (subcategory && subcategory !== 'all') {
+            const sSub = subcategory.trim().toLowerCase();
             products = products.filter(p => {
                 const pSub = (p.subcategory || p.subCategory || '').trim().toLowerCase();
-                const sSub = subcategory.trim().toLowerCase();
                 return pSub === sSub;
             });
         }
