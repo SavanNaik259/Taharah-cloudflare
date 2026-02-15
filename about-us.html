@@ -660,6 +660,19 @@
       });
     </script>
 
+    <!-- Navigation scripts -->
+    <script src="js/navigation.js?v=1.0.4"></script>
+    <script src="js/auto-slider.js?v=1.0.1"></script>
+    <script src="js/banner-rotator.js"></script>
+
+    <!-- Global Error Handler - Place this before any other scripts -->
+    <script src="js/error-handler.js"></script>
+
+    <!-- Search functionality - load in correct order -->
+    <script src="js/search-manager.js"></script>
+    <script src="js/search-ui.js"></script>
+
+    <!-- Firebase Auth Global Module -->
     <!-- Firebase Auth Module -->
     <script src="js/firebase/firebase-auth.js"></script>
 
@@ -672,47 +685,66 @@
     <script src="js/wishlist-local-storage.js?v=1.0.0"></script>
     <script src="js/firebase/firebase-wishlist-manager.js?v=1.0.0"></script>
     <script src="js/wishlist-manager.js?v=1.0.0"></script>
-    
-    <script src="js/main.js"></script>
 
-    <!-- Currency Converter (Load FIRST before products render) -->
-    <script src="js/currency-converter.js?v=3.0.0"></script>
-
-    <!-- Logout Confirmation Script -->
-    <script src="js/logout-confirmation.js"></script>
-
+    <!-- Initialize search after all scripts are loaded -->
     <script>
-        // WhatsApp Chat Function
-        function openWhatsAppChat() {
-            const phoneNumber = "918589920686"; // Updated WhatsApp number with country code
-            const message = "Hi! I'm interested. Can you help me?";
-            const encodedMessage = encodeURIComponent(message);
-            const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
-            window.open(whatsappURL, '_blank');
-        }
-
-        // Bottom Navigation Cart Handler
         document.addEventListener('DOMContentLoaded', function() {
-            const bottomNavCart = document.getElementById('bottomNavCart');
-            if (bottomNavCart) {
-                bottomNavCart.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    // Open cart panel
-                    if (window.CartManager && typeof window.CartManager.openCartPanel === 'function') {
-                        window.CartManager.openCartPanel();
-                    } else {
-                        // Fallback to cart page
-                        window.location.href = 'checkout';
-                    }
-                });
-            }
+            // Ensure search functionality is working
+            setTimeout(() => {
+                if (typeof SearchManager !== 'undefined') {
+                    console.log('SearchManager available');
+                }
+                if (typeof SearchUI !== 'undefined') {
+                    console.log('SearchUI available');
+                }
+
+                // Manual search icon setup as backup
+                const searchIcon = document.querySelector('.search-icon');
+                if (searchIcon && !searchIcon.hasAttribute('data-search-attached')) {
+                    searchIcon.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        console.log('Manual search icon click handler triggered');
+                        if (typeof SearchUI !== 'undefined' && SearchUI.openSearch) {
+                            SearchUI.openSearch();
+                        }
+                    });
+                    searchIcon.setAttribute('data-search-attached', 'true');
+                    console.log('Manual search icon handler attached');
+                }
+            }, 500);
         });
     </script>
-    <!-- Footer Toggle Script -->
-    <script src="js/footer-toggle.js"></script>
 
     <!-- Language Translator -->
     <script src="js/language-translator.js?v=1.0.0"></script>
+
+    <!-- Footer Toggle Script -->
+    <script src="js/footer-toggle.js"></script>
+
+    <!-- Analytics Tracking -->
+    <script>
+        // Wait for Firebase to be fully initialized before loading analytics
+        function loadAnalyticsScript() {
+            if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+                console.log('🔥 Firebase ready, loading analytics script...');
+                const script = document.createElement('script');
+                script.src = 'js/nazakat-analytics.js?v=1.0.1';
+                script.onload = function() {
+                    console.log('📊 Analytics script loaded successfully');
+                };
+                script.onerror = function() {
+                    console.error('❌ Failed to load analytics script');
+                };
+                document.head.appendChild(script);
+            } else {
+                console.log('⏳ Firebase not ready, retrying in 500ms...');
+                setTimeout(loadAnalyticsScript, 500);
+            }
+        }
+
+        // Start loading analytics after a brief delay to ensure Firebase init
+        setTimeout(loadAnalyticsScript, 1000);
+    </script>
 
     <!-- Notification Manager (uses existing Firebase 9.6.10 initialization) -->
     <script src="js/firebase/notification-manager.js"></script>
