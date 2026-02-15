@@ -393,23 +393,7 @@ window.CartManager = (function() {
 
         const subtotalElements = document.querySelectorAll('.subtotal-amount');
         const total = calculateTotal();
-        
-        // Get currency symbol from CurrencyConverter if available
-        let currencySymbol = '₹';
-        let displayTotal = total;
-        
-        if (window.CurrencyConverter) {
-            currencySymbol = window.CurrencyConverter.getCurrencySymbol();
-            displayTotal = window.CurrencyConverter.convertPrice(total);
-        }
-        
-        subtotalElements.forEach(el => {
-            if (currencySymbol === '₹') {
-                el.textContent = `Rs. ${displayTotal.toLocaleString('en-IN')}`;
-            } else {
-                el.textContent = `${currencySymbol}${displayTotal.toFixed(2)}`;
-            }
-        });
+        subtotalElements.forEach(el => el.textContent = `₹${total.toFixed(2)}`);
 
         renderCartItems();
     }
@@ -426,26 +410,7 @@ window.CartManager = (function() {
             return;
         }
 
-        // Get currency symbol from CurrencyConverter if available
-        let currencySymbol = '₹';
-        if (window.CurrencyConverter) {
-            currencySymbol = window.CurrencyConverter.getCurrencySymbol();
-        }
-
-        cartItemsContainer.innerHTML = cartItems.map(item => {
-            let itemPrice = item.price;
-            let itemTotal = item.price * item.quantity;
-            
-            if (window.CurrencyConverter) {
-                itemPrice = window.CurrencyConverter.convertPrice(item.price);
-                itemTotal = window.CurrencyConverter.convertPrice(itemTotal);
-            }
-
-            const formattedPrice = currencySymbol === '₹' ? 
-                `Rs. ${itemPrice.toLocaleString('en-IN')}` : 
-                `${currencySymbol}${itemPrice.toFixed(2)}`;
-
-            return `
+        cartItemsContainer.innerHTML = cartItems.map(item => `
             <div class="cart-item" data-id="${item.id}" data-size="${item.size || ''}" data-colour="${item.colour || ''}" data-dupatta="${item.dupatta || ''}">
                 <div class="cart-item-image">
                     <img src="${item.image}" alt="${item.name}">
@@ -457,7 +422,7 @@ window.CartManager = (function() {
                         ${item.colour ? `<span> | Colour: ${item.colour}</span>` : ''}
                         ${item.dupatta ? `<span> | Dupatta: ${item.dupatta}</span>` : ''}
                     </div>
-                    <div class="cart-item-price">${formattedPrice}</div>
+                    <div class="cart-item-price">₹${item.price.toFixed(2)}</div>
                     <div class="cart-item-quantity">
                         <button class="qty-btn dec-qty" onclick="CartManager.decrementQuantity('${item.id}')">-</button>
                         <span>${item.quantity}</span>
@@ -466,7 +431,7 @@ window.CartManager = (function() {
                 </div>
                 <button class="remove-item-btn" onclick="CartManager.removeFromCart('${item.id}')">&times;</button>
             </div>
-        `;}).join('');
+        `).join('');
     }
 
     /**
