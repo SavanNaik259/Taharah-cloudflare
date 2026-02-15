@@ -497,6 +497,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>` : ''}
                             <div class="flex-grow-1">
                                 <h6 class="mb-0">${item.name}</h6>
+                                <div class="item-options mt-1" style="font-size: 0.8rem; color: #666;">
+                                    ${item.size ? `<span class="me-2">Size: ${item.size}</span>` : ''}
+                                    ${item.colour ? `<span class="me-2">Color: ${item.colour}</span>` : ''}
+                                    ${item.dupatta ? `<span class="me-2">Dupatta: ${item.dupatta}</span>` : ''}
+                                    ${item.category ? `<span class="me-2">Category: ${item.category}</span>` : ''}
+                                </div>
                                 <div class="d-flex justify-content-between align-items-center mt-2">
                                     <div class="d-flex align-items-center">
                                         <span class="me-2 product-price" data-original-price="${item.price}">${currencySymbol}${itemPriceDisplay.toFixed(2)}</span>
