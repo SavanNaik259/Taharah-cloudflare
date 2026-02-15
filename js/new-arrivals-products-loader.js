@@ -424,9 +424,9 @@ const NewArrivalsProductsLoader = (function() {
         // Apply subcategory filter if selected
         if (subcategory && subcategory !== 'all') {
             console.log('Filtering by subcategory:', subcategory);
-            const sSub = subcategory.trim().toLowerCase();
             products = products.filter(p => {
                 const pSub = (p.subcategory || p.subCategory || '').trim().toLowerCase();
+                const sSub = subcategory.trim().toLowerCase();
                 return pSub === sSub;
             });
         }

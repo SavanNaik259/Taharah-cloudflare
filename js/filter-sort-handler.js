@@ -278,20 +278,19 @@ const FilterSortHandler = (function() {
             console.error('Error fetching subcategories from Storage:', error);
         }
 
+        // Fallback to searching products if no explicit subcategory list is found
         if (categorySubs.length === 0) {
             try {
                 // Determine which loader to use to get products
                 let products = [];
                 if (pageName === 'new-arrivals' && typeof NewArrivalsProductsLoader !== 'undefined') {
                     products = await NewArrivalsProductsLoader.loadNewArrivalsProducts();
-                } else if ((pageName === 'ready-to-wear' || pageName === 'featured-collection') && typeof FeaturedCollectionLoader !== 'undefined') {
-                    products = await FeaturedCollectionLoader.loadFeaturedProducts();
                 } else if (typeof SubcategoryProductsLoader !== 'undefined') {
                     products = await SubcategoryProductsLoader.loadSubcategoryProducts(category);
                 }
 
                 if (products && products.length > 0) {
-                    const uniqueSubs = [...new Set(products.map(p => p.subcategory || p.subCategory).filter(s => s && s.trim() !== ""))];
+                    const uniqueSubs = [...new Set(products.map(p => p.subcategory).filter(s => s && s.trim() !== ""))];
                     categorySubs = uniqueSubs;
                 }
             } catch (pError) {
@@ -402,9 +401,9 @@ const FilterSortHandler = (function() {
         // Apply subcategory filter if selected
         if (subcategory && subcategory !== 'all') {
             console.log('Filtering by subcategory:', subcategory);
-            const sSub = subcategory.trim().toLowerCase();
             sortedProducts = sortedProducts.filter(p => {
                 const pSub = (p.subcategory || p.subCategory || '').trim().toLowerCase();
+                const sSub = subcategory.trim().toLowerCase();
                 return pSub === sSub;
             });
             console.log('Filtered products count:', sortedProducts.length);
