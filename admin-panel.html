@@ -7920,13 +7920,28 @@
 
                                     return `
                                         <div style="padding: 16px; ${index < order.products.length - 1 ? 'border-bottom: 1px solid #e2e8f0;' : ''}">
-                                            <div style="display: flex; justify-content: space-between; align-items: start;">
-                                                <div style="flex: 1;">
-                                                    <h5 style="margin: 0 0 4px 0; color: #1e293b;">${item.name || item.productName || `Product #${item.id || index + 1}`}</h5>
-                                                    <p style="margin: 0; color: #64748b; font-size: 14px;">Qty: ${itemQuantity} × ₹${itemPrice.toLocaleString('en-IN')}</p>
+                                            <div style="display: flex; gap: 16px; align-items: start;">
+                                                ${item.image ? `
+                                                <div style="width: 80px; height: 100px; overflow: hidden; border-radius: 4px; border: 1px solid #e2e8f0; flex-shrink: 0;">
+                                                    <img src="${item.image}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover;">
                                                 </div>
-                                                <div style="text-align: right;">
-                                                    <p style="margin: 0; font-weight: 600; color: #059669;">₹${itemTotal.toLocaleString('en-IN')}</p>
+                                                ` : ''}
+                                                <div style="flex: 1;">
+                                                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                                                        <div>
+                                                            <h5 style="margin: 0 0 4px 0; color: #1e293b;">${item.name || item.productName || `Product #${item.id || index + 1}`}</h5>
+                                                            <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px;">
+                                                                ${item.size ? `<span style="font-size: 13px; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 4px;"><strong>Size:</strong> ${item.size}</span>` : ''}
+                                                                ${item.colour ? `<span style="font-size: 13px; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 4px;"><strong>Color:</strong> ${item.colour}</span>` : ''}
+                                                                ${item.dupatta ? `<span style="font-size: 13px; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 4px;"><strong>Dupatta:</strong> ${item.dupatta}</span>` : ''}
+                                                                ${item.category ? `<span style="font-size: 13px; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 4px;"><strong>Category:</strong> ${item.category}</span>` : ''}
+                                                            </div>
+                                                            <p style="margin: 8px 0 0 0; color: #64748b; font-size: 14px;">Qty: ${itemQuantity} × ₹${itemPrice.toLocaleString('en-IN')}</p>
+                                                        </div>
+                                                        <div style="text-align: right;">
+                                                            <p style="margin: 0; font-weight: 600; color: #059669;">₹${itemTotal.toLocaleString('en-IN')}</p>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
