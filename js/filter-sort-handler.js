@@ -208,6 +208,7 @@ const FilterSortHandler = (function() {
                 // Get subcategory if selected
                 const subcategory = selectedSubcategory ? selectedSubcategory.value : null;
                 
+                console.log('Applying subcategory filter from modal:', subcategory);
                 applySort(currentSort, subcategory);
                 
                 if (filterModal && filterModal.classList.contains('active')) {
@@ -334,7 +335,7 @@ const FilterSortHandler = (function() {
      * Apply sort to products (only for price sorting from dropdown)
      */
     async function applySort(sortBy, subcategory = null) {
-        console.log('Applying sort:', sortBy);
+        console.log('Applying sort:', sortBy, 'Subcategory:', subcategory);
 
         // Determine which loader to use based on page
         const path = window.location.pathname;
@@ -402,7 +403,11 @@ const FilterSortHandler = (function() {
         // Apply subcategory filter if selected
         if (subcategory && subcategory !== 'all') {
             console.log('Filtering by subcategory:', subcategory);
-            sortedProducts = sortedProducts.filter(p => p.subcategory === subcategory);
+            sortedProducts = sortedProducts.filter(p => {
+                const pSub = (p.subcategory || p.subCategory || '').trim().toLowerCase();
+                const sSub = subcategory.trim().toLowerCase();
+                return pSub === sSub;
+            });
         }
         
         // Display sorted products

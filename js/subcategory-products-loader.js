@@ -332,12 +332,22 @@ const SubcategoryProductsLoader = (function() {
     /**
      * Display sorted products
      */
-    function displaySortedProducts(products) {
+    function displaySortedProducts(products, subcategory = null) {
         const productsGrid = document.getElementById('products-grid') || document.querySelector('.products-grid');
         
         if (!productsGrid) {
             console.warn('Products grid not found');
             return;
+        }
+
+        // Apply subcategory filter if selected
+        if (subcategory && subcategory !== 'all') {
+            console.log('Filtering by subcategory:', subcategory);
+            products = products.filter(p => {
+                const pSub = (p.subcategory || p.subCategory || '').trim().toLowerCase();
+                const sSub = subcategory.trim().toLowerCase();
+                return pSub === sSub;
+            });
         }
 
         if (products.length > 0) {

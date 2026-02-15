@@ -1656,6 +1656,14 @@
                         document.getElementById('productDescription').value = product.description || '';
                         document.getElementById('productCategory').value = category;
 
+                        // Populating subcategory
+                        if (product.subcategory) {
+                            console.log('Pre-filling subcategory:', product.subcategory);
+                            // We need to ensure subcategories are loaded first
+                            await updateSubcategoryOptions(category);
+                            document.getElementById('productSubcategory').value = product.subcategory;
+                        }
+
                         // Populating size checkboxes
                         if (product.sizes && Array.isArray(product.sizes)) {
                             const sizeCheckboxes = document.querySelectorAll('#sizeCheckboxes input');
