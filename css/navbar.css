@@ -394,11 +394,11 @@
 /* Cart and wishlist count styles */
 .wishlist-count, .cart-count {
     position: absolute;
-    top: -5px;
-    right: -10px;
-    background-color: #000 !important;
+    top: -1px;
+    right: -8px;
+    background-color: #c8a97e !important; /* Golden color to match cart badge */
     color: #fff !important;
-    font-size: 10px;
+    font-size: 11px;
     width: 18px;
     height: 18px;
     min-width: 18px;
@@ -406,25 +406,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
+    font-weight: 500;
     line-height: 1;
     z-index: 999;
-    border: 1px solid #fff;
+    /* Always show the count badge, even when 0 */
     visibility: visible !important;
     opacity: 1 !important;
-}
-
-.mobile-wishlist-count, .mobile-cart-count {
-    background-color: #000 !important;
-    color: #fff !important;
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-size: 12px;
-    font-weight: 600;
-    margin-left: 5px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
 }
 
 /* Menu Overlay */
