@@ -2450,101 +2450,108 @@
         }
 
         // Update existing product data in Firebase Cloud Storage
-        async function updateProductData(productData, category) {
+        // Save updated product data
+        async function updateProductData(productData, originalCategory) {
             try {
-                // Update loading message
+                const newCategory = productData.category;
+                const categoryChanged = newCategory !== originalCategory;
+
+                console.log(`Updating product. Category changed: ${categoryChanged} (${originalCategory} -> ${newCategory})`);
+
+                // 1. Remove from original category if changed
+                if (categoryChanged) {
+                    console.log(`Removing product from original category: ${originalCategory}`);
+                    await removeProductFromCategory(productData.id, originalCategory);
+                }
+
+                // 2. Load products from the target category (new or same)
                 const loadingElement = document.getElementById('loading');
                 if (loadingElement) {
                     loadingElement.innerHTML = `
                         <i class="fas fa-spinner fa-spin"></i>
-                        <p>Loading existing products for update...</p>
+                        <p>Saving to ${newCategory} collection...</p>
                     `;
                 }
 
-                // Load existing products
-                console.log('Loading existing products for update...');
-                let existingProducts = [];
-
+                let targetProducts = [];
                 try {
-                    const cacheBust = `cacheBust=${Date.now()}`;
-                    const apiEndpoint = `/.netlify/functions/load-products?category=${category}&${cacheBust}`;
-
-                    const response = await fetch(apiEndpoint, {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Cache-Control': 'no-cache, no-store, must-revalidate',
-                            'Pragma': 'no-cache',
-                            'Expires': '0'
-                        },
-                        cache: 'no-store'
-                    });
-
+                    const response = await fetch(`/.netlify/functions/load-products?category=${newCategory}&cacheBust=${Date.now()}`);
                     if (response.ok) {
                         const data = await response.json();
                         if (data.success && Array.isArray(data.products)) {
-                            existingProducts = data.products;
-                            console.log('Successfully loaded', existingProducts.length, 'existing products for update');
+                            targetProducts = data.products;
                         }
                     }
-                } catch (error) {
-                    console.warn('Error loading products for update:', error.message);
-                    throw new Error('Failed to load existing products for update');
+                } catch (e) {
+                    console.warn(`Error loading products from ${newCategory}, starting fresh:`, e);
                 }
 
-                // Find and update the specific product
-                const productIndex = existingProducts.findIndex(p => p.id === productData.id);
-                if (productIndex === -1) {
-                    throw new Error('Product not found for update');
+                // 3. Update or Add the product in the target category
+                const existingIndex = targetProducts.findIndex(p => p.id === productData.id);
+                if (existingIndex >= 0) {
+                    // Update existing
+                    targetProducts[existingIndex] = {
+                        ...targetProducts[existingIndex],
+                        ...productData,
+                        updatedAt: new Date().toISOString()
+                    };
+                } else {
+                    // Add as new (this happens if moving categories)
+                    targetProducts.push(productData);
                 }
 
-                // Update the product while preserving createdAt
-                const existingProduct = existingProducts[productIndex];
-                productData.createdAt = existingProduct.createdAt || new Date().toISOString();
-                productData.updatedAt = new Date().toISOString();
+                // Sort by newest first
+                targetProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-                existingProducts[productIndex] = productData;
-                console.log('Updated product at index', productIndex);
-
-                // Update loading message
-                if (loadingElement) {
-                    loadingElement.innerHTML = `
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <p>Saving updated product to Cloud Storage...</p>
-                    `;
-                }
-
-                // Save updated list to Firebase Storage
-                const jsonData = JSON.stringify(existingProducts, null, 2);
+                // 4. Save to Firebase Storage
+                const jsonData = JSON.stringify(targetProducts, null, 2);
                 const blob = new Blob([jsonData], { type: 'application/json' });
-                const storageRef = storage.ref(`productData/${category}-products.json`);
+                const storageRef = storage.ref(`productData/${newCategory}-products.json`);
 
                 await storageRef.put(blob, {
                     contentType: 'application/json',
                     cacheControl: 'public, max-age=0, no-cache'
                 });
 
-                console.log('Product updated successfully in Firebase Storage');
+                console.log(`Product saved successfully to ${newCategory}`);
                 
-                // Invalidate cache for this category to force fresh load on category pages
-                try {
-                    const cacheKeys = [
-                        `${category.replace(/-/g, '')}Products`,
-                        `${category.replace(/-/g, '')}ProductsTime`,
-                        `${category.replace(/-/g, '')}ProductsETag`
-                    ];
-                    cacheKeys.forEach(key => localStorage.removeItem(key));
-                    localStorage.setItem('lastProductUpdate', Date.now().toString());
-                    console.log(`✅ Invalidated cache for ${category} category after update`);
-                } catch (e) {
-                    console.warn('Could not clear cache, but products were saved successfully:', e);
-                }
+                // Invalidate caches
+                [originalCategory, newCategory].forEach(cat => {
+                    const cleanCat = cat.replace(/-/g, '');
+                    localStorage.removeItem(`${cleanCat}Products`);
+                    localStorage.removeItem(`${cleanCat}ProductsTime`);
+                    localStorage.removeItem(`${cleanCat}ProductsETag`);
+                });
+                localStorage.setItem('lastProductUpdate', Date.now().toString());
                 
                 return true;
-
             } catch (error) {
-                console.error('Error updating product data:', error);
-                throw new Error(`Failed to update product: ${error.message}`);
+                console.error('Error updating product:', error);
+                throw error;
+            }
+        }
+
+        // Helper to remove product from a category file
+        async function removeProductFromCategory(productId, category) {
+            try {
+                const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
+                if (!response.ok) return;
+                
+                const data = await response.json();
+                if (!data.success || !Array.isArray(data.products)) return;
+                
+                const filteredProducts = data.products.filter(p => p.id !== productId);
+                if (filteredProducts.length === data.products.length) return; // Not found, nothing to do
+
+                const jsonData = JSON.stringify(filteredProducts, null, 2);
+                const blob = new Blob([jsonData], { type: 'application/json' });
+                await storage.ref(`productData/${category}-products.json`).put(blob, {
+                    contentType: 'application/json',
+                    cacheControl: 'public, max-age=0, no-cache'
+                });
+                console.log(`Removed product ${productId} from ${category}`);
+            } catch (e) {
+                console.error(`Failed to remove product from ${category}:`, e);
             }
         }
 
