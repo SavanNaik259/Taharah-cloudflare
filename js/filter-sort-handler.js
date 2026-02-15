@@ -351,20 +351,18 @@ const FilterSortHandler = (function() {
                 products = await AllCollectionLoader.loadAllProducts();
             }
         } else if (pageName === 'featured-collection' || pageName === 'ready-to-wear') {
-            if (typeof FeaturedCollectionLoader !== 'undefined' && typeof BridalProductsLoader !== 'undefined') {
-                products = await BridalProductsLoader.loadBridalProducts();
-            } else if (typeof FeaturedCollectionLoader !== 'undefined' && FeaturedCollectionLoader.loadFeaturedProducts) {
+            if (typeof FeaturedCollectionLoader !== 'undefined' && FeaturedCollectionLoader.loadFeaturedProducts) {
                 products = await FeaturedCollectionLoader.loadFeaturedProducts();
             } else if (typeof SubcategoryProductsLoader !== 'undefined' && pageName === 'ready-to-wear') {
                 products = await SubcategoryProductsLoader.loadSubcategoryProducts('ready-to-wear');
             }
         } else if (pageName === 'new-arrivals') {
-            if (typeof loadNewArrivalsProductsDirect === 'function') {
+            if (typeof NewArrivalsProductsLoader !== 'undefined' && NewArrivalsProductsLoader.loadNewArrivalsProducts) {
+                products = await NewArrivalsProductsLoader.loadNewArrivalsProducts();
+            } else if (typeof loadNewArrivalsProductsDirect === 'function') {
                 products = await loadNewArrivalsProductsDirect();
             } else if (typeof NewArrivalsPageLoader !== 'undefined' && NewArrivalsPageLoader.loadNewArrivalsProducts) {
                 products = await NewArrivalsPageLoader.loadNewArrivalsProducts();
-            } else if (typeof NewArrivalsProductsLoader !== 'undefined') {
-                products = await NewArrivalsProductsLoader.loadNewArrivalsProducts();
             }
         } else if (pageName === 'pakistani-pret-wear' || pageName === 'modest-wear' || pageName === 'party-wear') {
             if (typeof SubcategoryProductsLoader !== 'undefined') {
@@ -408,10 +406,17 @@ const FilterSortHandler = (function() {
                 const sSub = subcategory.trim().toLowerCase();
                 return pSub === sSub;
             });
+            console.log('Filtered products count:', sortedProducts.length);
         }
         
         // Display sorted products
-        displayProducts(sortedProducts);
+        if (pageName === 'new-arrivals' && typeof NewArrivalsProductsLoader !== 'undefined' && NewArrivalsProductsLoader.displayAllProducts) {
+            NewArrivalsProductsLoader.displayAllProducts(sortedProducts, subcategory);
+        } else if ((pageName === 'featured-collection' || pageName === 'ready-to-wear') && typeof FeaturedCollectionLoader !== 'undefined' && FeaturedCollectionLoader.displayProducts) {
+            FeaturedCollectionLoader.displayProducts(sortedProducts, subcategory);
+        } else {
+            displayProducts(sortedProducts);
+        }
         
         // Convert prices to user's selected currency
         if (typeof window.CurrencyConverter !== 'undefined') {
