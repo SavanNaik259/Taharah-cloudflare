@@ -283,26 +283,14 @@ const FilterSortHandler = (function() {
             try {
                 // Determine which loader to use to get products
                 let products = [];
-                if (pageName === 'new-arrivals') {
-                    if (typeof NewArrivalsProductsLoader !== 'undefined') {
-                        products = await NewArrivalsProductsLoader.loadNewArrivalsProducts();
-                    } else if (typeof loadNewArrivalsProductsDirect === 'function') {
-                        products = await loadNewArrivalsProductsDirect();
-                    }
-                } else if (pageName === 'ready-to-wear' || pageName === 'featured-collection') {
-                    if (typeof FeaturedCollectionLoader !== 'undefined' && FeaturedCollectionLoader.loadFeaturedProducts) {
-                        products = await FeaturedCollectionLoader.loadFeaturedProducts();
-                    }
-                }
-                
-                if (products.length === 0 && typeof SubcategoryProductsLoader !== 'undefined') {
+                if (pageName === 'new-arrivals' && typeof NewArrivalsProductsLoader !== 'undefined') {
+                    products = await NewArrivalsProductsLoader.loadNewArrivalsProducts();
+                } else if (typeof SubcategoryProductsLoader !== 'undefined') {
                     products = await SubcategoryProductsLoader.loadSubcategoryProducts(category);
                 }
 
                 if (products && products.length > 0) {
-                    const uniqueSubs = [...new Set(products.map(p => {
-                        return (p.subcategory || p.subCategory || "").trim();
-                    }).filter(s => s !== ""))];
+                    const uniqueSubs = [...new Set(products.map(p => p.subcategory).filter(s => s && s.trim() !== ""))];
                     categorySubs = uniqueSubs;
                 }
             } catch (pError) {
@@ -413,23 +401,17 @@ const FilterSortHandler = (function() {
         // Apply subcategory filter if selected
         if (subcategory && subcategory !== 'all') {
             console.log('Filtering by subcategory:', subcategory);
-            const targetSub = subcategory.trim().toLowerCase();
             sortedProducts = sortedProducts.filter(p => {
                 const pSub = (p.subcategory || p.subCategory || '').trim().toLowerCase();
-                return pSub === targetSub;
+                const sSub = subcategory.trim().toLowerCase();
+                return pSub === sSub;
             });
             console.log('Filtered products count:', sortedProducts.length);
         }
         
         // Display sorted products
-        if (pageName === 'new-arrivals') {
-            if (typeof displayAllProducts === 'function') {
-                displayAllProducts(sortedProducts);
-            } else if (typeof NewArrivalsProductsLoader !== 'undefined' && NewArrivalsProductsLoader.displayAllProducts) {
-                NewArrivalsProductsLoader.displayAllProducts(sortedProducts, subcategory);
-            } else {
-                displayProducts(sortedProducts);
-            }
+        if (pageName === 'new-arrivals' && typeof NewArrivalsProductsLoader !== 'undefined' && NewArrivalsProductsLoader.displayAllProducts) {
+            NewArrivalsProductsLoader.displayAllProducts(sortedProducts, subcategory);
         } else if ((pageName === 'featured-collection' || pageName === 'ready-to-wear') && typeof FeaturedCollectionLoader !== 'undefined' && FeaturedCollectionLoader.displayProducts) {
             FeaturedCollectionLoader.displayProducts(sortedProducts, subcategory);
         } else {
