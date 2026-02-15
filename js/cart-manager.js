@@ -578,15 +578,16 @@ window.CartManager = (function() {
 
                     // Get selected options if on product detail page
                     const isProductDetailPage = document.querySelector('.product-detail-container') !== null;
-                    let selectedSize = window.selectedSize;
-                    let selectedColour = window.selectedColour;
-                    let selectedDupatta = window.selectedDupatta;
+                    let selectedSize = window.selectedSize || document.querySelector('.size-btn.active')?.dataset.size;
+                    let selectedColour = window.selectedColour || document.querySelector('.colour-btn.active')?.dataset.colour;
+                    let selectedDupatta = window.selectedDupatta || document.querySelector('.dupatta-btn.active')?.dataset.dupatta;
+                    let selectedCategory = document.querySelector('.meta-item:last-child .meta-value')?.textContent.trim();
 
                     // Validate options if they are required
                     if (isProductDetailPage) {
-                        const hasSizes = document.getElementById('size-selection')?.style.display !== 'none';
-                        const hasColours = document.getElementById('colour-selection')?.style.display !== 'none';
-                        const hasDupatta = document.getElementById('dupatta-selection')?.style.display !== 'none';
+                        const hasSizes = document.getElementById('size-selection')?.style.display !== 'none' && document.querySelector('.size-btn');
+                        const hasColours = document.getElementById('colour-selection')?.style.display !== 'none' && document.querySelector('.colour-btn');
+                        const hasDupatta = document.getElementById('dupatta-selection')?.style.display !== 'none' && document.querySelector('.dupatta-btn');
 
                         if ((hasSizes && !selectedSize) || (hasColours && !selectedColour) || (hasDupatta && !selectedDupatta)) {
                             if (window.showToast) {
@@ -730,7 +731,11 @@ window.CartManager = (function() {
                         id: productId,
                         name: productName,
                         price: price,
-                        image: imageSrc
+                        image: imageSrc,
+                        size: selectedSize || null,
+                        colour: selectedColour || null,
+                        dupatta: selectedDupatta || null,
+                        category: selectedCategory || null
                     };
 
                     console.log('Adding product to cart:', product);
