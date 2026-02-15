@@ -1680,9 +1680,24 @@
                         }
 
                         // Populating material variants
-                        if (product.materialVariants && Array.isArray(product.materialVariants)) {
+                        if (product.materials && Array.isArray(product.materials)) {
                             const container = document.getElementById('material-variants-container');
                             container.innerHTML = ''; // Clear existing
+                            product.materials.forEach(variant => {
+                                const div = document.createElement('div');
+                                div.className = 'material-variant';
+                                div.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px;';
+                                div.innerHTML = `
+                                    <input type="text" placeholder="Material (e.g. Chiffon)" class="material-name" value="${variant.name || ''}">
+                                    <input type="number" placeholder="Price (e.g. 1450)" class="material-price" value="${variant.price || ''}">
+                                    <button type="button" class="remove-variant-btn" style="background:#ef4444; color:white; border:none; border-radius:4px; padding:0 10px;">&times;</button>
+                                `;
+                                container.appendChild(div);
+                            });
+                        } else if (product.materialVariants && Array.isArray(product.materialVariants)) {
+                            // Backward compatibility for temporary materialVariants field
+                            const container = document.getElementById('material-variants-container');
+                            container.innerHTML = ''; 
                             product.materialVariants.forEach(variant => {
                                 const div = document.createElement('div');
                                 div.className = 'material-variant';
@@ -1694,9 +1709,6 @@
                                 `;
                                 container.appendChild(div);
                             });
-                        } else if (product.materialPricing) {
-                            // Backward compatibility if it was stored as an object or string
-                            console.log('Found legacy materialPricing:', product.materialPricing);
                         }
 
                         // Populating dupatta options
