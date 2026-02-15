@@ -8159,7 +8159,7 @@
                                                     <h5 style="margin: 0 0 4px 0; color: #1e293b; font-size: 16px;">${item.name || item.productName || 'Product'}</h5>
                                                     <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
                                                         ${item.size ? `<span style="background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">Size: ${item.size}</span>` : ''}
-                                                        ${item.color ? `<span style="background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">Color: ${item.color}</span>` : ''}
+                                                        ${item.color || item.colour || item.selectedColor ? `<span style="background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">Color: ${item.color || item.colour || item.selectedColor}</span>` : ''}
                                                         ${item.duppata ? `<span style="background: #eff6ff; color: #2563eb; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">Dupatta: ${item.duppata}</span>` : ''}
                                                         ${item.dupatta ? `<span style="background: #eff6ff; color: #2563eb; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">Dupatta: ${item.dupatta}</span>` : ''}
                                                     </div>
