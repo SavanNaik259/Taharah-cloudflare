@@ -201,11 +201,21 @@ const ProductDetailLoader = (function() {
             return;
         }
 
+        // Determine default price (from first material if available)
+        let displayPrice = product.price;
+        if (product.materials && Array.isArray(product.materials) && product.materials.length > 0) {
+            displayPrice = product.materials[0].price;
+            console.log('Using first material price as default:', displayPrice);
+        } else if (product.materialVariants && Array.isArray(product.materialVariants) && product.materialVariants.length > 0) {
+            displayPrice = product.materialVariants[0].price;
+            console.log('Using first materialVariant price as default:', displayPrice);
+        }
+
         // Make product data available globally for cart functionality
         window.productDetails = {
             id: product.id,
             name: product.name,
-            price: product.price,
+            price: displayPrice,
             image: product.image || product.mainImage || (product.images && product.images[0] ? product.images[0].url : '')
         };
         console.log('Made product details available globally:', window.productDetails);
@@ -269,16 +279,17 @@ const ProductDetailLoader = (function() {
         });
 
         // Update product price
-        const priceElements = document.querySelectorAll('.product-detail-info .product-price, .product-detail-info .current-price, .product-detail-info .price');
+        const priceElements = document.querySelectorAll('.product-detail-info .product-price, .product-detail-info .current-price, .product-detail-info .price-value');
         if (priceElements.length > 0) {
             const formattedPrice = new Intl.NumberFormat('en-IN', {
                 style: 'currency',
                 currency: 'INR',
                 minimumFractionDigits: 0
-            }).format(product.price).replace('₹', '');
+            }).format(displayPrice).replace('₹', '');
 
             priceElements.forEach(element => {
                 element.textContent = `Rs. ${formattedPrice}`;
+                element.setAttribute('data-original-price', displayPrice);
                 console.log('Updated product price element:', `Rs. ${formattedPrice}`);
             });
         }
@@ -388,6 +399,19 @@ const ProductDetailLoader = (function() {
 
         // Render product options (Size, Colour, Dupatta)
         renderProductOptions(product);
+
+        // Auto-select first material/dupatta if available (Moved here to ensure it happens after rendering)
+        const firstMaterialBtn = document.querySelector('.material-options .material-btn');
+        if (firstMaterialBtn) {
+            console.log('Auto-selecting first material option');
+            firstMaterialBtn.click();
+        } else {
+            const firstDupattaBtn = document.querySelector('.dupatta-options .material-btn');
+            if (firstDupattaBtn) {
+                console.log('Auto-selecting first dupatta material option');
+                firstDupattaBtn.click();
+            }
+        }
 
         // Update page title
         if (product.name) {
@@ -553,10 +577,6 @@ const ProductDetailLoader = (function() {
                     }
                 });
             });
-            
-            // Auto-select first material
-            const firstBtn = dupattaList.querySelector('.material-btn');
-            if (firstBtn) firstBtn.click();
 
         } else if (dupattaContainer && product.dupattaOptions && Array.isArray(product.dupattaOptions) && product.dupattaOptions.length > 0) {
             const dupattaList = dupattaContainer.querySelector('.dupatta-options');
