@@ -1530,10 +1530,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (typeof window.CurrencyConverter !== 'undefined' && window.CurrencyConverter.convertPrice) {
                     itemTotalDisplay = window.CurrencyConverter.convertPrice(itemTotal);
                 }
+                // Display options if they exist
+                let optionsHTML = '';
+                if (item.size || item.colour || item.dupatta) {
+                    optionsHTML = '<div class="item-options" style="font-size: 0.85rem; color: #666;">';
+                    if (item.size) optionsHTML += `<span>Size: ${item.size}</span> `;
+                    if (item.colour) optionsHTML += `<span>Color: ${item.colour}</span> `;
+                    if (item.dupatta) optionsHTML += `<span>Dupatta: ${item.dupatta}</span>`;
+                    optionsHTML += '</div>';
+                }
+
                 detailsHTML += `
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>${item.name} × ${item.quantity}</span>
-                        <span>${currencySymbol}${itemTotalDisplay.toFixed(2)}</span>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span><strong>${item.name}</strong> × ${item.quantity}</span>
+                            <span>${currencySymbol}${itemTotalDisplay.toFixed(2)}</span>
+                        </div>
+                        ${optionsHTML}
                     </div>
                 `;
             });
