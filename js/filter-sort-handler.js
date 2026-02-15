@@ -258,7 +258,7 @@ const FilterSortHandler = (function() {
             'pakistani-pret-wear': 'gold-bangles',
             'modest-wear': 'gold-earrings',
             'party-wear': 'gold-necklace',
-            'ready-to-wear': 'ready-to-wear',
+            'ready-to-wear': 'featured-collection',
             'new-arrivals': 'new-arrivals'
         };
         
@@ -354,7 +354,7 @@ const FilterSortHandler = (function() {
             if (typeof FeaturedCollectionLoader !== 'undefined' && FeaturedCollectionLoader.loadFeaturedProducts) {
                 products = await FeaturedCollectionLoader.loadFeaturedProducts();
             } else if (typeof SubcategoryProductsLoader !== 'undefined' && pageName === 'ready-to-wear') {
-                products = await SubcategoryProductsLoader.loadSubcategoryProducts('ready-to-wear');
+                products = await SubcategoryProductsLoader.loadSubcategoryProducts('featured-collection');
             }
         } else if (pageName === 'new-arrivals') {
             if (typeof NewArrivalsProductsLoader !== 'undefined' && NewArrivalsProductsLoader.loadNewArrivalsProducts) {
@@ -371,7 +371,7 @@ const FilterSortHandler = (function() {
                     'pakistani-pret-wear': 'gold-bangles',
                     'modest-wear': 'gold-earrings',
                     'party-wear': 'gold-necklace',
-                    'ready-to-wear': 'ready-to-wear'
+                    'ready-to-wear': 'featured-collection'
                 };
                 const category = categoryMap[pageName] || pageName;
                 products = await SubcategoryProductsLoader.loadSubcategoryProducts(category);
