@@ -1306,54 +1306,52 @@
             }
         }
 
-        // Global variable to store subcategories fetched from Firestore
+        // Global variable to store subcategories
         let globalSubcategories = {};
 
-        // Fetch subcategories from Firestore on load
-        async function fetchSubcategoriesFromFirestore() {
+        // Fetch subcategories from Cloud Storage via Netlify Function
+        async function fetchSubcategories() {
             try {
-                if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
-                    const db = firebase.firestore();
-                    const doc = await db.collection('settings').doc('subcategories').get();
-                    if (doc.exists) {
-                        globalSubcategories = doc.data();
-                        console.log('Subcategories loaded from Firestore:', globalSubcategories);
-                        localStorage.setItem('persistentSubcategories', JSON.stringify(globalSubcategories));
-                    } else {
-                        console.log('No subcategories found in Firestore, checking localStorage');
-                        globalSubcategories = JSON.parse(localStorage.getItem('persistentSubcategories') || '{}');
+                const category = document.getElementById('productCategory').value;
+                if (!category) return;
+
+                console.log(`Fetching subcategories for ${category}...`);
+                const response = await fetch(`/.netlify/functions/load-subcategories?category=${category}&cacheBust=${Date.now()}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && Array.isArray(data.subcategories)) {
+                        globalSubcategories[category] = data.subcategories;
+                        console.log('Subcategories loaded:', data.subcategories);
                     }
                 }
             } catch (error) {
                 console.error('Error fetching subcategories:', error);
-                globalSubcategories = JSON.parse(localStorage.getItem('persistentSubcategories') || '{}');
             }
         }
 
-        async function saveSubcategoriesToFirestore() {
+        async function saveSubcategoryToStorage(category, subcategory) {
             try {
-                if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
-                    const db = firebase.firestore();
-                    // Merge with existing data to prevent overwriting other categories
-                    const subRef = db.collection('settings').doc('subcategories');
-                    const doc = await subRef.get();
-                    let existingData = {};
-                    if (doc.exists) {
-                        existingData = doc.data();
-                    }
-                    
-                    // Merge globalSubcategories into existingData
-                    const updatedData = { ...existingData, ...globalSubcategories };
-                    
-                    await subRef.set(updatedData, { merge: true });
-                    console.log('Subcategories saved to Firestore');
-                    localStorage.setItem('persistentSubcategories', JSON.stringify(updatedData));
+                console.log("Syncing subcategory to Storage via Netlify Function...");
+                const response = await fetch('/.netlify/functions/sync-subcategories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        category: category,
+                        subcategory: subcategory
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    console.log("Subcategory synced successfully");
+                    return true;
+                } else {
+                    throw new Error(result.error || 'Unknown error');
                 }
             } catch (error) {
-                console.error('Error saving subcategories:', error);
-                localStorage.setItem('persistentSubcategories', JSON.stringify(globalSubcategories));
-                // Enhanced error message
-                showError(`Sync failed: ${error.message}. Saved locally.`);
+                console.error("Failed to sync subcategory:", error);
+                showError(`Sync failed: ${error.message}`);
+                return false;
             }
         }
 
@@ -1371,7 +1369,7 @@
 
         async function updateSubcategoryOptions(category) {
             const subcategorySelect = document.getElementById('productSubcategory');
-            await fetchSubcategoriesFromFirestore();
+            await fetchSubcategories();
             const categorySubs = globalSubcategories[category] || [];
             
             subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>' + 
@@ -1390,24 +1388,20 @@
             }
             
             if (newSub) {
-                // Fetch first to ensure we have latest data
-                await fetchSubcategoriesFromFirestore();
-
-                if (!globalSubcategories[category]) {
-                    globalSubcategories[category] = [];
-                }
-                
-                if (!globalSubcategories[category].includes(newSub)) {
-                    globalSubcategories[category].push(newSub);
-                    await saveSubcategoriesToFirestore();
+                const success = await saveSubcategoryToStorage(category, newSub);
+                if (success) {
+                    if (!globalSubcategories[category]) {
+                        globalSubcategories[category] = [];
+                    }
+                    if (!globalSubcategories[category].includes(newSub)) {
+                        globalSubcategories[category].push(newSub);
+                    }
                     updateSubcategoryOptions(category);
-                    document.getElementById('productSubcategory').value = newSub;
-                } else {
-                    // Even if it exists, update options and select it
-                    updateSubcategoryOptions(category);
-                    document.getElementById('productSubcategory').value = newSub;
+                    setTimeout(() => {
+                        document.getElementById('productSubcategory').value = newSub;
+                    }, 100);
+                    newSubInput.value = '';
                 }
-                newSubInput.value = '';
             }
         }
 
@@ -2766,14 +2760,7 @@
                 if (productData.subcategory && productData.subcategory.trim() !== "") {
                     try {
                         console.log("Syncing subcategory via Netlify Function...");
-                        await fetch('/.netlify/functions/sync-subcategories', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                category: category,
-                                subcategory: productData.subcategory
-                            })
-                        });
+                        await saveSubcategoryToStorage(category, productData.subcategory);
                         console.log("Subcategory sync request sent");
                     } catch (syncError) {
                         console.warn("Failed to sync subcategory, but product will still be saved:", syncError);
