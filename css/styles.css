@@ -225,7 +225,7 @@ a {
 }
 
 .promo-banner .banner-text {
-    font-family: var(--font-primary);
+    font-family: var(--font-heading);
     font-size: 14px;
     margin: 0;
     display: inline-block;
@@ -234,7 +234,7 @@ a {
     letter-spacing: 2px;
     word-spacing: 4px;
     animation: scroll-left 20s linear infinite;
-    font-weight: 500;
+    font-weight: 400;
     text-transform: uppercase;
 }
 
