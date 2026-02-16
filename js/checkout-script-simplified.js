@@ -720,8 +720,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // This ensures quantity changes are persisted before user navigates away
     async function syncCartToStorage(items) {
         try {
-            // Always save to localStorage first (instant)
+            // ALWAYS use direct localStorage for immediate persistence
             localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+            
+            // Also sync with the global LocalStorageCart module to ensure CartManager sees it
+            if (typeof LocalStorageCart !== 'undefined' && LocalStorageCart.saveItems) {
+                LocalStorageCart.saveItems(items);
+            }
+            
             console.log('💾 Quantity change saved to localStorage');
 
             // If user is logged in, AWAIT Firebase update

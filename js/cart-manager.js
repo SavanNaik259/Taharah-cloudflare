@@ -350,10 +350,20 @@ window.CartManager = (function() {
      */
     async function removeFromCart(productId) {
         const initialLength = cartItems.length;
+        // Filter out the item to remove
         cartItems = cartItems.filter(item => item.id !== productId);
 
         if (cartItems.length !== initialLength) {
             console.log('Item removed from cart');
+            
+            // CRITICAL: Ensure local storage is updated BEFORE saving to Firebase
+            // This prevents a refresh from reloading the old data if Firebase is slow
+            if (typeof LocalStorageCart !== 'undefined' && LocalStorageCart.saveItems) {
+                LocalStorageCart.saveItems(cartItems);
+            } else {
+                localStorage.setItem('auric_cart_items', JSON.stringify(cartItems));
+            }
+            
             await saveCart();
             
             // If we are on the checkout page, we need to notify it to update its UI
