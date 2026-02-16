@@ -167,17 +167,15 @@ const SubcategoryProductsLoader = (function() {
         }).format(product.price).replace('₹', '');
 
         // Determine stock status and classes
-        // Normalize product.stock to number
-        const stockValue = product.stock !== undefined ? parseInt(product.stock) : 10;
-        const isOutOfStock = product.stockStatus === 'out-of-stock' || stockValue === 0;
+        const isOutOfStock = product.stockStatus === 'out-of-stock' || (product.stock === 0 || product.stock === '0');
         const stockClass = isOutOfStock ? 'out-of-stock' : '';
         const outOfStockBadge = isOutOfStock ? '<div class="out-of-stock-badge">OUT OF STOCK</div>' : '';
 
         return `
-            <div class="product-item ${stockClass}" data-product-id="${product.id}" data-product-price="${product.price}" data-product-name="${product.name}" data-product-image="${product.image}" data-product-stock="${stockValue}">
-                <a href="${isOutOfStock ? '#' : 'product-detail?id=' + product.id}" class="${isOutOfStock ? 'out-of-stock-link' : ''}" style="text-decoration: none; color: inherit; ${isOutOfStock ? 'cursor: not-allowed;' : ''}">
-                    <div class="product-image" style="position: relative;">
-                        <img src="${product.image}" alt="${product.name}" loading="lazy" style="${isOutOfStock ? 'filter: grayscale(80%) brightness(0.7) contrast(160%);' : ''}">
+            <div class="product-item ${stockClass}" data-product-id="${product.id}" data-product-price="${product.price}" data-product-name="${product.name}" data-product-image="${product.image}" data-product-stock="${product.stock || 0}">
+                <a href="product-detail?id=${product.id}" style="text-decoration: none; color: inherit;">
+                    <div class="product-image">
+                        <img src="${product.image}" alt="${product.name}" loading="lazy" ${isOutOfStock ? 'style="filter: grayscale(80%) brightness(0.7) contrast(160%);"' : ''}>
                         ${outOfStockBadge}
                         <button class="add-to-wishlist" data-product-id="${product.id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-image="${product.image}" >
                             <i class="far fa-heart"></i>
@@ -186,7 +184,6 @@ const SubcategoryProductsLoader = (function() {
                     <div class="product-details">
                         <h3 class="product-name">${product.name}</h3>
                         <div class="current-price" data-original-price="${product.price}">Rs. ${formattedPrice}</div>
-                        ${isOutOfStock ? '<div class="stock-indicator out-of-stock"><i class="fas fa-times-circle"></i> Out of Stock</div>' : ''}
                     </div>
                 </a>
             </div>
@@ -217,15 +214,6 @@ const SubcategoryProductsLoader = (function() {
                 
                 const productsHTML = products.map(product => generateProductHTML(product)).join('');
                 productsGrid.innerHTML = productsHTML;
-
-                // Force stock effects immediately for subcategory products
-                if (window.OutOfStockHandler) {
-                    products.forEach(product => {
-                        const stockValue = product.stock !== undefined ? parseInt(product.stock) : 10;
-                        window.OutOfStockHandler.processProductStock(product.id, stockValue);
-                    });
-                    setTimeout(() => window.OutOfStockHandler.applyOutOfStockEffects(), 100);
-                }
 
                 // Notify OutOfStockHandler about the newly loaded products
                 document.dispatchEvent(new CustomEvent('productsLoaded', {
