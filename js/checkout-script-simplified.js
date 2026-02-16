@@ -644,6 +644,12 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('🗑️ Removing item from checkout:', itemId);
             items.splice(itemIndex, 1);
             
+            // CRITICAL: Update localStorage IMMEDIATELY (Synchronous)
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+            if (typeof LocalStorageCart !== 'undefined' && LocalStorageCart.saveItems) {
+                LocalStorageCart.saveItems(items);
+            }
+
             // If cart is empty, redirect or show message
             if (items.length === 0) {
                 showEmptyCartMessage();
@@ -652,7 +658,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 displayCartItems(items);
             }
 
-            // Sync with storage
+            // Sync with storage (handles Firebase)
             await syncCartToStorage(items);
             
             // CRITICAL: Notify CartManager about the change so it stays in sync
