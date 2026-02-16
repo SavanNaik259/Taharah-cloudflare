@@ -355,6 +355,12 @@ window.CartManager = (function() {
         if (cartItems.length !== initialLength) {
             console.log('Item removed from cart');
             await saveCart();
+            
+            // If we are on the checkout page, we need to notify it to update its UI
+            if (window.location.pathname.includes('checkout') && typeof loadCartItems === 'function') {
+                console.log('🔄 Notifying checkout page to reload after removal');
+                await loadCartItems();
+            }
         }
     }
 

@@ -655,6 +655,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // Sync with storage
             await syncCartToStorage(items);
             
+            // CRITICAL: Notify CartManager about the change so it stays in sync
+            if (typeof CartManager !== 'undefined' && typeof CartManager.loadCart === 'function') {
+                console.log('🔄 Notifying CartManager to reload after removal');
+                await CartManager.loadCart();
+            }
+            
             // Update order total
             updateOrderTotal(items);
             
