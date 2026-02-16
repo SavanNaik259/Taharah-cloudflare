@@ -496,7 +496,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <img src="${item.image}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover;">
                             </div>` : ''}
                             <div class="flex-grow-1">
-                                <h6 class="mb-0">${item.name}</h6>
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h6 class="mb-0">${item.name}</h6>
+                                    <button class="btn btn-link text-danger p-0 remove-checkout-item" data-item-id="${item.id}" title="Remove Item">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
                                 <div class="item-options mt-1" style="font-size: 0.8rem; color: #666;">
                                     ${item.size ? `<span class="me-2">Size: ${item.size}</span>` : ''}
                                     ${item.colour ? `<span class="me-2">Color: ${item.colour}</span>` : ''}
@@ -584,6 +589,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function setupQuantityControlsForContainer(container, items) {
         if (!container || !items) return;
 
+        // Get all remove buttons
+        const removeButtons = container.querySelectorAll('.remove-checkout-item');
+        removeButtons.forEach(button => {
+            button.replaceWith(button.cloneNode(true));
+        });
+
         // Get all plus buttons within this container
         const plusButtons = container.querySelectorAll('.btn-quantity-plus');
         plusButtons.forEach(button => {
@@ -599,6 +610,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Re-get buttons after cloning and add fresh event listeners
+        const newRemoveButtons = container.querySelectorAll('.remove-checkout-item');
+        newRemoveButtons.forEach(button => {
+            button.addEventListener('click', async function() {
+                const itemId = this.getAttribute('data-item-id');
+                if (confirm('Are you sure you want to remove this item from your cart?')) {
+                    await removeCheckoutItem(itemId, window.checkoutCartItems);
+                }
+            });
+        });
+
         const newPlusButtons = container.querySelectorAll('.btn-quantity-plus');
         newPlusButtons.forEach(button => {
             button.addEventListener('click', async function() {
@@ -614,6 +635,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 await decrementItemQuantity(itemId, window.checkoutCartItems);
             });
         });
+    }
+
+    // Remove item from checkout
+    async function removeCheckoutItem(itemId, items) {
+        const itemIndex = items.findIndex(item => item.id === itemId);
+        if (itemIndex !== -1) {
+            console.log('🗑️ Removing item from checkout:', itemId);
+            items.splice(itemIndex, 1);
+            
+            // If cart is empty, redirect or show message
+            if (items.length === 0) {
+                showEmptyCartMessage();
+            } else {
+                // Re-display all items to update the UI correctly
+                displayCartItems(items);
+            }
+
+            // Sync with storage
+            await syncCartToStorage(items);
+            
+            // Update order total
+            updateOrderTotal(items);
+            
+            // If on desktop, we might need to update the other step summaries too
+            if (orderSummaryStep2) {
+                orderSummaryStep2.innerHTML = orderSummaryContainer.innerHTML;
+                setupQuantityControlsForContainer(orderSummaryStep2, items);
+            }
+            if (orderSummaryStep3) {
+                orderSummaryStep3.innerHTML = orderSummaryContainer.innerHTML;
+                setupQuantityControlsForContainer(orderSummaryStep3, items);
+            }
+        }
     }
 
     // Increment item quantity
