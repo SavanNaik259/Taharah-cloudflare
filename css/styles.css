@@ -235,7 +235,7 @@ a {
     word-spacing: 4px;
     animation: scroll-left 20s linear infinite;
     font-weight: 400;
-    text-transform: uppercase;
+    text-transform: capitalize;
 }
 
 .promo-banner a {
