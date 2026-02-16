@@ -301,7 +301,7 @@ class NotificationManager {
         const notificationData = {
           title: payload.notification?.title || 'New Promotion',
           body: payload.notification?.body || 'Check out our latest offers!',
-          icon: '/images/logos/taharah-logo.png'
+          icon: '/images/logos/royalmeenakari.png'
         };
 
         if (callback) {

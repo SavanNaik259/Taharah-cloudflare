@@ -453,7 +453,7 @@ function customerDeliveryTemplate(data) {
 
       <h2 style="color: #4caf50; text-align: center;">✅ Your Order Has Been Delivered!</h2>
       <p>Dear ${customer.firstName || ''} ${customer.lastName || ''},</p>
-      <p>${status === 'cancelled' ? 'We regret to inform you that your order has been cancelled. Here are the details:' : 'Thank you for your order. We\'re pleased to confirm that we\'ve received your order and it\'s being processed.'}</p>
+      <p>Great news! Your order has been successfully delivered. We hope you enjoy your beautiful jewelry from Taharah.</p>
 
       <div class="success-box">
         <h3 style="margin: 0 0 10px 0;">Delivery Confirmed</h3>
