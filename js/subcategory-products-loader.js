@@ -172,10 +172,10 @@ const SubcategoryProductsLoader = (function() {
         const outOfStockBadge = isOutOfStock ? '<div class="out-of-stock-badge">OUT OF STOCK</div>' : '';
 
         return `
-            <div class="product-item ${stockClass}" data-product-id="${product.id}" data-product-price="${product.price}" data-product-name="${product.name}" data-product-image="${product.image}">
+            <div class="product-item ${stockClass}" data-product-id="${product.id}" data-product-price="${product.price}" data-product-name="${product.name}" data-product-image="${product.image}" data-product-stock="${product.stock || 0}">
                 <a href="product-detail?id=${product.id}" style="text-decoration: none; color: inherit;">
                     <div class="product-image">
-                        <img src="${product.image}" alt="${product.name}" loading="lazy">
+                        <img src="${product.image}" alt="${product.name}" loading="lazy" ${isOutOfStock ? 'style="filter: grayscale(80%) brightness(0.7) contrast(160%);"' : ''}>
                         ${outOfStockBadge}
                         <button class="add-to-wishlist" data-product-id="${product.id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-image="${product.image}" >
                             <i class="far fa-heart"></i>
@@ -214,6 +214,14 @@ const SubcategoryProductsLoader = (function() {
                 
                 const productsHTML = products.map(product => generateProductHTML(product)).join('');
                 productsGrid.innerHTML = productsHTML;
+
+                // Notify OutOfStockHandler about the newly loaded products
+                document.dispatchEvent(new CustomEvent('productsLoaded', {
+                    detail: { 
+                        products: products, 
+                        section: category 
+                    }
+                }));
 
                 // Convert prices to user's selected currency
                 if (typeof window.CurrencyConverter !== 'undefined') {
