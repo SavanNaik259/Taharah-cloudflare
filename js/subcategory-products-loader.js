@@ -209,6 +209,17 @@ const SubcategoryProductsLoader = (function() {
                 const productsHTML = products.map(product => generateProductHTML(product)).join('');
                 productsGrid.innerHTML = productsHTML;
 
+                // CRITICAL: Populate global products for OutOfStockHandler
+                window.allCollectionProducts = products;
+                
+                // Dispatch event for OutOfStockHandler to catch
+                document.dispatchEvent(new CustomEvent('productsLoaded', {
+                    detail: { 
+                        section: 'all-collection', 
+                        products: products 
+                    }
+                }));
+
                 // Convert prices to user's selected currency
                 if (typeof window.CurrencyConverter !== 'undefined') {
                     window.CurrencyConverter.convertAllPrices();

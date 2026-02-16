@@ -38,7 +38,8 @@ class OutOfStockHandler {
             { name: 'newArrivals', products: window.newArrivalsProducts || [] },
             { name: 'polki', products: window.polkiProducts || [] },
             { name: 'sareeCollection', products: window.sareeCollectionProducts || [] },
-            { name: 'allCollection', products: window.allCollectionProducts || [] }
+            { name: 'allCollection', products: window.allCollectionProducts || [] },
+            { name: 'subcategory', products: window.subcategoryProducts || [] }
         ];
 
         let totalProducts = 0;
