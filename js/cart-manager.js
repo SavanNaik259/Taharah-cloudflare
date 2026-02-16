@@ -347,18 +347,19 @@ window.CartManager = (function() {
 
     /**
      * Remove a product from the cart
-     * @param {String} productId - ID of the product to remove
+     * @param {Object|String} productOrId - Product object or ID of the product to remove
      */
-    async function removeFromCart(productId) {
+    async function removeFromCart(productOrId) {
         const initialLength = cartItems.length;
+        const productId = typeof productOrId === 'string' ? productOrId : productOrId.id;
+        
         // Filter out the item to remove
         cartItems = cartItems.filter(item => item.id !== productId);
 
         if (cartItems.length !== initialLength) {
-            console.log('Item removed from cart');
+            console.log('Item removed from cart:', productId);
             
             // CRITICAL: Ensure local storage is updated BEFORE saving to Firebase
-            // This prevents a refresh from reloading the old data if Firebase is slow
             if (typeof LocalStorageCart !== 'undefined' && LocalStorageCart.saveItems) {
                 LocalStorageCart.saveItems(cartItems);
             } else {

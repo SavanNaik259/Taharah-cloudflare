@@ -927,6 +927,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // First hide the loading state
         hideLoadingState();
 
+        // Get current currency symbol
+        let currencySymbol = '₹';
+        if (typeof window.CurrencyConverter !== 'undefined' && window.CurrencyConverter.getCurrencySymbol) {
+            currencySymbol = window.CurrencyConverter.getCurrencySymbol();
+        }
+
         if (orderSummaryContainer) {
             orderSummaryContainer.innerHTML = '<p class="text-center text-muted">Your cart is empty. Please add some products before checkout.</p>';
         }
