@@ -170,6 +170,7 @@ window.CartManager = (function() {
      * Uses Firebase if logged in, otherwise tries sessionStorage cache, then local storage
      */
     async function loadCart() {
+        console.log('CartManager.loadCart() called');
         if (isUserLoggedIn()) {
             console.log('User logged in, loading cart from Firebase');
             try {

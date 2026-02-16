@@ -354,8 +354,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Load and display cart items - prioritizes Firebase if user is logged in
     async function loadCartItems() {
-        console.log('Loading cart items for checkout display...');
-
+        console.log('loadCartItems() called for checkout display');
+        
         // Prevent multiple simultaneous loading operations
         if (isLoadingCart) {
             console.log('Cart loading already in progress, skipping...');
