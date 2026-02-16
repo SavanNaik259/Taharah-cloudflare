@@ -173,10 +173,11 @@ const SubcategoryProductsLoader = (function() {
         const stockClass = isOutOfStock ? 'out-of-stock' : '';
         const outOfStockBadge = isOutOfStock ? '<div class="out-of-stock-badge">OUT OF STOCK</div>' : '';
 
+        // Added .product-image-container for consistency with shop.css
         return `
             <div class="product-item ${stockClass}" data-product-id="${product.id}" data-product-price="${product.price}" data-product-name="${product.name}" data-product-image="${product.image}" data-product-stock="${stockValue}">
                 <a href="${isOutOfStock ? '#' : 'product-detail?id=' + product.id}" class="${isOutOfStock ? 'out-of-stock-link' : ''}" style="text-decoration: none; color: inherit; ${isOutOfStock ? 'cursor: not-allowed;' : ''}">
-                    <div class="product-image" style="position: relative;">
+                    <div class="product-image product-image-container" style="position: relative;">
                         <img src="${product.image}" alt="${product.name}" loading="lazy" style="${isOutOfStock ? 'filter: grayscale(80%) brightness(0.7) contrast(160%);' : ''}">
                         ${outOfStockBadge}
                         <button class="add-to-wishlist" data-product-id="${product.id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-image="${product.image}" >
@@ -426,9 +427,9 @@ const SubcategoryProductsLoader = (function() {
             'gold-rings': 'gold-rings',
             'silver-rings': 'silver-rings',
             'meenakari-rings': 'meenakari-rings',
-            'pakistani-pret-wear': 'gold-bangles',
-            'modest-wear': 'gold-earrings',
-            'party-wear': 'gold-necklace'
+            'pakistani-pret-wear': 'pakistani-pret-wear',
+            'modest-wear': 'modest-wear',
+            'party-wear': 'party-wear'
         };
 
         const category = categoryMap[pageName];
