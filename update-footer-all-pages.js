@@ -134,7 +134,7 @@ const FOOTER_HTML = `
             </div>
 
             <!-- Download Our App Section -->
-            <div class="footer-app-section">
+            <!-- <div class="footer-app-section">
                 <h3 class="app-section-title" data-translate="download_app">Download Our App</h3>
                 <div class="app-buttons-container">
                     <a href="#" class="app-store-button">
@@ -143,7 +143,7 @@ const FOOTER_HTML = `
                     <a href="#" class="google-play-button">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play">
                     </a>
-                </div>
+                </div>-->
             </div>
 
             <div class="footer-bottom">
