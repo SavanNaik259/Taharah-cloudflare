@@ -227,7 +227,7 @@ a {
 .promo-banner .banner-text {
     font-family: var(--font-heading);
     font-size: 14px;
-    margin-top: -6px; /* Moved up further */
+    margin: 0;
     display: inline-block;
     white-space: nowrap;
     will-change: transform;
@@ -236,6 +236,8 @@ a {
     animation: scroll-left 20s linear infinite;
     font-weight:600;
     text-transform: capitalize;
+    position: relative;
+    top: -3px; /* Only move the text content up */
 }
 
 .promo-banner a {

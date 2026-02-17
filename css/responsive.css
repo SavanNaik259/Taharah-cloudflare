@@ -1,22 +1,16 @@
 /* Promo Banner Responsive Adjustments */
 @media (max-width: 768px) {
-    .promo-banner {
-        padding: 6px 0 !important;
-    }
     .promo-banner .banner-text {
         font-size: 12px;
-        margin-top: -4px; /* Move up on mobile */
+        top: -2px; /* Fine-tune text position for mobile */
         letter-spacing: 1px;
     }
 }
 
 @media (max-width: 480px) {
-    .promo-banner {
-        padding: 5px 0 !important;
-    }
     .promo-banner .banner-text {
         font-size: 11px;
-        margin-top: -3px; /* Move up on small mobile */
+        top: -1px; /* Fine-tune text position for small mobile */
     }
 }
 /* Responsive Styles for Divas Mantra Website */
