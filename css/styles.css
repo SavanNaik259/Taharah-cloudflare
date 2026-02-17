@@ -227,18 +227,19 @@ a {
 .promo-banner .banner-text {
     font-family: var(--font-heading);
     font-size: 14px;
-    margin: 0;
+    margin:0;
     display: inline-block;
     white-space: nowrap;
     will-change: transform;
     letter-spacing: 2px;
     word-spacing: 4px;
     animation: scroll-left 20s linear infinite;
-    font-weight: 600;
+    font-weight:600;
     text-transform: capitalize;
 }
 
 .promo-banner a {
+    margin-bottom: 100px!important;
     color: #8b704c;
     text-decoration: underline;
     font-weight: 600;
