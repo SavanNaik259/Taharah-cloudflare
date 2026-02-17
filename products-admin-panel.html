@@ -1740,7 +1740,8 @@
                                 cb.checked = dupattaOptions.includes(cb.value);
                             });
                             // Backward compatibility for old IDs
-                            if (document.getElementById('dupattaCotton')) document.getElementById('dupattaCotton').checked = dupattaOptions.includes('Cotton');
+                            const dC = document.getElementById('dupattaCotton');
+                            if (dC) dC.checked = dupattaOptions.includes('Cotton');
                             if (document.getElementById('dupattaChiffon')) document.getElementById('dupattaChiffon').checked = dupattaOptions.includes('Chiffon');
                         }
 
@@ -2743,7 +2744,8 @@
                 const formData = new FormData(productForm);
                 // Get Dupatta options
                 const dupattaOptions = [];
-                if (document.getElementById('dupattaCotton').checked) dupattaOptions.push('Cotton');
+                const dC = document.getElementById('dupattaCotton');
+                if (dC && dC.checked) dupattaOptions.push('Cotton');
                 if (document.getElementById('dupattaChiffon').checked) dupattaOptions.push('Chiffon');
                 if (document.getElementById('dupattaNet').checked) dupattaOptions.push('Net');
                 if (document.getElementById('dupattaOrganza').checked) dupattaOptions.push('Organza');
