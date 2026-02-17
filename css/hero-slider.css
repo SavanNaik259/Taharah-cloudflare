@@ -46,7 +46,7 @@
 
 .slide-content {
     position: absolute;
-    bottom: 180px;
+    bottom: 250px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 2;
@@ -132,7 +132,7 @@
     }
     
     .slide-content {
-        bottom: 160px;
+        bottom: 220px;
         max-width: 450px;
     }
 }
@@ -148,7 +148,7 @@
     }
     
     .slide-content {
-        bottom: 120px;
+        bottom: 180px;
         max-width: 350px;
         padding: 0 20px;
     }
@@ -179,7 +179,7 @@
         max-width: calc(100% - 0px);
     }
     .slide-content {
-        bottom: 300px;
+        bottom: 350px;
         max-width: 300px;
         padding: 0 15px;
     }
