@@ -227,7 +227,7 @@ a {
 .promo-banner .banner-text {
     font-family: var(--font-heading);
     font-size: 14px;
-    margin:0;
+    margin-top: -6px; /* Moved up further */
     display: inline-block;
     white-space: nowrap;
     will-change: transform;
