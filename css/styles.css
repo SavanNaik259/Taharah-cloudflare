@@ -214,7 +214,7 @@ a {
 .promo-banner {
     background-color: #b3a681 !important;
     color: var(--color-text);
-    padding: 12px 0 !important;
+    padding: 8px 0 !important;
     text-align: center;
     position: relative;
     display: flex;
@@ -234,7 +234,7 @@ a {
     letter-spacing: 2px;
     word-spacing: 4px;
     animation: scroll-left 20s linear infinite;
-    font-weight: 400;
+    font-weight: 600;
     text-transform: capitalize;
 }
 
