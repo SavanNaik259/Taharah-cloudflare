@@ -1743,6 +1743,8 @@
                             const dC = document.getElementById('dupattaCotton');
                             if (dC) dC.checked = dupattaOptions.includes('Cotton');
                             if (document.getElementById('dupattaChiffon')) document.getElementById('dupattaChiffon').checked = dupattaOptions.includes('Chiffon');
+                            if (document.getElementById('dupattaNet')) document.getElementById('dupattaNet').checked = dupattaOptions.includes('Net');
+                            if (document.getElementById('dupattaOrganza')) document.getElementById('dupattaOrganza').checked = dupattaOptions.includes('Organza');
                         }
 
                         // Remove required attributes in edit mode to allow partial updates
@@ -2746,9 +2748,9 @@
                 const dupattaOptions = [];
                 const dC = document.getElementById('dupattaCotton');
                 if (dC && dC.checked) dupattaOptions.push('Cotton');
-                if (document.getElementById('dupattaChiffon').checked) dupattaOptions.push('Chiffon');
-                if (document.getElementById('dupattaNet').checked) dupattaOptions.push('Net');
-                if (document.getElementById('dupattaOrganza').checked) dupattaOptions.push('Organza');
+                if (document.getElementById('dupattaChiffon') && document.getElementById('dupattaChiffon').checked) dupattaOptions.push('Chiffon');
+                if (document.getElementById('dupattaNet') && document.getElementById('dupattaNet').checked) dupattaOptions.push('Net');
+                if (document.getElementById('dupattaOrganza') && document.getElementById('dupattaOrganza').checked) dupattaOptions.push('Organza');
 
                 // Get Material Variants
                 const materialVariants = [];
