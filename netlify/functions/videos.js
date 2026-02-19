@@ -135,7 +135,10 @@ exports.handler = async (event) => {
                     version: 'v4',
                     action: 'write',
                     expires: Date.now() + 15 * 60 * 1000, // 15 minutes
-                    contentType: fileType || 'video/mp4'
+                    contentType: fileType || 'video/mp4',
+                    extensionHeaders: {
+                        'x-goog-content-length-range': '0,104857600' // 100MB limit
+                    }
                 });
 
                 console.log(`[Videos Function] Generated signed URL for ${storagePath} with type ${fileType || 'video/mp4'}`);
