@@ -57,6 +57,27 @@
     }
 }
 
+/* Add to Cart and Buy Now buttons color update */
+.add-to-cart-btn {
+    background-color: #E6B8B8 !important; /* Dusty Pink */
+    color: #fff !important;
+    border: none !important;
+}
+
+.buy-now-btn {
+    background-color: #F5F5DC !important; /* Beige */
+    color: #000 !important;
+    border: none !important;
+}
+
+.add-to-cart-btn:hover {
+    background-color: #D4A5A5 !important;
+}
+
+.buy-now-btn:hover {
+    background-color: #EBEBD3 !important;
+}
+
 /* Emergency fallback - if nothing else works */
 .product-detail-container.force-position {
     margin-top: 200px !important;
