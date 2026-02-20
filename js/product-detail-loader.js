@@ -558,7 +558,57 @@ const ProductDetailLoader = (function() {
 
         // Dupatta selection
         const dupattaContainer = document.getElementById('dupatta-selection');
-        if (dupattaContainer && product.materialVariants && Array.isArray(product.materialVariants) && product.materialVariants.length > 0) {
+        if (dupattaContainer && product.materials && Array.isArray(product.materials) && product.materials.length > 0) {
+            const dupattaList = dupattaContainer.querySelector('.dupatta-options');
+            dupattaList.innerHTML = product.materials.map((variant, index) => {
+                const isOutOfStock = variant.inStock === false;
+                const isSelected = index === 0 && !isOutOfStock;
+                return `
+                <button class="option-btn material-btn ${isSelected ? 'selected' : ''} ${isOutOfStock ? 'out-of-stock' : ''}" 
+                    data-name="${variant.name}" 
+                    data-price="${variant.price}" 
+                    ${isOutOfStock ? 'disabled' : ''}
+                    style="padding: 5px 15px; border: 1px solid ${isSelected ? '#000' : '#ddd'}; background: ${isOutOfStock ? '#f9f9f9' : '#fff'}; cursor: ${isOutOfStock ? 'not-allowed' : 'pointer'}; border-radius: 4px; font-family: 'Futura PT', sans-serif; color: ${isOutOfStock ? '#999' : '#000'}; position: relative;">
+                    ${variant.name}
+                    ${isOutOfStock ? '<span style="position: absolute; top: -10px; right: -5px; background: #ff4d4d; color: white; font-size: 8px; padding: 2px 4px; border-radius: 4px; line-height: 1;">OUT</span>' : ''}
+                </button>
+            `;
+            }).join('');
+            dupattaContainer.style.display = 'block';
+            hasOptions = true;
+
+            // Set initial price from first material if available
+            const firstInStock = product.materials.find(m => m.inStock !== false) || product.materials[0];
+            if (firstInStock) {
+                window.selectedDupatta = firstInStock.name;
+                window.selectedPrice = firstInStock.price;
+                updatePriceDisplay(firstInStock.price);
+            }
+
+            // Add click listeners
+            dupattaList.querySelectorAll('.material-btn:not(.out-of-stock)').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    dupattaList.querySelectorAll('.material-btn').forEach(b => {
+                        b.style.borderColor = '#ddd';
+                        b.classList.remove('selected');
+                    });
+                    btn.style.borderColor = '#000';
+                    btn.classList.add('selected');
+                    
+                    window.selectedDupatta = btn.dataset.name;
+                    window.selectedPrice = parseFloat(btn.dataset.price);
+                    
+                    updatePriceDisplay(window.selectedPrice);
+                    
+                    // Update global product details for cart
+                    if (window.productDetails) {
+                        window.productDetails.price = window.selectedPrice;
+                        window.productDetails.dupatta = window.selectedDupatta;
+                    }
+                });
+            });
+
+        } else if (dupattaContainer && product.materialVariants && Array.isArray(product.materialVariants) && product.materialVariants.length > 0) {
             const dupattaList = dupattaContainer.querySelector('.dupatta-options');
             dupattaList.innerHTML = product.materialVariants.map(variant => `
                 <button class="option-btn material-btn" data-name="${variant.name}" data-price="${variant.price}" style="padding: 5px 15px; border: 1px solid #ddd; background: #fff; cursor: pointer; border-radius: 4px;">${variant.name} - Rs. ${variant.price}</button>
