@@ -1770,11 +1770,11 @@
 
                         // Populating hardcoded variant stock
                         if (product.materials && Array.isArray(product.materials)) {
-                            const chiffon = product.materials.find(m => m.name === 'Chiffon');
+                            const chiffon = product.materials.find(m => m.name === 'Chiffon' || m.name === 'Chiffon Dupatta' || m.name === 'Chiffon ');
                             if (chiffon && document.getElementById('stock-chiffon')) {
                                 document.getElementById('stock-chiffon').checked = chiffon.inStock !== false;
                             }
-                            const cotton = product.materials.find(m => m.name === 'Cotton');
+                            const cotton = product.materials.find(m => m.name === 'Cotton' || m.name === 'Cotton Dupatta' || m.name === 'Cotton ');
                             if (cotton && document.getElementById('stock-cotton')) {
                                 document.getElementById('stock-cotton').checked = cotton.inStock !== false;
                             }
@@ -2789,11 +2789,11 @@
                     const nameInput = variant.querySelector('.material-name');
                     const name = nameInput ? nameInput.value.trim() : '';
                     const priceInput = variant.querySelector('.material-price');
-                    const price = priceInput && priceInput.value ? parseFloat(priceInput.value) : null;
+                    const price = priceInput && priceInput.value ? parseFloat(priceInput.value) : 0;
                     const inStockCheckbox = variant.querySelector('.material-in-stock');
                     const inStock = inStockCheckbox ? inStockCheckbox.checked : true;
-                    if (name && price !== null && !isNaN(price)) {
-                        materialVariants.push({ name, price, inStock: inStock });
+                    if (name) {
+                        materialVariants.push({ name, price: isNaN(price) ? 0 : price, inStock: inStock });
                     }
                 });
 
