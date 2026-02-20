@@ -507,27 +507,33 @@ const ProductDetailLoader = (function() {
         const materialContainer = document.getElementById('material-selection');
         if (materialContainer && product.materials && Array.isArray(product.materials) && product.materials.length > 0) {
             const materialList = materialContainer.querySelector('.material-options');
-            materialList.innerHTML = product.materials.map((variant, index) => `
-                <button class="option-btn material-btn ${index === 0 ? 'selected' : ''}" 
+            materialList.innerHTML = product.materials.map((variant, index) => {
+                const isOutOfStock = variant.inStock === false;
+                const isSelected = index === 0 && !isOutOfStock;
+                return `
+                <button class="option-btn material-btn ${isSelected ? 'selected' : ''} ${isOutOfStock ? 'out-of-stock' : ''}" 
                     data-name="${variant.name}" 
                     data-price="${variant.price}" 
-                    style="padding: 5px 15px; border: 1px solid ${index === 0 ? '#000' : '#ddd'}; background: #fff; cursor: pointer; border-radius: 4px; font-family: 'Futura PT', sans-serif;">
+                    ${isOutOfStock ? 'disabled' : ''}
+                    style="padding: 5px 15px; border: 1px solid ${isSelected ? '#000' : '#ddd'}; background: ${isOutOfStock ? '#f9f9f9' : '#fff'}; cursor: ${isOutOfStock ? 'not-allowed' : 'pointer'}; border-radius: 4px; font-family: 'Futura PT', sans-serif; color: ${isOutOfStock ? '#999' : '#000'}; position: relative;">
                     ${variant.name}
+                    ${isOutOfStock ? '<span style="position: absolute; top: -10px; right: -5px; background: #ff4d4d; color: white; font-size: 8px; padding: 2px 4px; border-radius: 4px; line-height: 1;">OUT</span>' : ''}
                 </button>
-            `).join('');
+            `;
+            }).join('');
             materialContainer.style.display = 'block';
             hasOptions = true;
 
             // Set initial price from first material if available
-            if (product.materials[0]) {
-                const firstMaterial = product.materials[0];
-                window.selectedMaterial = firstMaterial.name;
-                window.selectedPrice = firstMaterial.price;
-                updatePriceDisplay(firstMaterial.price);
+            const firstInStock = product.materials.find(m => m.inStock !== false) || product.materials[0];
+            if (firstInStock) {
+                window.selectedMaterial = firstInStock.name;
+                window.selectedPrice = firstInStock.price;
+                updatePriceDisplay(firstInStock.price);
             }
 
             // Add click listeners
-            materialList.querySelectorAll('.material-btn').forEach(btn => {
+            materialList.querySelectorAll('.material-btn:not(.out-of-stock)').forEach(btn => {
                 btn.addEventListener('click', () => {
                     materialList.querySelectorAll('.material-btn').forEach(b => {
                         b.style.borderColor = '#ddd';
@@ -598,359 +604,205 @@ const ProductDetailLoader = (function() {
 
         function updatePriceDisplay(price) {
             const priceElements = document.querySelectorAll('.product-detail-info .product-price, .product-detail-info .current-price, .product-detail-info .price-value');
-            const formattedPrice = new Intl.NumberFormat('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-                minimumFractionDigits: 0
-            }).format(price).replace('₹', '');
+            if (priceElements.length > 0) {
+                const formattedPrice = new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                    minimumFractionDigits: 0
+                }).format(price).replace('₹', '');
 
-            priceElements.forEach(element => {
-                element.textContent = `Rs. ${formattedPrice}`;
-                // Also update the data-original-price for currency conversion
-                element.setAttribute('data-original-price', price);
-                if (element.classList.contains('current-price')) {
-                    element.dataset.originalPrice = price;
+                priceElements.forEach(element => {
+                    element.textContent = `Rs. ${formattedPrice}`;
+                    element.setAttribute('data-original-price', price);
+                });
+                
+                // Convert currency if active
+                if (typeof window.CurrencyConverter !== 'undefined') {
+                    window.CurrencyConverter.convertAllPrices();
                 }
-            });
-
-            // Trigger currency conversion if available
-            if (window.CurrencyConverter && typeof window.CurrencyConverter.convertAllPrices === 'function') {
-                window.CurrencyConverter.convertAllPrices();
             }
         }
-
-        optionsContainer.style.display = hasOptions ? 'block' : 'none';
     }
 
     /**
-     * Update image gallery with multiple images
+     * Update image gallery thumbnails
      */
     function updateImageGallery(images) {
+        if (!images || images.length === 0) return;
+
         console.log('Updating image gallery with', images.length, 'images');
 
-        // Find main image element directly and in containers
-        const directMainImages = document.querySelectorAll('.product-detail-left .product-main-image');
-        const mainImageContainers = document.querySelectorAll('.product-detail-left .main-image, .product-detail-left .gallery-main');
-
-        if (images.length > 0) {
-            const mainImage = images.find(img => img.isMain) || images[0];
-
-            // Update direct main image elements
-            directMainImages.forEach(img => {
-                if (mainImage.url) {
-                    img.src = mainImage.url;
-                    img.alt = mainImage.alt || 'Product image';
-                    img.style.display = 'block';
-                    console.log('Updated direct main image element');
-                } else {
-                    img.style.display = 'none';
-                    img.src = '';
-                    img.alt = '';
-                }
-            });
-
-            // Update main images in containers
-            mainImageContainers.forEach(container => {
-                const mainImg = container.querySelector('img');
-                if (mainImg) {
-                    if (mainImage.url) {
-                        mainImg.src = mainImage.url;
-                        mainImg.alt = mainImage.alt || 'Product image';
-                        mainImg.style.display = 'block';
-                        console.log('Updated main image in container');
-                    } else {
-                        mainImg.style.display = 'none';
-                        mainImg.src = '';
-                        mainImg.alt = '';
-                    }
-                }
-            });
-        } else {
-            // Hide all images when no images are provided
-            directMainImages.forEach(img => {
-                img.style.display = 'none';
-                img.src = '';
-                img.alt = '';
-            });
-
-            mainImageContainers.forEach(container => {
-                const mainImg = container.querySelector('img');
-                if (mainImg) {
-                    mainImg.style.display = 'none';
-                    mainImg.src = '';
-                    mainImg.alt = '';
-                }
-            });
-        }
-
-        // Find thumbnail container and handle multiple images
-        const thumbnailContainers = document.querySelectorAll('.thumbnail-gallery, .product-thumbnails, .gallery-thumbs');
-        console.log('Found thumbnail containers:', thumbnailContainers.length);
-
-        if (thumbnailContainers.length > 0) {
-            thumbnailContainers.forEach((container, containerIndex) => {
-                // Clear existing thumbnails to prevent duplicates
-                container.innerHTML = '';
-                console.log(`Cleared thumbnail container ${containerIndex + 1}`);
-
-                // Only show thumbnails if there are multiple images
-                if (images.length > 1) {
-                    // Remove duplicate images based on URL
-                    const uniqueImages = images.filter((image, index, self) => 
-                        index === self.findIndex(img => img.url === image.url)
-                    );
-
-                    console.log(`Creating ${uniqueImages.length} unique thumbnails out of ${images.length} total images`);
-
-                    uniqueImages.forEach((image, index) => {
-                        const thumbnailElement = document.createElement('div');
-                        thumbnailElement.className = `thumbnail thumbnail-item ${image.isMain || index === 0 ? 'active' : ''}`;
-                        thumbnailElement.innerHTML = `
-                            ${image.url ? `<img src="${image.url}" alt="${image.alt || `View ${index + 1}`}" loading="lazy">` : ''}
-                        `;
-
-                        // Add click handler to change main image
-                        thumbnailElement.addEventListener('click', () => {
-                            // Update main image - include direct .product-main-image selector
-                            const allMainImgs = document.querySelectorAll('.product-detail-left .product-main-image, .product-detail-left .main-image img, .product-detail-left .gallery-main img');
-                            allMainImgs.forEach(img => {
-                                img.src = image.url;
-                                img.alt = image.alt || 'Product image';
-                            });
-
-                            // Update active thumbnail
-                            document.querySelectorAll('.thumbnail, .thumbnail-item').forEach(thumb => {
-                                thumb.classList.remove('active');
-                                thumb.style.opacity = '0.6';
-                                thumb.style.borderColor = 'transparent';
-                            });
-                            thumbnailElement.classList.add('active');
-                            thumbnailElement.style.opacity = '1';
-                            thumbnailElement.style.borderColor = '#000';
-
-                            // Sync internal scroll index
-                            if (window.updateScrollIndex) window.updateScrollIndex(index);
-                            
-                            console.log('Thumbnail clicked, updated main image to:', image.url);
+        // Update thumbnails
+        const thumbnailContainers = document.querySelectorAll('.product-thumbnails');
+        thumbnailContainers.forEach((container, containerIndex) => {
+            console.log(`Cleared thumbnail container ${containerIndex + 1}`);
+            container.innerHTML = '';
+            
+            // Limit to unique images to avoid duplicates in thumbnails
+            const uniqueImages = images.filter((img, idx, self) => 
+                idx === self.findIndex(t => t.url === img.url)
+            );
+            
+            console.log(`Creating ${uniqueImages.length} unique thumbnails out of ${images.length} total images`);
+            
+            uniqueImages.forEach((img, index) => {
+                const thumb = document.createElement('div');
+                thumb.className = 'thumbnail' + (index === 0 ? ' active' : '');
+                thumb.innerHTML = `<img src="${img.url}" alt="${img.alt || 'Product thumbnail'}">`;
+                
+                thumb.addEventListener('click', () => {
+                    // Update main image
+                    const mainImageElements = document.querySelectorAll('.product-main-image');
+                    mainImageElements.forEach(mainImg => {
+                        mainImageElements.forEach(mainImg => {
+                            mainImg.src = img.url;
+                            mainImg.alt = img.alt || 'Product image';
                         });
-
-                        container.appendChild(thumbnailElement);
                     });
+                    
+                    // Update direct main image element for gallery-main layout
+                    const galleryMainImg = document.querySelector('.gallery-main img');
+                    if (galleryMainImg) {
+                        galleryMainImg.src = img.url;
+                        galleryMainImg.alt = img.alt || 'Product image';
+                        console.log('Updated direct main image element');
+                    }
 
-                    console.log(`Updated thumbnail gallery in container ${containerIndex + 1} with ${uniqueImages.length} thumbnails`);
-                } else {
-                    console.log(`Only one image, not showing thumbnails in container ${containerIndex + 1}`);
-                }
+                    // Update active thumbnail
+                    container.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+                    thumb.classList.add('active');
+                });
+                
+                container.appendChild(thumb);
             });
-        } else {
-            console.log('No thumbnail containers found');
-        }
+            console.log(`Updated thumbnail gallery in container ${containerIndex + 1} with ${uniqueImages.length} thumbnails`);
+        });
     }
 
+    /**
+     * Setup next/prev scroll buttons for images
+     */
     function setupScrollButtons(images) {
         const prevBtn = document.getElementById('prev-product-image');
         const nextBtn = document.getElementById('next-product-image');
         
-        if (!prevBtn || !nextBtn) return;
-
-        // Reset display
-        prevBtn.style.display = 'none';
-        nextBtn.style.display = 'none';
-
-        if (!images || images.length <= 1) {
-            console.log('Scroll buttons hidden - single image variant');
+        if (!prevBtn || !nextBtn || !images || images.length <= 1) {
+            if (prevBtn) prevBtn.style.display = 'none';
+            if (nextBtn) nextBtn.style.display = 'none';
             return;
         }
-
-        const uniqueImages = images.filter((img, index, self) => 
-            index === self.findIndex(i => i.url === img.url)
-        );
-
-        if (uniqueImages.length <= 1) return;
 
         prevBtn.style.display = 'flex';
         nextBtn.style.display = 'flex';
-        
+
         let currentIndex = 0;
+        
+        // Remove existing listeners to avoid multiple attachments
+        const newPrevBtn = prevBtn.cloneNode(true);
+        const newNextBtn = nextBtn.cloneNode(true);
+        prevBtn.parentNode.replaceChild(newPrevBtn, prevBtn);
+        nextBtn.parentNode.replaceChild(newNextBtn, nextBtn);
 
-        const updateUI = (index) => {
-            if (!uniqueImages[index]) return;
-            const targetUrl = uniqueImages[index].url;
+        newPrevBtn.addEventListener('click', () => {
+            currentIndex = (currentIndex - 1 + images.length) % images.length;
+            updateMainImage(images[currentIndex]);
+        });
+
+        newNextBtn.addEventListener('click', () => {
+            currentIndex = (currentIndex + 1) % images.length;
+            updateMainImage(images[currentIndex]);
+        });
+
+        function updateMainImage(image) {
+            const mainImages = document.querySelectorAll('.product-main-image, .gallery-main img');
+            mainImages.forEach(img => {
+                img.src = image.url;
+                img.alt = image.alt || 'Product image';
+            });
             
-            // Update all main image elements
-            const mainImgs = document.querySelectorAll('.product-main-image, .product-detail-left .main-image img, .product-detail-left .gallery-main img');
-            mainImgs.forEach(img => { img.src = targetUrl; });
-
             // Update thumbnails
-            const thumbnails = document.querySelectorAll('.thumbnail, .thumbnail-item');
-            thumbnails.forEach((thumb) => {
-                const thumbImg = thumb.querySelector('img');
-                if (thumbImg) {
-                    const thumbUrl = thumbImg.src;
-                    const isMatch = thumbUrl === targetUrl || thumbUrl.endsWith(targetUrl);
-                    thumb.classList.toggle('active', isMatch);
-                    thumb.style.opacity = isMatch ? '1' : '0.6';
-                    thumb.style.borderColor = isMatch ? '#000' : 'transparent';
-                    if (isMatch) thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            thumbnails.forEach((thumb, idx) => {
+                if (images[currentIndex].url === thumb.querySelector('img').src) {
+                    thumb.classList.add('active');
+                } else {
+                    thumb.classList.remove('active');
                 }
             });
-        };
-
-        // Expose index sync to thumbnails
-        window.updateScrollIndex = (index) => {
-            currentIndex = index;
-            updateUI(currentIndex);
-        };
-
-        prevBtn.onclick = (e) => {
-            e.preventDefault();
-            currentIndex = (currentIndex - 1 + uniqueImages.length) % uniqueImages.length;
-            updateUI(currentIndex);
-        };
-
-        nextBtn.onclick = (e) => {
-            e.preventDefault();
-            currentIndex = (currentIndex + 1) % uniqueImages.length;
-            updateUI(currentIndex);
-        };
-
-        // Set initial state
-        updateUI(0);
-    }
-
-    /**
-     * Update wishlist button state on product detail page
-     */
-    function updateWishlistButtonState(productId) {
-        if (!productId) return;
-
-        const wishlistButton = document.querySelector('.add-to-wishlist-btn');
-        if (!wishlistButton) return;
-
-        // Check if WishlistManager is available and if product is in wishlist
-        if (typeof window.WishlistManager !== 'undefined') {
-            const isInWishlist = window.WishlistManager.isInWishlist(productId);
-            console.log('Updating wishlist button state for product', productId, 'isInWishlist:', isInWishlist);
-
-            if (isInWishlist) {
-                wishlistButton.innerHTML = '<i class="fas fa-heart"></i> REMOVE FROM WISHLIST';
-            } else {
-                wishlistButton.innerHTML = '<i class="fas fa-heart"></i> ADD TO WISHLIST';
-            }
         }
     }
 
     /**
-     * Update placeholders when no product data is available
+     * Update wishlist button state
      */
-    function updatePlaceholders() {
-        // Update loading placeholders to show "Not Available"
-        const skuElements = document.querySelectorAll('.meta-item:nth-child(3) .meta-value');
-        if (skuElements.length > 0) {
-            skuElements[0].textContent = 'Not Available';
-        }
-
-        const categoryElements = document.querySelectorAll('.meta-item:nth-child(4) .meta-value');
-        if (categoryElements.length > 0) {
-            categoryElements[0].textContent = 'Not Available';
-        }
-
-        console.log('Updated placeholders to show "Not Available"');
-    }
-
-    /**
-     * Show error state when product cannot be loaded
-     */
-    function showErrorState() {
-        updatePlaceholders();
-        const mainContainers = document.querySelectorAll('.product-detail-container, .product-container, main');
-        if (mainContainers.length > 0) {
-            mainContainers[0].innerHTML = `
-                <div class="error-state" style="text-align: center; padding: 50px 20px;">
-                    <h2>Product Not Found</h2>
-                    <p>Sorry, we couldn't find the product you're looking for.</p>
-                    <a href="/" class="btn btn-primary" style="display: inline-block; padding: 10px 20px; background: #5a3f2a; color: white; text-decoration: none; border-radius: 5px;">Return to Homepage</a>
-                </div>
-            `;
-        }
-    }
-
-    /**
-     * Load and display product details
-     */
-    async function loadAndDisplayProduct() {
-        console.log('Starting product detail loading process...');
-
-        const productId = getProductIdFromURL();
-        if (!productId) {
-            // Error already logged in getProductIdFromURL
-            showErrorState();
-            return;
-        }
-
-        console.log('Loading product with ID:', productId);
-
-        // Show loading state
-        const mainContainers = document.querySelectorAll('.product-detail-container, .product-container, main');
-        if (mainContainers.length > 0) {
-            const loadingDiv = document.createElement('div');
-            loadingDiv.className = 'loading-state';
-            loadingDiv.style.cssText = 'text-align: center; padding: 50px 20px;';
-            loadingDiv.innerHTML = `
-                <div class="spinner" style="width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top: 3px solid #5a3f2a; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px;"></div>
-                <p>Loading product details...</p>
-                <style>
-                    @keyframes spin {
-                        0% { transform: rotate(0deg); }
-                        100% { transform: rotate(360deg); }
-                    }
-                </style>
-            `;
-            mainContainers[0].appendChild(loadingDiv);
-        }
+    async function updateWishlistButtonState(productId) {
+        const wishlistBtn = document.querySelector('.add-to-wishlist-btn');
+        if (!wishlistBtn) return;
 
         try {
-            const product = await loadProductData(productId);
-
-            // Remove loading state
-            const loadingState = document.querySelector('.loading-state');
-            if (loadingState) {
-                loadingState.remove();
-            }
-
-            if (product) {
-                updateProductDetailPage(product);
-            } else {
-                showErrorState();
+            const manager = window.WishlistManager || window.FirebaseWishlistManager;
+            if (manager && typeof manager.isItemInWishlist === 'function') {
+                const isInWishlist = await manager.isItemInWishlist(productId);
+                console.log('Checking if product', productId, 'is in wishlist:', isInWishlist);
+                
+                if (isInWishlist) {
+                    wishlistBtn.innerHTML = '<i class="fas fa-heart"></i> IN WISHLIST';
+                    wishlistBtn.classList.add('in-wishlist');
+                } else {
+                    wishlistBtn.innerHTML = '<i class="far fa-heart"></i> ADD TO WISHLIST';
+                    wishlistBtn.classList.remove('in-wishlist');
+                }
+                console.log('Updating detail page button for product:', productId, 'inWishlist:', isInWishlist);
             }
         } catch (error) {
-            console.error('Error in loadAndDisplayProduct:', error);
-
-            // Remove loading state
-            const loadingState = document.querySelector('.loading-state');
-            if (loadingState) {
-                loadingState.remove();
-            }
-
-            showErrorState();
+            console.error('Error updating wishlist button state:', error);
         }
+    }
+
+    /**
+     * Show error state when product loading fails
+     */
+    function showErrorState() {
+        const titleEl = document.querySelector('.product-title');
+        if (titleEl) titleEl.textContent = 'Product Not Found';
+        
+        const priceEl = document.querySelector('.product-price');
+        if (priceEl) priceEl.style.display = 'none';
+        
+        const loader = document.getElementById('product-loader');
+        if (loader) loader.style.display = 'none';
+    }
+
+    /**
+     * Update placeholders while loading
+     */
+    function updatePlaceholders() {
+        // Implementation for loading skeletons or placeholders
     }
 
     // Public API
     return {
-        init,
-        loadAndDisplayProduct,
-        getProductIdFromURL,
-        loadAndDisplayProduct: loadAndDisplayProduct,
-        loadProductData
+        init: init,
+        loadProduct: async function() {
+            const productId = getProductIdFromURL();
+            if (!productId) return;
+
+            // Load product data
+            const product = await loadProductData(productId);
+            if (product) {
+                updateProductDetailPage(product);
+                
+                // Dispatch event when product is loaded
+                window.dispatchEvent(new CustomEvent('productLoaded', { detail: { product } }));
+            } else {
+                showErrorState();
+            }
+        }
     };
 })();
 
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, initializing Product Detail Loader...');
-
-    if (ProductDetailLoader.init()) {
-        ProductDetailLoader.loadAndDisplayProduct();
-    }
+// Initialize and load
+document.addEventListener('DOMContentLoaded', () => {
+    ProductDetailLoader.init();
+    ProductDetailLoader.loadProduct();
 });
