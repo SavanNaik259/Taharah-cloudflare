@@ -503,154 +503,88 @@ const ProductDetailLoader = (function() {
             });
         }
 
-        // Material selection (New implementation for separate pricing)
-        const materialContainer = document.getElementById('material-selection');
-        if (materialContainer && product.materials && Array.isArray(product.materials) && product.materials.length > 0) {
-            const materialList = materialContainer.querySelector('.material-options');
-            materialList.innerHTML = product.materials.map((variant, index) => {
-                const isOutOfStock = variant.inStock === false;
-                const isSelected = index === 0 && !isOutOfStock;
-                return `
-                <button class="option-btn material-btn ${isSelected ? 'selected' : ''} ${isOutOfStock ? 'out-of-stock' : ''}" 
-                    data-name="${variant.name}" 
-                    data-price="${variant.price}" 
-                    ${isOutOfStock ? 'disabled' : ''}
-                    style="padding: 5px 15px; border: 1px solid ${isSelected ? '#000' : '#ddd'}; background: ${isOutOfStock ? '#f9f9f9' : '#fff'}; cursor: ${isOutOfStock ? 'not-allowed' : 'pointer'}; border-radius: 4px; font-family: 'Futura PT', sans-serif; color: ${isOutOfStock ? '#999' : '#000'}; position: relative;">
-                    ${variant.name}
-                    ${isOutOfStock ? '<span style="position: absolute; top: -10px; right: -5px; background: #ff4d4d; color: white; font-size: 8px; padding: 2px 4px; border-radius: 4px; line-height: 1;">OUT</span>' : ''}
-                </button>
-            `;
-            }).join('');
-            materialContainer.style.display = 'block';
-            hasOptions = true;
+        // Unified Option Rendering Helper
+        const renderUnifiedOptions = (containerId, optionType) => {
+            const container = document.getElementById(containerId);
+            if (!container) return;
 
-            // Set initial price from first material if available
-            const firstInStock = product.materials.find(m => m.inStock !== false) || product.materials[0];
-            if (firstInStock) {
-                window.selectedMaterial = firstInStock.name;
-                window.selectedPrice = firstInStock.price;
-                updatePriceDisplay(firstInStock.price);
+            const listElement = container.querySelector(optionType === 'material' ? '.material-options' : '.dupatta-options');
+            if (!listElement) return;
+
+            // Determine data source: product.materials has priority
+            let options = [];
+            if (product.materials && Array.isArray(product.materials) && product.materials.length > 0) {
+                options = product.materials;
+            } else if (product.materialVariants && Array.isArray(product.materialVariants) && product.materialVariants.length > 0) {
+                options = product.materialVariants;
+            } else if (product.dupattaOptions && Array.isArray(product.dupattaOptions) && product.dupattaOptions.length > 0) {
+                options = product.dupattaOptions.map(opt => ({ name: opt, price: 0, inStock: true }));
             }
 
-            // Add click listeners
-            materialList.querySelectorAll('.material-btn:not(.out-of-stock)').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    materialList.querySelectorAll('.material-btn').forEach(b => {
-                        b.style.borderColor = '#ddd';
-                        b.classList.remove('selected');
+            if (options.length > 0) {
+                listElement.innerHTML = options.map((variant, index) => {
+                    const name = typeof variant === 'string' ? variant : (variant.name || variant.value || '');
+                    const price = variant.price || 0;
+                    const isOutOfStock = variant.inStock === false;
+                    const isSelected = index === 0 && !isOutOfStock;
+                    
+                    return `
+                    <button class="option-btn material-btn ${isSelected ? 'selected' : ''} ${isOutOfStock ? 'out-of-stock' : ''}" 
+                        data-name="${name}" 
+                        data-price="${price}" 
+                        ${isOutOfStock ? 'disabled' : ''}
+                        style="padding: 5px 15px; border: 1px solid ${isSelected ? '#000' : '#ddd'}; background: ${isOutOfStock ? '#f9f9f9' : '#fff'}; cursor: ${isOutOfStock ? 'not-allowed' : 'pointer'}; border-radius: 4px; font-family: 'Futura PT', sans-serif; color: ${isOutOfStock ? '#999' : '#000'}; position: relative;">
+                        ${name} ${price > 0 ? `(+Rs. ${price})` : ''}
+                        ${isOutOfStock ? '<span style="position: absolute; top: -10px; right: -5px; background: #ff4d4d; color: white; font-size: 8px; padding: 2px 4px; border-radius: 4px; line-height: 1;">OUT</span>' : ''}
+                    </button>`;
+                }).join('');
+                container.style.display = 'block';
+                hasOptions = true;
+
+                // Initial Selection
+                const firstInStock = options.find(o => o.inStock !== false) || options[0];
+                if (firstInStock) {
+                    const name = typeof firstInStock === 'string' ? firstInStock : (firstInStock.name || firstInStock.value || '');
+                    const price = firstInStock.price || 0;
+                    
+                    if (optionType === 'dupatta') window.selectedDupatta = name;
+                    else window.selectedMaterial = name;
+                    
+                    window.selectedPrice = price;
+                    updatePriceDisplay(price);
+                }
+
+                // Click Listeners
+                listElement.querySelectorAll('.material-btn:not(.out-of-stock)').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        listElement.querySelectorAll('.material-btn').forEach(b => {
+                            b.style.borderColor = '#ddd';
+                            b.classList.remove('selected');
+                        });
+                        btn.style.borderColor = '#000';
+                        btn.classList.add('selected');
+                        
+                        const name = btn.dataset.name;
+                        const price = parseFloat(btn.dataset.price);
+                        
+                        if (optionType === 'dupatta') window.selectedDupatta = name;
+                        else window.selectedMaterial = name;
+                        
+                        window.selectedPrice = price;
+                        updatePriceDisplay(price);
+                        
+                        if (window.productDetails) {
+                            window.productDetails.price = price;
+                            if (optionType === 'dupatta') window.productDetails.dupatta = name;
+                            else window.productDetails.material = name;
+                        }
                     });
-                    btn.style.borderColor = '#000';
-                    btn.classList.add('selected');
-                    
-                    window.selectedMaterial = btn.dataset.name;
-                    window.selectedPrice = parseFloat(btn.dataset.price);
-                    
-                    updatePriceDisplay(window.selectedPrice);
-                    
-                    // Update global product details for cart
-                    if (window.productDetails) {
-                        window.productDetails.price = window.selectedPrice;
-                        window.productDetails.material = window.selectedMaterial;
-                    }
                 });
-            });
-        }
-
-        // Dupatta selection
-        const dupattaContainer = document.getElementById('dupatta-selection');
-        if (dupattaContainer && product.materials && Array.isArray(product.materials) && product.materials.length > 0) {
-            const dupattaList = dupattaContainer.querySelector('.dupatta-options');
-            dupattaList.innerHTML = product.materials.map((variant, index) => {
-                const isOutOfStock = variant.inStock === false;
-                const isSelected = index === 0 && !isOutOfStock;
-                return `
-                <button class="option-btn material-btn ${isSelected ? 'selected' : ''} ${isOutOfStock ? 'out-of-stock' : ''}" 
-                    data-name="${variant.name}" 
-                    data-price="${variant.price}" 
-                    ${isOutOfStock ? 'disabled' : ''}
-                    style="padding: 5px 15px; border: 1px solid ${isSelected ? '#000' : '#ddd'}; background: ${isOutOfStock ? '#f9f9f9' : '#fff'}; cursor: ${isOutOfStock ? 'not-allowed' : 'pointer'}; border-radius: 4px; font-family: 'Futura PT', sans-serif; color: ${isOutOfStock ? '#999' : '#000'}; position: relative;">
-                    ${variant.name} (+Rs. ${variant.price})
-                    ${isOutOfStock ? '<span style="position: absolute; top: -10px; right: -5px; background: #ff4d4d; color: white; font-size: 8px; padding: 2px 4px; border-radius: 4px; line-height: 1;">OUT</span>' : ''}
-                </button>
-            `;
-            }).join('');
-            dupattaContainer.style.display = 'block';
-            hasOptions = true;
-
-            // Set initial price from first material if available
-            const firstInStock = product.materials.find(m => m.inStock !== false) || product.materials[0];
-            if (firstInStock) {
-                window.selectedDupatta = firstInStock.name;
-                window.selectedPrice = firstInStock.price;
-                updatePriceDisplay(firstInStock.price);
             }
+        };
 
-            // Add click listeners
-            dupattaList.querySelectorAll('.material-btn:not(.out-of-stock)').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    dupattaList.querySelectorAll('.material-btn').forEach(b => {
-                        b.style.borderColor = '#ddd';
-                        b.classList.remove('selected');
-                    });
-                    btn.style.borderColor = '#000';
-                    btn.classList.add('selected');
-                    
-                    window.selectedDupatta = btn.dataset.name;
-                    window.selectedPrice = parseFloat(btn.dataset.price);
-                    
-                    updatePriceDisplay(window.selectedPrice);
-                    
-                    // Update global product details for cart
-                    if (window.productDetails) {
-                        window.productDetails.price = window.selectedPrice;
-                        window.productDetails.dupatta = window.selectedDupatta;
-                    }
-                });
-            });
-
-        } else if (dupattaContainer && product.materialVariants && Array.isArray(product.materialVariants) && product.materialVariants.length > 0) {
-            const dupattaList = dupattaContainer.querySelector('.dupatta-options');
-            dupattaList.innerHTML = product.materialVariants.map(variant => `
-                <button class="option-btn material-btn" data-name="${variant.name}" data-price="${variant.price}" style="padding: 5px 15px; border: 1px solid #ddd; background: #fff; cursor: pointer; border-radius: 4px;">${variant.name} - Rs. ${variant.price}</button>
-            `).join('');
-            dupattaContainer.style.display = 'block';
-            hasOptions = true;
-
-            // Add click listeners
-            dupattaList.querySelectorAll('.material-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    dupattaList.querySelectorAll('.material-btn').forEach(b => b.style.borderColor = '#ddd');
-                    btn.style.borderColor = '#000';
-                    window.selectedDupatta = btn.dataset.name;
-                    window.selectedPrice = parseFloat(btn.dataset.price);
-                    
-                    updatePriceDisplay(window.selectedPrice);
-                    
-                    // Update global product details for cart
-                    if (window.productDetails) {
-                        window.productDetails.price = window.selectedPrice;
-                        window.productDetails.dupatta = window.selectedDupatta;
-                    }
-                });
-            });
-
-        } else if (dupattaContainer && product.dupattaOptions && Array.isArray(product.dupattaOptions) && product.dupattaOptions.length > 0) {
-            const dupattaList = dupattaContainer.querySelector('.dupatta-options');
-            dupattaList.innerHTML = product.dupattaOptions.map(option => `
-                <button class="option-btn dupatta-btn" data-value="${option}" style="padding: 5px 15px; border: 1px solid #ddd; background: #fff; cursor: pointer; border-radius: 4px;">${option}</button>
-            `).join('');
-            dupattaContainer.style.display = 'block';
-            hasOptions = true;
-
-            // Add click listeners
-            dupattaList.querySelectorAll('.dupatta-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    dupattaList.querySelectorAll('.dupatta-btn').forEach(b => b.style.borderColor = '#ddd');
-                    btn.style.borderColor = '#000';
-                    window.selectedDupatta = btn.dataset.value;
-                });
-            });
-        }
+        renderUnifiedOptions('material-selection', 'material');
+        renderUnifiedOptions('dupatta-selection', 'dupatta');
 
         function updatePriceDisplay(price) {
             const priceElements = document.querySelectorAll('.product-detail-info .product-price, .product-detail-info .current-price, .product-detail-info .price-value');

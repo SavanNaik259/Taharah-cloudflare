@@ -913,7 +913,7 @@
                         <div class="material-variant" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff;">
                             <div style="display: flex; gap: 10px;">
                                 <input type="text" placeholder="Dupatta Material (e.g. Chiffon)" class="material-name" value="Chiffon" style="flex: 2;">
-                                <input type="number" placeholder="Price (e.g. 1150)" class="material-price" style="flex: 1;">
+                                <input type="number" placeholder="Price (e.g. 1450)" class="material-price" value="1450" style="flex: 1;">
                                 <button type="button" class="remove-variant-btn" style="background:#ef4444; color:white; border:none; border-radius:4px; padding:0 15px; cursor: pointer; height: 42px;">&times;</button>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
@@ -924,7 +924,7 @@
                         <div class="material-variant" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff;">
                             <div style="display: flex; gap: 10px;">
                                 <input type="text" placeholder="Dupatta Material (e.g. Cotton)" class="material-name" value="Cotton" style="flex: 2;">
-                                <input type="number" placeholder="Price (e.g. 1199)" class="material-price" style="flex: 1;">
+                                <input type="number" placeholder="Price (e.g. 1199)" class="material-price" value="1199" style="flex: 1;">
                                 <button type="button" class="remove-variant-btn" style="background:#ef4444; color:white; border:none; border-radius:4px; padding:0 15px; cursor: pointer; height: 42px;">&times;</button>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
@@ -1766,12 +1766,18 @@
                             checkboxes.forEach(cb => {
                                 cb.checked = dupattaOptions.includes(cb.value);
                             });
-                            // Backward compatibility for old IDs
-                            const dC = document.getElementById('dupattaCotton');
-                            if (dC) dC.checked = dupattaOptions.includes('Cotton');
-                            if (document.getElementById('dupattaChiffon')) document.getElementById('dupattaChiffon').checked = dupattaOptions.includes('Chiffon');
-                            if (document.getElementById('dupattaNet')) document.getElementById('dupattaNet').checked = dupattaOptions.includes('Net');
-                            if (document.getElementById('dupattaOrganza')) document.getElementById('dupattaOrganza').checked = dupattaOptions.includes('Organza');
+                        }
+
+                        // Populating hardcoded variant stock
+                        if (product.materials && Array.isArray(product.materials)) {
+                            const chiffon = product.materials.find(m => m.name === 'Chiffon');
+                            if (chiffon && document.getElementById('stock-chiffon')) {
+                                document.getElementById('stock-chiffon').checked = chiffon.inStock !== false;
+                            }
+                            const cotton = product.materials.find(m => m.name === 'Cotton');
+                            if (cotton && document.getElementById('stock-cotton')) {
+                                document.getElementById('stock-cotton').checked = cotton.inStock !== false;
+                            }
                         }
 
                         // Remove required attributes in edit mode to allow partial updates
@@ -2773,11 +2779,9 @@
                 const formData = new FormData(productForm);
                 // Get Dupatta options
                 const dupattaOptions = [];
-                const dC = document.getElementById('dupattaCotton');
-                if (dC && dC.checked) dupattaOptions.push('Cotton');
-                if (document.getElementById('dupattaChiffon') && document.getElementById('dupattaChiffon').checked) dupattaOptions.push('Chiffon');
-                if (document.getElementById('dupattaNet') && document.getElementById('dupattaNet').checked) dupattaOptions.push('Net');
-                if (document.getElementById('dupattaOrganza') && document.getElementById('dupattaOrganza').checked) dupattaOptions.push('Organza');
+                document.querySelectorAll('input[name="dupattaOptions"]:checked').forEach(cb => {
+                    dupattaOptions.push(cb.value);
+                });
 
                 // Get Material Variants
                 const materialVariants = [];

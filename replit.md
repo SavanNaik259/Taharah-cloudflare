@@ -50,6 +50,17 @@ Products are organized into Firestore collections:
 - `js/netlify-helpers.js` - Serverless function utilities
 - `firebase-messaging-sw.js` - Push notification service worker
 
+### Stock Management Refactor (Feb 2026)
+- **Root Cause Identified**: Hardcoded dupatta options (Chiffon/Cotton) in the admin panel lacked name/price fields, preventing them from being saved as valid `material` variants with stock tracking. The product loader also had multiple redundant code paths that didn't consistently check the `inStock` property.
+- **Admin Panel Fixes**: 
+  - Added default names and prices to hardcoded dupatta variants so they are correctly saved to the `materials` array.
+  - Improved `loadProductForEdit` to correctly pre-fill stock status for both dynamic and hardcoded variants.
+  - Unified `dupattaOptions` save logic to use query selectors instead of hardcoded IDs.
+- **Frontend Loader Fixes**:
+  - Unified `material-selection` and `dupatta-selection` rendering into a single robust helper function.
+  - Ensured all rendering paths (including legacy fallbacks) properly respect the `inStock` property by disabling buttons and adding visual "OUT" indicators.
+  - Improved default price selection to automatically pick the first available in-stock option.
+
 ### Video Management (Watch & Buy)
 - **Storage Location**: Firebase Storage under `watch-buy-videos/` path
 - **Metadata Storage**: Firestore `watch-buy-videos` collection
