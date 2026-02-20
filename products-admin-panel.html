@@ -2782,10 +2782,12 @@
                 // Get Material Variants
                 const materialVariants = [];
                 document.querySelectorAll('.material-variant').forEach(variant => {
-                    const name = variant.querySelector('.material-name').value.trim();
+                    const nameInput = variant.querySelector('.material-name');
+                    const name = nameInput ? nameInput.value.trim() : '';
                     const priceInput = variant.querySelector('.material-price');
                     const price = priceInput && priceInput.value ? parseFloat(priceInput.value) : null;
-                    const inStock = variant.querySelector('.material-in-stock').checked;
+                    const inStockCheckbox = variant.querySelector('.material-in-stock');
+                    const inStock = inStockCheckbox ? inStockCheckbox.checked : true;
                     if (name && price !== null && !isNaN(price)) {
                         materialVariants.push({ name, price, inStock: inStock });
                     }

@@ -569,7 +569,7 @@ const ProductDetailLoader = (function() {
                     data-price="${variant.price}" 
                     ${isOutOfStock ? 'disabled' : ''}
                     style="padding: 5px 15px; border: 1px solid ${isSelected ? '#000' : '#ddd'}; background: ${isOutOfStock ? '#f9f9f9' : '#fff'}; cursor: ${isOutOfStock ? 'not-allowed' : 'pointer'}; border-radius: 4px; font-family: 'Futura PT', sans-serif; color: ${isOutOfStock ? '#999' : '#000'}; position: relative;">
-                    ${variant.name}
+                    ${variant.name} (+Rs. ${variant.price})
                     ${isOutOfStock ? '<span style="position: absolute; top: -10px; right: -5px; background: #ff4d4d; color: white; font-size: 8px; padding: 2px 4px; border-radius: 4px; line-height: 1;">OUT</span>' : ''}
                 </button>
             `;
