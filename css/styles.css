@@ -240,6 +240,12 @@ a {
     top: -1px; /* Only move the text content up */
 }
 
+@media (max-width: 480px) {
+    .promo-banner .banner-text {
+        font-size: 10px !important;
+    }
+}
+
 .promo-banner a {
     margin-bottom: 100px!important;
     color: #8b704c;
