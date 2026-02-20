@@ -42,6 +42,10 @@ args = "Server-Dev-Fixed-Icons"
 task = "workflow.run"
 args = "Server-Dev-Final"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Server-Dev-Fixed-Stock-Final"
+
 [[workflows.workflow]]
 name = "Server"
 author = "agent"
@@ -85,6 +89,18 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm start"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow]]
+name = "Server-Dev-Fixed-Stock-Final"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node run-server.js"
 waitForPort = 5000
 
 [workflows.workflow.metadata]
