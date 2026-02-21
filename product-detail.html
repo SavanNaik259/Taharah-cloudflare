@@ -1101,7 +1101,7 @@ background-color: #000 !important;
                 // Parallel fetch for speed
                 const results = await Promise.all(categories.map(async (category) => {
                     try {
-                        const response = await fetch(`/.netlify/functions/load-products?category=${category}&t=${Date.now()}`);
+                        const response = await fetch(`/api/load-products?category=${category}&t=${Date.now()}`);
                         if (response.ok) {
                             const data = await response.json();
                             return data.products || [];

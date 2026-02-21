@@ -59,7 +59,7 @@ const BridalProductsLoader = (function() {
         const now = Date.now();
         
         try {
-            let netlifyEndpoint = `/.netlify/functions/load-products?category=featured-collection&cacheBust=${now}`;
+            let netlifyEndpoint = `/api/load-products?category=featured-collection&cacheBust=${now}`;
             
             const response = await fetch(netlifyEndpoint, {
                 cache: 'no-store',

@@ -491,7 +491,7 @@
                     try {
                         console.log(`\n🔍 [${category}] Starting load...`);
 
-                        let netlifyEndpoint = `/.netlify/functions/load-products?category=${category}`;
+                        let netlifyEndpoint = `/api/load-products?category=${category}`;
 
                         if (forceRefresh || cacheInvalidated) {
                             const timestamp = Date.now();

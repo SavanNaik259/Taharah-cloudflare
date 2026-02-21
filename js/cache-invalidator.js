@@ -38,9 +38,7 @@ window.CacheInvalidator = (function() {
      */
     function getApiEndpoint(category = 'bridal') {
         const env = getEnvironment();
-        return env.isNetlify 
-            ? `/.netlify/functions/load-products?category=${category}`
-            : `/api/load-products/${category}`;
+        return `/api/load-products?category=${category}`;
     }
 
     /**
@@ -299,8 +297,8 @@ window.CacheInvalidator = (function() {
 
         // Create multiple cache-busting requests to flush browser cache
         const urls = [
-            env.isNetlify ? `/.netlify/functions/load-products?category=bridal&flush=${timestamp}` : `/api/load-products/bridal?flush=${timestamp}`,
-            env.isNetlify ? `/.netlify/functions/load-products?category=bridal&bust=${timestamp}` : `/api/load-products/bridal?bust=${timestamp}`,
+            `/api/load-products?category=bridal&flush=${timestamp}`,
+            `/api/load-products?category=bridal&bust=${timestamp}`,
         ];
 
         const promises = urls.map(url => {

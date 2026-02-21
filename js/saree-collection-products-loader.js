@@ -152,7 +152,7 @@ const JewelrySubcategoriesLoader = (function() {
                 console.log('Using Netlify function endpoint with multiple categories');
 
                 const categoriesParam = JEWELRY_SUBCATEGORIES.join(',');
-                let netlifyEndpoint = `/.netlify/functions/load-products?categories=${encodeURIComponent(categoriesParam)}`;
+                let netlifyEndpoint = `/api/load-products?categories=${encodeURIComponent(categoriesParam)}`;
 
                 if (forceRefresh || cacheInvalidated) {
                     const timestamp = Date.now();

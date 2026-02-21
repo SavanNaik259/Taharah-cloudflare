@@ -104,7 +104,7 @@ window.StockManager = (function() {
             // Try each category until we find the product
             for (const category of categoriesToSearch) {
                 try {
-                    const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
+                    const response = await fetch(`/api/load-products?category=${category}&cacheBust=${Date.now()}`);
                     
                     if (!response.ok) {
                         console.log(`Category ${category} not available (${response.status})`);
@@ -142,7 +142,7 @@ window.StockManager = (function() {
             products[productIndex].updatedAt = new Date().toISOString();
 
             // Save updated products back to Firebase
-            const updateResponse = await fetch('/.netlify/functions/update-product-stock', {
+            const updateResponse = await fetch('/api/update-product-stock', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -268,7 +268,7 @@ window.StockManager = (function() {
             };
 
             // Send notification to admin dashboard
-            const response = await fetch('/.netlify/functions/admin-notifications', {
+            const response = await fetch('/api/admin-notifications', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -303,7 +303,7 @@ window.StockManager = (function() {
             // Try each category until we find the product
             for (const category of categoriesToSearch) {
                 try {
-                    const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
+                    const response = await fetch(`/api/load-products?category=${category}&cacheBust=${Date.now()}`);
                     
                     if (!response.ok) {
                         continue;

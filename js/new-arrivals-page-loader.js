@@ -105,10 +105,10 @@ function sortProducts(products, sortBy) {
  */
 async function loadNewArrivalsProductsDirect() {
     try {
-        console.log('Loading products directly from Netlify function...');
+        console.log('Loading products directly from API function...');
 
         const cacheBust = Date.now();
-        const endpoint = `/.netlify/functions/load-products?category=new-arrivals&cacheBust=${cacheBust}`;
+        const endpoint = `/api/load-products?category=new-arrivals&cacheBust=${cacheBust}`;
 
         console.log('Making request to:', endpoint);
 

@@ -123,12 +123,12 @@ const NewArrivalsProductsLoader = (function() {
 
             let response;
 
-            // Use Netlify function for proper CDN caching (works on both deployed and development)
-            if (true) { // Always use Netlify function for CDN optimization
-                console.log('Deployed site detected - using Netlify function endpoint');
+            // Use API function for proper CDN caching (works on both deployed and development)
+            if (true) { // Always use API function for CDN optimization
+                console.log('Deployed site detected - using API function endpoint');
 
-                // Use Netlify function endpoint for proper cache control
-                let netlifyEndpoint = '/.netlify/functions/load-products?category=new-arrivals';
+                // Use API function endpoint for proper cache control
+                let netlifyEndpoint = '/api/load-products?category=new-arrivals';
 
                 // Add cache busting parameter if force refresh or cache invalidated
                 if (forceRefresh || cacheInvalidated) {

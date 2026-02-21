@@ -30,8 +30,24 @@ author = "agent"
 task = "workflow.run"
 args = "Server-Dev-Fixed-Icons"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Server-Dev-Fixed-Icons-CF"
+
 [[workflows.workflow]]
 name = "Server-Dev-Fixed-Icons"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node run-server.js"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow]]
+name = "Server-Dev-Fixed-Icons-CF"
 author = "agent"
 
 [[workflows.workflow.tasks]]

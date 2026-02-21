@@ -1339,7 +1339,7 @@
                 if (!category) return;
 
                 console.log(`Fetching subcategories for ${category}...`);
-                const response = await fetch(`/.netlify/functions/load-subcategories?category=${category}&cacheBust=${Date.now()}`);
+                const response = await fetch(`/api/load-subcategories?category=${category}&cacheBust=${Date.now()}`);
                 if (response.ok) {
                     const data = await response.json();
                     if (data.success && Array.isArray(data.subcategories)) {
@@ -1355,7 +1355,7 @@
         async function saveSubcategoryToStorage(category, subcategory) {
             try {
                 console.log("Syncing subcategory to Storage via Netlify Function...");
-                const response = await fetch('/.netlify/functions/sync-subcategories', {
+                const response = await fetch('/api/sync-subcategories', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -1662,7 +1662,7 @@
                 `;
 
                 // Load products data
-                const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
+                const response = await fetch(`/api/load-products?category=${category}&cacheBust=${Date.now()}`);
                 const data = await response.json();
 
                 if (data.success && data.products) {
@@ -2490,7 +2490,7 @@
                             // Generate image proxy URL instead of direct Firebase URL
                             // This ensures images are served through Netlify's true CDN to save on Firebase bandwidth costs
                             const imagePath = `productImages/${fileName}`;
-                            const proxyURL = `/.netlify/functions/image-proxy?path=${encodeURIComponent(imagePath)}`;
+                            const proxyURL = `/api/image-proxy?path=${encodeURIComponent(imagePath)}`;
                             console.log('Generated image proxy URL for Netlify CDN:', proxyURL);
 
                             resolve(proxyURL);
@@ -2529,7 +2529,7 @@
 
                 let targetProducts = [];
                 try {
-                    const response = await fetch(`/.netlify/functions/load-products?category=${newCategory}&cacheBust=${Date.now()}`);
+                    const response = await fetch(`/api/load-products?category=${newCategory}&cacheBust=${Date.now()}`);
                     if (response.ok) {
                         const data = await response.json();
                         if (data.success && Array.isArray(data.products)) {
@@ -2588,7 +2588,7 @@
         // Helper to remove product from a category file
         async function removeProductFromCategory(productId, category) {
             try {
-                const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
+                const response = await fetch(`/api/load-products?category=${category}&cacheBust=${Date.now()}`);
                 if (!response.ok) return;
                 
                 const data = await response.json();
@@ -2627,7 +2627,7 @@
 
                 try {
                     // Always use the relative path which works across all domains on Netlify
-                    const apiEndpoint = `/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`;
+                    const apiEndpoint = `/api/load-products?category=${category}&cacheBust=${Date.now()}`;
 
                     console.log('Using endpoint with cache busting:', apiEndpoint);
 
@@ -2958,7 +2958,7 @@
                       // Back-in-stock: ONLY if stock field was edited and stock went from 0 to available
                       if (fieldsChanged.stock && originalProductData.stock === 0 && updatedProductData.stock > 0) {
                         console.log('📦 Triggering back-in-stock notification (stock field was edited)...');
-                        await fetch('https://taharah.netlify.app/.netlify/functions/auto-back-in-stock-alerts', {
+                        await fetch('https://taharah.netlify.app/api/auto-back-in-stock-alerts', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({
@@ -2973,7 +2973,7 @@
                       // Low-stock: ONLY if stock field was edited and stock changed to 3 or below
                       if (fieldsChanged.stock && updatedProductData.stock <= 3 && updatedProductData.stock > 0) {
                         console.log('⚡ Triggering low-stock notification (stock field was edited)...');
-                        await fetch('https://taharah.netlify.app/.netlify/functions/auto-low-stock-alerts', {
+                        await fetch('https://taharah.netlify.app/api/auto-low-stock-alerts', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({
@@ -2990,7 +2990,7 @@
                       // Price-drop: ONLY if price field was edited and price decreased
                       if (fieldsChanged.price && originalProductData.price > updatedProductData.price) {
                         console.log('📉 Triggering price-drop notification (price field was edited)...');
-                        await fetch('https://taharah.netlify.app/.netlify/functions/auto-price-drop-alerts', {
+                        await fetch('https://taharah.netlify.app/api/auto-price-drop-alerts', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({
@@ -3034,7 +3034,7 @@
                       console.log('⭐ Triggering new-product notification...');
                       const isProduction = !window.location.hostname.includes('localhost');
                       const notificationUrl = isProduction 
-                        ? 'https://taharah.netlify.app/.netlify/functions/auto-new-product-alerts'
+                        ? 'https://taharah.netlify.app/api/auto-new-product-alerts'
                         : '/api/new-product-notification';
                       
                       const response = await fetch(notificationUrl, {

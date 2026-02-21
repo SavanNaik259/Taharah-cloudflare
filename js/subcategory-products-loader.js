@@ -89,7 +89,7 @@ const SubcategoryProductsLoader = (function() {
             console.log(`Loading ${category} products from Cloud Storage...`);
 
             // Only add cache busting when force refresh or cache invalidated (not always)
-            let netlifyEndpoint = `/.netlify/functions/load-products?category=${category}`;
+            let netlifyEndpoint = `/api/load-products?category=${category}`;
 
             if (forceRefresh || cacheInvalidated) {
                 const cacheBustTimestamp = Date.now();

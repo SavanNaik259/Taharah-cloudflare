@@ -266,8 +266,8 @@ const FilterSortHandler = (function() {
         
         let categorySubs = [];
         try {
-            // Fetch from Storage via Netlify Function for shared persistence
-            const response = await fetch(`/.netlify/functions/load-subcategories?category=${category}&cacheBust=${Date.now()}`);
+            // Fetch from Storage via API Function for shared persistence
+            const response = await fetch(`/api/load-subcategories?category=${category}&cacheBust=${Date.now()}`);
             if (response.ok) {
                 const data = await response.json();
                 if (data.success && Array.isArray(data.subcategories)) {

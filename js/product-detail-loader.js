@@ -147,7 +147,7 @@ const ProductDetailLoader = (function() {
                     }
                 };
 
-                const endpoint = `/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`;
+                const endpoint = `/api/load-products?category=${category}&cacheBust=${Date.now()}`;
 
                 const response = await fetch(endpoint, requestOptions);
 
