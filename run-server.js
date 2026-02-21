@@ -80,6 +80,56 @@ app.use(cors());
 
 // Parse JSON bodies for all routes
 app.use(express.json());
+// Cloudflare Pages API compatibility proxy for local development
+app.all('/api/:functionName', async (req, res) => {
+  try {
+    const functionName = req.params.functionName;
+    console.log(`[Local API Proxy] Routing to: ${functionName}`);
+    
+    // Check if it's the image-proxy which we need to handle specially or if we use the netlify version
+    const functionPath = path.join(__dirname, 'netlify', 'functions', `${functionName}.js`);
+    
+    if (!fs.existsSync(functionPath)) {
+      console.error(`[Local API Proxy] Function not found: ${functionPath}`);
+      return res.status(404).json({ success: false, error: 'Function not found' });
+    }
+
+    const netlifyFunction = require(functionPath);
+    const event = {
+      queryStringParameters: req.query,
+      headers: req.headers,
+      body: JSON.stringify(req.body),
+      httpMethod: req.method,
+      path: req.path
+    };
+
+    const result = await netlifyFunction.handler(event, {});
+
+    if (result.headers) {
+      Object.keys(result.headers).forEach(key => res.setHeader(key, result.headers[key]));
+    }
+
+    res.status(result.statusCode || 200);
+
+    if (result.body) {
+      if (result.isBase64Encoded) {
+        res.send(Buffer.from(result.body, 'base64'));
+      } else {
+        try {
+          res.json(JSON.parse(result.body));
+        } catch (e) {
+          res.send(result.body);
+        }
+      }
+    } else {
+      res.end();
+    }
+  } catch (error) {
+    console.error(`[Local API Proxy] Error:`, error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 
 // Serve static files from the current directory
 app.use(express.static('.'));

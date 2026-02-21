@@ -8,7 +8,15 @@ export async function onRequest(context) {
   }
 
   try {
-    const response = await fetch(imageUrl);
+    const decodedUrl = decodeURIComponent(imageUrl);
+    console.log(`Proxying image: ${decodedUrl}`);
+
+    const response = await fetch(decodedUrl, {
+      headers: {
+        'User-Agent': 'Cloudflare-Worker'
+      }
+    });
+
     if (!response.ok) {
       return new Response(`Failed to fetch image: ${response.statusText}`, { status: response.status });
     }
@@ -24,6 +32,7 @@ export async function onRequest(context) {
       }
     });
   } catch (error) {
+    console.error(`Proxy error for ${imageUrl}:`, error);
     return new Response(`Error proxying image: ${error.message}`, { status: 500 });
   }
 }

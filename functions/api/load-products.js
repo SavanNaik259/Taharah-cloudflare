@@ -17,21 +17,18 @@ export async function onRequest(context) {
   }
 
   try {
-    if (!category && !categories) {
-      return new Response(JSON.stringify({
-        success: false,
-        products: [],
-        error: 'Category parameter is required'
-      }), { status: 400, headers });
+    const categoryList = categories ? categories.split(',').map(c => c.trim()).filter(c => c) : [category];
+    if (categoryList.length === 0 || !categoryList[0]) {
+       return new Response(JSON.stringify({ success: false, products: [], error: 'Category required' }), { status: 400, headers });
     }
 
-    const categoryList = categories ? categories.split(',').map(c => c.trim()).filter(c => c) : [category];
+    const storageBucket = env.FIREBASE_STORAGE_BUCKET || 'studio-7642357109-d9026.firebasestorage.app';
     
     const productPromises = categoryList.map(async (cat) => {
       const isBandwidthTest = cat.startsWith('bandwidth-test-');
       let storageUrl = isBandwidthTest 
-        ? `https://firebasestorage.googleapis.com/v0/b/${env.FIREBASE_STORAGE_BUCKET || 'studio-7642357109-d9026.firebasestorage.app'}/o/bandwidthTest%2F${cat}-products.json?alt=media`
-        : `https://firebasestorage.googleapis.com/v0/b/${env.FIREBASE_STORAGE_BUCKET || 'studio-7642357109-d9026.firebasestorage.app'}/o/productData%2F${cat}-products.json?alt=media`;
+        ? `https://firebasestorage.googleapis.com/v0/b/${storageBucket}/o/bandwidthTest%2F${cat}-products.json?alt=media`
+        : `https://firebasestorage.googleapis.com/v0/b/${storageBucket}/o/productData%2F${cat}-products.json?alt=media`;
 
       if (cacheBust) storageUrl += `&fbCacheBust=${cacheBust}`;
 
@@ -44,16 +41,24 @@ export async function onRequest(context) {
     const productsArrays = await Promise.all(productPromises);
     const allProducts = productsArrays.flat();
 
-    // Cloudflare specific: transform image URLs to use the image proxy if needed
+    const baseUrl = new URL(request.url).origin;
     const transformedProducts = allProducts.map(p => {
-      if (p.image && p.image.includes('firebasestorage.googleapis.com')) {
-        p.image = `/api/image-proxy?url=${encodeURIComponent(p.image)}`;
-      }
-      if (p.images) {
+      const proxyUrl = (u) => {
+        if (u && (u.includes('firebasestorage.googleapis.com') || u.includes('googleusercontent.com'))) {
+          // Absolute URL to ensure it works even if relative pathing fails
+          return `${baseUrl}/api/image-proxy?url=${encodeURIComponent(u)}`;
+        }
+        return u;
+      };
+
+      if (p.image) p.image = proxyUrl(p.image);
+      if (p.mainImage) p.mainImage = proxyUrl(p.mainImage);
+      if (p.imageUrl) p.imageUrl = proxyUrl(p.imageUrl);
+      
+      if (p.images && Array.isArray(p.images)) {
         p.images = p.images.map(img => {
-          if (img.url && img.url.includes('firebasestorage.googleapis.com')) {
-            img.url = `/api/image-proxy?url=${encodeURIComponent(img.url)}`;
-          }
+          if (typeof img === 'string') return proxyUrl(img);
+          if (img && img.url) img.url = proxyUrl(img.url);
           return img;
         });
       }
@@ -67,9 +72,6 @@ export async function onRequest(context) {
     }), { status: 200, headers });
 
   } catch (error) {
-    return new Response(JSON.stringify({
-      success: false,
-      error: error.message
-    }), { status: 500, headers });
+    return new Response(JSON.stringify({ success: false, error: error.message }), { status: 500, headers });
   }
 }
