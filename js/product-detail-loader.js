@@ -518,7 +518,15 @@ const ProductDetailLoader = (function() {
             } else if (product.materialVariants && Array.isArray(product.materialVariants) && product.materialVariants.length > 0) {
                 options = product.materialVariants;
             } else if (product.dupattaOptions && Array.isArray(product.dupattaOptions) && product.dupattaOptions.length > 0) {
-                options = product.dupattaOptions.map(opt => ({ name: opt, price: 0, inStock: true }));
+                // Support for dupatta stock status in options
+                options = product.dupattaOptions.map(opt => {
+                    if (typeof opt === 'string') return { name: opt, price: 0, inStock: true };
+                    return {
+                        name: opt.name || opt.value || '',
+                        price: opt.price || 0,
+                        inStock: opt.stock !== undefined ? opt.stock > 0 : (opt.inStock !== undefined ? opt.inStock : true)
+                    };
+                });
             }
 
             if (options.length > 0) {

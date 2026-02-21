@@ -63,12 +63,16 @@ const BridalProductsLoader = (function() {
         }
 
         try {
-            let netlifyEndpoint = `/.netlify/functions/load-products?category=featured-collection`;
-            if (forceRefresh || cacheInvalidated) {
-                netlifyEndpoint += `&cacheBust=${Date.now()}`;
-            }
-
-            const response = await fetch(netlifyEndpoint);
+            let netlifyEndpoint = `/.netlify/functions/load-products?category=featured-collection&cacheBust=${Date.now()}`;
+            
+            const response = await fetch(netlifyEndpoint, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
+            });
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             
             const data = await response.json();
