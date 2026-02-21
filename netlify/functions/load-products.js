@@ -241,10 +241,12 @@ exports.handler = async (event, context) => {
       responseHeaders['Pragma'] = 'no-cache';
       responseHeaders['Expires'] = '0';
     } else {
-      // For normal requests, use shorter cache to catch product updates faster
-      // This ensures new products appear within 1 hour instead of 24 hours
-      responseHeaders['Cache-Control'] = 'public, max-age=3600, stale-while-revalidate=86400'; // 1 hour cache, 1 day stale
-      responseHeaders['Netlify-CDN-Cache-Control'] = 'public, max-age=3600, durable, stale-while-revalidate=86400'; // Netlify CDN specific
+      // For normal requests, disable caching to ensure users always see the latest products
+      // This fixes the issue where new or edited products don't show up until redeploy
+      responseHeaders['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+      responseHeaders['Pragma'] = 'no-cache';
+      responseHeaders['Expires'] = '0';
+      responseHeaders['Netlify-CDN-Cache-Control'] = 'public, max-age=0, must-revalidate'; // Netlify CDN specific
       
       // Generate consistent ETag based on product data to ensure proper cache validation
       if (etag) {

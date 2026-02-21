@@ -90,7 +90,7 @@ exports.handler = async (event, context) => {
     await file.save(updatedData, {
       metadata: {
         contentType: 'application/json',
-        cacheControl: 'public, max-age=2592000', // 30 days cache
+        cacheControl: 'no-cache, no-store, must-revalidate', // Disable cache
         customMetadata: {
           lastStockUpdate: new Date().toISOString(),
           updatedProduct: productId,

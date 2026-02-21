@@ -125,7 +125,7 @@ exports.handler = async (event, context) => {
     await file.save(fileContent, {
       metadata: {
         contentType: 'application/json',
-        cacheControl: 'public, max-age=2592000' // 30 days cache
+        cacheControl: 'no-cache, no-store, must-revalidate' // Disable cache for data files
       }
     });
 
