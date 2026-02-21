@@ -94,7 +94,8 @@ exports.handler = async (event, context) => {
         customMetadata: {
           lastStockUpdate: new Date().toISOString(),
           updatedProduct: productId,
-          stockChange: `${previousStock}->${newStock}`
+          stockChange: `${previousStock}->${newStock}`,
+          forceRefresh: 'true'
         }
       }
     });

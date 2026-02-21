@@ -38,32 +38,28 @@ const BridalProductsLoader = (function() {
     /**
      * Load bridal products EXCLUSIVELY from Firebase Cloud Storage
      */
-    async function loadBridalProducts(forceRefresh = false) {
+    async function loadBridalProducts(forceRefresh = true) {
         if (!isInitialized) {
             console.error('Bridal Products Loader not initialized');
             return [];
         }
 
-        const lastProductUpdate = localStorage.getItem('lastProductUpdate');
-        let cacheInvalidated = false;
-
-        if (lastProductUpdate) {
-            const updateTime = parseInt(lastProductUpdate);
-            const cacheTime = parseInt(localStorage.getItem('featuredCollectionProductsTime') || '0');
-
-            if (updateTime > cacheTime) {
-                cacheInvalidated = true;
-                forceRefresh = true;
-            }
-        }
+        // Always force refresh to clear any potential local cache
+        localStorage.removeItem('featuredCollectionProducts');
+        localStorage.removeItem('featuredCollectionProductsTime');
+        localStorage.removeItem('lastProductUpdate');
+        
+        // Clear ALL possible collection caches
+        const collections = ['new-arrivals', 'ready-to-wear', 'party-wear', 'modest-wear', 'featured-collection'];
+        collections.forEach(c => {
+            localStorage.removeItem(`${c}Products`);
+            localStorage.removeItem(`${c}ProductsTime`);
+        });
 
         const now = Date.now();
-        if (!forceRefresh && !cacheInvalidated && cachedProducts && (now - lastFetchTime) < CACHE_DURATION) {
-            return cachedProducts;
-        }
-
+        
         try {
-            let netlifyEndpoint = `/.netlify/functions/load-products?category=featured-collection&cacheBust=${Date.now()}`;
+            let netlifyEndpoint = `/.netlify/functions/load-products?category=featured-collection&cacheBust=${now}`;
             
             const response = await fetch(netlifyEndpoint, {
                 cache: 'no-store',

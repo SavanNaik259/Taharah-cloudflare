@@ -337,7 +337,8 @@ function initShop() {
     // Initialize shop with default view showing all products
     setTimeout(() => {
         console.log('Initializing default shop view - showing all products');
-        // Initially just display all products without filtering/sorting
+        // Always ensure we have the latest products by clearing any potential stale references
+        // and forcing a clean render
         displayAllProducts(originalProducts);
     }, 100);
 

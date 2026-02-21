@@ -89,7 +89,14 @@ async function updateDynamicVideoProductLink(container, sku) {
 
         // Use the categories parameter to fetch all at once for better performance and reliability
         const categoriesQuery = categories.join(',');
-        const response = await fetch(`/.netlify/functions/load-products?categories=${categoriesQuery}`);
+        const response = await fetch(`/.netlify/functions/load-products?categories=${categoriesQuery}&cacheBust=${Date.now()}`, {
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            }
+        });
         if (response.ok) {
             const data = await response.json();
             if (data.success && data.products) {
@@ -206,7 +213,14 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
 
         for (const category of categories) {
             try {
-                const response = await fetch(`/.netlify/functions/load-products?category=${category}`);
+                const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
                 if (response.ok) {
                     const data = await response.json();
 

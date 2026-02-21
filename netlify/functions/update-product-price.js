@@ -82,7 +82,8 @@ exports.handler = async (event, context) => {
         customMetadata: {
           lastPriceUpdate: new Date().toISOString(),
           updatedProduct: productId,
-          priceChange: `${oldPrice}->${newPrice}`
+          priceChange: `${oldPrice}->${newPrice}`,
+          forceRefresh: 'true'
         }
       }
     });

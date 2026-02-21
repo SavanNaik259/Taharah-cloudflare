@@ -119,11 +119,15 @@ const ProductDetailLoader = (function() {
     /**
      * Load product data from Firebase Storage via Netlify function
      */
-    async function loadProductData(productId, forceRefresh = false) {
+    async function loadProductData(productId, forceRefresh = true) {
         if (!productId) {
             console.error('No product ID provided');
             return null;
         }
+
+        // Clear local storage for this specific product to ensure fresh data
+        localStorage.removeItem(`product_${productId}`);
+        localStorage.removeItem(`product_${productId}_time`);
 
         const searchCategories = getCategoriesForProduct(productId);
         console.log(`Searching for product ${productId} in categories:`, searchCategories);
@@ -132,22 +136,18 @@ const ProductDetailLoader = (function() {
             try {
                 console.log(`🔍 Searching category: ${category} for SKU: ${productId}`);
                 
-                // Prepare request options
+                // Always bypass browser cache
                 const requestOptions = {
                     method: 'GET',
-                    cache: forceRefresh ? 'no-store' : 'default'
-                };
-
-                // Add cache-busting and headers if force refresh
-                let endpoint = `/.netlify/functions/load-products?category=${category}`;
-                if (forceRefresh) {
-                    endpoint += `&cacheBust=${Date.now()}`;
-                    requestOptions.headers = {
+                    cache: 'no-store',
+                    headers: {
                         'Cache-Control': 'no-cache, no-store, must-revalidate',
                         'Pragma': 'no-cache',
                         'Expires': '0'
-                    };
-                }
+                    }
+                };
+
+                const endpoint = `/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`;
 
                 const response = await fetch(endpoint, requestOptions);
 

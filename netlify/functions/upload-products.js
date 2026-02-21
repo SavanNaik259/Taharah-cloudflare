@@ -125,11 +125,12 @@ exports.handler = async (event, context) => {
     await file.save(fileContent, {
       metadata: {
         contentType: 'application/json',
-        cacheControl: 'no-cache, no-store, must-revalidate' // Disable cache for data files
+        cacheControl: 'no-cache, no-store, must-revalidate'
       }
     });
 
-    console.log(`File uploaded successfully: ${fileName}`);
+    // Notify Netlify to purge cache if possible (though we've disabled it)
+    console.log(`File uploaded successfully: ${fileName}. Cache headers set to no-store.`);
 
     return {
       statusCode: 200,

@@ -45,7 +45,15 @@ const InteractiveShowcase = (function () {
 
             for (const category of categories) {
                 const response = await fetch(
-                    `/.netlify/functions/load-products?category=${category}`,
+                    `/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`,
+                    {
+                        cache: 'no-store',
+                        headers: {
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0'
+                        }
+                    }
                 );
                 const data = await response.json();
 
