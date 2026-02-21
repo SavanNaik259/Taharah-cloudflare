@@ -6,7 +6,7 @@ export async function onRequestGet(context) {
   const cacheBust = url.searchParams.get('cacheBust');
 
   const headers = {
-    ...import('./utils/config').then(m => m.corsHeaders),
+    ...import('../utils/config').then(m => m.corsHeaders),
     'Content-Type': 'application/json'
   };
 
