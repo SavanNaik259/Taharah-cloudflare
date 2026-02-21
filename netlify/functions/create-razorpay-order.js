@@ -2,7 +2,7 @@
  * Netlify Function: Create Razorpay Order
  * 
  * Creates a new order in Razorpay for payment processing
- * Handles POST requests to /.netlify/functions/create-razorpay-order
+ * Handles POST requests to /api/create-razorpay-order
  */
 
 const Razorpay = require('razorpay');

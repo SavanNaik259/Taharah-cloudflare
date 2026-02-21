@@ -2192,7 +2192,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Shipment data prepared:', shipmentData);
 
             try {
-                const response = await fetch('/.netlify/functions/shiprocket-create-order', {
+                const response = await fetch('/api/shiprocket-create-order', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

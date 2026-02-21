@@ -202,7 +202,7 @@ app.post('/api/new-product-notification', async (req, res) => {
 });
 
 // Netlify functions compatibility endpoint
-app.get('/.netlify/functions/load-products', async (req, res) => {
+app.get('/api/load-products', async (req, res) => {
   try {
     // Import the Netlify function
     const netlifyFunction = require('./netlify/functions/load-products');
@@ -212,7 +212,7 @@ app.get('/.netlify/functions/load-products', async (req, res) => {
       queryStringParameters: req.query,
       headers: req.headers,
       httpMethod: 'GET',
-      path: '/.netlify/functions/load-products'
+      path: '/api/load-products'
     };
 
     // Create mock context
@@ -254,7 +254,7 @@ app.get('/.netlify/functions/load-products', async (req, res) => {
 });
 
 // Update product stock endpoint
-app.post('/.netlify/functions/update-product-stock', async (req, res) => {
+app.post('/api/update-product-stock', async (req, res) => {
   try {
     // Import the Netlify function
     const netlifyFunction = require('./netlify/functions/update-product-stock');
@@ -264,7 +264,7 @@ app.post('/.netlify/functions/update-product-stock', async (req, res) => {
       body: JSON.stringify(req.body),
       headers: req.headers,
       httpMethod: 'POST',
-      path: '/.netlify/functions/update-product-stock'
+      path: '/api/update-product-stock'
     };
 
     // Create mock context
@@ -305,7 +305,7 @@ app.post('/.netlify/functions/update-product-stock', async (req, res) => {
 });
 
 // Delete product endpoint
-app.delete('/.netlify/functions/delete-product', async (req, res) => {
+app.delete('/api/delete-product', async (req, res) => {
   try {
     // Import the Netlify delete function
     const netlifyFunction = require('./netlify/functions/delete-product');
@@ -315,7 +315,7 @@ app.delete('/.netlify/functions/delete-product', async (req, res) => {
       body: JSON.stringify(req.body),
       headers: req.headers,
       httpMethod: 'DELETE',
-      path: '/.netlify/functions/delete-product'
+      path: '/api/delete-product'
     };
 
     // Create mock context
@@ -356,7 +356,7 @@ app.delete('/.netlify/functions/delete-product', async (req, res) => {
 });
 
 // Image proxy endpoint
-app.get('/.netlify/functions/image-proxy', async (req, res) => {
+app.get('/api/image-proxy', async (req, res) => {
   try {
     // Import the Netlify image-proxy function
     const imageProxyFunction = require('./netlify/functions/image-proxy');
@@ -366,7 +366,7 @@ app.get('/.netlify/functions/image-proxy', async (req, res) => {
       queryStringParameters: req.query,
       headers: req.headers,
       httpMethod: 'GET',
-      path: '/.netlify/functions/image-proxy'
+      path: '/api/image-proxy'
     };
 
     // Create mock context
@@ -413,7 +413,7 @@ app.get('/.netlify/functions/image-proxy', async (req, res) => {
 });
 
 // Direct email service for verification emails (bypassing Netlify function for local dev)
-app.post('/.netlify/functions/send-verification-email', async (req, res) => {
+app.post('/api/send-verification-email', async (req, res) => {
   try {
     const nodemailer = require('nodemailer');
     const emailData = req.body;
@@ -545,7 +545,7 @@ app.post('/.netlify/functions/send-verification-email', async (req, res) => {
 });
 
 // Password reset email endpoint
-app.post('/.netlify/functions/send-password-reset-email', async (req, res) => {
+app.post('/api/send-password-reset-email', async (req, res) => {
   try {
     // Clear require cache to ensure fresh module load with correct environment
     const functionPath = './netlify/functions/send-password-reset-email';
@@ -559,7 +559,7 @@ app.post('/.netlify/functions/send-password-reset-email', async (req, res) => {
       body: JSON.stringify(req.body),
       headers: req.headers,
       httpMethod: 'POST',
-      path: '/.netlify/functions/send-password-reset-email'
+      path: '/api/send-password-reset-email'
     };
 
     // Create mock context with environment variables access
@@ -996,7 +996,7 @@ app.get('/api/shipping/diagnose', async (req, res) => {
 });
 
 // Add shiprocket tracking Netlify function route
-app.get('/.netlify/functions/shiprocket-track-order/:trackingId', async (req, res) => {
+app.get('/api/shiprocket-track-order/:trackingId', async (req, res) => {
   try {
     // Import the Netlify function
     const netlifyFunction = require('./netlify/functions/shiprocket-track-order');
@@ -1006,7 +1006,7 @@ app.get('/.netlify/functions/shiprocket-track-order/:trackingId', async (req, re
       queryStringParameters: req.query,
       headers: req.headers,
       httpMethod: 'GET',
-      path: `/.netlify/functions/shiprocket-track-order/${req.params.trackingId}`
+      path: `/api/shiprocket-track-order/${req.params.trackingId}`
     };
 
     // Create mock context
@@ -1047,7 +1047,7 @@ app.get('/.netlify/functions/shiprocket-track-order/:trackingId', async (req, re
 });
 
 // Add DTDC tracking Netlify function route
-app.post('/.netlify/functions/dtdc-track-order', async (req, res) => {
+app.post('/api/dtdc-track-order', async (req, res) => {
   try {
     // Import the Netlify function
     const netlifyFunction = require('./netlify/functions/dtdc-track-order');
@@ -1057,7 +1057,7 @@ app.post('/.netlify/functions/dtdc-track-order', async (req, res) => {
       queryStringParameters: req.query,
       headers: req.headers,
       httpMethod: 'POST',
-      path: '/.netlify/functions/dtdc-track-order',
+      path: '/api/dtdc-track-order',
       body: JSON.stringify(req.body)
     };
 
@@ -1099,7 +1099,7 @@ app.post('/.netlify/functions/dtdc-track-order', async (req, res) => {
 });
 
 // Add debug Netlify function route
-app.get('/.netlify/functions/debug-shiprocket', async (req, res) => {
+app.get('/api/debug-shiprocket', async (req, res) => {
   try {
     // Import the Netlify function
     const netlifyFunction = require('./netlify/functions/debug-shiprocket');
@@ -1109,7 +1109,7 @@ app.get('/.netlify/functions/debug-shiprocket', async (req, res) => {
       queryStringParameters: req.query,
       headers: req.headers,
       httpMethod: 'GET',
-      path: '/.netlify/functions/debug-shiprocket'
+      path: '/api/debug-shiprocket'
     };
 
     // Create mock context
@@ -1150,7 +1150,7 @@ app.get('/.netlify/functions/debug-shiprocket', async (req, res) => {
 });
 
 // Add email service for order notifications
-app.post('/.netlify/functions/send-order-email', async (req, res) => {
+app.post('/api/send-order-email', async (req, res) => {
   try {
     // Import the Netlify function
     const netlifyFunction = require('./netlify/functions/send-order-email');
@@ -1160,7 +1160,7 @@ app.post('/.netlify/functions/send-order-email', async (req, res) => {
       body: JSON.stringify(req.body),
       headers: req.headers,
       httpMethod: 'POST',
-      path: '/.netlify/functions/send-order-email'
+      path: '/api/send-order-email'
     };
 
     // Create mock context

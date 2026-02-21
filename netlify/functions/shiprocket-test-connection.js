@@ -1,6 +1,6 @@
 /**
  * Netlify Function to test Shiprocket connection
- * Endpoint: /.netlify/functions/shiprocket-test-connection
+ * Endpoint: /api/shiprocket-test-connection
  */
 
 const ShiprocketService = require('./shiprocket-service');

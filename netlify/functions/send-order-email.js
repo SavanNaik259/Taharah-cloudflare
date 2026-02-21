@@ -2,7 +2,7 @@
  * Netlify Function: Send Order Email
  * 
  * Sends order confirmation emails to customer and shop owner
- * Handles POST requests to /.netlify/functions/send-order-email
+ * Handles POST requests to /api/send-order-email
  */
 
 const emailService = require('./utils/email-service');

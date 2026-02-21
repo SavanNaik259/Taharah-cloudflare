@@ -2,7 +2,7 @@
  * Netlify Function: Load Products (Generic)
  * 
  * Loads products from Firebase Storage using direct CDN URLs for optimal caching
- * Handles GET requests to /.netlify/functions/load-products?category=CATEGORY
+ * Handles GET requests to /api/load-products?category=CATEGORY
  * 
  * Uses direct Firebase Storage URLs with alt=media to ensure proper CDN caching,
  * avoiding the bandwidth consumption issues that occur with signed URLs or Admin SDK downloads.

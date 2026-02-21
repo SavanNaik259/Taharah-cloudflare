@@ -2,7 +2,7 @@
  * Netlify Function: Health Check
  * 
  * Simple health check endpoint to verify functions are working
- * Handles GET requests to /.netlify/functions/health
+ * Handles GET requests to /api/health
  */
 
 exports.handler = async (event, context) => {

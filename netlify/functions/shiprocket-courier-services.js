@@ -1,7 +1,7 @@
 
 /**
  * Netlify Function to get Shiprocket courier services
- * Endpoint: /.netlify/functions/shiprocket-courier-services
+ * Endpoint: /api/shiprocket-courier-services
  */
 
 const ShiprocketService = require('./shiprocket-service');

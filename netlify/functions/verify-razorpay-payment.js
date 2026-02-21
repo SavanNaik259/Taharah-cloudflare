@@ -2,7 +2,7 @@
  * Netlify Function: Verify Razorpay Payment
  * 
  * Verifies the signature of a Razorpay payment to confirm it's legitimate
- * Handles POST requests to /.netlify/functions/verify-razorpay-payment
+ * Handles POST requests to /api/verify-razorpay-payment
  */
 
 const crypto = require('crypto');

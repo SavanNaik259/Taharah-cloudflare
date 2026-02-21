@@ -1,6 +1,6 @@
 /**
  * Netlify Function to run Shiprocket diagnostics
- * Endpoint: /.netlify/functions/shiprocket-diagnose
+ * Endpoint: /api/shiprocket-diagnose
  */
 
 const ShiprocketService = require('./shiprocket-service');

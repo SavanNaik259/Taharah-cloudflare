@@ -2,7 +2,7 @@
 /**
  * Comprehensive Order Tracking Netlify Function
  * Combines Firebase order data with Shiprocket tracking for complete order information
- * Endpoint: /.netlify/functions/comprehensive-order-track
+ * Endpoint: /api/comprehensive-order-track
  */
 
 const axios = require('axios');
@@ -56,7 +56,7 @@ exports.handler = async (event, context) => {
         try {
             console.log('🚚 Checking Shiprocket...');
             const shiprocketResponse = await axios.get(
-                `${process.env.URL || 'https://your-site.netlify.app'}/.netlify/functions/shiprocket-track-order/${trackingId}`,
+                `${process.env.URL || 'https://your-site.netlify.app'}/api/shiprocket-track-order/${trackingId}`,
                 { timeout: 10000 }
             );
 

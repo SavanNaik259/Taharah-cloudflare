@@ -1,7 +1,7 @@
 
 /**
  * Netlify Function to get orders from Shiprocket
- * Endpoint: /.netlify/functions/shiprocket-get-orders
+ * Endpoint: /api/shiprocket-get-orders
  */
 
 const ShiprocketService = require('./shiprocket-service');

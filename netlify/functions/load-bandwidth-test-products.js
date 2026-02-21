@@ -3,7 +3,7 @@
  * Netlify Function: Load Bandwidth Test Products
  * 
  * Loads products from Firebase Storage for bandwidth testing using direct CDN URLs
- * Handles GET requests to /.netlify/functions/load-bandwidth-test-products?category=CATEGORY
+ * Handles GET requests to /api/load-bandwidth-test-products?category=CATEGORY
  * 
  * This function uses direct Firebase Storage URLs with alt=media to ensure proper CDN caching,
  * avoiding the bandwidth consumption issues that occur with signed URLs.

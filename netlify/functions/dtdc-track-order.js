@@ -1,7 +1,7 @@
 
 /**
  * Netlify Function to track DTDC orders using AfterShip API
- * Endpoint: /.netlify/functions/dtdc-track-order
+ * Endpoint: /api/dtdc-track-order
  * AfterShip API Documentation: https://docs.aftership.com/api/4/overview
  */
 

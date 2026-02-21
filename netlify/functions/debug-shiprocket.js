@@ -1,6 +1,6 @@
 /**
  * Debug function to test Shiprocket credentials and connection
- * Endpoint: /.netlify/functions/debug-shiprocket
+ * Endpoint: /api/debug-shiprocket
  */
 
 exports.handler = async (event, context) => {

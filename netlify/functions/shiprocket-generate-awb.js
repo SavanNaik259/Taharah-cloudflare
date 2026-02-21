@@ -1,7 +1,7 @@
 
 /**
  * Netlify Function to generate Shiprocket AWB
- * Endpoint: /.netlify/functions/shiprocket-generate-awb
+ * Endpoint: /api/shiprocket-generate-awb
  */
 
 const ShiprocketService = require('./shiprocket-service');

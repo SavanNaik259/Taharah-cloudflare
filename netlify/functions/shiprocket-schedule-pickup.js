@@ -1,7 +1,7 @@
 
 /**
  * Netlify Function to schedule Shiprocket pickup
- * Endpoint: /.netlify/functions/shiprocket-schedule-pickup
+ * Endpoint: /api/shiprocket-schedule-pickup
  */
 
 const ShiprocketService = require('./shiprocket-service');

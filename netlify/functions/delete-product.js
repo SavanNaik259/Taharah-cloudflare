@@ -2,7 +2,7 @@
  * Netlify Function: Delete Product
  * 
  * Handles deleting products from Firebase Storage product JSON files
- * Supports DELETE requests to /.netlify/functions/delete-product
+ * Supports DELETE requests to /api/delete-product
  */
 
 const admin = require('firebase-admin');

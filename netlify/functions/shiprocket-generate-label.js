@@ -1,7 +1,7 @@
 
 /**
  * Netlify Function to generate Shiprocket shipping label
- * Endpoint: /.netlify/functions/shiprocket-generate-label
+ * Endpoint: /api/shiprocket-generate-label
  */
 
 const ShiprocketService = require('./shiprocket-service');

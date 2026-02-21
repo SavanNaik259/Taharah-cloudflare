@@ -373,7 +373,7 @@ window.StockManager = (function() {
             const outOfStockProducts = [];
 
             for (const category of categories) {
-                const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
+                const response = await fetch(`/api/load-products?category=${category}&cacheBust=${Date.now()}`);
                 
                 if (response.ok) {
                     const data = await response.json();
@@ -427,7 +427,7 @@ window.StockManager = (function() {
             const lowStockProducts = [];
 
             for (const category of categories) {
-                const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
+                const response = await fetch(`/api/load-products?category=${category}&cacheBust=${Date.now()}`);
                 
                 if (response.ok) {
                     const data = await response.json();

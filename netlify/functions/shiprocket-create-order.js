@@ -1,7 +1,7 @@
 
 /**
  * Netlify Function to create Shiprocket shipments
- * Endpoint: /.netlify/functions/shiprocket-create-order
+ * Endpoint: /api/shiprocket-create-order
  */
 
 const axios = require('axios');
