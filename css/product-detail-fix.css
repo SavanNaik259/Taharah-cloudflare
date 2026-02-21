@@ -59,19 +59,19 @@
 
 /* Add to Cart and Buy Now buttons color update */
 .add-to-cart-btn {
-    background-color: #a46d77 !important; /* Brand Plum Color from Logo */
+    background-color: #a46d77 !important; /* Brand Plum Color */
     color: #fff !important;
     border: none !important;
 }
 
 .buy-now-btn {
-    background-color: #a46d77 !important; /* Brand Plum Color from Logo */
-    color: #fff !important;
+    background-color: #d8d2c2 !important; /* Greyish Beige Color */
+    color: #4a4a4a !important; /* Dark grey for readability on beige */
     border: none !important;
 }
 
 .add-to-cart-btn:hover, .buy-now-btn:hover {
-    filter: brightness(0.9) !important;
+    filter: brightness(0.95) !important;
 }
 
 /* Emergency fallback - if nothing else works */
