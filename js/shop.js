@@ -337,6 +337,18 @@ function initShop() {
     // Initialize shop with default view showing all products
     setTimeout(() => {
         console.log('Initializing default shop view - showing all products');
+        
+        // Aggressively clear ALL possible product-related caches on shop load
+        const allPossibleCaches = [
+            'featuredCollectionProducts', 'featuredCollectionProductsTime',
+            'new-arrivalsProducts', 'new-arrivalsProductsTime',
+            'ready-to-wearProducts', 'ready-to-wearProductsTime',
+            'party-wearProducts', 'party-wearProductsTime',
+            'modest-wearProducts', 'modest-wearProductsTime',
+            'lastProductUpdate'
+        ];
+        allPossibleCaches.forEach(key => localStorage.removeItem(key));
+        
         // Always ensure we have the latest products by clearing any potential stale references
         // and forcing a clean render
         displayAllProducts(originalProducts);

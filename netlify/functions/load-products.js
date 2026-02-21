@@ -246,7 +246,7 @@ exports.handler = async (event, context) => {
       responseHeaders['Cache-Control'] = 'no-cache, no-store, must-revalidate';
       responseHeaders['Pragma'] = 'no-cache';
       responseHeaders['Expires'] = '0';
-      responseHeaders['Netlify-CDN-Cache-Control'] = 'public, max-age=0, must-revalidate'; // Netlify CDN specific
+      responseHeaders['Netlify-CDN-Cache-Control'] = 'no-store, must-revalidate, max-age=0'; // Netlify CDN specific - disable caching
       
       // Generate consistent ETag based on product data to ensure proper cache validation
       if (etag) {
