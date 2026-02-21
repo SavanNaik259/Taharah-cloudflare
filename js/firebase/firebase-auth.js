@@ -186,9 +186,13 @@ window.FirebaseAuth = (function() {
       // Store user data at "users/{user.uid}" path in Firestore
       await db.collection("users").doc(user.uid).set(userProfile);
 
-      // Send custom verification email using your working email service
+      // Send custom verification email using the API
       console.log("📧 Attempting to send verification email...");
-      const emailResult = await sendCustomVerificationEmail(user.email, userData.displayName || userData.firstName || 'User', verificationToken);
+      const emailResult = await fetch('/api/send-verification-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email, name: userData.displayName, token: verificationToken })
+      }).then(res => res.json());
 
       if (!emailResult.success) {
         console.error("❌ Failed to send verification email:", emailResult.error);

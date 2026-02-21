@@ -5,22 +5,16 @@
  * in both local development and production environments.
  */
 
-// Determine if we're running in production (Netlify) or development (localhost)
+// Determine if we're running in production (Cloudflare/Netlify) or development (localhost)
 const isProduction = !window.location.hostname.includes('localhost') && 
                      !window.location.hostname.includes('127.0.0.1');
 
 /**
- * Get the base URL for API requests to Netlify Functions
+ * Get the base URL for API requests
  * @returns {string} The base URL to use for API requests
  */
 function getApiBaseUrl() {
-  // Always use /.netlify/functions directly in production
-  // This ensures we're accessing the functions directly without relying on redirects
-  if (isProduction) {
-    return '/.netlify/functions';
-  }
-
-  // In development, use the redirects from netlify.toml to map /api/ to /.netlify/functions/
+  // For Cloudflare Pages Functions, functions are served from /api
   return '/api';
 }
 

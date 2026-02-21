@@ -1,0 +1,9 @@
+name = "nazakat-website"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "."
+
+[vars]
+EMAIL_SERVICE = "gmail"
+FIREBASE_PROJECT_ID = "studio-7642357109-d9026"
+FIREBASE_STORAGE_BUCKET = "studio-7642357109-d9026.firebasestorage.app"
+RAZORPAY_KEY_ID = "rzp_live_SCOazTCPWFjXmG"
