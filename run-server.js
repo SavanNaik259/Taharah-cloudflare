@@ -84,8 +84,11 @@ app.all('/api/:functionName', async (req, res) => {
                     } catch(e) {}
                   }
                   
+                  // Convert relative paths or extracted paths to direct Firebase URLs
                   const cleanPath = path.startsWith('/') ? path.substring(1) : path;
                   const finalPath = cleanPath.startsWith('productImages/') ? cleanPath : `productImages/${cleanPath}`;
+                  
+                  // SYNC WITH LOCAL: Use direct public URL without proxy
                   return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(finalPath)}?alt=media`;
                 };
                 const newP = { ...p };
