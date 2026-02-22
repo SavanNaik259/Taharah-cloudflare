@@ -16,45 +16,10 @@ app.all('/api/:functionName', async (req, res) => {
   const functionName = req.params.functionName;
   
     if (functionName === 'image-proxy') {
-    let imageUrl = req.query.url;
-    if (!imageUrl) return res.status(400).send('Missing URL');
-    
-    try {
-      imageUrl = decodeURIComponent(imageUrl);
-      
-      // Fix potential double-encoding or malformed Firebase URLs
-      if (imageUrl.includes('firebasestorage.googleapis.com') && !imageUrl.includes('?alt=media')) {
-        imageUrl += (imageUrl.includes('?') ? '&' : '?') + 'alt=media';
-      }
-
-      console.log(`[Local Proxy] Fetching: ${imageUrl}`);
-      
-      const fetchResponse = await fetch(imageUrl, {
-        headers: { 
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
-          'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
-        },
-        timeout: 15000
-      });
-      
-      if (!fetchResponse.ok) {
-        console.error(`[Local Proxy] Failed: ${fetchResponse.status} for ${imageUrl}`);
-        // If it's a 400 from Firebase, it might be a permission or path issue
-        // We redirect as a fallback, but the browser will likely fail too
-        return res.redirect(imageUrl);
-      }
-      
-      res.setHeader('Content-Type', fetchResponse.headers.get('content-type') || 'image/jpeg');
-      res.setHeader('Cache-Control', 'public, max-age=31536000');
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      
-      const buffer = await fetchResponse.buffer();
-      return res.send(buffer);
-    } catch (e) {
-      console.error(`[Local Proxy] Error:`, e.message);
-      try { return res.redirect(imageUrl); } catch (err) { return res.status(500).send(e.message); }
+      let imageUrl = req.query.url;
+      if (!imageUrl) return res.status(400).send('Missing URL');
+      return res.redirect(decodeURIComponent(imageUrl));
     }
-  }
 
   const functionPath = path.join(__dirname, 'netlify', 'functions', `${functionName}.js`);
   if (!fs.existsSync(functionPath)) return res.status(404).json({ success: false, error: 'Function not found' });
@@ -84,27 +49,34 @@ app.all('/api/:functionName', async (req, res) => {
              const bucket = 'studio-7642357109-d9026.firebasestorage.app';
              parsed.products = parsed.products.map(p => {
                 const transform = (u) => {
-                  if (!u) return u;
-                  if (typeof u === 'string' && u.includes('/.netlify/functions/image-proxy')) {
-                    try {
-                      const uObj = new URL(u, 'http://localhost');
-                      const pParam = uObj.searchParams.get('path');
-                      if (pParam) {
-                        return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(pParam)}?alt=media`;
-                      }
-                    } catch(e) {}
-                  }
-                  if (typeof u === 'string' && u.includes('firebasestorage')) {
+                  if (!u || typeof u !== 'string') return u;
+                  const bucket = 'studio-7642357109-d9026.firebasestorage.app';
+                  
+                  // If it's already a full firebasestorage URL, just return it
+                  if (u.includes('firebasestorage.googleapis.com')) {
+                    // Extract the actual URL if it was wrapped in a proxy
                     if (u.includes('/api/image-proxy?url=')) {
-                        try {
-                            const uObj = new URL(u, 'http://localhost');
-                            const urlParam = uObj.searchParams.get('url');
-                            if (urlParam) return urlParam;
-                        } catch(e) {}
+                      try {
+                        const uObj = new URL(u, 'http://localhost');
+                        const urlParam = uObj.searchParams.get('url');
+                        if (urlParam) return urlParam;
+                      } catch(e) {}
                     }
                     return u;
                   }
-                  return u;
+
+                  // Handle legacy and relative paths
+                  let path = u;
+                  if (u.includes('?path=')) {
+                    try {
+                      const uObj = new URL(u, 'http://localhost');
+                      path = uObj.searchParams.get('path') || u;
+                    } catch(e) {}
+                  }
+                  
+                  const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+                  const finalPath = cleanPath.startsWith('productImages/') ? cleanPath : `productImages/${cleanPath}`;
+                  return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(finalPath)}?alt=media`;
                 };
                 const newP = { ...p };
                 if (newP.image) newP.image = transform(newP.image);

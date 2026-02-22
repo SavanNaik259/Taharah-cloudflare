@@ -233,25 +233,24 @@ exports.handler = async (event, context) => {
     const transformImageUrl = (u) => {
       if (!u || typeof u !== 'string') return u;
       const bucket = 'studio-7642357109-d9026.firebasestorage.app';
-      if (u.includes('/.netlify/functions/image-proxy')) {
-        try {
-          const uObj = new URL(u, 'http://localhost');
-          const pParam = uObj.searchParams.get('path');
-          if (pParam) return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(pParam)}?alt=media`;
-        } catch(e) {}
+      
+      // If it's already a direct Firebase URL, return it
+      if (u.includes('firebasestorage.googleapis.com') && !u.includes('/api/image-proxy')) {
+        return u;
       }
-      if (u.includes('/api/image-proxy?url=')) {
-        try {
-          const uObj = new URL(u, 'http://localhost');
-          const urlParam = uObj.searchParams.get('url');
-          if (urlParam) return urlParam;
-        } catch(e) {}
-      }
-      if (u.startsWith('productImages/') || u.startsWith('/productImages/')) {
-        const cleanPath = u.startsWith('/') ? u.substring(1) : u;
-        return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(cleanPath)}?alt=media`;
-      }
-      return u;
+
+      // Extract path if it was wrapped in any proxy
+      let path = u;
+      try {
+        const uObj = new URL(u, 'http://localhost');
+        path = uObj.searchParams.get('url') || uObj.searchParams.get('path') || u;
+        if (path.includes('firebasestorage.googleapis.com')) return path;
+      } catch(e) {}
+
+      // Convert relative paths or extracted paths to direct Firebase URLs
+      const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+      const finalPath = cleanPath.startsWith('productImages/') ? cleanPath : `productImages/${cleanPath}`;
+      return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(finalPath)}?alt=media`;
     };
 
     const transformedProducts = (Array.isArray(products) ? products : []).map(p => {
