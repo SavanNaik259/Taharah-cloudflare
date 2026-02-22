@@ -1,37 +1,23 @@
 export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
-  const category = url.searchParams.get('category');
-  const categories = url.searchParams.get('categories');
-  const cacheBust = url.searchParams.get('cacheBust');
+  const categories = url.searchParams.get('categories') || url.searchParams.get('category');
   
   const headers = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
     'Content-Type': 'application/json'
   };
 
-  if (request.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers });
-  }
-
   try {
-    const categoryList = categories ? categories.split(',').map(c => c.trim()).filter(c => c) : [category];
-    if (categoryList.length === 0 || !categoryList[0]) {
-       return new Response(JSON.stringify({ success: false, products: [], error: 'Category required' }), { status: 400, headers });
+    if (!categories) {
+       return new Response(JSON.stringify({ success: false, error: 'Category required' }), { status: 400, headers });
     }
 
+    const categoryList = categories.split(',').map(c => c.trim()).filter(c => c);
     const storageBucket = env.FIREBASE_STORAGE_BUCKET || 'studio-7642357109-d9026.firebasestorage.app';
     
     const productPromises = categoryList.map(async (cat) => {
-      const isBandwidthTest = cat.startsWith('bandwidth-test-');
-      let storageUrl = isBandwidthTest 
-        ? `https://firebasestorage.googleapis.com/v0/b/${storageBucket}/o/bandwidthTest%2F${cat}-products.json?alt=media`
-        : `https://firebasestorage.googleapis.com/v0/b/${storageBucket}/o/productData%2F${cat}-products.json?alt=media`;
-
-      if (cacheBust) storageUrl += `&fbCacheBust=${cacheBust}`;
-
+      const storageUrl = `https://firebasestorage.googleapis.com/v0/b/${storageBucket}/o/productData%2F${cat}-products.json?alt=media`;
       const response = await fetch(storageUrl);
       if (!response.ok) return [];
       const data = await response.json();
@@ -42,34 +28,53 @@ export async function onRequest(context) {
     const allProducts = productsArrays.flat();
 
     const transformedProducts = allProducts.map(p => {
-      const proxyUrl = (u) => {
-        if (u && (u.includes('firebasestorage.googleapis.com') || u.includes('googleusercontent.com'))) {
-          // Use relative path for production
+      const transformUrl = (u) => {
+        if (!u) return u;
+        
+        // Handle legacy Netlify proxy paths in the database
+        if (typeof u === 'string' && u.includes('/.netlify/functions/image-proxy')) {
+          try {
+            const urlObj = new URL(u, 'http://localhost');
+            const pathParam = urlObj.searchParams.get('path');
+            if (pathParam) {
+              const newUrl = `https://firebasestorage.googleapis.com/v0/b/${storageBucket}/o/${encodeURIComponent(pathParam)}?alt=media`;
+              return `/api/image-proxy?url=${encodeURIComponent(newUrl)}`;
+            }
+          } catch (e) {
+            console.error('URL parse error:', e);
+          }
+        }
+        
+        // Handle direct Firebase URLs
+        if (typeof u === 'string' && u.includes('firebasestorage.googleapis.com')) {
           return `/api/image-proxy?url=${encodeURIComponent(u)}`;
         }
+        
         return u;
       };
 
-      if (p.image) p.image = proxyUrl(p.image);
-      if (p.mainImage) p.mainImage = proxyUrl(p.mainImage);
-      if (p.imageUrl) p.imageUrl = proxyUrl(p.imageUrl);
+      // Deep copy to avoid mutation issues if needed, but here we just map
+      const newP = { ...p };
+      if (newP.image) newP.image = transformUrl(newP.image);
+      if (newP.mainImage) newP.mainImage = transformUrl(newP.mainImage);
+      if (newP.imageUrl) newP.imageUrl = transformUrl(newP.imageUrl);
       
-      if (p.images && Array.isArray(p.images)) {
-        p.images = p.images.map(img => {
-          if (typeof img === 'string') return proxyUrl(img);
-          if (img && img.url) {
-            img.url = proxyUrl(img.url);
+      if (newP.images && Array.isArray(newP.images)) {
+        newP.images = newP.images.map(img => {
+          if (typeof img === 'string') return transformUrl(img);
+          if (img && typeof img === 'object' && img.url) {
+            return { ...img, url: transformUrl(img.url) };
           }
           return img;
         });
       }
-      return p;
+      return newP;
     });
 
     return new Response(JSON.stringify({
       success: true,
       products: transformedProducts,
-      message: `Loaded ${transformedProducts.length} products`
+      count: transformedProducts.length
     }), { status: 200, headers });
 
   } catch (error) {
