@@ -36,7 +36,7 @@ window.FirebaseInit = (function() {
         return true;
       } catch (appError) {
         // If app/no-app error, initialize Firebase
-        if (appError.code === 'app-compat/no-app') {
+        if (appError.code === 'app-compat/no-app' || appError.code === 'app/no-app' || appError.message.includes('No Firebase App')) {
           console.log('No Firebase app found, initializing now');
           
           // Check if firebaseConfig is available

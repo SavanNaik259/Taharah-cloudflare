@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Config & Private Key Test</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; max-width: 900px; margin: 0 auto; background: #f4f7f6; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h1, h2 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .status { padding: 15px; margin: 10px 0; border-radius: 4px; font-weight: bold; border-left: 5px solid; }
+        .success { background: #d4edda; color: #155724; border-color: #28a745; }
+        .error { background: #f8d7da; color: #721c24; border-color: #dc3545; }
+        .info { background: #d1ecf1; color: #0c5460; border-color: #17a2b8; }
+        .warning { background: #fff3cd; color: #856404; border-color: #ffc107; }
+        pre { background: #272822; color: #f8f8f2; padding: 15px; border-radius: 4px; overflow-x: auto; white-space: pre-wrap; font-family: 'Courier New', Courier, monospace; }
+        .secret-container { position: relative; }
+        .copy-btn { position: absolute; top: 10px; right: 10px; padding: 5px 10px; cursor: pointer; background: #444; color: white; border: none; border-radius: 3px; }
+        code { background: #eee; padding: 2px 5px; border-radius: 3px; font-weight: bold; }
+        .env-row { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Firebase Environment Diagnostic</h1>
+        <p>This page checks your environment variables and private key configuration required for server-side operations.</p>
+    </div>
+
+    <div class="card">
+        <h2>1. Client-side Configuration (Public)</h2>
+        <div id="client-config-status" class="status">Checking...</div>
+        <pre id="client-config-pre">Loading window.firebaseConfig...</pre>
+    </div>
+
+    <div class="card">
+        <h2>2. Server-side Environment Variables (Cloudflare)</h2>
+        <p class="info">This section shows your actual environment variables fetched from the server.</p>
+        <div id="server-env-status" class="status">Checking server...</div>
+        
+        <div class="env-row">
+            <strong>Project ID:</strong> <span id="env-project-id">loading...</span>
+        </div>
+        <div class="env-row">
+            <strong>Client Email:</strong> <span id="env-client-email">loading...</span>
+        </div>
+        <div class="env-row">
+            <strong>Storage Bucket:</strong> <span id="env-storage-bucket">loading...</span>
+        </div>
+        
+        <div id="private-key-section">
+            <p><strong>Private Key (Raw Content):</strong> <span id="pk-status">Checking...</span></p>
+            <div class="secret-container">
+                <button class="copy-btn" onclick="copyKey()">Copy</button>
+                <pre id="private-key-display">Waiting for server response...</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>3. Root Cause Checklist</h2>
+        <ul>
+            <li><strong>Is FIREBASE_PRIVATE_KEY set?</strong> Must start with <code>-----BEGIN PRIVATE KEY-----</code>.</li>
+            <li><strong>Are newlines handled?</strong> Cloudflare variables sometimes strip <code>\n</code>. If so, replace them with actual newlines or <code>\\n</code> depending on your loader logic.</li>
+            <li><strong>Storage Bucket Rules:</strong> Ensure your bucket <code>studio-7642357109-d9026.firebasestorage.app</code> has <b>Public Read</b> access enabled in the Firebase Console.</li>
+        </ul>
+    </div>
+
+    <script type="module">
+        function updateUI() {
+            const clientStatus = document.getElementById('client-config-status');
+            const clientPre = document.getElementById('client-config-pre');
+            
+            if (window.firebaseConfig) {
+                clientStatus.className = 'status success';
+                clientStatus.textContent = 'Public Configuration Loaded Successfully';
+                clientPre.textContent = JSON.stringify(window.firebaseConfig, null, 2);
+            } else {
+                clientStatus.className = 'status error';
+                clientStatus.textContent = 'Missing js/firebase-config.js';
+            }
+        }
+
+        async function checkServerEnv() {
+            const serverStatus = document.getElementById('server-env-status');
+            const pkDisplay = document.getElementById('private-key-display');
+            const pkStatus = document.getElementById('pk-status');
+            
+            const elProjectId = document.getElementById('env-project-id');
+            const elClientEmail = document.getElementById('env-client-email');
+            const elStorageBucket = document.getElementById('env-storage-bucket');
+
+            try {
+                const response = await fetch('/api/debug-env');
+                if (response.ok) {
+                    const data = await response.json();
+                    serverStatus.className = 'status success';
+                    serverStatus.textContent = 'Server-side data retrieved successfully';
+                    
+                    elProjectId.textContent = data.FIREBASE_PROJECT_ID;
+                    elClientEmail.textContent = data.FIREBASE_CLIENT_EMAIL;
+                    elStorageBucket.textContent = data.FIREBASE_STORAGE_BUCKET;
+                    
+                    if (data.FIREBASE_PRIVATE_KEY && data.FIREBASE_PRIVATE_KEY !== "NOT_SET") {
+                        pkStatus.className = 'status success';
+                        pkStatus.textContent = 'FOUND';
+                        pkDisplay.textContent = data.FIREBASE_PRIVATE_KEY;
+                    } else {
+                        pkStatus.className = 'status error';
+                        pkStatus.textContent = 'NOT FOUND';
+                        pkDisplay.textContent = 'Key is missing in environment variables.';
+                    }
+                } else {
+                    serverStatus.className = 'status error';
+                    serverStatus.textContent = 'Failed to fetch /api/debug-env. Status: ' + response.status;
+                }
+            } catch (e) {
+                serverStatus.className = 'status error';
+                serverStatus.textContent = 'Error: ' + e.message;
+            }
+        }
+
+        window.copyKey = () => {
+            const text = document.getElementById('private-key-display').textContent;
+            navigator.clipboard.writeText(text);
+            alert('Copied to clipboard');
+        }
+
+        if (window.firebaseConfig) {
+            updateUI();
+            checkServerEnv();
+        } else {
+            const script = document.createElement('script');
+            script.src = 'js/firebase-config.js';
+            script.onload = () => { updateUI(); checkServerEnv(); };
+            document.head.appendChild(script);
+        }
+    </script>
+</body>
+</html>

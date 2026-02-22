@@ -25,6 +25,15 @@ app.all('/api/:functionName', async (req, res) => {
       return res.redirect(decodeURIComponent(imageUrl));
     }
 
+  if (functionName === 'debug-env') {
+    return res.json({
+      FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID || "NOT_SET",
+      FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL || "NOT_SET",
+      FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET || "NOT_SET",
+      FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY || "NOT_SET"
+    });
+  }
+
   const functionPath = path.join(__dirname, 'netlify', 'functions', `${functionName}.js`);
   if (!fs.existsSync(functionPath)) return res.status(404).json({ success: false, error: 'Function not found' });
 

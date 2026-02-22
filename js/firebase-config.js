@@ -12,3 +12,11 @@ const firebaseConfig = {
 
 // Make firebaseConfig available globally
 window.firebaseConfig = firebaseConfig;
+
+// Initialize Firebase immediately if the SDK is loaded
+if (typeof firebase !== 'undefined') {
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+        console.log("Firebase initialized directly from config file");
+    }
+}
