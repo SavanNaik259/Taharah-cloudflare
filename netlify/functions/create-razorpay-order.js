@@ -38,7 +38,10 @@ exports.handler = async (event, context) => {
   
   try {
     // Check if Razorpay credentials are available
-    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || "rzp_live_SCOazTCPWFjXmG";
+    const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || "qcL5npnItQTGVDyBc4hFAbp9";
+
+    if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
       console.error('Razorpay credentials missing from environment variables');
       return {
         statusCode: 500,
@@ -47,8 +50,8 @@ exports.handler = async (event, context) => {
           success: false,
           message: 'Razorpay credentials are not configured correctly',
           debug: {
-            keyIdExists: !!process.env.RAZORPAY_KEY_ID,
-            keySecretExists: !!process.env.RAZORPAY_KEY_SECRET
+            keyIdExists: !!RAZORPAY_KEY_ID,
+            keySecretExists: !!RAZORPAY_KEY_SECRET
           }
         })
       };
@@ -56,8 +59,8 @@ exports.handler = async (event, context) => {
     
     // Create a Razorpay instance
     const razorpay = new Razorpay({
-      key_id: process.env.RAZORPAY_KEY_ID,
-      key_secret: process.env.RAZORPAY_KEY_SECRET
+      key_id: RAZORPAY_KEY_ID,
+      key_secret: RAZORPAY_KEY_SECRET
     });
     
     // Parse the request body
@@ -124,7 +127,7 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({
         success: true,
         order,
-        key_id: process.env.RAZORPAY_KEY_ID
+        key_id: RAZORPAY_KEY_ID
       })
     };
   } catch (error) {

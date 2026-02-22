@@ -55,7 +55,7 @@ exports.handler = async (event, context) => {
     console.log('Verifying Razorpay payment:', razorpay_payment_id);
     
     // Create the signature verification data
-    const secret = process.env.RAZORPAY_KEY_SECRET;
+    const secret = process.env.RAZORPAY_KEY_SECRET || "qcL5npnItQTGVDyBc4hFAbp9";
     if (!secret) {
       console.error('RAZORPAY_KEY_SECRET is missing');
       return {
