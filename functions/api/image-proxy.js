@@ -9,20 +9,23 @@ export async function onRequest(context) {
 
   try {
     const decodedUrl = decodeURIComponent(imageUrl);
-    console.log(`Proxying image: ${decodedUrl}`);
+    console.log(`[Proxy] Fetching image from: ${decodedUrl}`);
 
-    // Standard headers to avoid blocking
+    // Headers to look like a real browser request to avoid blocking
     const fetchHeaders = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-      'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+      'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+      'Accept-Language': 'en-US,en;q=0.9'
     };
 
     const response = await fetch(decodedUrl, {
-      headers: fetchHeaders
+      headers: fetchHeaders,
+      redirect: 'follow'
     });
 
     if (!response.ok) {
-      // Retry once without headers if it fails
+      console.error(`[Proxy] Failed to fetch image: ${response.status} ${response.statusText}`);
+      // Fallback: try one more time with no custom headers
       const retryResponse = await fetch(decodedUrl);
       if (!retryResponse.ok) {
         return new Response(`Failed to fetch image: ${retryResponse.statusText}`, { status: retryResponse.status });
@@ -49,7 +52,7 @@ export async function onRequest(context) {
       }
     });
   } catch (error) {
-    console.error(`Proxy error for ${imageUrl}:`, error);
+    console.error(`[Proxy] Error:`, error);
     return new Response(`Error proxying image: ${error.message}`, { status: 500 });
   }
 }

@@ -41,12 +41,11 @@ export async function onRequest(context) {
     const productsArrays = await Promise.all(productPromises);
     const allProducts = productsArrays.flat();
 
-    const baseUrl = new URL(request.url).origin;
     const transformedProducts = allProducts.map(p => {
       const proxyUrl = (u) => {
         if (u && (u.includes('firebasestorage.googleapis.com') || u.includes('googleusercontent.com'))) {
-          // Absolute URL to ensure it works even if relative pathing fails
-          return `${baseUrl}/api/image-proxy?url=${encodeURIComponent(u)}`;
+          // Use relative path for production
+          return `/api/image-proxy?url=${encodeURIComponent(u)}`;
         }
         return u;
       };
@@ -58,7 +57,9 @@ export async function onRequest(context) {
       if (p.images && Array.isArray(p.images)) {
         p.images = p.images.map(img => {
           if (typeof img === 'string') return proxyUrl(img);
-          if (img && img.url) img.url = proxyUrl(img.url);
+          if (img && img.url) {
+            img.url = proxyUrl(img.url);
+          }
           return img;
         });
       }

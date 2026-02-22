@@ -1,55 +1,51 @@
-exports.handler = async (event, context) => { const request = { url: "http://localhost" + event.path + (Object.keys(event.queryStringParameters || {}).length ? "?" + new URLSearchParams(event.queryStringParameters).toString() : "") };
-  
-  const url = new URL(request.url);
-  const imageUrl = url.searchParams.get('url');
+const fetch = require('node-fetch');
+
+exports.handler = async (event, context) => {
+  const imageUrl = event.queryStringParameters.url;
 
   if (!imageUrl) {
-    return { body: ('Missing URL parameter', { status: 400 });
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: 'Missing URL parameter' })
+    };
   }
 
   try {
     const decodedUrl = decodeURIComponent(imageUrl);
-    console.log(`Proxying image: ${decodedUrl}`);
-
-    // Standard headers to avoid blocking
-    const fetchHeaders = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-      'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
-    };
+    console.log(`[Local Proxy] Fetching: ${decodedUrl}`);
 
     const response = await fetch(decodedUrl, {
-      headers: fetchHeaders
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
     });
 
     if (!response.ok) {
-      // Retry once without headers if it fails
-      const retryResponse = await fetch(decodedUrl);
-      if (!retryResponse.ok) {
-        return { body: (`Failed to fetch image: ${retryResponse.statusText}`, { status: retryResponse.status });
-      }
-      
-      const content = await retryResponse.arrayBuffer();
-      return { body: (content, {
-        headers: {
-          'Content-Type': retryResponse.headers.get('content-type') || 'image/jpeg',
-          'Cache-Control': 'public, max-age=31536000',
-          'Access-Control-Allow-Origin': '*'
-        }
-      });
+      console.error(`[Local Proxy] Failed to fetch: ${response.status} ${response.statusText}`);
+      return {
+        statusCode: response.status,
+        body: `Failed to fetch image: ${response.statusText}`
+      };
     }
 
     const contentType = response.headers.get('content-type');
-    const imageBuffer = await response.arrayBuffer();
+    const buffer = await response.buffer();
 
-    return { body: (imageBuffer, {
+    return {
+      statusCode: 200,
       headers: {
         'Content-Type': contentType || 'image/jpeg',
-        'Cache-Control': 'public, max-age=31536000',
-        'Access-Control-Allow-Origin': '*'
-      }
-    });
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'public, max-age=31536000'
+      },
+      body: buffer.toString('base64'),
+      isBase64Encoded: true
+    };
   } catch (error) {
-    console.error(`Proxy error for ${imageUrl}:`, error);
-    return { body: (`Error proxying image: ${error.message}`, { status: 500 });
+    console.error(`[Local Proxy] Error:`, error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: error.message })
+    };
   }
-}
+};
