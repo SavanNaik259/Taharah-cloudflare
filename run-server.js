@@ -46,22 +46,14 @@ app.all('/api/:functionName', async (req, res) => {
         try { 
           const parsed = JSON.parse(result.body);
           if (functionName === 'load-products' && parsed.products) {
-             const bucket = 'studio-7642357109-d9026.firebasestorage.app';
+             const bucket = process.env.FIREBASE_STORAGE_BUCKET || 'studio-7642357109-d9026.firebasestorage.app';
              parsed.products = parsed.products.map(p => {
                 const transform = (u) => {
                   if (!u || typeof u !== 'string') return u;
-                  const bucket = 'studio-7642357109-d9026.firebasestorage.app';
+                  const bucket = process.env.FIREBASE_STORAGE_BUCKET || 'studio-7642357109-d9026.firebasestorage.app';
                   
                   // If it's already a full firebasestorage URL, just return it
                   if (u.includes('firebasestorage.googleapis.com')) {
-                    // Extract the actual URL if it was wrapped in a proxy
-                    if (u.includes('/api/image-proxy?url=')) {
-                      try {
-                        const uObj = new URL(u, 'http://localhost');
-                        const urlParam = uObj.searchParams.get('url');
-                        if (urlParam) return urlParam;
-                      } catch(e) {}
-                    }
                     return u;
                   }
 
