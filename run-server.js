@@ -15,7 +15,7 @@ app.use(express.static('.'));
 app.all('/api/:functionName', async (req, res) => {
   const functionName = req.params.functionName;
   
-  if (functionName === 'image-proxy') {
+    if (functionName === 'image-proxy') {
     const imageUrl = req.query.url;
     if (!imageUrl) return res.status(400).send('Missing URL');
     
@@ -23,7 +23,7 @@ app.all('/api/:functionName', async (req, res) => {
       const decodedUrl = decodeURIComponent(imageUrl);
       console.log(`[Local Proxy] Fetching: ${decodedUrl}`);
       
-      const response = await fetch(decodedUrl, {
+      const fetchResponse = await fetch(decodedUrl, {
         headers: { 
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
           'Accept': 'image/*, */*'
@@ -31,14 +31,14 @@ app.all('/api/:functionName', async (req, res) => {
         timeout: 15000
       });
       
-      if (!response.ok) {
-        console.error(`[Local Proxy] Failed: ${response.status} for ${decodedUrl}`);
+      if (!fetchResponse.ok) {
+        console.error(`[Local Proxy] Failed: ${fetchResponse.status} for ${decodedUrl}`);
         return res.redirect(decodedUrl);
       }
       
-      res.setHeader('Content-Type', response.headers.get('content-type') || 'image/jpeg');
+      res.setHeader('Content-Type', fetchResponse.headers.get('content-type') || 'image/jpeg');
       res.setHeader('Cache-Control', 'public, max-age=31536000');
-      const buffer = await response.buffer();
+      const buffer = await fetchResponse.buffer();
       return res.send(buffer);
     } catch (e) {
       console.error(`[Local Proxy] Error:`, e.message);
