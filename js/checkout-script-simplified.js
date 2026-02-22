@@ -2337,7 +2337,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     // Fallback to direct API call to Express server
                     console.log('Using local server to create order');
-                    apiEndpoint = `${window.location.origin}/api/create-razorpay-order`;
+                    const baseUrl = window.location.origin;
+                    apiEndpoint = `${baseUrl}/api/create-razorpay-order`;
 
                     const response = await Promise.race([
                         fetch(apiEndpoint, {
@@ -2585,8 +2586,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     ]);
                 } else {
                     console.log('Verifying payment via Express server');
+                    const baseUrl = window.location.origin;
                     const verifyResponse = await Promise.race([
-                        fetch(`${window.location.origin}/api/verify-razorpay-payment`, {
+                        fetch(`${baseUrl}/api/verify-razorpay-payment`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
