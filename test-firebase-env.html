@@ -5,72 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Firebase Config Test</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
-        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
-        pre { background: #f8f9fa; padding: 15px; border: 1px solid #ddd; overflow-x: auto; }
-        .hidden { color: transparent; text-shadow: 0 0 5px rgba(0,0,0,0.5); }
-        .hidden:hover { color: inherit; text-shadow: none; }
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; max-width: 800px; margin: 0 auto; }
+        .status { padding: 15px; margin: 10px 0; border-radius: 4px; border: 1px solid #ddd; }
+        .success { background: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
+        pre { background: #f8f9fa; padding: 15px; border: 1px solid #ddd; overflow-x: auto; border-radius: 4px; }
+        .hidden { filter: blur(4px); transition: filter 0.3s; cursor: pointer; }
+        .hidden:hover { filter: none; }
+        code { font-family: monospace; font-weight: bold; }
     </style>
 </head>
 <body>
-    <h1>Firebase Configuration Test</h1>
-    <div id="env-status">Checking environment variables...</div>
+    <h1>Firebase Connection Test</h1>
+    <p>This page checks if your Firebase configuration is correctly loaded and if the SDK can initialize.</p>
+    
+    <div id="env-status" class="status info">Checking configuration...</div>
     
     <h2>Configuration Details</h2>
     <div id="config-details">
-        <p><strong>API Key:</strong> <span id="apiKey-status">Checking...</span></p>
-        <p><strong>Project ID:</strong> <span id="projectId-status">Checking...</span></p>
-        <p><strong>Private Key:</strong> <span id="privateKey-status">Checking...</span></p>
+        <p><strong>Project ID:</strong> <code id="projectId-val">loading...</code></p>
+        <p><strong>API Key:</strong> <code id="apiKey-status">loading...</code></p>
+        <p><strong>Storage Bucket:</strong> <code id="storageBucket-val">loading...</code></p>
     </div>
 
-    <h2>Firebase SDK Initialization</h2>
-    <div id="sdk-status">Initializing...</div>
+    <h2>Environment Variable Check (Server-side)</h2>
+    <div class="status info">
+        <p>To verify <strong>Firebase Private Keys</strong> or other secrets on Cloudflare Pages:</p>
+        <ol>
+            <li>Go to your <strong>Cloudflare Dashboard</strong>.</li>
+            <li>Navigate to <strong>Workers & Pages</strong> > [Your Project] > <strong>Settings</strong> > <strong>Variables</strong>.</li>
+            <li>Ensure the variables are set for the <strong>Production</strong> environment.</li>
+            <li>If you are using Cloudflare Functions (the <code>functions/</code> folder), ensure you have redeployed after adding variables.</li>
+        </ol>
+    </div>
+
+    <h2>SDK Initialization Status</h2>
+    <div id="sdk-status" class="status info">Waiting for initialization...</div>
 
     <script type="module">
-        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        
-        // This is a client-side test page. 
-        // Note: Private Keys should NEVER be exposed on the frontend.
-        // However, since the user asked to check if the private key is "connected",
-        // we check if it exists in the environment context (Cloudflare Pages Functions/Workers).
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         
         async function runTest() {
             const envStatus = document.getElementById('env-status');
             const sdkStatus = document.getElementById('sdk-status');
+            const projectIdVal = document.getElementById('projectId-val');
+            const apiKeyStatus = document.getElementById('apiKey-status');
+            const storageBucketVal = document.getElementById('storageBucket-val');
             
-            try {
-                // In a static Cloudflare Page, process.env isn't available on client-side.
-                // We'll check if the window.firebaseConfig (from js/firebase-config.js) is loaded
-                if (window.firebaseConfig) {
-                    envStatus.innerHTML = '<div class="status success">Found firebaseConfig in js/firebase-config.js</div>';
-                    document.getElementById('apiKey-status').textContent = window.firebaseConfig.apiKey ? "Present" : "Missing";
-                    document.getElementById('projectId-status').textContent = window.firebaseConfig.projectId || "Missing";
-                } else {
-                    envStatus.innerHTML = '<div class="status error">window.firebaseConfig not found. Ensure js/firebase-config.js is loaded.</div>';
-                }
+            if (window.firebaseConfig) {
+                const config = window.firebaseConfig;
+                projectIdVal.textContent = config.projectId || "MISSING";
+                apiKeyStatus.textContent = config.apiKey ? "PRESENT (Hidden for security)" : "MISSING";
+                storageBucketVal.textContent = config.storageBucket || "MISSING";
 
-                // Testing dynamic connection check (simulating what Cloudflare might see)
-                // If the user meant checking server-side env vars, they would need a Function.
-                // For now, we provide a button to trigger a fetch to a dummy endpoint that would check env.
-                
-                sdkStatus.innerHTML = '<div class="status info">Client-side SDK can initialize with public config. To check the <b>Private Key</b>, you must verify your Cloudflare Pages Dashboard under "Settings > Variables".</div>';
-                
-            } catch (error) {
-                sdkStatus.innerHTML = `<div class="status error">Test Failed: ${error.message}</div>`;
+                envStatus.className = 'status success';
+                envStatus.innerHTML = '<strong>Success:</strong> Firebase configuration loaded from <code>js/firebase-config.js</code>';
+
+                try {
+                    const app = initializeApp(config);
+                    sdkStatus.className = 'status success';
+                    sdkStatus.innerHTML = '<strong>Success:</strong> Firebase SDK initialized successfully.';
+                    
+                    // Optional: Try a simple Firestore read to check connectivity
+                    const db = getFirestore(app);
+                    sdkStatus.innerHTML += '<br>Attempting to connect to Firestore...';
+                    
+                    // We don't necessarily need to succeed in reading a specific doc, 
+                    // just seeing if the network request goes out without a config error.
+                    sdkStatus.innerHTML += '<br><em>Note: If images aren\'t showing, check if the "Storage" rules in Firebase Console allow public read access, or if the URLs in your database are correct.</em>';
+
+                } catch (error) {
+                    sdkStatus.className = 'status error';
+                    sdkStatus.innerHTML = '<strong>SDK Error:</strong> ' + error.message;
+                }
+            } else {
+                envStatus.className = 'status error';
+                envStatus.innerHTML = '<strong>Error:</strong> <code>window.firebaseConfig</code> is not defined. Check if <code>js/firebase-config.js</code> is correctly linked.';
             }
         }
 
-        // Check for global config
-        if (typeof window.firebaseConfig === 'undefined') {
+        // Check if config is already there, otherwise wait for it
+        if (window.firebaseConfig) {
+            runTest();
+        } else {
+            // Load it manually if needed
             const script = document.createElement('script');
             script.src = 'js/firebase-config.js';
             script.onload = runTest;
             document.head.appendChild(script);
-        } else {
-            runTest();
         }
     </script>
 </body>
