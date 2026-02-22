@@ -16,33 +16,43 @@ app.all('/api/:functionName', async (req, res) => {
   const functionName = req.params.functionName;
   
     if (functionName === 'image-proxy') {
-    const imageUrl = req.query.url;
+    let imageUrl = req.query.url;
     if (!imageUrl) return res.status(400).send('Missing URL');
     
     try {
-      const decodedUrl = decodeURIComponent(imageUrl);
-      console.log(`[Local Proxy] Fetching: ${decodedUrl}`);
+      imageUrl = decodeURIComponent(imageUrl);
       
-      const fetchResponse = await fetch(decodedUrl, {
+      // Fix potential double-encoding or malformed Firebase URLs
+      if (imageUrl.includes('firebasestorage.googleapis.com') && !imageUrl.includes('?alt=media')) {
+        imageUrl += (imageUrl.includes('?') ? '&' : '?') + 'alt=media';
+      }
+
+      console.log(`[Local Proxy] Fetching: ${imageUrl}`);
+      
+      const fetchResponse = await fetch(imageUrl, {
         headers: { 
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
-          'Accept': 'image/*, */*'
+          'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
         },
         timeout: 15000
       });
       
       if (!fetchResponse.ok) {
-        console.error(`[Local Proxy] Failed: ${fetchResponse.status} for ${decodedUrl}`);
-        return res.redirect(decodedUrl);
+        console.error(`[Local Proxy] Failed: ${fetchResponse.status} for ${imageUrl}`);
+        // If it's a 400 from Firebase, it might be a permission or path issue
+        // We redirect as a fallback, but the browser will likely fail too
+        return res.redirect(imageUrl);
       }
       
       res.setHeader('Content-Type', fetchResponse.headers.get('content-type') || 'image/jpeg');
       res.setHeader('Cache-Control', 'public, max-age=31536000');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      
       const buffer = await fetchResponse.buffer();
       return res.send(buffer);
     } catch (e) {
       console.error(`[Local Proxy] Error:`, e.message);
-      try { return res.redirect(decodeURIComponent(imageUrl)); } catch (err) { return res.status(500).send(e.message); }
+      try { return res.redirect(imageUrl); } catch (err) { return res.status(500).send(e.message); }
     }
   }
 
