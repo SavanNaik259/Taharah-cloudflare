@@ -173,7 +173,15 @@ async function loadNewArrivalsProductsDirect() {
             id: product.id,
             name: product.name,
             price: product.price,
-            image: productImage,
+            image: (function(img) {
+                if (!img || typeof img !== 'string') return img;
+                if (!img.startsWith('http')) {
+                    const bucket = window.firebaseConfig?.storageBucket || 'studio-7642357109-d9026.firebasestorage.app';
+                    const cleanPath = img.startsWith('/') ? img.substring(1) : img;
+                    return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(cleanPath)}?alt=media`;
+                }
+                return img;
+            })(productImage),
             category: product.category,
             subcategory: product.subcategory || product.subCategory || '',
             stock: product.stock,

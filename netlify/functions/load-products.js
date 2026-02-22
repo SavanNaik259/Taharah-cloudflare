@@ -230,6 +230,45 @@ exports.handler = async (event, context) => {
 
     console.log(`Successfully loaded ${products.length} ${category} products from Firebase Storage CDN`);
 
+    const transformImageUrl = (u) => {
+      if (!u || typeof u !== 'string') return u;
+      const bucket = 'studio-7642357109-d9026.firebasestorage.app';
+      if (u.includes('/.netlify/functions/image-proxy')) {
+        try {
+          const uObj = new URL(u, 'http://localhost');
+          const pParam = uObj.searchParams.get('path');
+          if (pParam) return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(pParam)}?alt=media`;
+        } catch(e) {}
+      }
+      if (u.includes('/api/image-proxy?url=')) {
+        try {
+          const uObj = new URL(u, 'http://localhost');
+          const urlParam = uObj.searchParams.get('url');
+          if (urlParam) return urlParam;
+        } catch(e) {}
+      }
+      if (u.startsWith('productImages/') || u.startsWith('/productImages/')) {
+        const cleanPath = u.startsWith('/') ? u.substring(1) : u;
+        return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(cleanPath)}?alt=media`;
+      }
+      return u;
+    };
+
+    const transformedProducts = (Array.isArray(products) ? products : []).map(p => {
+      const newP = { ...p };
+      if (newP.image) newP.image = transformImageUrl(newP.image);
+      if (newP.mainImage) newP.mainImage = transformImageUrl(newP.mainImage);
+      if (newP.imageUrl) newP.imageUrl = transformImageUrl(newP.imageUrl);
+      if (newP.images && Array.isArray(newP.images)) {
+        newP.images = newP.images.map(img => {
+          if (typeof img === 'string') return transformImageUrl(img);
+          if (img && img.url) return { ...img, url: transformImageUrl(img.url) };
+          return img;
+        });
+      }
+      return newP;
+    });
+
     // Set proper CDN cache headers for Netlify CDN caching
     const responseHeaders = {
       ...headers
@@ -265,8 +304,8 @@ exports.handler = async (event, context) => {
       headers: responseHeaders,
       body: JSON.stringify({
         success: true,
-        products: Array.isArray(products) ? products : [],
-        message: `Loaded ${products.length} ${category || 'unknown'} products from Firebase Storage CDN`
+        products: transformedProducts,
+        message: `Loaded ${transformedProducts.length} ${category || 'unknown'} products from Firebase Storage CDN`
       })
     };
 

@@ -281,6 +281,13 @@ const NewArrivalsProductsLoader = (function() {
                     product.image = product.images[0].url;
                 }
 
+                // Ensure image URL is direct Firebase URL
+                if (product.image && !product.image.startsWith('http')) {
+                    const bucket = window.firebaseConfig?.storageBucket || 'studio-7642357109-d9026.firebasestorage.app';
+                    const cleanPath = product.image.startsWith('/') ? product.image.substring(1) : product.image;
+                    product.image = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(cleanPath)}?alt=media`;
+                }
+
                 return product;
             }).filter(product => {
                 const isValid = product.name && product.price && product.image;
