@@ -90,12 +90,20 @@ app.all('/api/:functionName', async (req, res) => {
                       const uObj = new URL(u, 'http://localhost');
                       const pParam = uObj.searchParams.get('path');
                       if (pParam) {
-                        const nUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(pParam)}?alt=media`;
-                        return `/api/image-proxy?url=${encodeURIComponent(nUrl)}`;
+                        return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(pParam)}?alt=media`;
                       }
                     } catch(e) {}
                   }
-                  if (typeof u === 'string' && u.includes('firebasestorage')) return `/api/image-proxy?url=${encodeURIComponent(u)}`;
+                  if (typeof u === 'string' && u.includes('firebasestorage')) {
+                    if (u.includes('/api/image-proxy?url=')) {
+                        try {
+                            const uObj = new URL(u, 'http://localhost');
+                            const urlParam = uObj.searchParams.get('url');
+                            if (urlParam) return urlParam;
+                        } catch(e) {}
+                    }
+                    return u;
+                  }
                   return u;
                 };
                 const newP = { ...p };
