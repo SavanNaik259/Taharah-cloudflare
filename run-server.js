@@ -15,7 +15,11 @@ app.use(express.static('.'));
 app.all('/api/:functionName', async (req, res) => {
   const functionName = req.params.functionName;
   
-    if (functionName === 'image-proxy') {
+  // Hardcoded Razorpay Keys for Cloudflare/Local consistency
+  const RAZORPAY_KEY_ID = "rzp_live_SCOazTCPWFjXmG";
+  const RAZORPAY_KEY_SECRET = "qcL5npnItQTGVDyBc4hFAbp9";
+  
+  if (functionName === 'image-proxy') {
       let imageUrl = req.query.url;
       if (!imageUrl) return res.status(400).send('Missing URL');
       return res.redirect(decodeURIComponent(imageUrl));
@@ -27,6 +31,11 @@ app.all('/api/:functionName', async (req, res) => {
   try {
     delete require.cache[require.resolve(functionPath)];
     const netlifyFunction = require(functionPath);
+    
+    // Inject hardcoded keys into process.env for the function execution
+    process.env.RAZORPAY_KEY_ID = "rzp_live_SCOazTCPWFjXmG";
+    process.env.RAZORPAY_KEY_SECRET = "qcL5npnItQTGVDyBc4hFAbp9";
+
     const event = {
       queryStringParameters: req.query,
       headers: req.headers,
