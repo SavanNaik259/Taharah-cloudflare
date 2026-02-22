@@ -175,10 +175,12 @@ async function loadNewArrivalsProductsDirect() {
             price: product.price,
             image: (function(img) {
                 if (!img || typeof img !== 'string') return img;
+                const bucket = window.firebaseConfig?.storageBucket || 'studio-7642357109-d9026.firebasestorage.app';
                 if (!img.startsWith('http')) {
-                    const bucket = window.firebaseConfig?.storageBucket || 'studio-7642357109-d9026.firebasestorage.app';
                     const cleanPath = img.startsWith('/') ? img.substring(1) : img;
                     return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(cleanPath)}?alt=media`;
+                } else if (img.includes('firebasestorage.googleapis.com') && !img.includes('alt=media')) {
+                    return img.includes('?') ? `${img}&alt=media` : `${img}?alt=media`;
                 }
                 return img;
             })(productImage),

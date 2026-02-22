@@ -282,10 +282,15 @@ const NewArrivalsProductsLoader = (function() {
                 }
 
                 // Ensure image URL is direct Firebase URL
-                if (product.image && !product.image.startsWith('http')) {
+                if (product.image) {
                     const bucket = window.firebaseConfig?.storageBucket || 'studio-7642357109-d9026.firebasestorage.app';
-                    const cleanPath = product.image.startsWith('/') ? product.image.substring(1) : product.image;
-                    product.image = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(cleanPath)}?alt=media`;
+                    if (!product.image.startsWith('http')) {
+                        const cleanPath = product.image.startsWith('/') ? product.image.substring(1) : product.image;
+                        product.image = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(cleanPath)}?alt=media`;
+                    } else if (product.image.includes('firebasestorage.googleapis.com') && !product.image.includes('alt=media')) {
+                        // Fix existing Firebase URLs that might be missing the alt=media parameter
+                        product.image = product.image.includes('?') ? `${product.image}&alt=media` : `${product.image}?alt=media`;
+                    }
                 }
 
                 return product;
