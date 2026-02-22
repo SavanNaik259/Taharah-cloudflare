@@ -76,10 +76,14 @@ exports.createRazorpayOrder = functions.https.onRequest((req, res) => {
       // Import Razorpay
       const Razorpay = require('razorpay');
       
+      // Keys: Try config first, then environment, then hardcoded fallback
+      const RAZORPAY_KEY_ID = functions.config().razorpay?.key_id || process.env.RAZORPAY_KEY_ID || "rzp_live_SCOazTCPWFjXmG";
+      const RAZORPAY_KEY_SECRET = functions.config().razorpay?.key_secret || process.env.RAZORPAY_KEY_SECRET || "qcL5npnItQTGVDyBc4hFAbp9";
+
       // Create a Razorpay instance
       const razorpay = new Razorpay({
-        key_id: functions.config().razorpay?.key_id,
-        key_secret: functions.config().razorpay?.key_secret
+        key_id: RAZORPAY_KEY_ID,
+        key_secret: RAZORPAY_KEY_SECRET
       });
       
       // Get order details from request body
@@ -110,7 +114,7 @@ exports.createRazorpayOrder = functions.https.onRequest((req, res) => {
       return res.status(200).json({
         success: true,
         order,
-        key_id: functions.config().razorpay?.key_id
+        key_id: RAZORPAY_KEY_ID
       });
     } catch (error) {
       console.error('Error creating Razorpay order:', error);
@@ -144,7 +148,7 @@ exports.verifyRazorpayPayment = functions.https.onRequest((req, res) => {
       
       // Create the signature verification data
       const crypto = require('crypto');
-      const secret = functions.config().razorpay?.key_secret;
+      const secret = functions.config().razorpay?.key_secret || process.env.RAZORPAY_KEY_SECRET || "qcL5npnItQTGVDyBc4hFAbp9";
       const generated_signature = crypto
         .createHmac('sha256', secret)
         .update(razorpay_order_id + "|" + razorpay_payment_id)
