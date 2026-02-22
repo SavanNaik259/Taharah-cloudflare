@@ -1,0 +1,73 @@
+You are debugging a production issue on Cloudflare Pages: product names show but images only show alt text. Use the repo as-is (no guesswork). Root cause is a mismatch between the image proxy’s expected query param and how image URLs are stored/used.
+
+✅ Root Cause (confirmed in code):
+1) Cloudflare Pages image proxy expects `?url=` but the site stores `?path=`:
+   - /functions/api/image-proxy.js line 4–8:
+     const imageUrl = url.searchParams.get('url');
+     If `url` is missing, it returns 400.
+2) Product images are saved in Firebase JSON as `/api/image-proxy?path=...`:
+   - /products-admin-panel.html lines ~2486–2494:
+     const proxyURL = `/api/image-proxy?path=${encodeURIComponent(imagePath)}`;
+     This is the wrong query param for Cloudflare Pages.
+3) Product gallery also generates `?path=`:
+   - /js/product-gallery.js lines ~244–259:
+     return `/api/image-proxy?path=${encodeURIComponent(imagePath)}`;
+4) Cloudflare load-products function only rewrites legacy Netlify proxy + direct Firebase URLs, NOT `?path=`:
+   - /functions/api/load-products.js lines 30–55
+     It only transforms `.netlify/functions/image-proxy` or Firebase URLs.
+
+✅ Why images break:
+All `<img>` tags point to `/api/image-proxy?path=...` → Cloudflare function expects `url` → 400 “Missing URL parameter” → images fail.
+
+✅ Fix (recommended, consistent):
+A) Update image URL generation when uploading products so it uses `url=` with a FULL Firebase URL.
+   File: /products-admin-panel.html ~2486–2494
+   Replace:
+     const proxyURL = `/api/image-proxy?path=${encodeURIComponent(imagePath)}`;
+   With:
+     const proxyURL = `/api/image-proxy?url=${encodeURIComponent(downloadURL)}`;
+   (downloadURL is already a full Firebase URL)
+
+B) Update product gallery helper to use `url=` and build a Firebase URL when a path is provided.
+   File: /js/product-gallery.js lines ~244–259
+   Suggested logic:
+     if (imagePath.startsWith('http')) return `/api/image-proxy?url=${encodeURIComponent(imagePath)}`;
+     const bucket = window.firebaseConfig?.storageBucket || 'studio-7642357109-d9026.firebasestorage.app';
+     const firebaseUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(imagePath)}?alt=media`;
+     return `/api/image-proxy?url=${encodeURIComponent(firebaseUrl)}`;
+
+C) Patch load-products transform to also rewrite legacy `?path=` in product JSON:
+   File: /functions/api/load-products.js lines ~30–55
+   Add a handler:
+     if (u.includes('/api/image-proxy?path=')) {
+        const urlObj = new URL(u, 'http://localhost');
+        const pathParam = urlObj.searchParams.get('path');
+        if (pathParam) {
+           const firebaseUrl = `https://firebasestorage.googleapis.com/v0/b/${storageBucket}/o/${encodeURIComponent(pathParam)}?alt=media`;
+           return `/api/image-proxy?url=${encodeURIComponent(firebaseUrl)}`;
+        }
+     }
+
+✅ Important: update existing data
+Existing products already stored with `?path=` will stay broken until migrated.
+Options:
+1) Re-save products via admin panel (after fix).
+2) One-time script to update productData JSON in Firebase Storage, replacing `?path=` with `?url=` + full Firebase URL.
+
+✅ If you want a fallback (no proxy):
+Store image URLs directly as:
+https://firebasestorage.googleapis.com/v0/b/<bucket>/o/productImages%2Ffile.jpg?alt=media
+(Use encodeURIComponent for the object path)
+Note: if bypassing proxy, ensure Firebase Storage CORS allows your domain.
+
+✅ Optional checks:
+- Ensure Cloudflare Pages functions are enabled and `/functions/api/*` is deployed.
+- Confirm FIREBASE_STORAGE_BUCKET env var if your bucket is different.
+
+Deliverables:
+- Fix code in the above files.
+- Migrate or re-upload product JSON.
+- Confirm `/api/image-proxy?url=...` returns 200 in production.
+
+If you want, I can also prepare a one‑time migration script to fix existing product JSON in Firebase Storage, but I won’t execute anything here.
+Feb 22, 07:58 PM
