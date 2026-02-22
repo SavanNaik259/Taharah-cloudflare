@@ -4970,7 +4970,9 @@
 
                     console.log('Sending cancellation email with data:', emailData);
 
-                    const emailResponse = await fetch('/api/send-order-email', {
+                    // Use absolute URL to avoid issues with hosting changes
+                    const baseUrl = window.location.origin;
+                    const emailResponse = await fetch(`${baseUrl}/api/send-order-email`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
