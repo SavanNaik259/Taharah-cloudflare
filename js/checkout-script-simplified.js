@@ -1147,7 +1147,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 } else {
                     console.log('Using Express server for COD order email');
-                    const emailResponse = await fetch('/api/send-order-email', {
+                    // Use absolute URL to avoid issues with hosting changes
+                    const baseUrl = window.location.origin;
+                    const emailResponse = await fetch(`${baseUrl}/api/send-order-email`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(orderData)
@@ -2757,7 +2759,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 } else {
                     console.log('Using Express server for email');
-                    const emailResponse = await fetch('/api/send-order-email', {
+                    // Use absolute URL to avoid issues with hosting changes
+                    const baseUrl = window.location.origin;
+                    const emailResponse = await fetch(`${baseUrl}/api/send-order-email`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(updatedOrderData)
