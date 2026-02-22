@@ -11,14 +11,31 @@ export async function onRequest(context) {
     const decodedUrl = decodeURIComponent(imageUrl);
     console.log(`Proxying image: ${decodedUrl}`);
 
+    // Standard headers to avoid blocking
+    const fetchHeaders = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+      'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+    };
+
     const response = await fetch(decodedUrl, {
-      headers: {
-        'User-Agent': 'Cloudflare-Worker'
-      }
+      headers: fetchHeaders
     });
 
     if (!response.ok) {
-      return new Response(`Failed to fetch image: ${response.statusText}`, { status: response.status });
+      // Retry once without headers if it fails
+      const retryResponse = await fetch(decodedUrl);
+      if (!retryResponse.ok) {
+        return new Response(`Failed to fetch image: ${retryResponse.statusText}`, { status: retryResponse.status });
+      }
+      
+      const content = await retryResponse.arrayBuffer();
+      return new Response(content, {
+        headers: {
+          'Content-Type': retryResponse.headers.get('content-type') || 'image/jpeg',
+          'Cache-Control': 'public, max-age=31536000',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
     }
 
     const contentType = response.headers.get('content-type');
