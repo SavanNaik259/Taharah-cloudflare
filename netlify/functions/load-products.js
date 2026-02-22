@@ -232,7 +232,7 @@ exports.handler = async (event, context) => {
 
     const transformImageUrl = (u) => {
       if (!u || typeof u !== 'string') return u;
-      const bucket = 'studio-7642357109-d9026.firebasestorage.app';
+      const bucket = process.env.FIREBASE_STORAGE_BUCKET || 'studio-7642357109-d9026.firebasestorage.app';
       
       // If it's already a direct Firebase URL, return it
       if (u.includes('firebasestorage.googleapis.com') && !u.includes('/api/image-proxy')) {
