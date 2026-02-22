@@ -246,16 +246,20 @@ class ProductGallery {
         
         // If it's already a full URL, return as is
         if (imagePath.startsWith('http')) {
-            return imagePath;
+            return `/api/image-proxy?url=${encodeURIComponent(imagePath)}`;
         }
         
         // Check if it's a relative path starting with /productImages/
+        const bucket = window.firebaseConfig?.storageBucket || 'studio-7642357109-d9026.firebasestorage.app';
         if (imagePath.startsWith('/productImages/') || imagePath.startsWith('productImages/')) {
-             return `/api/image-proxy?path=${encodeURIComponent(imagePath.startsWith('/') ? imagePath.substring(1) : imagePath)}`;
+             const cleanPath = imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
+             const firebaseUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(cleanPath)}?alt=media`;
+             return `/api/image-proxy?url=${encodeURIComponent(firebaseUrl)}`;
         }
 
         // Use image proxy for Firebase Storage images
-        return `/api/image-proxy?path=${encodeURIComponent(imagePath)}`;
+        const firebaseUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(imagePath)}?alt=media`;
+        return `/api/image-proxy?url=${encodeURIComponent(firebaseUrl)}`;
     }
 
     updateGallery() {

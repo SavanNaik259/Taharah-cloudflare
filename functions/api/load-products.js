@@ -49,6 +49,20 @@ export async function onRequest(context) {
         if (typeof u === 'string' && u.includes('firebasestorage.googleapis.com')) {
           return `/api/image-proxy?url=${encodeURIComponent(u)}`;
         }
+
+        // Handle legacy ?path= parameters
+        if (typeof u === 'string' && u.includes('/api/image-proxy?path=')) {
+          try {
+            const urlObj = new URL(u, 'http://localhost');
+            const pathParam = urlObj.searchParams.get('path');
+            if (pathParam) {
+              const newUrl = `https://firebasestorage.googleapis.com/v0/b/${storageBucket}/o/${encodeURIComponent(pathParam)}?alt=media`;
+              return `/api/image-proxy?url=${encodeURIComponent(newUrl)}`;
+            }
+          } catch (e) {
+            console.error('URL parse error for path proxy:', e);
+          }
+        }
         
         return u;
       };
