@@ -28,23 +28,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Taharah-Dev-Server"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "Taharah-Dev-Server-Fix"
-
-[[workflows.workflow]]
-name = "Taharah-Dev-Server"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "node run-server.js"
-waitForPort = 5000
-
-[workflows.workflow.metadata]
-outputType = "webview"
 
 [[workflows.workflow]]
 name = "Taharah-Dev-Server-Fix"
