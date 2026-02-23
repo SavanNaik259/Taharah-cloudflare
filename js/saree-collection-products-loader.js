@@ -395,11 +395,24 @@ const JewelrySubcategoriesLoader = (function() {
             minimumFractionDigits: 0
         }).format(product.price).replace('₹', '');
 
+        const proxyUrl = (function(img) {
+            if (!img) return '';
+            const cleanPath = (function(path) {
+                if (path.includes('firebasestorage.googleapis.com')) {
+                    const match = path.match(/\/o\/(.+?)\?/);
+                    return match ? decodeURIComponent(match[1]) : path;
+                }
+                const p = path.startsWith('/') ? path.substring(1) : path;
+                return p.startsWith('productImages/') ? p : `productImages/${p}`;
+            })(img);
+            return `/api/image-proxy?url=${encodeURIComponent(cleanPath)}`;
+        })(product.image);
+
         return `
             <div class="arrival-item polki-card" data-product-id="${product.id}" data-product-price="${product.price}" data-product-name="${product.name}" data-product-image="${product.image}">
                 <a href="product-detail?id=${product.id}" style="text-decoration: none; color: inherit;">
                     <div class="arrival-image">
-                        <img src="${product.image}" alt="${product.name}" loading="lazy">
+                        <img src="${proxyUrl}" alt="${product.name}" loading="lazy">
                         <button class="add-to-wishlist" data-product-id="${product.id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-image="${product.image}" >
                             <i class="far fa-heart"></i>
                         </button>

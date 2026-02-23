@@ -317,24 +317,23 @@ const ProductDetailLoader = (function() {
 
         // Update main product image - check multiple possible image properties
         const rawImageUrl = product.image || product.imageUrl || product.mainImage || (product.images && product.images[0] && product.images[0].url);
-        const bucket = window.firebaseConfig?.storageBucket || 'studio-7642357109-d9026.firebasestorage.app';
         let imageUrl = rawImageUrl;
 
         if (rawImageUrl) {
-            if (rawImageUrl.includes('firebasestorage.googleapis.com')) {
-                imageUrl = rawImageUrl.includes('alt=media') ? rawImageUrl : (rawImageUrl.includes('?') ? `${rawImageUrl}&alt=media` : `${rawImageUrl}?alt=media`);
-            } else if (rawImageUrl.startsWith('/api/image-proxy')) {
-                const urlParams = new URLSearchParams(rawImageUrl.split('?')[1]);
-                const path = urlParams.get('path');
-                if (path) {
-                    const cleanPath = path.startsWith('/') ? path.substring(1) : path;
-                    imageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(cleanPath)}?alt=media`;
+            // Use Cloudflare proxy for all images to ensure consistency and bypass potential direct access issues
+            // This matches the "Proxied URL (Testing Cloudflare Function)" approach from test-images.html
+            const cleanPath = (function(path) {
+                if (path.includes('firebasestorage.googleapis.com')) {
+                    // Extract path from Firebase URL
+                    const match = path.match(/\/o\/(.+?)\?/);
+                    return match ? decodeURIComponent(match[1]) : path;
                 }
-            } else if (!rawImageUrl.startsWith('http')) {
-                const cleanPath = rawImageUrl.startsWith('/') ? rawImageUrl.substring(1) : rawImageUrl;
-                const finalPath = cleanPath.startsWith('productImages/') ? cleanPath : `productImages/${cleanPath}`;
-                imageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(finalPath)}?alt=media`;
-            }
+                const p = path.startsWith('/') ? path.substring(1) : path;
+                return p.startsWith('productImages/') ? p : `productImages/${p}`;
+            })(rawImageUrl);
+
+            imageUrl = `/api/image-proxy?url=${encodeURIComponent(cleanPath)}`;
+            console.log('Using Cloudflare proxy URL:', imageUrl);
         }
 
         const mainImageElements = document.querySelectorAll('.product-detail-left .product-main-image, .product-detail-left .main-image img, .product-detail-left .gallery-main img');

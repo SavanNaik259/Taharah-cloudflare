@@ -140,7 +140,7 @@ const BridalProductsLoader = (function() {
             <div class="product-item" data-product-id="${product.id}" data-product-price="${product.price}">
                 <a href="product-detail?id=${product.id}">
                     <div class="product-image">
-                        <img src="${product.image}" alt="${product.name}">
+                        <img src="/api/image-proxy?url=${encodeURIComponent(product.image.includes('firebasestorage') ? decodeURIComponent(product.image.match(/\/o\/(.+?)\?/)[1]) : (product.image.startsWith('productImages/') ? product.image : 'productImages/' + (product.image.startsWith('/') ? product.image.substring(1) : product.image)))}" alt="${product.name}">
                     </div>
                     <div class="product-details">
                         <h3>${product.name}</h3>
