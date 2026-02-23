@@ -4,6 +4,9 @@ pages_build_output_dir = "."
 
 [vars]
 EMAIL_SERVICE = "gmail"
+OWNER_EMAIL = "sss.naik2007@gmail.com"
+EMAIL_USER = "sss.naik2007@gmail.com"
+EMAIL_PASS = "cwswjmubelmlhaod"
 FIREBASE_PROJECT_ID = "studio-7642357109-d9026"
 FIREBASE_STORAGE_BUCKET = "studio-7642357109-d9026.firebasestorage.app"
 RAZORPAY_KEY_ID = "rzp_live_SCOazTCPWFjXmG"
