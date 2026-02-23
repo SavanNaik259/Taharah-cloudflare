@@ -39,30 +39,28 @@ export async function onRequest(context) {
         
         const bucket = env.FIREBASE_STORAGE_BUCKET || 'studio-7642357109-d9026.firebasestorage.app';
 
-        // 1. If it's already a proxy URL, extract the direct URL to avoid double-wrapping
+        // 1. If it's already a direct Firebase URL, return it as is
+        if (u.includes('firebasestorage.googleapis.com')) {
+          return u;
+        }
+
+        // 2. If it's already a proxy URL, extract the direct URL
         if (u.startsWith('/api/image-proxy')) {
           try {
             const urlObj = new URL(u, 'https://dummy');
             const extractedUrl = urlObj.searchParams.get('url') || urlObj.searchParams.get('path');
             if (extractedUrl) {
-               // If it's a full URL, return it. If it's just a path, convert to Firebase URL
                if (extractedUrl.startsWith('http')) return extractedUrl;
                const cleanPath = extractedUrl.startsWith('/') ? extractedUrl.substring(1) : extractedUrl;
-               const finalPath = cleanPath.startsWith('productImages/') ? cleanPath : `productImages/${cleanPath}`;
-               return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(finalPath)}?alt=media`;
+               return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(cleanPath)}?alt=media`;
             }
           } catch (e) {}
         }
 
-        // 2. If it's already a direct Firebase URL, return it as is (no wrapping)
-        if (u.includes('firebasestorage.googleapis.com')) {
-          return u;
-        }
-
-        // 3. Handle relative paths (e.g., from admin panel)
+        // 3. Handle relative paths (do not force productImages/ if it might already be there)
         const cleanPath = u.startsWith('/') ? u.substring(1) : u;
-        const finalPath = cleanPath.startsWith('productImages/') ? cleanPath : `productImages/${cleanPath}`;
-        return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(finalPath)}?alt=media`;
+        // Check if the path already starts with productImages/ or similar
+        return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(cleanPath)}?alt=media`;
       };
 
       // Deep copy to avoid mutation issues if needed, but here we just map

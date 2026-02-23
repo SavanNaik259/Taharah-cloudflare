@@ -14,8 +14,8 @@ export async function onRequest(context) {
     if (!decodedUrl.startsWith('http')) {
       const bucket = env.FIREBASE_STORAGE_BUCKET || 'studio-7642357109-d9026.firebasestorage.app';
       const cleanPath = decodedUrl.startsWith('/') ? decodedUrl.substring(1) : decodedUrl;
-      const finalPath = cleanPath.startsWith('productImages/') ? cleanPath : `productImages/${cleanPath}`;
-      decodedUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(finalPath)}?alt=media`;
+      // Do not force productImages prefix if not present, let the path be as provided
+      decodedUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(cleanPath)}?alt=media`;
     }
     
     const response = await fetch(decodedUrl, {

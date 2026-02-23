@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Image Test</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+        .test-box { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px; }
+        img { max-width: 100%; height: auto; display: block; margin-top: 10px; border: 1px solid #eee; }
+        code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; }
+        .error { color: red; font-weight: bold; }
+        .success { color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Firebase Image Loading Test</h1>
+    
+    <div class="test-box">
+        <h3>1. Direct Firebase URL (provided by you)</h3>
+        <p>URL: <code>https://firebasestorage.googleapis.com/v0/b/studio-7642357109-d9026.firebasestorage.app/o/productImages%2FNEW-1770531879780-l2sp6wnx-740664_1770531879779_0_wvbwcb.jpg?alt=media&token=e2c9a7cf-b5bc-4967-8b3a-217d2f476cf6</code></p>
+        <img src="https://firebasestorage.googleapis.com/v0/b/studio-7642357109-d9026.firebasestorage.app/o/productImages%2FNEW-1770531879780-l2sp6wnx-740664_1770531879779_0_wvbwcb.jpg?alt=media&token=e2c9a7cf-b5bc-4967-8b3a-217d2f476cf6" alt="Direct Firebase Image">
+    </div>
+
+    <div class="test-box">
+        <h3>2. Proxied URL (Testing Cloudflare Function)</h3>
+        <p>URL: <code>/api/image-proxy?url=productImages%2FNEW-1770531879780-l2sp6wnx-740664_1770531879779_0_wvbwcb.jpg</code></p>
+        <img src="/api/image-proxy?url=productImages%2FNEW-1770531879780-l2sp6wnx-740664_1770531879779_0_wvbwcb.jpg" alt="Proxied Image" onerror="this.after('Failed to load via proxy')">
+    </div>
+
+    <div class="test-box">
+        <h3>3. Full URL via Proxy</h3>
+        <p>URL: <code>/api/image-proxy?url=https%3A%2F%2Ffirebasestorage.googleapis.com%2Fv0%2Fb%2Fstudio-7642357109-d9026.firebasestorage.app%2Fo%2FproductImages%252FNEW-1770531879780-l2sp6wnx-740664_1770531879779_0_wvbwcb.jpg%3Falt%3Dmedia%26token%3De2c9a7cf-b5bc-4967-8b3a-217d2f476cf6</code></p>
+        <img src="/api/image-proxy?url=https%3A%2F%2Ffirebasestorage.googleapis.com%2Fv0%2Fb%2Fstudio-7642357109-d9026.firebasestorage.app%2Fo%2FproductImages%252FNEW-1770531879780-l2sp6wnx-740664_1770531879779_0_wvbwcb.jpg%3Falt%3Dmedia%26token%3De2c9a7cf-b5bc-4967-8b3a-217d2f476cf6" alt="Full URL Proxied">
+    </div>
+
+    <script>
+        console.log("Test page loaded");
+        document.querySelectorAll('img').forEach(img => {
+            img.onload = () => console.log("Loaded: " + img.alt);
+            img.onerror = () => console.error("Failed: " + img.alt);
+        });
+    </script>
+</body>
+</html>
