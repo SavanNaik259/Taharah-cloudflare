@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 console.log('Loading cart from Firebase...');
                                 const result = await FirebaseCartManager.getItems();
                                 return result;
-                            } catch (error) {
+                            } 
                                 console.error('Error loading cart from Firebase:', error);
                                 return { success: false, items: [] };
                             }
@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 console.log('Clearing Firebase cart...');
                                 const result = await FirebaseCartManager.clearItems();
                                 return result;
-                            } catch (error) {
+                            } 
                                 console.error('Error clearing Firebase cart:', error);
                                 return { success: false, error: error.message };
                             }
@@ -310,7 +310,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('No Firebase cart methods available');
                 return [];
             }
-        } catch (error) {
+        } 
             console.error('❌ Error in loadCartFromFirebase:', error.message);
             console.log('📦 Will fallback to localStorage');
             return [];
@@ -433,7 +433,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             console.log('Cart loading completed successfully');
             return cartItems;
-        } catch (error) {
+        } 
             console.error('Error in loadCartItems:', error);
 
             // Ensure minimum loading time even for errors
@@ -864,7 +864,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         console.error('❌ Error updating Firebase cart:', err);
                     });
             }
-        } catch (error) {
+        } 
             console.error('❌ Error saving cart to storage:', error);
 
             // Always try the most basic fallback method on error
@@ -1058,20 +1058,73 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             // Process payment based on the selected payment method
             if (paymentMethod === 'Razorpay') {
-                console.log('Razorpay payment method selected, opening payment gateway...');
+                  console.log('Razorpay payment method selected');
+                  const amountInINR = orderData.orderTotal;
+                  if (!amountInINR || amountInINR <= 0) throw new Error('Invalid order amount');
 
-                try {
-                    // Process payment with Razorpay (this will open the popup)
-                    await processRazorpayPayment(orderData);
+                  try {
+                      console.log('Requesting /api/create-razorpay-order...');
+                      const response = await fetch('/api/create-razorpay-order', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                              amount: amountInINR,
+                              currency: 'INR',
+                              receipt: orderData.orderReference,
+                              notes: { orderReference: orderData.orderReference }
+                          })
+                      });
 
-                    // If we get here, it means the popup didn't open or there was another issue
-                    // The actual success handling is in the handleRazorpaySuccess function
-                    return;
-                } catch (razorpayError) {
-                    console.error('Error processing Razorpay payment:', razorpayError);
-                    throw new Error('Payment processing failed: ' + razorpayError.message);
-                }
-            }
+                      if (!response.ok) {
+                          const err = await response.json().catch(() => ({}));
+                          throw new Error(err.message || 'Server error creating order: ' + response.status);
+                      }
+
+                      const result = await response.json();
+                      if (!result.success || !result.order || !result.key_id) {
+                          throw new Error(result.message || 'Invalid response from payment server');
+                      }
+
+                      // Open Razorpay
+                      const options = {
+                          key: result.key_id,
+                          amount: result.order.amount,
+                          currency: result.order.currency,
+                          name: 'Taharah',
+                          description: 'Order Reference: ' + orderData.orderReference,
+                          order_id: result.order.id,
+                          handler: function(resp) {
+                              handleRazorpaySuccess(resp, orderData, cartItems);
+                          },
+                          prefill: {
+                              name: orderData.customer.firstName + ' ' + orderData.customer.lastName,
+                              email: orderData.customer.email,
+                              contact: orderData.customer.phone
+                          },
+                          theme: { color: '#000000' },
+                          modal: {
+                              ondismiss: function() {
+                                  console.log('Razorpay modal closed');
+                                  submitButton.disabled = false;
+                                  submitButton.innerHTML = originalButtonText;
+                              }
+                          }
+                      };
+
+                      const rzp = new Razorpay(options);
+                      rzp.on('payment.failed', function(resp) {
+                          console.error('Payment failed:', resp.error);
+                          showErrorModal('Payment failed: ' + resp.error.description);
+                          submitButton.disabled = false;
+                          submitButton.innerHTML = originalButtonText;
+                      });
+                      rzp.open();
+                      return; // Stop handleSubmit execution, handler takes over
+                  } catch (apiError) {
+                      console.error('Razorpay Setup Error:', apiError);
+                      throw new Error('Could not initialize payment: ' + apiError.message);
+                  }
+              }
 
             // Only continue with the rest of the flow for non-Razorpay payment methods
             // or if Razorpay processing fails
@@ -1138,8 +1191,7 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 console.log('Sending order confirmation email for COD order via Cloudflare...');
                 const emailResult = await sendOrderConfirmationEmails({
-                    id: orderId,
-                    orderTotal: orderData.orderTotal,
+                    id: orderData.orderReference || orderId, orderTotal: orderData.orderTotal,
                     customer: orderData.customer,
                     products: cartItems
                 });
@@ -1231,7 +1283,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         } catch (error) {
             console.error('Error processing order:', error);
-            showErrorModal('There was an error processing your order. Please try again later.');
+            showErrorModal('Error: ' + (error.message || 'There was an error processing your order. Please try again later.'));
 
             // Reset button state on error
             submitButton.disabled = false;
@@ -1342,7 +1394,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (orderTotalElement) {
                     orderTotalElement.textContent = currencySymbol + '0.00';
                 }
-            } catch (fallbackError) {
+            } 
                 console.error('Critical error: Failed to clear cart with fallback method', fallbackError);
             }
         }
@@ -2304,51 +2356,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 console.log('Creating Razorpay order for amount (INR):', amountInINR);
 
-                // Use Cloudflare Pages Functions to create order
-                if (window.netlifyHelpers) {
-                    console.log('Using Cloudflare Functions to create order');
-                    result = await Promise.race([
-                        window.netlifyHelpers.callNetlifyFunction('create-razorpay-order', {
-                            method: 'POST',
-                            body: JSON.stringify({
-                                amount: amountInINR,
-                                currency: 'INR',
-                                receipt: orderData.orderReference,
-                                notes: {
-                                    orderReference: orderData.orderReference
-                                }
-                            })
-                        }),
-                        timeoutPromise
-                    ]);
-                } else {
-                    // Fallback to direct /api call (Cloudflare Pages serves functions from /api)
-                    console.log('Using direct /api/create-razorpay-order');
-                    const response = await Promise.race([
-                        fetch('/api/create-razorpay-order', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                amount: amountInINR,
-                                currency: 'INR',
-                                receipt: orderData.orderReference,
-                                notes: {
-                                    orderReference: orderData.orderReference
-                                }
-                            })
-                        }),
-                        timeoutPromise
-                    ]);
+                // Use direct /api/create-razorpay-order
+                  console.log('Using direct /api/create-razorpay-order');
+                  const response = await Promise.race([
+                      fetch('/api/create-razorpay-order', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                              amount: amountInINR,
+                              currency: 'INR',
+                              receipt: orderData.orderReference,
+                              notes: { orderReference: orderData.orderReference }
+                          })
+                      }),
+                      timeoutPromise
+                  ]);
 
-                    if (!response.ok) {
-                        const errorData = await response.json().catch(() => ({}));
-                        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-                    }
-                    result = await response.json();
-                }
-            } catch (apiError) {
+                  if (!response.ok) {
+                      const errorData = await response.json().catch(() => ({}));
+                      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                  }
+                  result = await response.json(); catch (apiError) {
                 if (apiError.name === 'TypeError' && apiError.message.includes('fetch')) {
                     console.error('Network error:', apiError);
                     throw new Error('Failed to connect to payment server: Network error');
@@ -2540,7 +2568,90 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {Object} response - The Razorpay success response
      * @param {Object} orderData - The original order data
      */
-    async function handleRazorpaySuccess(response, orderData) {
+              let verificationResult;
+          const verifyTimeoutPromise = new Promise((_, reject) => {
+              const timerId = setTimeout(() => reject(new Error('Payment verification timed out but your payment may have gone through. Please check your email for confirmation.')), 15000);
+              verifyTimeoutPromise.timerId = timerId;
+          });
+
+          try {
+              console.log('Verifying payment via /api/verify-razorpay-payment');
+              const verifyResponse = await Promise.race([
+                  fetch('/api/verify-razorpay-payment', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                          razorpay_payment_id: response.razorpay_payment_id,
+                          razorpay_order_id: response.razorpay_order_id,
+                          razorpay_signature: response.razorpay_signature
+                      })
+                  }),
+                  verifyTimeoutPromise
+              ]);
+              
+              if (verifyTimeoutPromise.timerId) clearTimeout(verifyTimeoutPromise.timerId);
+
+              if (!verifyResponse.ok) {
+                  const errorData = await verifyResponse.json().catch(() => ({}));
+                  throw new Error(errorData.message || `HTTP error! status: ${verifyResponse.status}`);
+              }
+              verificationResult = await verifyResponse.json();
+          } catch (verifyError) {
+              console.warn('Proceeding with order despite verification error:', verifyError);
+              verificationResult = { success: true, message: 'Payment accepted, verification deferred.' };
+          }
+
+          if (!verificationResult.success) {
+              console.error('Payment verification failed:', verificationResult.message);
+              showErrorModal('Payment was successful but there was an error processing your order. Please contact support.');
+              return;
+          }
+
+          const updatedOrderData = {
+              ...orderData,
+              paymentMethod: 'razorpay',
+              paymentStatus: 'paid',
+              paymentId: response.razorpay_payment_id,
+              razorpayOrderId: response.razorpay_order_id,
+              signature: response.razorpay_signature,
+              paymentCompletedAt: new Date().toISOString()
+          };
+
+          const orderId = orderData.orderReference || Date.now().toString();
+
+          try {
+              if (window.firebaseOrdersModule) {
+                  await window.firebaseOrdersModule.saveOrderToFirebase(updatedOrderData);
+              }
+              
+              if (window.StockManager) {
+                  await window.StockManager.updateStockAfterOrder(cartItems);
+              }
+              
+              await sendOrderConfirmationEmails({
+                  id: orderId,
+                  orderTotal: orderData.orderTotal,
+                  customer: orderData.customer,
+                  products: cartItems
+              });
+
+              if (submitButton) {
+                  submitButton.innerHTML = '<i class="fas fa-check-circle"></i> Order Complete';
+                  submitButton.classList.add('btn-success');
+                  submitButton.disabled = true;
+              }
+
+              setTimeout(() => {
+                  showOrderConfirmation(updatedOrderData);
+                  clearCart();
+                  checkoutForm?.reset();
+              }, 1500);
+
+          } catch (error) {
+              console.error('Error in post-payment processing:', error);
+              showErrorModal('Payment successful but order record failed. Please contact support.');
+          }
+      async function legacyHandleRazorpaySuccess(response, orderData) {
         try {
             console.log('Razorpay payment successful:', response);
 
@@ -2555,33 +2666,37 @@ document.addEventListener('DOMContentLoaded', function() {
             let verificationResult;
             // Set a timeout for API calls to prevent infinite loading
             const verifyTimeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('Payment verification timed out but your payment may have gone through. Please check your email for confirmation.')), 15000);
+                const timerId = setTimeout(() => reject(new Error('Payment verification timed out but your payment may have gone through. Please check your email for confirmation.')), 15000);
+                // Attach timerId to the promise so it can be cleared if needed
+                verifyTimeoutPromise.timerId = timerId;
             });
 
             try {
-                // Use the same helper for consistency
-                console.log('Verifying payment via /api/verify-razorpay-payment');
-                const verifyResponse = await Promise.race([
-                    fetch('/api/verify-razorpay-payment', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_order_id: response.razorpay_order_id,
-                            razorpay_signature: response.razorpay_signature
-                        })
-                    }),
-                    verifyTimeoutPromise
-                ]);
-                
-                if (!verifyResponse.ok) {
-                    const errorData = await verifyResponse.json().catch(() => ({}));
-                    throw new Error(errorData.message || `HTTP error! status: ${verifyResponse.status}`);
-                }
-                verificationResult = await verifyResponse.json();
-            } catch (verifyError) {
+                // Use direct /api/verify-razorpay-payment
+                  console.log('Verifying payment via /api/verify-razorpay-payment');
+                  const verifyResponse = await Promise.race([
+                      fetch('/api/verify-razorpay-payment', {
+                          method: 'POST',
+                          headers: {
+                              'Content-Type': 'application/json'
+                          },
+                          body: JSON.stringify({
+                              razorpay_payment_id: response.razorpay_payment_id,
+                              razorpay_order_id: response.razorpay_order_id,
+                              razorpay_signature: response.razorpay_signature
+                          })
+                      }),
+                      verifyTimeoutPromise
+                  ]);
+                  
+                  if (verifyTimeoutPromise.timerId) clearTimeout(verifyTimeoutPromise.timerId);
+
+                  if (!verifyResponse.ok) {
+                      const errorData = await verifyResponse.json().catch(() => ({}));
+                      console.error('Verification HTTP Error:', verifyResponse.status, errorData);
+                      throw new Error(errorData.message || `HTTP error! status: ${verifyResponse.status}`);
+                  }
+                  verificationResult = await verifyResponse.json(); catch (verifyError) {
                 // Continue with order processing even if verification fails
                 // This is safer than leaving the user hanging, as Razorpay has confirmed payment
                 console.warn('Proceeding with order despite verification error:', verifyError);
@@ -2685,7 +2800,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             console.warn('Failed to save order to Firebase:', firebaseSaveResult.error);
                         }
                     }
-                } catch (firebaseError) {
+                } 
                     console.error('Firebase operation threw an error:', firebaseError);
                     // Don't throw error here, continue with email processing
                 }
@@ -2731,8 +2846,7 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 console.log('Attempting to send order confirmation email via Cloudflare...');
                 emailResult = await sendOrderConfirmationEmails({
-                    id: orderId,
-                    orderTotal: orderData.orderTotal,
+                    id: orderData.orderReference || orderId, orderTotal: orderData.orderTotal,
                     customer: orderData.customer,
                     products: cartItems
                 });
@@ -2808,16 +2922,22 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {Object} orderData - The order data
      */
     async function sendOrderConfirmationEmails(orderData) {
-        try {
-            console.log('Sending order confirmation emails via Cloudflare Functions...');
+      console.log('Sending confirmation emails via /api/send-order-email...');
+      try {
+          const response = await fetch('/api/send-order-email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(orderData)
+          });
+          const result = await response.json();
+          return result.success;
+      } catch (error) {
+          console.error('Error sending order emails:', error);
+          return false;
+      }
+  }
 
-            // Check if netlify helpers are available
-            if (!window.netlifyHelpers || typeof window.netlifyHelpers.callNetlifyFunction !== 'function') {
-                console.warn('Netlify helpers not available, skipping email sending');
-                return false;
-            }
-
-            const emailResult = await window.netlifyHelpers.callNetlifyFunction('send-order-email', {
+            const emailResult = await callNetlifyFunction('send-order-email', {
                 method: 'POST',
                 body: JSON.stringify({
                     orderData: {
@@ -2841,7 +2961,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.warn('Failed to send order confirmation emails:', emailResult?.message || 'Email service unavailable');
                 return false;
             }
-        } catch (emailError) {
+        } 
             console.error('Error sending order emails:', emailError);
             return false;
         }
@@ -3089,7 +3209,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 showManualAddressForm();
             }
 
-        } catch (error) {
+        } 
             console.error('Error loading addresses:', error);
             addressContainer.innerHTML = '<div class="no-addresses">Error loading addresses. Please enter your shipping details below.</div>';
             showManualAddressForm();
@@ -3247,7 +3367,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 console.log('Address data loaded into form from', storageType);
             }
-        } catch (error) {
+        } 
             console.error('Error loading address into form:', error);
         }
     }
@@ -3377,4 +3497,102 @@ document.addEventListener('DOMContentLoaded', function() {
     // Make functions global so they can be called from HTML
     window.selectSavedAddress = selectSavedAddress;
     window.loadSavedAddresses = loadSavedAddresses;
-});
+});      try {
+          const verify = await fetch('/api/verify-razorpay-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_signature: response.razorpay_signature
+              })
+          });
+          const result = await verify.json();
+          if (!result.success) throw new Error(result.message || 'Verification failed');
+
+          const updatedOrder = { ...orderData, paymentMethod: 'razorpay', paymentStatus: 'paid', paymentId: response.razorpay_payment_id };
+          if (window.firebaseOrdersModule) await window.firebaseOrdersModule.saveOrderToFirebase(updatedOrder);
+          
+          await fetch('/api/send-order-email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: orderData.orderReference, orderTotal: orderData.orderTotal, customer: orderData.customer, products: cartItems })
+          });
+          
+          if (typeof showOrderConfirmation === 'function') showOrderConfirmation(updatedOrder);
+          if (typeof clearCart === 'function') clearCart();
+          document.querySelector('form#checkout-form')?.reset();
+      } catch (e) {
+          console.error('Post-payment error:', e);
+          if (typeof showErrorModal === 'function') showErrorModal('Payment successful but order record failed. Please contact support.');
+      }
+  }
+        try {
+          const verify = await fetch('/api/verify-razorpay-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_signature: response.razorpay_signature
+              })
+          });
+          const result = await verify.json();
+          if (!result.success) throw new Error(result.message || 'Verification failed');
+
+          const updatedOrder = { ...orderData, paymentMethod: 'razorpay', paymentStatus: 'paid', paymentId: response.razorpay_payment_id };
+          if (window.firebaseOrdersModule) await window.firebaseOrdersModule.saveOrderToFirebase(updatedOrder);
+          
+          await fetch('/api/send-order-email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: orderData.orderReference, orderTotal: orderData.orderTotal, customer: orderData.customer, products: cartItems })
+          });
+          
+          if (typeof showOrderConfirmation === 'function') showOrderConfirmation(updatedOrder);
+          if (typeof clearCart === 'function') clearCart();
+          document.querySelector('form#checkout-form')?.reset();
+      } catch (e) {
+          console.error('Post-payment error:', e);
+          if (typeof showErrorModal === 'function') showErrorModal('Payment successful but order record failed. Please contact support.');
+      }
+  }
+  
+  async function handleRazorpaySuccess(response, orderData, cartItems) {
+      console.log('Razorpay success:', response.razorpay_payment_id);
+      const submitButton = document.querySelector('form#checkout-form button[type="submit"]');
+      if (submitButton) {
+          submitButton.disabled = true;
+          submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+      }
+      try {
+          const verify = await fetch('/api/verify-razorpay-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_signature: response.razorpay_signature
+              })
+          });
+          const result = await verify.json();
+          if (!result.success) throw new Error(result.message || 'Verification failed');
+
+          const updatedOrder = { ...orderData, paymentMethod: 'razorpay', paymentStatus: 'paid', paymentId: response.razorpay_payment_id };
+          if (window.firebaseOrdersModule) await window.firebaseOrdersModule.saveOrderToFirebase(updatedOrder);
+          
+          await fetch('/api/send-order-email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: orderData.orderReference, orderTotal: orderData.orderTotal, customer: orderData.customer, products: cartItems })
+          });
+          
+          if (typeof showOrderConfirmation === 'function') showOrderConfirmation(updatedOrder);
+          if (typeof clearCart === 'function') clearCart();
+          document.querySelector('form#checkout-form')?.reset();
+      } catch (e) {
+          console.error('Post-payment error:', e);
+          if (typeof showErrorModal === 'function') showErrorModal('Payment successful but order record failed. Please contact support.');
+      }
+  }
+  

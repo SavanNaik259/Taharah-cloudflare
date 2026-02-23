@@ -1,35 +1,23 @@
 export async function onRequest(context) {
-  const { env } = context;
+  const { env, request } = context;
   
-  // Create a safe version of the environment variables to display
-  const safeEnv = {};
-  for (const key in env) {
-    if (typeof env[key] === 'string') {
-      // Show first 5 and last 5 characters for sensitive-looking keys
-      if (key.includes('KEY') || key.includes('SECRET') || key.includes('CERT')) {
-        const val = env[key];
-        safeEnv[key] = val.length > 10 
-          ? `${val.substring(0, 5)}...${val.substring(val.length - 5)} (Length: ${val.length})`
-          : `*** (Length: ${val.length})`;
-      } else {
-        safeEnv[key] = env[key];
-      }
-    } else {
-      safeEnv[key] = `Type: ${typeof env[key]}`;
-    }
-  }
-
+  const RAZORPAY_KEY_ID = env.RAZORPAY_KEY_ID ? \`Configured (\${env.RAZORPAY_KEY_ID.substring(0, 4)}...)\` : "Missing";
+  const RAZORPAY_KEY_SECRET = env.RAZORPAY_KEY_SECRET ? "Configured" : "Missing";
+  const RESEND_API_KEY = env.RESEND_API_KEY ? "Configured" : "Missing";
+  
   const debugData = {
     message: "Cloudflare Pages Environment Variables Debug",
     timestamp: new Date().toISOString(),
-    env_keys: Object.keys(env),
-    env_values: safeEnv,
-    // Add specific checks for expected variables
-    verification: {
-      has_project_id: !!env.FIREBASE_PROJECT_ID,
-      has_storage_bucket: !!env.FIREBASE_STORAGE_BUCKET,
-      has_private_key: !!env.FIREBASE_PRIVATE_KEY,
-      storage_bucket_value: env.FIREBASE_STORAGE_BUCKET || 'NOT_SET'
+    env: {
+      RAZORPAY_KEY_ID,
+      RAZORPAY_KEY_SECRET,
+      RESEND_API_KEY,
+      all_keys: Object.keys(env)
+    },
+    request: {
+      url: request.url,
+      method: request.method,
+      headers: Object.fromEntries(request.headers)
     }
   };
 
