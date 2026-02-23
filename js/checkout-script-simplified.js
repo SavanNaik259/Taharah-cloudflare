@@ -2304,9 +2304,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 console.log('Creating Razorpay order for amount (INR):', amountInINR);
 
-                // Use Cloudflare Pages Functions to create order
+                // Use Netlify Functions if helper is available
                 if (window.netlifyHelpers) {
-                    console.log('Using Cloudflare Functions to create order');
+                    console.log('Using Netlify Functions to create order');
                     result = await Promise.race([
                         window.netlifyHelpers.callNetlifyFunction('create-razorpay-order', {
                             method: 'POST',
@@ -2322,10 +2322,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         timeoutPromise
                     ]);
                 } else {
-                    // Fallback to direct /api call (Cloudflare Pages serves functions from /api)
-                    console.log('Using direct /api/create-razorpay-order');
+                    // Fallback to direct API call to Express server
+                    console.log('Using local server to create order');
+                    const baseUrl = window.location.origin;
+                    apiEndpoint = `${baseUrl}/api/create-razorpay-order`;
+
                     const response = await Promise.race([
-                        fetch('/api/create-razorpay-order', {
+                        fetch(apiEndpoint, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -2342,10 +2345,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         timeoutPromise
                     ]);
 
-                    if (!response.ok) {
-                        const errorData = await response.json().catch(() => ({}));
-                        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-                    }
                     result = await response.json();
                 }
             } catch (apiError) {
@@ -2559,28 +2558,38 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             try {
-                // Use the same helper for consistency
-                console.log('Verifying payment via /api/verify-razorpay-payment');
-                const verifyResponse = await Promise.race([
-                    fetch('/api/verify-razorpay-payment', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_order_id: response.razorpay_order_id,
-                            razorpay_signature: response.razorpay_signature
-                        })
-                    }),
-                    verifyTimeoutPromise
-                ]);
-                
-                if (!verifyResponse.ok) {
-                    const errorData = await verifyResponse.json().catch(() => ({}));
-                    throw new Error(errorData.message || `HTTP error! status: ${verifyResponse.status}`);
+                if (window.netlifyHelpers) {
+                    console.log('Verifying payment via Netlify Functions');
+                    verificationResult = await Promise.race([
+                        window.netlifyHelpers.callNetlifyFunction('verify-razorpay-payment', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_signature: response.razorpay_signature
+                            })
+                        }),
+                        verifyTimeoutPromise
+                    ]);
+                } else {
+                    console.log('Verifying payment via Express server');
+                    const baseUrl = window.location.origin;
+                    const verifyResponse = await Promise.race([
+                        fetch(`${baseUrl}/api/verify-razorpay-payment`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_signature: response.razorpay_signature
+                            })
+                        }),
+                        verifyTimeoutPromise
+                    ]);
+                    verificationResult = await verifyResponse.json();
                 }
-                verificationResult = await verifyResponse.json();
             } catch (verifyError) {
                 // Continue with order processing even if verification fails
                 // This is safer than leaving the user hanging, as Razorpay has confirmed payment
