@@ -59,8 +59,12 @@ export async function onRequest(context) {
 
         // 3. Handle relative paths (do not force productImages/ if it might already be there)
         const cleanPath = u.startsWith('/') ? u.substring(1) : u;
-        // Check if the path already starts with productImages/ or similar
-        return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(cleanPath)}?alt=media`;
+        
+        // If the path doesn't contain a slash, it's likely just a filename that needs productImages/
+        // If it already has a folder structure, keep it as is.
+        const finalPath = cleanPath.includes('/') ? cleanPath : `productImages/${cleanPath}`;
+        
+        return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(finalPath)}?alt=media`;
       };
 
       // Deep copy to avoid mutation issues if needed, but here we just map
