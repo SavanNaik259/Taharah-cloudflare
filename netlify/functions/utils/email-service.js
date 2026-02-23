@@ -214,48 +214,18 @@ try {
   console.error('Failed to create email transporter:', error);
 }
 
+// Helper function to create Resend client (replaces createTransporter)
+function getResendClient() {
+  return getResend();
+}
+
 /**
  * Send an order confirmation email to the customer
- *
- * @param {Object} orderData - Order data including customer information and products
- * @returns {Promise<Object>} - Result of email sending operation
  */
 async function sendCustomerOrderConfirmation(orderData) {
   try {
     const { customer } = orderData;
-
-    // Validate required data
-    if (!customer || !customer.email) {
-      console.error('Customer data missing or incomplete:', { customer, orderData });
-      throw new Error('Customer email is required to send order confirmation');
-    }
-
-    // Ensure required fields have default values
-    const customerData = {
-      firstName: customer.firstName || 'Valued',
-      lastName: customer.lastName || 'Customer',
-      email: customer.email,
-      phone: customer.phone || 'Not provided',
-      address: customer.address || 'Not provided',
-      city: customer.city || '',
-      state: customer.state || '',
-      postalCode: customer.postalCode || ''
-    };
-
-    // Ensure order data has required fields
-    const completeOrderData = {
-      ...orderData,
-      customer: customerData,
-      orderReference: orderData.orderReference || 'TAH-' + Date.now(),
-      orderDate: orderData.orderDate || new Date().toISOString(),
-      orderTotal: orderData.orderTotal || 0,
-      paymentMethod: orderData.paymentMethod || 'Not specified',
-      products: orderData.products || []
-    };
-
-    console.log('Preparing customer email with complete data:', completeOrderData);
-
-    const transporter = createTransporter();
+    const resend = getResendClient();
 
     // Determine email type based on order status - prioritize explicit status
     let subject, htmlContent;
@@ -365,7 +335,7 @@ async function sendOwnerOrderNotification(orderData) {
       throw new Error('Owner email configuration missing');
     }
 
-    const transporter = createTransporter();
+    const resend = getResendClient();
 
     // Determine email subject and content based on order data
     let subject, ownerContent;
@@ -456,7 +426,7 @@ async function sendCustomerDeliveryConfirmation(orderData) {
       throw new Error('Customer email is required to send delivery confirmation');
     }
 
-    const transporter = createTransporter();
+    const resend = getResendClient();
     const htmlContent = templates.customerDeliveryTemplate(orderData);
 
     const mailOptions = {
@@ -501,7 +471,7 @@ async function sendOwnerDeliveryConfirmation(orderData) {
       throw new Error('Owner email is required to send delivery confirmation');
     }
 
-    const transporter = createTransporter();
+    const resend = getResendClient();
     const htmlContent = templates.ownerDeliveryTemplate(orderData);
 
     const mailOptions = {
@@ -732,7 +702,7 @@ async function sendPasswordResetEmail(emailData) {
       throw new Error('Customer email is required to send password reset email');
     }
 
-    const transporter = createTransporter();
+    const resend = getResendClient();
 
     const htmlContent = `
       <!DOCTYPE html>
