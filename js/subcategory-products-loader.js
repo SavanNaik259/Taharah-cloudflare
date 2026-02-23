@@ -136,24 +136,8 @@ const SubcategoryProductsLoader = (function() {
                 
                 // Ensure image URL is direct Firebase URL if it's not already
                 if (product.image) {
-                    const bucket = window.firebaseConfig?.storageBucket || 'studio-7642357109-d9026.firebasestorage.app';
-                    
-                    if (product.image.includes('firebasestorage.googleapis.com')) {
-                        if (!product.image.includes('alt=media')) {
-                            product.image = product.image.includes('?') ? `${product.image}&alt=media` : `${product.image}?alt=media`;
-                        }
-                    } else if (product.image.startsWith('/api/image-proxy')) {
-                        const urlParams = new URLSearchParams(product.image.split('?')[1]);
-                        const path = urlParams.get('path');
-                        if (path) {
-                            const cleanPath = path.startsWith('/') ? path.substring(1) : path;
-                            product.image = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(cleanPath)}?alt=media`;
-                        }
-                    } else if (!product.image.startsWith('http')) {
-                        const cleanPath = product.image.startsWith('/') ? product.image.substring(1) : product.image;
-                        const finalPath = cleanPath.startsWith('productImages/') ? cleanPath : `productImages/${cleanPath}`;
-                        product.image = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(finalPath)}?alt=media`;
-                    }
+                    // URL is already transformed by the backend
+                    return product;
                 }
                 
                 return product;
