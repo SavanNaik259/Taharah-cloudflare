@@ -24,17 +24,26 @@ app.all('/api/:functionName', async (req, res) => {
       if (!imageUrl) return res.status(400).send('Missing URL');
       
       let decodedUrl = decodeURIComponent(imageUrl);
+      console.log(`[Proxy Request] Original: ${imageUrl} | Decoded: ${decodedUrl}`);
+      
+      // Handle nested proxy URLs or legacy Netlify paths
+      if (decodedUrl.includes('image-proxy?path=')) {
+        const parts = decodedUrl.split('path=');
+        decodedUrl = decodeURIComponent(parts[parts.length - 1]);
+        console.log(`[Proxy Nested] Extracted path: ${decodedUrl}`);
+      }
       
       // If it's a relative path, convert to direct Firebase URL
       if (!decodedUrl.startsWith('http')) {
         const bucket = process.env.FIREBASE_STORAGE_BUCKET || 'studio-7642357109-d9026.firebasestorage.app';
-        const cleanPath = decodedUrl.startsWith('/') ? decodedUrl.substring(1) : decodedUrl;
+        let cleanPath = decodedUrl.startsWith('/') ? decodedUrl.substring(1) : decodedUrl;
         
-        // If the path doesn't contain a slash, it's likely just a filename that needs productImages/
+        // Final path cleanup
         const finalPath = (cleanPath.includes('/') || cleanPath.startsWith('productImages')) ? cleanPath : `productImages/${cleanPath}`;
         
         const encodedPath = finalPath.split('/').map(part => encodeURIComponent(part)).join('%2F');
         decodedUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodedPath}?alt=media`;
+        console.log(`[Proxy Construct] Path: ${finalPath} | URL: ${decodedUrl}`);
       }
 
       // Ensure it's a firebase URL we are fetching

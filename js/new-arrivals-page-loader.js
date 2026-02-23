@@ -176,13 +176,21 @@ async function loadNewArrivalsProductsDirect() {
             image: (function(img) {
                 if (!img || typeof img !== 'string') return img;
                 const bucket = window.firebaseConfig?.storageBucket || 'studio-7642357109-d9026.firebasestorage.app';
-                if (!img.startsWith('http')) {
-                    const cleanPath = img.startsWith('/') ? img.substring(1) : img;
-                    return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(cleanPath)}?alt=media`;
-                } else if (img.includes('firebasestorage.googleapis.com') && !img.includes('alt=media')) {
-                    return img.includes('?') ? `${img}&alt=media` : `${img}?alt=media`;
+                
+                // Extract clean path regardless of current format
+                let cleanPath = img;
+                if (img.includes('firebasestorage.googleapis.com')) {
+                    const match = img.match(/\/o\/(.+?)\?/);
+                    cleanPath = match ? decodeURIComponent(match[1]) : img;
+                } else if (img.includes('image-proxy?path=')) {
+                    const parts = img.split('path=');
+                    cleanPath = decodeURIComponent(parts[parts.length - 1]);
                 }
-                return img;
+                
+                const finalPath = cleanPath.startsWith('/') ? cleanPath.substring(1) : cleanPath;
+                const p = finalPath.startsWith('productImages/') ? finalPath : `productImages/${finalPath}`;
+                
+                return `/api/image-proxy?url=${encodeURIComponent(p)}`;
             })(productImage),
             category: product.category,
             subcategory: product.subcategory || product.subCategory || '',
