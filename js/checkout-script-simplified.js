@@ -1136,31 +1136,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Send order confirmation email for COD orders
             try {
-                console.log('Sending order confirmation email for COD order...');
-                let emailResult = { success: false };
-
-                if (window.netlifyHelpers) {
-                    console.log('Using Netlify Functions for COD order email');
-                    emailResult = await window.netlifyHelpers.callNetlifyFunction('send-order-email', {
-                        method: 'POST',
-                        body: JSON.stringify(orderData)
-                    });
-                } else {
-                    console.log('Using Express server for COD order email');
-                    // Use absolute URL to avoid issues with hosting changes
-                    const baseUrl = window.location.origin;
-                    const emailResponse = await fetch(`${baseUrl}/api/send-order-email`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(orderData)
-                    });
-                    emailResult = await emailResponse.json();
-                }
-
-                if (emailResult.success) {
+                console.log('Sending order confirmation email for COD order via Cloudflare...');
+                const emailResult = await sendOrderConfirmationEmails({
+                    id: orderId,
+                    orderTotal: orderData.orderTotal,
+                    customer: orderData.customer,
+                    products: cartItems
+                });
+                
+                if (emailResult) {
                     console.log('✅ COD order confirmation emails sent successfully');
                 } else {
-                    console.warn('⚠️ Failed to send COD order confirmation emails:', emailResult?.message || 'Email service unavailable');
+                    console.warn('⚠️ Failed to send COD order confirmation emails');
                 }
             } catch (emailError) {
                 console.error('❌ Error sending COD order emails:', emailError);
@@ -2751,30 +2738,18 @@ document.addEventListener('DOMContentLoaded', function() {
             // Send order confirmation email
             let emailResult = { success: false };
             try {
-                console.log('Attempting to send order confirmation email...');
-
-                if (window.netlifyHelpers) {
-                    console.log('Using Netlify Functions for email');
-                    emailResult = await window.netlifyHelpers.callNetlifyFunction('send-order-email', {
-                        method: 'POST',
-                        body: JSON.stringify(updatedOrderData)
-                    });
-                } else {
-                    console.log('Using Express server for email');
-                    // Use absolute URL to avoid issues with hosting changes
-                    const baseUrl = window.location.origin;
-                    const emailResponse = await fetch(`${baseUrl}/api/send-order-email`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(updatedOrderData)
-                    });
-                    emailResult = await emailResponse.json();
-                }
-
-                if (emailResult.success) {
+                console.log('Attempting to send order confirmation email via Cloudflare...');
+                emailResult = await sendOrderConfirmationEmails({
+                    id: orderId,
+                    orderTotal: orderData.orderTotal,
+                    customer: orderData.customer,
+                    products: cartItems
+                });
+                
+                if (emailResult) {
                     console.log('Order confirmation emails sent successfully');
                 } else {
-                    console.warn('Failed to send order confirmation emails:', emailResult?.message || 'Email service unavailable');
+                    console.warn('Failed to send order confirmation emails');
                 }
             } catch (emailError) {
                 console.error('Error sending order emails:', emailError);
@@ -2843,7 +2818,7 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     async function sendOrderConfirmationEmails(orderData) {
         try {
-            console.log('Sending order confirmation emails via Netlify Functions...');
+            console.log('Sending order confirmation emails via Cloudflare Functions...');
 
             // Check if netlify helpers are available
             if (!window.netlifyHelpers || typeof window.netlifyHelpers.callNetlifyFunction !== 'function') {
@@ -2851,31 +2826,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 return false;
             }
 
-            // Make API call to the Netlify Function with timeout
-            const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('Email sending timed out')), 10000);
+            const emailResult = await window.netlifyHelpers.callNetlifyFunction('send-order-email', {
+                method: 'POST',
+                body: JSON.stringify({
+                    orderData: {
+                        id: orderData.id || orderData.orderReference || '',
+                        amount: (orderData.orderTotal || 0) * 100,
+                        currency: 'INR'
+                    },
+                    items: orderData.products || orderData.items || [],
+                    customerInfo: {
+                        firstName: orderData.customer?.firstName || '',
+                        lastName: orderData.customer?.lastName || '',
+                        email: orderData.customer?.email || ''
+                    }
+                })
             });
-
-            const emailResult = await Promise.race([
-                window.netlifyHelpers.callNetlifyFunction('send-order-email', {
-                    method: 'POST',
-                    body: JSON.stringify(orderData)
-                }),
-                timeoutPromise
-            ]);
 
             if (emailResult && emailResult.success) {
                 console.log('Order confirmation emails sent successfully:', emailResult);
                 return true;
             } else {
                 console.warn('Failed to send order confirmation emails:', emailResult?.message || 'Email service unavailable');
-                // Continue with order processing even if email sending fails
                 return false;
             }
         } catch (emailError) {
             console.error('Error sending order emails:', emailError);
-            console.error('Failed to send order confirmation emails:', emailError.message || emailError);
-            // Continue with order processing even if email sending fails
             return false;
         }
     }

@@ -1,95 +1,29 @@
-# Taharah E-commerce Platform
+# Razorpay & Email Integration Fix (Cloudflare Pages)
 
-## Overview
+The project has been migrated from Netlify Functions to Cloudflare Pages Functions to fix the Razorpay checkout error.
 
-Taharah is a premium e-commerce platform for exquisite Pakistani fashion. The platform provides a sophisticated online shopping experience with product catalogs, user authentication, shopping cart functionality, wishlist management, secure payments, and order notifications.
+## Changes Made
+1.  **Created Cloudflare Pages Functions**:
+    -   `/functions/api/create-razorpay-order.js`: Handles Razorpay order creation using fetch API (No Node SDK).
+    -   `/functions/api/verify-razorpay-payment.js`: Verifies signatures using Web Crypto API.
+    -   `/functions/api/send-order-email.js`: Sends confirmation emails via **Resend API**.
 
-The site is built as a multi-page static website with serverless backend functions, designed for deployment on Netlify with Firebase as the primary data layer.
+2.  **Updated Frontend (`js/checkout-script-simplified.js`)**:
+    -   Refactored `sendOrderConfirmationEmails` to use the new Cloudflare API structure.
+    -   Updated both COD and Online payment flows to trigger the new email function.
+    -   Removed legacy Express/Netlify conditional logic for cleaner execution.
 
-## User Preferences
+3.  **Cleanup**:
+    -   Removed all unused Netlify function files and directories (`app/netlify/`).
+    -   Deleted Shiprocket-related serverless functions as the feature is disabled.
 
-Preferred communication style: Simple, everyday language.
+## Environment Variables Required
+Ensure the following are set in your Cloudflare Pages dashboard:
+-   `RAZORPAY_KEY_ID`
+-   `RAZORPAY_KEY_SECRET`
+-   `RESEND_API_KEY` (Default provided in code as fallback)
 
-## System Architecture
-
-### Frontend Architecture
-- **Technology**: Static HTML5/CSS3 pages with vanilla JavaScript
-- **Design Pattern**: Multi-page application (MPA) with shared components
-- **Styling**: Custom CSS with responsive design, using Font Awesome and Flaticon for icons
-- **Typography**: Playfair Display and Lato fonts via Google Fonts
-
-### Backend Architecture
-- **Serverless Functions**: Netlify Functions located in `/netlify/functions/`
-- **API Endpoints**:
-  - `send-order-email` - Email notifications via Nodemailer
-  - `create-razorpay-order` - Payment order creation
-  - `verify-razorpay-payment` - Payment verification
-  - `health` - Health check endpoint
-- **Local Development Server**: Express.js server in `run-server.js` for development
-
-### Data Storage
-- **Database**: Firebase Firestore for products, orders, user data, and analytics
-- **Authentication**: Firebase Authentication for user accounts
-- **File Storage**: Firebase Storage for product images
-- **Client-side Storage**: localStorage for cart and session data
-
-### Payment Integration
-- **Payment Gateway**: Razorpay for processing transactions
-- **Flow**: Client creates order → Razorpay checkout → Server verifies payment → Order confirmation
-
-### Product Organization
-Products are organized into Firestore collections:
-- `new-arrivals` - Latest fashion additions
-- `ready-to-wear` - Curated ready-to-wear items
-- `pakistani-pret-wear` - Pret wear collection
-- Category-specific collections for party wear, modest wear, etc.
-
-### Key JavaScript Files
-- `js/firebase-config.js` - Centralized Firebase configuration
-- `js/currency-converter.js` - Multi-currency support
-- `js/netlify-helpers.js` - Serverless function utilities
-- `firebase-messaging-sw.js` - Push notification service worker
-
-### Stock Management Refactor (Feb 2026)
-- **Root Cause Identified**: Hardcoded dupatta options (Chiffon/Cotton) in the admin panel lacked name/price fields, preventing them from being saved as valid `material` variants with stock tracking. The product loader also had multiple redundant code paths that didn't consistently check the `inStock` property.
-- **Admin Panel Fixes**: 
-  - Added default names and prices to hardcoded dupatta variants so they are correctly saved to the `materials` array.
-  - Improved `loadProductForEdit` to correctly pre-fill stock status for both dynamic and hardcoded variants.
-  - Unified `dupattaOptions` save logic to use query selectors instead of hardcoded IDs.
-- **Frontend Loader Fixes**:
-  - Unified `material-selection` and `dupatta-selection` rendering into a single robust helper function.
-  - Ensured all rendering paths (including legacy fallbacks) properly respect the `inStock` property by disabling buttons and adding visual "OUT" indicators.
-  - Improved default price selection to automatically pick the first available in-stock option.
-
-### Video Management (Watch & Buy)
-- **Storage Location**: Firebase Storage under `watch-buy-videos/` path
-- **Metadata Storage**: Firestore `watch-buy-videos` collection
-- **API Endpoints**:
-  - `GET /api/videos` - Fetch all videos
-  - `POST /api/videos` - Upload new video (multipart/form-data)
-  - `PUT /api/videos/:id` - Update video metadata
-  - `DELETE /api/videos/:id` - Delete video and metadata
-- **Video Fields**: title, description, videoUrl, thumbnailUrl, linkedProductSku, order, createdAt, updatedAt
-
-## External Dependencies
-
-### Firebase Services
-- **Project ID**: `studio-7642357109-d9026`
-- **Services Used**: Authentication, Firestore, Storage, Cloud Messaging
-- **Admin SDK**: Used server-side for privileged operations
-
-Email: Officialtaharah@gmail.com
-Number to add on WhatsApp floating button and all: +91 8589920686
-Domain: taharah.in
-Instagram id: https://www.instagram.com/taharahofficial_?igsh=MTdpdTRvdTBiMDh1dQ==
-Address: kerala, India
-
-### CDN Resources
-- Font Awesome icons
-- Flaticon UI icons
-- Google Fonts
-- Bootstrap CSS (checkout page only)
-
-### Deployment Platform
-- **Netlify**: Static hosting with serverless functions
-- **Configuration**: `netlify.toml` for build settings, `firebase.json` for Firebase hosting rules
+## Verification Steps
+1.  Place a COD order: Check browser console for "COD order confirmation emails sent successfully".
+2.  Place a Razorpay order: Verify the popup opens and the signature verification call to `/api/verify-razorpay-payment` succeeds.
+3.  Check Email: Ensure emails are received via Resend from `orders@fluxe.in`.
