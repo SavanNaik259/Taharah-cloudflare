@@ -962,7 +962,7 @@ window.FirebaseAuth = (function() {
       };
 
       // Use your existing email service endpoint
-      const response = await fetch('/.netlify/functions/send-verification-email', {
+      const response = await fetch('/api/send-verification-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -1005,7 +1005,7 @@ window.FirebaseAuth = (function() {
       console.log('📧 Sending custom password reset email via Netlify function');
 
       // Use custom password reset email service endpoint
-      const response = await fetch('/.netlify/functions/send-password-reset-email', {
+      const response = await fetch('/api/send-password-reset-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
