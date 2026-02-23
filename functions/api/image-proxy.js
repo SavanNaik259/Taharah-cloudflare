@@ -20,6 +20,7 @@ export async function onRequest(context) {
       
       const encodedPath = finalPath.split('/').map(part => encodeURIComponent(part)).join('%2F');
       decodedUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodedPath}?alt=media`;
+      console.log('Constructed Firebase URL:', decodedUrl);
     }
 
     // Ensure it's a firebase URL we are fetching
@@ -27,6 +28,7 @@ export async function onRequest(context) {
       decodedUrl += (decodedUrl.includes('?') ? '&' : '?') + 'alt=media';
     }
     
+    console.log('Fetching from:', decodedUrl);
     const response = await fetch(decodedUrl, {
       method: 'GET',
       headers: {
@@ -37,6 +39,7 @@ export async function onRequest(context) {
     });
 
     if (!response.ok) {
+      console.error('Fetch failed with status:', response.status);
       // If proxy fails, redirect user directly to the source
       return Response.redirect(decodedUrl, 302);
     }

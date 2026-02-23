@@ -37,29 +37,17 @@ export async function onRequest(context) {
       const transformUrl = (u) => {
         if (!u || typeof u !== 'string') return u;
         
-        const bucket = env.FIREBASE_STORAGE_BUCKET || 'studio-7642357109-d9026.firebasestorage.app';
+        // Use proxy for ALL images to ensure consistency
+        const cleanPath = (function(path) {
+            if (path.includes('firebasestorage.googleapis.com')) {
+                const match = path.match(/\/o\/(.+?)\?/);
+                return match ? decodeURIComponent(match[1]) : path;
+            }
+            const p = path.startsWith('/') ? path.substring(1) : path;
+            return p.startsWith('productImages/') ? p : `productImages/${p}`;
+        })(u);
 
-        // 1. If it's already a direct Firebase URL, ensure it has alt=media
-        if (u.includes('firebasestorage.googleapis.com')) {
-          if (!u.includes('alt=media')) {
-            return u.includes('?') ? `${u}&alt=media` : `${u}?alt=media`;
-          }
-          return u;
-        }
-
-        // 2. If it's already a proxy URL, keep it as is
-        if (u.startsWith('/api/image-proxy')) {
-          return u;
-        }
-
-        // 3. Handle relative paths
-        const cleanPath = u.startsWith('/') ? u.substring(1) : u;
-        const finalPath = (cleanPath.includes('/') || cleanPath.startsWith('productImages')) ? cleanPath : `productImages/${cleanPath}`;
-        
-        // Use encodeURIComponent for the path part, but keep the folder structure
-        const encodedPath = finalPath.split('/').map(part => encodeURIComponent(part)).join('%2F');
-        
-        return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodedPath}?alt=media`;
+        return `/api/image-proxy?url=${encodeURIComponent(cleanPath)}`;
       };
 
       // Deep copy to avoid mutation issues if needed, but here we just map
