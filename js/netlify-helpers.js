@@ -32,8 +32,9 @@ async function callNetlifyFunction(endpoint, options = {}) {
   }
 
   // Add Content-Type header for JSON if not specified and we have a body
-  if (options.body && !options.headers['Content-Type']) {
-    options.headers['Content-Type'] = 'application/json';
+  if (options.body && typeof options.body === 'object' && !(options.body instanceof FormData)) {
+    options.body = JSON.stringify(options.body);
+    options.headers['Content-Type'] = options.headers['Content-Type'] || 'application/json';
   }
 
   // Create the URL

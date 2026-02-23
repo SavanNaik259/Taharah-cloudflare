@@ -10,8 +10,8 @@ export async function onRequestPost({ request, env }) {
       return new Response(JSON.stringify({ success: false, message: "Missing verification data" }), { status: 400, headers });
     }
 
-    // Hardcoded test secret as requested
-    const secret = "dwhI00HuTIRk5T61AyUq1Bhh";
+    // Use environment variable for Razorpay secret
+    const secret = env.RAZORPAY_KEY_SECRET || "dwhI00HuTIRk5T61AyUq1Bhh";
     const enc = new TextEncoder();
     const key = await crypto.subtle.importKey(
       "raw",

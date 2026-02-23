@@ -11,9 +11,9 @@ export async function onRequestPost({ request, env }) {
       return new Response(JSON.stringify({ success: false, message: "Invalid amount" }), { status: 400, headers });
     }
 
-    // Hardcoded test credentials as requested
-    const keyId = "rzp_test_qZWULE2MoPHZJv";
-    const keySecret = "dwhI00HuTIRk5T61AyUq1Bhh";
+    // Use environment variables for Razorpay credentials
+    const keyId = env.RAZORPAY_KEY_ID || "rzp_test_qZWULE2MoPHZJv";
+    const keySecret = env.RAZORPAY_KEY_SECRET || "dwhI00HuTIRk5T61AyUq1Bhh";
 
     const auth = btoa(`${keyId}:${keySecret}`);
     const resp = await fetch("https://api.razorpay.com/v1/orders", {
