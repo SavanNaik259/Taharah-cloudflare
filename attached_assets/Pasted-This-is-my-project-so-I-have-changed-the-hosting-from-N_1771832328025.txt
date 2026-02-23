@@ -1,0 +1,74 @@
+This is my project so I have changed the hosting from Netlify to Cloudflare because of limited free plan limit in Netlify so I was using the firebase and all with netlify functions to connect with backend so the issue is that the firebase storage products data like name, description are showing but their images are still not showing on production or in cloudflare pages just the alt name is showing, but in local server The product images and all properly , mostly like the issue is how you are loading the product images on production
+In test-images.html page in cloudflare pages the Direct Firebase URL images is showing Proxied URL (Testing Cloudflare Function) is showing but not Full URL via Proxy image is showing so make sure you are not using that mostly thr problem is that how you are loading the product images because on test images the images are properly loading so the issue is only the on how you are loading the images
+
+
+This is the product json data of featured collection category which was created while creating the product from products-admin-panel when my project was hosted on netlify but these products are not showing now but in netlify they were properly showing the products images in ready to wear page on website and this is the path productData/featured-collection-products.json.
+And the data of json looks like this [
+  {
+    "id": "RTW-1771670788363-ll7l8x2c-453397",
+    "name": "Anarkali fit(2 shades)",
+    "price": 1650,
+    "stock": 20,
+    "category": "featured-collection",
+    "subcategory": "",
+    "description": "Georgette anarkali suit\nTop length:48 inches \nBottom length:40 inches",
+    "sizes": [
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "colours": [
+      "Maroon",
+      "Rani pink"
+    ],
+    "materials": [],
+    "dupattaOptions": [],
+    "images": [
+      {
+        "url": "/.netlify/functions/image-proxy?path=productImages%2FRTW-1771670642150-ibjxbx9y-682485_1771670642150_0_ndt4cj.jpg",
+        "isMain": true,
+        "alt": "Anarkali fit(2 shades) - Image 1",
+        "color": ""
+      },
+      {
+        "url": "/.netlify/functions/image-proxy?path=productImages%2FRTW-1771670643548-0os9il8a-419158_1771670643548_1_okxl53.jpg",
+        "isMain": false,
+        "alt": "Anarkali fit(2 shades) - Image 2",
+        "color": "Maroon"
+      },
+      {
+        "url": "/.netlify/functions/image-proxy?path=productImages%2FRTW-1771670649297-2o4m01mi-757977_1771670649297_2_erdexv.jpg",
+        "isMain": false,
+        "alt": "Anarkali fit(2 shades) - Image 3",
+        "color": ""
+      },
+      {
+        "url": "/.netlify/functions/image-proxy?path=productImages%2FRTW-1771670655411-lopwc3j4-975936_1771670655411_3_fl021s.jpg",
+        "isMain": false,
+        "alt": "Anarkali fit(2 shades) - Image 4",
+        "color": ""
+      },
+      {
+        "url": "/.netlify/functions/image-proxy?path=productImages%2FRTW-1771670657345-i1ztv7md-086711_1771670657345_4_vnewmp.jpg",
+        "isMain": false,
+        "alt": "Anarkali fit(2 shades) - Image 5",
+        "color": "Rani pink"
+      },
+      {
+        "url": "/.netlify/functions/image-proxy?path=productImages%2FRTW-1771670663908-kmsag0k2-709617_1771670663908_5_tv7kzl.jpg",
+        "isMain": false,
+        "alt": "Anarkali fit(2 shades) - Image 6",
+        "color": ""
+      }
+    ],
+    "mainImage": "/.netlify/functions/image-proxy?path=productImages%2FRTW-1771670642150-ibjxbx9y-682485_1771670642150_0_ndt4cj.jpg",
+    "allImages": [],
+    "createdAt": "2026-02-21T10:46:28.363Z",
+    "updatedAt": "2026-02-21T10:44:02.150Z",
+    "status": "active"
+  },
+
+Also you can check how the firebase images storaged and path looks productImages/FEA-1770561522855-di1irpjo-834153_1770561522855_0_nua7or.jpg
+
+I have also provided two screenshots check them also
