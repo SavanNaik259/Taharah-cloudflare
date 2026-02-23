@@ -1,0 +1,135 @@
+You are debugging a Cloudflare Pages deployment of a static ecommerce site. Razorpay checkout fails with “There was an error processing your order.”
+
+Your task is to find the exact failure and fix it. Use file/line numbers below.
+1) Confirm exact frontend error location
+
+In /app/js/checkout-script-simplified.js line ~1247:
+
+showErrorModal('There was an error processing your order. Please try again later.');
+
+That error is thrown in the catch of the main checkout flow.
+2) Identify Razorpay order API call
+
+In /app/js/checkout-script-simplified.js lines ~2321–2335, the frontend calls:
+
+window.netlifyHelpers.callNetlifyFunction('create-razorpay-order', {...})
+
+This uses /api/create-razorpay-order (set in /app/js/netlify-helpers.js line ~16).
+3) Root cause
+
+In Cloudflare Pages, serverless functions must be in /functions/api/.
+But there is NO /functions/api/create-razorpay-order.js or /functions/api/verify-razorpay-payment.js.
+The only implementations are in Netlify functions:
+
+    /app/netlify/functions/create-razorpay-order.js
+    /app/netlify/functions/verify-razorpay-payment.js
+
+So Cloudflare returns 404 → order creation fails → frontend shows error.
+✅ REQUIRED FIXES
+A) Add Cloudflare Pages Functions
+
+Create these files under /functions/api/:
+1) /functions/api/create-razorpay-order.js
+
+Use Cloudflare Pages Function style:
+
+export async function onRequestPost({ request, env }) {
+  const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
+
+  const { amount, currency = "INR", receipt, notes } = await request.json();
+
+  if (!amount || amount <= 0) {
+    return new Response(JSON.stringify({ success:false, message:"Invalid amount"}), { status:400, headers });
+  }
+
+  const keyId = env.RAZORPAY_KEY_ID;
+  const keySecret = env.RAZORPAY_KEY_SECRET;
+
+  if (!keyId || !keySecret) {
+    return new Response(JSON.stringify({ success:false, message:"Razorpay credentials missing" }), { status:500, headers });
+  }
+
+  // Prefer REST API (no Node SDK)
+  const auth = btoa(`${keyId}:${keySecret}`);
+  const resp = await fetch("https://api.razorpay.com/v1/orders", {
+    method: "POST",
+    headers: {
+      "Content-Type":"application/json",
+      "Authorization": `Basic ${auth}`
+    },
+    body: JSON.stringify({
+      amount: Math.round(amount * 100),
+      currency,
+      receipt,
+      notes
+    })
+  });
+
+  const data = await resp.json();
+
+  if (!resp.ok) {
+    return new Response(JSON.stringify({ success:false, message:"Failed to create order", error:data }), { status:500, headers });
+  }
+
+  return new Response(JSON.stringify({ success:true, order:data, key_id:keyId }), { status:200, headers });
+}
+
+2) /functions/api/verify-razorpay-payment.js
+
+Use Web Crypto instead of Node crypto:
+
+export async function onRequestPost({ request, env }) {
+  const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
+
+  const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = await request.json();
+  if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+    return new Response(JSON.stringify({ success:false, message:"Missing verification data" }), { status:400, headers });
+  }
+
+  const secret = env.RAZORPAY_KEY_SECRET;
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+
+  const signature = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    enc.encode(`${razorpay_order_id}|${razorpay_payment_id}`)
+  );
+
+  const expected = Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, "0")).join("");
+
+  if (expected === razorpay_signature) {
+    return new Response(JSON.stringify({ success:true, message:"Payment verified" }), { status:200, headers });
+  }
+
+  return new Response(JSON.stringify({ success:false, message:"Verification failed" }), { status:400, headers });
+}
+
+B) Nodemailer on Cloudflare Pages
+
+Nodemailer SMTP will not work on Workers/Pages (no TCP sockets).
+So /app/netlify/functions/send-order-email.js + /app/netlify/functions/utils/email-config.js will fail in Cloudflare.
+
+Fix: Replace email sending with an HTTP email API (Resend/SendGrid/Mailgun/Postmark).
+Create /functions/api/send-order-email.js using that provider.
+C) Remove Shiprocket
+
+Shiprocket is disabled in /app/js/checkout-script-simplified.js line ~2157 (commented block).
+Remove any Shiprocket calls and delete /app/netlify/functions/shiprocket-*.js to avoid accidental calls.
+✅ Testing Checklist
+
+    POST /api/create-razorpay-order from browser → must return success:true.
+    Open checkout page → Razorpay popup should open.
+    Complete payment → /api/verify-razorpay-payment must return success.
+    Email confirmation should work via HTTP email API.
+
+If any function still returns 404, confirm it’s inside /functions/api/ and deployed to Cloudflare Pages.
+
+If you want, I can also draft the exact Cloudflare Pages functions for email + full diff.
+Feb 23, 03:51 PM
