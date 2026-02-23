@@ -16,10 +16,15 @@ export async function onRequest(context) {
       const cleanPath = decodedUrl.startsWith('/') ? decodedUrl.substring(1) : decodedUrl;
       
       // If the path doesn't contain a slash, it's likely just a filename that needs productImages/
-      const finalPath = cleanPath.includes('/') ? cleanPath : `productImages/${cleanPath}`;
+      const finalPath = (cleanPath.includes('/') || cleanPath.startsWith('productImages')) ? cleanPath : `productImages/${cleanPath}`;
       
       const encodedPath = finalPath.split('/').map(part => encodeURIComponent(part)).join('%2F');
       decodedUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodedPath}?alt=media`;
+    }
+
+    // Ensure it's a firebase URL we are fetching
+    if (decodedUrl.includes('firebasestorage.googleapis.com') && !decodedUrl.includes('alt=media')) {
+      decodedUrl += (decodedUrl.includes('?') ? '&' : '?') + 'alt=media';
     }
     
     const response = await fetch(decodedUrl, {

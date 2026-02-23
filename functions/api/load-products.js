@@ -54,7 +54,7 @@ export async function onRequest(context) {
 
         // 3. Handle relative paths
         const cleanPath = u.startsWith('/') ? u.substring(1) : u;
-        const finalPath = cleanPath.includes('/') ? cleanPath : `productImages/${cleanPath}`;
+        const finalPath = (cleanPath.includes('/') || cleanPath.startsWith('productImages')) ? cleanPath : `productImages/${cleanPath}`;
         
         // Use encodeURIComponent for the path part, but keep the folder structure
         const encodedPath = finalPath.split('/').map(part => encodeURIComponent(part)).join('%2F');
