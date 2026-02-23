@@ -3,8 +3,12 @@
  * Handles sending emails for various purposes using Nodemailer
  */
 
-const { createTransporter } = require('./email-config');
+const { getResend } = require('./email-config');
 const templates = require('./email-templates');
+
+const resend = getResend();
+
+// ... existing currency code ...
 
 // Currency symbol mapping
 const currencySymbols = {
@@ -312,14 +316,28 @@ If you have any questions, please contact us at ${process.env.EMAIL_USER}.
       `
     };
 
-    // Send the email
     console.log(`Sending order confirmation email to customer: ${customerData.email}`);
-    const result = await transporter.sendMail(mailOptions);
-    console.log(`Order confirmation email sent to customer: ${result.messageId}`);
+    
+    const { data, error } = await resend.emails.send({
+      from: `Taharah <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+      to: [customerData.email],
+      subject: subject,
+      html: htmlContent,
+      reply_to: 'savannnaik090@gmail.com',
+      headers: {
+        'X-Entity-ID': 'taharah-ecommerce'
+      }
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log(`Order confirmation email sent to customer: ${data.id}`);
 
     return {
       success: true,
-      messageId: result.messageId
+      messageId: data.id
     };
   } catch (error) {
     console.error('Error sending customer order confirmation email:', error);
@@ -399,12 +417,24 @@ Please log in to your dashboard to view the complete order details.
 
     // Send the email
     console.log(`Sending order notification email to owner: ${ownerEmail}`);
-    const result = await transporter.sendMail(mailOptions);
-    console.log(`Order notification email sent to owner: ${result.messageId}`);
+    
+    const { data, error } = await resend.emails.send({
+      from: `Taharah Orders <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+      to: [ownerEmail],
+      subject: subject,
+      html: ownerContent,
+      reply_to: 'savannnaik090@gmail.com'
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log(`Order notification email sent to owner: ${data.id}`);
 
     return {
       success: true,
-      messageId: result.messageId
+      messageId: data.id
     };
   } catch (error) {
     console.error('Error sending owner order notification email:', error);
@@ -438,10 +468,22 @@ async function sendCustomerDeliveryConfirmation(orderData) {
     };
 
     console.log(`Sending delivery confirmation email to customer: ${customer.email}`);
-    const result = await transporter.sendMail(mailOptions);
-    console.log(`Delivery confirmation email sent to customer: ${result.messageId}`);
+    
+    const { data, error } = await resend.emails.send({
+      from: `Taharah <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+      to: [customer.email],
+      subject: `✅ Delivery Confirmed - ${orderData.orderReference}`,
+      html: htmlContent,
+      reply_to: 'savannnaik090@gmail.com'
+    });
 
-    return { success: true, messageId: result.messageId };
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log(`Delivery confirmation email sent to customer: ${data.id}`);
+
+    return { success: true, messageId: data.id };
   } catch (error) {
     console.error('Error sending customer delivery confirmation email:', error);
     return { success: false, error: error.message };
@@ -471,10 +513,22 @@ async function sendOwnerDeliveryConfirmation(orderData) {
     };
 
     console.log(`Sending delivery confirmation email to owner: ${ownerEmail}`);
-    const result = await transporter.sendMail(mailOptions);
-    console.log(`Delivery confirmation email sent to owner: ${result.messageId}`);
+    
+    const { data, error } = await resend.emails.send({
+      from: `Taharah Orders <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+      to: [ownerEmail],
+      subject: `✅ Order Delivered - ${orderData.orderReference}`,
+      html: htmlContent,
+      reply_to: 'savannnaik090@gmail.com'
+    });
 
-    return { success: true, messageId: result.messageId };
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log(`Delivery confirmation email sent to owner: ${data.id}`);
+
+    return { success: true, messageId: data.id };
   } catch (error) {
     console.error('Error sending owner delivery confirmation email:', error);
     return { success: false, error: error.message };
@@ -635,48 +689,25 @@ async function sendVerificationEmail(emailData) {
 
     console.log(`📤 Sending verification email to: ${customer.email}`);
     
-    // Attempt to send email with proper error handling
-    let result;
-    try {
-      // Test connection first
-      await transporter.verify();
-      console.log('✅ SMTP connection verified successfully');
-      
-      result = await transporter.sendMail(mailOptions);
-      console.log(`📧 Verification email sent successfully: ${result.messageId}`);
-      
-      return {
-        success: true,
-        messageId: result.messageId,
-        recipient: customer.email
-      };
-      
-    } catch (sendError) {
-      console.error('❌ Failed to send verification email:', {
-        error: sendError.message,
-        code: sendError.code,
-        command: sendError.command,
-        recipient: customer.email
-      });
-      
-      // Provide specific error messages based on error type
-      let userFriendlyMessage = 'Failed to send verification email. Please try again.';
-      
-      if (sendError.code === 'EAUTH') {
-        userFriendlyMessage = 'Email authentication failed. Please contact support.';
-      } else if (sendError.code === 'ECONNECTION') {
-        userFriendlyMessage = 'Could not connect to email server. Please try again later.';
-      } else if (sendError.responseCode === 550) {
-        userFriendlyMessage = 'Email address rejected. Please check your email and try again.';
-      }
-      
-      return {
-        success: false,
-        error: userFriendlyMessage,
-        details: sendError.message,
-        recipient: customer.email
-      };
+    const { data, error } = await resend.emails.send({
+      from: `Taharah <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+      to: [customer.email],
+      subject: '✅ Verify Your Email Address - Taharah',
+      html: htmlContent,
+      reply_to: 'savannnaik090@gmail.com'
+    });
+
+    if (error) {
+      throw new Error(error.message);
     }
+
+    console.log(`Verification email sent: ${data.id}`);
+
+    return {
+      success: true,
+      messageId: data.id,
+      recipient: customer.email
+    };
     
   } catch (error) {
     console.error('💥 Critical error in verification email service:', error);
@@ -776,12 +807,24 @@ async function sendPasswordResetEmail(emailData) {
     };
 
     console.log(`Sending password reset email to: ${customer.email}`);
-    const result = await transporter.sendMail(mailOptions);
-    console.log(`Password reset email sent: ${result.messageId}`);
+    
+    const { data, error } = await resend.emails.send({
+      from: `Taharah Security <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+      to: [customer.email],
+      subject: '🔐 Reset Your Password - Taharah',
+      html: htmlContent,
+      reply_to: 'savannnaik090@gmail.com'
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log(`Password reset email sent: ${data.id}`);
 
     return {
       success: true,
-      messageId: result.messageId
+      messageId: data.id
     };
   } catch (error) {
     console.error('Error sending password reset email:', error);
@@ -805,15 +848,16 @@ async function sendAppointmentEmail(appointmentData) {
       throw new Error('Required appointment fields are missing');
     }
 
-    const transporter = createTransporter();
-
-    // Format date
-    const formattedDate = new Date(appointmentDate).toLocaleDateString('en-US', {
+    const ownerEmail = process.env.OWNER_EMAIL || 'savannnaik090@gmail.com';
+    const email = appointmentData.email;
+    const fullName = appointmentData.fullName;
+    const formattedDate = new Date(appointmentData.appointmentDate).toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
+    const selectedTime = appointmentData.selectedTime;
 
     // Email to business owner/admin
     const adminEmailContent = `
@@ -980,19 +1024,35 @@ async function sendAppointmentEmail(appointmentData) {
       html: customerEmailContent
     };
 
-    // Send both emails in parallel
-    console.log(`Sending appointment emails - Admin: ${adminMailOptions.to}, Customer: ${customerMailOptions.to}`);
+    // Send emails in parallel
+    console.log(`Sending appointment emails - Admin: ${ownerEmail}, Customer: ${email}`);
+    
     const [adminResult, customerResult] = await Promise.all([
-      transporter.sendMail(adminMailOptions),
-      transporter.sendMail(customerMailOptions)
+      resend.emails.send({
+        from: `Taharah Appointments <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+        to: [ownerEmail],
+        subject: `🗓️ New Appointment: ${fullName} - ${formattedDate} at ${selectedTime}`,
+        html: adminEmailContent,
+        reply_to: email
+      }),
+      resend.emails.send({
+        from: `Taharah <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+        to: [email],
+        subject: '✅ Appointment Confirmation - Taharah',
+        html: customerEmailContent,
+        reply_to: 'savannnaik090@gmail.com'
+      })
     ]);
 
-    console.log(`Appointment emails sent - Admin: ${adminResult.messageId}, Customer: ${customerResult.messageId}`);
+    if (adminResult.error) throw new Error(`Admin email error: ${adminResult.error.message}`);
+    if (customerResult.error) throw new Error(`Customer email error: ${customerResult.error.message}`);
+
+    console.log(`Appointment emails sent - Admin: ${adminResult.data.id}, Customer: ${customerResult.data.id}`);
 
     return {
       success: true,
-      adminMessageId: adminResult.messageId,
-      customerMessageId: customerResult.messageId
+      adminMessageId: adminResult.data.id,
+      customerMessageId: customerResult.data.id
     };
   } catch (error) {
     console.error('Error sending appointment email:', error);
@@ -1016,7 +1076,12 @@ async function sendContactEmail(contactData) {
       throw new Error('Required contact form fields are missing');
     }
 
-    const transporter = createTransporter();
+    const ownerEmail = process.env.OWNER_EMAIL || 'savannnaik090@gmail.com';
+    const email = contactData.email;
+    const firstName = contactData.firstName;
+    const lastName = contactData.lastName;
+    const subject = contactData.subject;
+    const message = contactData.message;
 
     // Email to business owner/admin
     const adminEmailContent = `
@@ -1155,19 +1220,38 @@ async function sendContactEmail(contactData) {
       }
     };
 
-    // Send both emails in parallel
-    console.log(`Sending contact form emails - Admin: ${adminMailOptions.to}, Customer: ${customerMailOptions.to}`);
+    // Send emails in parallel
+    console.log(`Sending contact form emails - Admin: ${ownerEmail}, Customer: ${email}`);
+    
     const [adminResult, customerResult] = await Promise.all([
-      transporter.sendMail(adminMailOptions),
-      transporter.sendMail(customerMailOptions)
+      resend.emails.send({
+        from: `Taharah Contact <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+        to: [ownerEmail],
+        subject: `New Contact Form: ${subject} - ${firstName} ${lastName}`,
+        html: adminEmailContent,
+        reply_to: email,
+        headers: {
+          'X-Entity-ID': 'taharah-contact'
+        }
+      }),
+      resend.emails.send({
+        from: `Taharah Team <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+        to: [email],
+        subject: '✅ Thank you for contacting Taharah - We\'ll be in touch soon!',
+        html: customerEmailContent,
+        reply_to: ownerEmail
+      })
     ]);
 
-    console.log(`Contact form emails sent - Admin: ${adminResult.messageId}, Customer: ${customerResult.messageId}`);
+    if (adminResult.error) throw new Error(`Admin contact email error: ${adminResult.error.message}`);
+    if (customerResult.error) throw new Error(`Customer contact email error: ${customerResult.error.message}`);
+
+    console.log(`Contact form emails sent - Admin: ${adminResult.data.id}, Customer: ${customerResult.data.id}`);
 
     return {
       success: true,
-      adminMessageId: adminResult.messageId,
-      customerMessageId: customerResult.messageId
+      adminMessageId: adminResult.data.id,
+      customerMessageId: customerResult.data.id
     };
   } catch (error) {
     console.error('Error sending contact form email:', error);

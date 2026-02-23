@@ -3,10 +3,11 @@ compatibility_date = "2024-01-01"
 pages_build_output_dir = "."
 
 [vars]
-EMAIL_SERVICE = "gmail"
-OWNER_EMAIL = "sss.naik2007@gmail.com"
-EMAIL_USER = "sss.naik2007@gmail.com"
-EMAIL_PASS = "cwswjmubelmlhaod"
+RESEND_API_KEY = "re_TEeXueCx_LkVvYLKY8S9nsQ32regcjzvD"
+EMAIL_FROM = "noreply@fluxe.in"
+OWNER_EMAIL = "savannnaik090@gmail.com"
+EMAIL_USER = "noreply@fluxe.in"
+# Keep existing vars but update if they overlap
 FIREBASE_PROJECT_ID = "studio-7642357109-d9026"
 FIREBASE_STORAGE_BUCKET = "studio-7642357109-d9026.firebasestorage.app"
 FIREBASE_PRIVATE_KEY_ID = "992b031db8cbb949f66b6a71ad1dd3d434adcd7c"

@@ -5,169 +5,70 @@
 
 const { createTransport } = require('./config');
 const templates = require('./templates');
-const functions = require('firebase-functions');
 
-// Create a nodemailer transporter
-const transporter = createTransport();
+// Create a Resend instance
+const resend = createTransport();
 
 /**
  * Send an order confirmation email to the customer
- * 
- * @param {Object} orderData - Order data including customer information and products
- * @returns {Promise<Object>} - Result of email sending operation
  */
 async function sendCustomerOrderConfirmation(orderData) {
   try {
     const { customer } = orderData;
     
-    // Validate required data
     if (!customer || !customer.email) {
       throw new Error('Customer email is required to send order confirmation');
     }
     
-    // Get the HTML template for customer email
     const htmlContent = templates.customerOrderTemplate(orderData);
     
-    // Define email options with anti-spam headers
-    const mailOptions = {
-      from: `"Taharah Team" <${functions.config().email?.user || process.env.EMAIL_USER}>`,
-      to: customer.email,
-      subject: `✅ Order Confirmed: ${orderData.orderReference} - Thank You!`,
+    const { data, error } = await resend.emails.send({
+      from: `Taharah <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+      to: [customer.email],
+      subject: `✅ Order Confirmed: ${orderData.orderReference}`,
       html: htmlContent,
-      headers: {
-        'X-Priority': '3',
-        'X-MSMail-Priority': 'Normal',
-        'X-Mailer': 'Taharah E-commerce Platform v1.0',
-        'List-Unsubscribe': `<mailto:${functions.config().email?.user || process.env.EMAIL_USER}?subject=Unsubscribe>`,
-        'X-Auto-Response-Suppress': 'OOF, DR, RN, NRN',
-        'Reply-To': functions.config().email?.user || process.env.EMAIL_USER,
-        // Additional anti-spam headers
-        'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@taharah.in>`,
-        'X-Entity-ID': 'taharah-ecommerce',
-        'X-SenderID': 'Taharah-Official',
-        'Return-Path': functions.config().email?.user || process.env.EMAIL_USER,
-        'X-Original-From': functions.config().email?.user || process.env.EMAIL_USER,
-        'Precedence': 'bulk',
-        'X-Spam-Status': 'No, score=0.0',
-        'X-Campaign-ID': `order-confirmation-${Date.now()}`,
-        'Organization': 'Taharah Fashion',
-        'X-MC-Track': 'opens,clicks'
-      },
-      // Text version for email clients that don't support HTML
-      text: `Dear ${customer.firstName} ${customer.lastName},
+      reply_to: 'savannnaik090@gmail.com'
+    });
 
-Thank you for your order with Taharah!
-
-ORDER CONFIRMATION DETAILS:
-Order Reference: ${orderData.orderReference}
-Order Date: ${new Date(orderData.orderDate).toLocaleString()}
-Payment Method: ${orderData.paymentMethod}
-Total Amount: ₹${orderData.orderTotal.toFixed(2)}
-
-Your order has been successfully received and is currently being processed. You will receive a shipping confirmation with tracking details once your order is dispatched.
-
-CUSTOMER SUPPORT:
-For any questions about your order, please contact us:
-Email: Officialtaharah@gmail.com
-Phone: +91 8589920686
-
-Thank you for choosing Taharah!
-
-Best regards,
-The Taharah Team
-
----
-This email was sent to ${customer.email}
-To unsubscribe, reply with "UNSUBSCRIBE" in the subject line.
-      `
-    };
+    if (error) throw new Error(error.message);
     
-    // Send the email
-    console.log(`Sending order confirmation email to customer: ${customer.email}`);
-    const result = await transporter.sendMail(mailOptions);
-    console.log(`Order confirmation email sent to customer: ${result.messageId}`);
-    
-    return {
-      success: true,
-      messageId: result.messageId
-    };
+    return { success: true, messageId: data.id };
   } catch (error) {
     console.error('Error sending customer order confirmation email:', error);
-    return {
-      success: false,
-      error: error.message
-    };
+    return { success: false, error: error.message };
   }
 }
 
 /**
  * Send an order notification email to the store owner
- * 
- * @param {Object} orderData - Order data including customer information and products
- * @returns {Promise<Object>} - Result of email sending operation
  */
 async function sendOwnerOrderNotification(orderData) {
   try {
-    // Get the owner's email from environment variables
-    const ownerEmail = functions.config().email?.owner || process.env.OWNER_EMAIL || process.env.EMAIL_USER;
-    
-    // Validate required data
-    if (!ownerEmail) {
-      throw new Error('Owner email is required to send order notification');
-    }
-    
-    // Get the HTML template for owner email
+    const ownerEmail = process.env.OWNER_EMAIL || 'savannnaik090@gmail.com';
     const htmlContent = templates.ownerOrderTemplate(orderData);
     
-    // Define email options
-    const mailOptions = {
-      from: `"Taharah Orders" <${functions.config().email?.user || process.env.EMAIL_USER}>`,
-      to: ownerEmail,
+    const { data, error } = await resend.emails.send({
+      from: `Taharah Orders <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+      to: [ownerEmail],
       subject: `New Order - ${orderData.orderReference}`,
       html: htmlContent,
-      // Text version for email clients that don't support HTML
-      text: `New Order - ${orderData.orderReference}
-        
-A new order has been placed on your Taharah store.
-        
-Order Reference: ${orderData.orderReference}
-Order Date: ${new Date(orderData.orderDate).toLocaleString()}
-Customer: ${orderData.customer.firstName} ${orderData.customer.lastName}
-Email: ${orderData.customer.email}
-Phone: ${orderData.customer.phone}
-Total: $${orderData.orderTotal.toFixed(2)}
-        
-Please log in to your dashboard to view the complete order details.
-      `
-    };
+      reply_to: 'savannnaik090@gmail.com'
+    });
+
+    if (error) throw new Error(error.message);
     
-    // Send the email
-    console.log(`Sending order notification email to owner: ${ownerEmail}`);
-    const result = await transporter.sendMail(mailOptions);
-    console.log(`Order notification email sent to owner: ${result.messageId}`);
-    
-    return {
-      success: true,
-      messageId: result.messageId
-    };
+    return { success: true, messageId: data.id };
   } catch (error) {
     console.error('Error sending owner order notification email:', error);
-    return {
-      success: false,
-      error: error.message
-    };
+    return { success: false, error: error.message };
   }
 }
 
 /**
  * Send both customer and owner emails for an order
- * 
- * @param {Object} orderData - Order data including customer information and products
- * @returns {Promise<Object>} - Results of both email sending operations
  */
 async function sendOrderEmails(orderData) {
   try {
-    // Send both emails in parallel
     const [customerResult, ownerResult] = await Promise.all([
       sendCustomerOrderConfirmation(orderData),
       sendOwnerOrderNotification(orderData)
@@ -180,10 +81,55 @@ async function sendOrderEmails(orderData) {
     };
   } catch (error) {
     console.error('Error sending order emails:', error);
-    return {
-      success: false,
-      error: error.message
-    };
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Send email verification email
+ */
+async function sendVerificationEmail(emailData) {
+  try {
+    const { customer, verificationUrl } = emailData;
+    const htmlContent = templates.verificationTemplate(emailData);
+
+    const { data, error } = await resend.emails.send({
+      from: `Taharah <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+      to: [customer.email],
+      subject: '✅ Verify Your Email Address - Taharah',
+      html: htmlContent,
+      reply_to: 'savannnaik090@gmail.com'
+    });
+
+    if (error) throw new Error(error.message);
+    return { success: true, messageId: data.id };
+  } catch (error) {
+    console.error('Error sending verification email:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Send password reset email
+ */
+async function sendPasswordResetEmail(emailData) {
+  try {
+    const { customer, resetUrl } = emailData;
+    const htmlContent = templates.passwordResetTemplate(emailData);
+
+    const { data, error } = await resend.emails.send({
+      from: `Taharah Security <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+      to: [customer.email],
+      subject: '🔐 Reset Your Password - Taharah',
+      html: htmlContent,
+      reply_to: 'savannnaik090@gmail.com'
+    });
+
+    if (error) throw new Error(error.message);
+    return { success: true, messageId: data.id };
+  } catch (error) {
+    console.error('Error sending password reset email:', error);
+    return { success: false, error: error.message };
   }
 }
 
@@ -191,5 +137,7 @@ async function sendOrderEmails(orderData) {
 module.exports = {
   sendCustomerOrderConfirmation,
   sendOwnerOrderNotification,
-  sendOrderEmails
+  sendOrderEmails,
+  sendVerificationEmail,
+  sendPasswordResetEmail
 };
