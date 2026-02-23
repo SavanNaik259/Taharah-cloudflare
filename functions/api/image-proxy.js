@@ -1,5 +1,5 @@
 export async function onRequest(context) {
-  const { request } = context;
+  const { request, env } = context;
   const url = new URL(request.url);
   const imageUrl = url.searchParams.get('url');
 
@@ -8,7 +8,15 @@ export async function onRequest(context) {
   }
 
   try {
-    const decodedUrl = decodeURIComponent(imageUrl);
+    let decodedUrl = decodeURIComponent(imageUrl);
+    
+    // If it's a relative path, convert to direct Firebase URL
+    if (!decodedUrl.startsWith('http')) {
+      const bucket = env.FIREBASE_STORAGE_BUCKET || 'studio-7642357109-d9026.firebasestorage.app';
+      const cleanPath = decodedUrl.startsWith('/') ? decodedUrl.substring(1) : decodedUrl;
+      const finalPath = cleanPath.startsWith('productImages/') ? cleanPath : `productImages/${cleanPath}`;
+      decodedUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(finalPath)}?alt=media`;
+    }
     
     const response = await fetch(decodedUrl, {
       method: 'GET',
