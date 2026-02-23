@@ -55,7 +55,7 @@ exports.handler = async (event, context) => {
     console.log('Verifying Razorpay payment:', razorpay_payment_id);
     
     // Create the signature verification data
-    const secret = "dwhI00HuTIRk5T61AyUq1Bhh";
+    const secret = process.env.RAZORPAY_KEY_SECRET || "dwhI00HuTIRk5T61AyUq1Bhh";
     if (!secret) {
       console.error('RAZORPAY_KEY_SECRET is missing');
       return {
@@ -74,6 +74,30 @@ exports.handler = async (event, context) => {
     
     // Verify the signature
     if (generated_signature === razorpay_signature) {
+      console.log('✅ Payment verified successfully');
+      
+      // Trigger order email after successful payment
+      if (requestData.orderData) {
+        try {
+          const fetch = require('node-fetch');
+          const protocol = event.headers['x-forwarded-proto'] || 'http';
+          const host = event.headers.host;
+          const baseUrl = `${protocol}://${host}`;
+          
+          console.log('Triggering send-order-email for verified payment...');
+          // We don't await this to avoid blocking the response, or we can await it for reliability
+          const emailResponse = await fetch(`${baseUrl}/api/send-order-email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestData.orderData)
+          });
+          const emailResult = await emailResponse.json();
+          console.log('Email trigger result:', emailResult);
+        } catch (emailError) {
+          console.error('Failed to trigger order email:', emailError);
+        }
+      }
+
       return {
         statusCode: 200,
         headers,

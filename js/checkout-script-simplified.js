@@ -2641,22 +2641,27 @@ document.addEventListener('DOMContentLoaded', function() {
             // Send order confirmation email
             let emailResult = { success: false };
             try {
-                console.log('Attempting to send order confirmation email...');
+                console.log('Attempting to send order confirmation email with Resend...');
+
+                // Ensure we use the latest updated order data with payment info
+                const emailPayload = {
+                    ...updatedOrderData,
+                    resendTrigger: true // Add a flag for debugging
+                };
 
                 if (window.netlifyHelpers) {
-                    console.log('Using Netlify Functions for email');
+                    console.log('Using Netlify Functions for Resend email');
                     emailResult = await window.netlifyHelpers.callNetlifyFunction('send-order-email', {
                         method: 'POST',
-                        body: JSON.stringify(updatedOrderData)
+                        body: JSON.stringify(emailPayload)
                     });
                 } else {
-                    console.log('Using Express server for email');
-                    // Use absolute URL to avoid issues with hosting changes
+                    console.log('Using fallback for email');
                     const baseUrl = window.location.origin;
                     const emailResponse = await fetch(`${baseUrl}/api/send-order-email`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(updatedOrderData)
+                        body: JSON.stringify(emailPayload)
                     });
                     emailResult = await emailResponse.json();
                 }
