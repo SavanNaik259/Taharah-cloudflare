@@ -285,15 +285,24 @@ const NewArrivalsProductsLoader = (function() {
                 if (product.image) {
                     const bucket = window.firebaseConfig?.storageBucket || 'studio-7642357109-d9026.firebasestorage.app';
                     
-                    // Skip if it's already a proxy URL
-                    if (product.image.startsWith('/api/image-proxy')) {
-                        // leave as is
+                    if (product.image.includes('firebasestorage.googleapis.com')) {
+                        // It's already a Firebase URL, just ensure alt=media
+                        if (!product.image.includes('alt=media')) {
+                            product.image = product.image.includes('?') ? `${product.image}&alt=media` : `${product.image}?alt=media`;
+                        }
+                    } else if (product.image.startsWith('/api/image-proxy')) {
+                        // Extract path from proxy and convert to direct Firebase URL
+                        const urlParams = new URLSearchParams(product.image.split('?')[1]);
+                        const path = urlParams.get('path');
+                        if (path) {
+                            const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+                            product.image = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(cleanPath)}?alt=media`;
+                        }
                     } else if (!product.image.startsWith('http')) {
+                        // It's a relative path
                         const cleanPath = product.image.startsWith('/') ? product.image.substring(1) : product.image;
-                        product.image = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(cleanPath)}?alt=media`;
-                    } else if (product.image.includes('firebasestorage.googleapis.com') && !product.image.includes('alt=media')) {
-                        // Fix existing Firebase URLs that might be missing the alt=media parameter
-                        product.image = product.image.includes('?') ? `${product.image}&alt=media` : `${product.image}?alt=media`;
+                        const finalPath = cleanPath.startsWith('productImages/') ? cleanPath : `productImages/${cleanPath}`;
+                        product.image = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(finalPath)}?alt=media`;
                     }
                 }
 

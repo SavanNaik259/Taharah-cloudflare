@@ -316,7 +316,27 @@ const ProductDetailLoader = (function() {
         }
 
         // Update main product image - check multiple possible image properties
-        const imageUrl = product.image || product.imageUrl || product.mainImage || (product.images && product.images[0] && product.images[0].url);
+        const rawImageUrl = product.image || product.imageUrl || product.mainImage || (product.images && product.images[0] && product.images[0].url);
+        const bucket = window.firebaseConfig?.storageBucket || 'studio-7642357109-d9026.firebasestorage.app';
+        let imageUrl = rawImageUrl;
+
+        if (rawImageUrl) {
+            if (rawImageUrl.includes('firebasestorage.googleapis.com')) {
+                imageUrl = rawImageUrl.includes('alt=media') ? rawImageUrl : (rawImageUrl.includes('?') ? `${rawImageUrl}&alt=media` : `${rawImageUrl}?alt=media`);
+            } else if (rawImageUrl.startsWith('/api/image-proxy')) {
+                const urlParams = new URLSearchParams(rawImageUrl.split('?')[1]);
+                const path = urlParams.get('path');
+                if (path) {
+                    const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+                    imageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(cleanPath)}?alt=media`;
+                }
+            } else if (!rawImageUrl.startsWith('http')) {
+                const cleanPath = rawImageUrl.startsWith('/') ? rawImageUrl.substring(1) : rawImageUrl;
+                const finalPath = cleanPath.startsWith('productImages/') ? cleanPath : `productImages/${cleanPath}`;
+                imageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(finalPath)}?alt=media`;
+            }
+        }
+
         const mainImageElements = document.querySelectorAll('.product-detail-left .product-main-image, .product-detail-left .main-image img, .product-detail-left .gallery-main img');
 
         if (mainImageElements.length > 0 && imageUrl) {
