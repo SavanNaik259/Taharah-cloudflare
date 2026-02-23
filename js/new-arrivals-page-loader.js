@@ -240,9 +240,11 @@ function displayAllProducts(products, subcategory = null) {
 
     // Create product HTML for each product
     products.forEach((product, index) => {
-        // Force use proxy URL for each product
+        // Standardize image path for proxy
         const cleanPath = (function(img) {
             if (!img) return '';
+            if (typeof img !== 'string') return '';
+            
             if (img.includes('firebasestorage.googleapis.com')) {
                 const match = img.match(/\/o\/(.+?)\?/);
                 return match ? decodeURIComponent(match[1]) : img;
@@ -250,6 +252,7 @@ function displayAllProducts(products, subcategory = null) {
             const p = img.startsWith('/') ? img.substring(1) : img;
             return p.startsWith('productImages/') ? p : `productImages/${p}`;
         })(product.image);
+        
         product.image = `/api/image-proxy?url=${encodeURIComponent(cleanPath)}`;
         
         const productHTML = createProductHTML(product);
