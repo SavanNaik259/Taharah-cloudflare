@@ -35,11 +35,12 @@ name = "Taharah-Dev-Server-Fix"
 author = "agent"
 
 [workflows.workflow.metadata]
-outputType = "console"
+outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "node run-server.js"
+waitForPort = 5000
 
 [agent]
 expertMode = true
