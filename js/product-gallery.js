@@ -244,32 +244,17 @@ class ProductGallery {
     getImageUrl(imagePath) {
         if (!imagePath) return '';
         
-        const bucket = window.firebaseConfig?.storageBucket || 'studio-7642357109-d9026.firebasestorage.app';
-
-        // 1. If it's already a Firebase URL, just ensure alt=media
-        if (imagePath.includes('firebasestorage.googleapis.com')) {
-            return imagePath.includes('alt=media') ? imagePath : (imagePath.includes('?') ? `${imagePath}&alt=media` : `${imagePath}?alt=media`);
-        }
-        
-        // 2. If it's a proxy URL, convert to direct Firebase URL
-        if (imagePath.startsWith('/api/image-proxy')) {
-            const urlParams = new URLSearchParams(imagePath.split('?')[1]);
-            const path = urlParams.get('path');
-            if (path) {
-                const cleanPath = path.startsWith('/') ? path.substring(1) : path;
-                return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(cleanPath)}?alt=media`;
+        // Use Cloudflare proxy for all gallery images as well
+        const cleanPath = (function(path) {
+            if (path.includes('firebasestorage.googleapis.com')) {
+                const match = path.match(/\/o\/(.+?)\?/);
+                return match ? decodeURIComponent(match[1]) : path;
             }
-        }
-        
-        // 3. If it's a relative path or other HTTP URL
-        if (imagePath.startsWith('http')) {
-            return imagePath;
-        }
-        
-        const cleanPath = imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
-        const finalPath = cleanPath.startsWith('productImages/') ? cleanPath : `productImages/${cleanPath}`;
-        
-        return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(finalPath)}?alt=media`;
+            const p = path.startsWith('/') ? path.substring(1) : path;
+            return p.startsWith('productImages/') ? p : `productImages/${p}`;
+        })(imagePath);
+
+        return `/api/image-proxy?url=${encodeURIComponent(cleanPath)}`;
     }
 
     updateGallery() {
