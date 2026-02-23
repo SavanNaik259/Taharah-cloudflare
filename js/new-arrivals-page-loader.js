@@ -175,22 +175,40 @@ async function loadNewArrivalsProductsDirect() {
             price: product.price,
             image: (function(img) {
                 if (!img || typeof img !== 'string') return img;
-                const bucket = window.firebaseConfig?.storageBucket || 'studio-7642357109-d9026.firebasestorage.app';
                 
-                // Extract clean path regardless of current format
-                let cleanPath = img;
-                if (img.includes('firebasestorage.googleapis.com')) {
-                    const match = img.match(/\/o\/(.+?)\?/);
-                    cleanPath = match ? decodeURIComponent(match[1]) : img;
-                } else if (img.includes('image-proxy?path=')) {
-                    const parts = img.split('path=');
-                    cleanPath = decodeURIComponent(parts[parts.length - 1]);
-                }
+                const extractStoragePath = (input) => {
+                    if (!input || typeof input !== 'string') return '';
+                    let s = input;
+
+                    // If wrapped in proxy (netlify or cloudflare)
+                    try {
+                        if (s.includes('image-proxy')) {
+                            const u = new URL(s, 'https://dummy');
+                            const p = u.searchParams.get('path') || u.searchParams.get('url');
+                            if (p) s = decodeURIComponent(p);
+                        }
+                    } catch (e) {}
+
+                    // If full Firebase URL
+                    if (s.includes('firebasestorage.googleapis.com')) {
+                        const m = s.match(/\/o\/([^?]+)/);
+                        if (m) s = decodeURIComponent(m[1]);
+                    }
+
+                    // Decode any leftover %2F
+                    try { s = decodeURIComponent(s); } catch (e) {}
+
+                    s = s.startsWith('/') ? s.slice(1) : s;
+                    if (!s.startsWith('productImages/')) {
+                        s = `productImages/${s.replace(/^productImages\//, '')}`;
+                    }
+                    return s;
+                };
+
+                if (img.startsWith('/api/image-proxy?url=')) return img;
                 
-                const finalPath = cleanPath.startsWith('/') ? cleanPath.substring(1) : cleanPath;
-                const p = finalPath.startsWith('productImages/') ? finalPath : `productImages/${finalPath}`;
-                
-                return `/api/image-proxy?url=${encodeURIComponent(p)}`;
+                const cleanPath = extractStoragePath(img);
+                return `/api/image-proxy?url=${encodeURIComponent(cleanPath)}`;
             })(productImage),
             category: product.category,
             subcategory: product.subcategory || product.subCategory || '',
@@ -249,19 +267,39 @@ function displayAllProducts(products, subcategory = null) {
     // Create product HTML for each product
     products.forEach((product, index) => {
         // Standardize image path for proxy
-        const cleanPath = (function(img) {
-            if (!img) return '';
-            if (typeof img !== 'string') return '';
-            
-            if (img.includes('firebasestorage.googleapis.com')) {
-                const match = img.match(/\/o\/(.+?)\?/);
-                return match ? decodeURIComponent(match[1]) : img;
+        const extractStoragePath = (input) => {
+            if (!input || typeof input !== 'string') return '';
+            let s = input;
+
+            // If wrapped in proxy (netlify or cloudflare)
+            try {
+                if (s.includes('image-proxy')) {
+                    const u = new URL(s, 'https://dummy');
+                    const p = u.searchParams.get('path') || u.searchParams.get('url');
+                    if (p) s = decodeURIComponent(p);
+                }
+            } catch (e) {}
+
+            // If full Firebase URL
+            if (s.includes('firebasestorage.googleapis.com')) {
+                const m = s.match(/\/o\/([^?]+)/);
+                if (m) s = decodeURIComponent(m[1]);
             }
-            const p = img.startsWith('/') ? img.substring(1) : img;
-            return p.startsWith('productImages/') ? p : `productImages/${p}`;
-        })(product.image);
+
+            // Decode any leftover %2F
+            try { s = decodeURIComponent(s); } catch (e) {}
+
+            s = s.startsWith('/') ? s.slice(1) : s;
+            if (!s.startsWith('productImages/')) {
+                s = `productImages/${s.replace(/^productImages\//, '')}`;
+            }
+            return s;
+        };
         
-        product.image = `/api/image-proxy?url=${encodeURIComponent(cleanPath)}`;
+        if (!product.image.startsWith('/api/image-proxy?url=')) {
+            const cleanPath = extractStoragePath(product.image);
+            product.image = `/api/image-proxy?url=${encodeURIComponent(cleanPath)}`;
+        }
         
         const productHTML = createProductHTML(product);
         productsGrid.insertAdjacentHTML('beforeend', productHTML);

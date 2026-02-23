@@ -137,21 +137,43 @@ const BridalProductsLoader = (function() {
         }).format(product.price).replace('₹', '');
 
         // Standardize image path for proxy
-        const cleanPath = (function(path) {
-            if (!path) return '';
-            if (path.includes('firebasestorage.googleapis.com')) {
-                const match = path.match(/\/o\/(.+?)\?/);
-                return match ? decodeURIComponent(match[1]) : path;
+        const extractStoragePath = (input) => {
+            if (!input || typeof input !== 'string') return '';
+            let s = input;
+
+            // If wrapped in proxy (netlify or cloudflare)
+            try {
+                if (s.includes('image-proxy')) {
+                    const u = new URL(s, 'https://dummy');
+                    const p = u.searchParams.get('path') || u.searchParams.get('url');
+                    if (p) s = decodeURIComponent(p);
+                }
+            } catch (e) {}
+
+            // If full Firebase URL
+            if (s.includes('firebasestorage.googleapis.com')) {
+                const m = s.match(/\/o\/([^?]+)/);
+                if (m) s = decodeURIComponent(m[1]);
             }
-            const p = path.startsWith('/') ? path.substring(1) : path;
-            return p.startsWith('productImages/') ? p : `productImages/${p}`;
-        })(product.image);
+
+            // Decode any leftover %2F
+            try { s = decodeURIComponent(s); } catch (e) {}
+
+            s = s.startsWith('/') ? s.slice(1) : s;
+            if (!s.startsWith('productImages/')) {
+                s = `productImages/${s.replace(/^productImages\//, '')}`;
+            }
+            return s;
+        };
+
+        const cleanPath = extractStoragePath(product.image);
+        const proxyUrl = product.image && product.image.startsWith('/api/image-proxy?url=') ? product.image : `/api/image-proxy?url=${encodeURIComponent(cleanPath)}`;
 
         return `
             <div class="product-item" data-product-id="${product.id}" data-product-price="${product.price}">
                 <a href="product-detail?id=${product.id}">
                     <div class="product-image">
-                        <img src="/api/image-proxy?url=${encodeURIComponent(cleanPath)}" alt="${product.name}">
+                        <img src="${proxyUrl}" alt="${product.name}">
                     </div>
                     <div class="product-details">
                         <h3>${product.name}</h3>

@@ -9,6 +9,20 @@ export async function onRequest(context) {
 
   try {
     let decodedUrl = decodeURIComponent(imageUrl);
+
+    // Support for legacy Netlify proxy URLs, existing proxy URLs, and Firebase URLs
+    if (decodedUrl.includes('image-proxy')) {
+      try {
+        const u = new URL(decodedUrl, 'https://dummy');
+        const p = u.searchParams.get('path') || u.searchParams.get('url');
+        if (p) decodedUrl = decodeURIComponent(p);
+      } catch (e) {}
+    }
+
+    if (decodedUrl.includes('firebasestorage.googleapis.com')) {
+      const m = decodedUrl.match(/\/o\/([^?]+)/);
+      if (m) decodedUrl = decodeURIComponent(m[1]);
+    }
     
     // If it's a relative path, convert to direct Firebase URL
     if (!decodedUrl.startsWith('http')) {

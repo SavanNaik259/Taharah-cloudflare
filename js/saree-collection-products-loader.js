@@ -396,17 +396,37 @@ const JewelrySubcategoriesLoader = (function() {
         }).format(product.price).replace('₹', '');
 
         // Standardize image path for proxy
-        const cleanPath = (function(path) {
-            if (!path) return '';
-            if (path.includes('firebasestorage.googleapis.com')) {
-                const match = path.match(/\/o\/(.+?)\?/);
-                return match ? decodeURIComponent(match[1]) : path;
-            }
-            const p = path.startsWith('/') ? path.substring(1) : path;
-            return p.startsWith('productImages/') ? p : `productImages/${p}`;
-        })(product.image);
+        const extractStoragePath = (input) => {
+            if (!input || typeof input !== 'string') return '';
+            let s = input;
 
-        const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(cleanPath)}`;
+            // If wrapped in proxy (netlify or cloudflare)
+            try {
+                if (s.includes('image-proxy')) {
+                    const u = new URL(s, 'https://dummy');
+                    const p = u.searchParams.get('path') || u.searchParams.get('url');
+                    if (p) s = decodeURIComponent(p);
+                }
+            } catch (e) {}
+
+            // If full Firebase URL
+            if (s.includes('firebasestorage.googleapis.com')) {
+                const m = s.match(/\/o\/([^?]+)/);
+                if (m) s = decodeURIComponent(m[1]);
+            }
+
+            // Decode any leftover %2F
+            try { s = decodeURIComponent(s); } catch (e) {}
+
+            s = s.startsWith('/') ? s.slice(1) : s;
+            if (!s.startsWith('productImages/')) {
+                s = `productImages/${s.replace(/^productImages\//, '')}`;
+            }
+            return s;
+        };
+
+        const cleanPath = extractStoragePath(product.image);
+        const proxyUrl = product.image && product.image.startsWith('/api/image-proxy?url=') ? product.image : `/api/image-proxy?url=${encodeURIComponent(cleanPath)}`;
 
         return `
             <div class="arrival-item polki-card" data-product-id="${product.id}" data-product-price="${product.price}" data-product-name="${product.name}" data-product-image="${product.image}">

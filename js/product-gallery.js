@@ -245,16 +245,37 @@ class ProductGallery {
         if (!imagePath) return '';
         
         // Use Cloudflare proxy for all gallery images as well
-        const cleanPath = (function(path) {
-            if (path.includes('firebasestorage.googleapis.com')) {
-                const match = path.match(/\/o\/(.+?)\?/);
-                return match ? decodeURIComponent(match[1]) : path;
-            }
-            const p = path.startsWith('/') ? path.substring(1) : path;
-            return p.startsWith('productImages/') ? p : `productImages/${p}`;
-        })(imagePath);
+        const extractStoragePath = (input) => {
+            if (!input || typeof input !== 'string') return '';
+            let s = input;
 
-        return `/api/image-proxy?url=${encodeURIComponent(cleanPath)}`;
+            // If wrapped in proxy (netlify or cloudflare)
+            try {
+                if (s.includes('image-proxy')) {
+                    const u = new URL(s, 'https://dummy');
+                    const p = u.searchParams.get('path') || u.searchParams.get('url');
+                    if (p) s = decodeURIComponent(p);
+                }
+            } catch (e) {}
+
+            // If full Firebase URL
+            if (s.includes('firebasestorage.googleapis.com')) {
+                const m = s.match(/\/o\/([^?]+)/);
+                if (m) s = decodeURIComponent(m[1]);
+            }
+
+            // Decode any leftover %2F
+            try { s = decodeURIComponent(s); } catch (e) {}
+
+            s = s.startsWith('/') ? s.slice(1) : s;
+            if (!s.startsWith('productImages/')) {
+                s = `productImages/${s.replace(/^productImages\//, '')}`;
+            }
+            return s;
+        };
+
+        const cleanPath = extractStoragePath(imagePath);
+        return imagePath.startsWith('/api/image-proxy?url=') ? imagePath : `/api/image-proxy?url=${encodeURIComponent(cleanPath)}`;
     }
 
     updateGallery() {

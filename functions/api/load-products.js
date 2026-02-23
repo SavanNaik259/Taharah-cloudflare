@@ -37,16 +37,37 @@ export async function onRequest(context) {
       const transformUrl = (u) => {
         if (!u || typeof u !== 'string') return u;
         
-        // Use proxy for ALL images to ensure consistency
-        const cleanPath = (function(path) {
-            if (path.includes('firebasestorage.googleapis.com')) {
-                const match = path.match(/\/o\/(.+?)\?/);
-                return match ? decodeURIComponent(match[1]) : path;
-            }
-            const p = path.startsWith('/') ? path.substring(1) : path;
-            return p.startsWith('productImages/') ? p : `productImages/${p}`;
-        })(u);
+        // Normalize any image URL to a clean Firebase storage path
+        const extractStoragePath = (input) => {
+          if (!input || typeof input !== 'string') return '';
+          let s = input;
 
+          // If wrapped in proxy (netlify or cloudflare)
+          try {
+            if (s.includes('image-proxy')) {
+              const u = new URL(s, 'https://dummy');
+              const p = u.searchParams.get('path') || u.searchParams.get('url');
+              if (p) s = decodeURIComponent(p);
+            }
+          } catch (e) {}
+
+          // If full Firebase URL
+          if (s.includes('firebasestorage.googleapis.com')) {
+            const m = s.match(/\/o\/([^?]+)/);
+            if (m) s = decodeURIComponent(m[1]);
+          }
+
+          // Decode any leftover %2F
+          try { s = decodeURIComponent(s); } catch (e) {}
+
+          s = s.startsWith('/') ? s.slice(1) : s;
+          if (!s.startsWith('productImages/')) {
+            s = `productImages/${s.replace(/^productImages\//, '')}`;
+          }
+          return s;
+        };
+
+        const cleanPath = extractStoragePath(u);
         return `/api/image-proxy?url=${encodeURIComponent(cleanPath)}`;
       };
 
