@@ -2213,14 +2213,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     result = await Promise.race([
                         window.netlifyHelpers.callNetlifyFunction('create-razorpay-order', {
                             method: 'POST',
-                            body: JSON.stringify({
+                            body: {
                                 amount: amountInINR,
                                 currency: 'INR',
                                 receipt: orderData.orderReference,
                                 notes: {
                                     orderReference: orderData.orderReference
                                 }
-                            })
+                            }
                         }),
                         timeoutPromise
                     ]);
@@ -2466,11 +2466,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     verificationResult = await Promise.race([
                         window.netlifyHelpers.callNetlifyFunction('verify-razorpay-payment', {
                             method: 'POST',
-                            body: JSON.stringify({
+                            body: {
                                 razorpay_payment_id: response.razorpay_payment_id,
                                 razorpay_order_id: response.razorpay_order_id,
                                 razorpay_signature: response.razorpay_signature
-                            })
+                            }
                         }),
                         verifyTimeoutPromise
                     ]);

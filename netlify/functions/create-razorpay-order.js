@@ -38,8 +38,8 @@ exports.handler = async (event, context) => {
   
   try {
     // Check if Razorpay credentials are available
-    const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || "rzp_live_SCOazTCPWFjXmG";
-    const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || "qcL5npnItQTGVDyBc4hFAbp9";
+    const RAZORPAY_KEY_ID = "rzp_test_qZWULE2MoPHZJv";
+    const RAZORPAY_KEY_SECRET = "dwhI00HuTIRk5T61AyUq1Bhh";
 
     if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
       console.error('Razorpay credentials missing from environment variables');

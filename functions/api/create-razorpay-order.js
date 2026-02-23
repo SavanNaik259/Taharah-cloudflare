@@ -11,13 +11,9 @@ export async function onRequestPost({ request, env }) {
       return new Response(JSON.stringify({ success: false, message: "Invalid amount" }), { status: 400, headers });
     }
 
-    // Hardcoded credentials from wrangler.toml as fallback/direct use to ensure connectivity
-    const keyId = env.RAZORPAY_KEY_ID || "rzp_live_SCOazTCPWFjXmG";
-    const keySecret = env.RAZORPAY_KEY_SECRET || "qcL5npnItQTGVDyBc4hFAbp9";
-
-    if (!keyId || !keySecret) {
-      return new Response(JSON.stringify({ success: false, message: "Razorpay credentials missing" }), { status: 500, headers });
-    }
+    // Hardcoded test credentials as requested
+    const keyId = "rzp_test_qZWULE2MoPHZJv";
+    const keySecret = "dwhI00HuTIRk5T61AyUq1Bhh";
 
     const auth = btoa(`${keyId}:${keySecret}`);
     const resp = await fetch("https://api.razorpay.com/v1/orders", {
