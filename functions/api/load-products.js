@@ -15,11 +15,17 @@ export async function onRequest(context) {
 
     const categoryList = categories.split(',').map(c => c.trim()).filter(c => c);
     const storageBucket = env.FIREBASE_STORAGE_BUCKET || 'studio-7642357109-d9026.firebasestorage.app';
+    console.log('Using storage bucket:', storageBucket);
     
     const productPromises = categoryList.map(async (cat) => {
+      // Use direct Firebase Storage JSON URL
       const storageUrl = `https://firebasestorage.googleapis.com/v0/b/${storageBucket}/o/productData%2F${cat}-products.json?alt=media`;
+      console.log('Fetching category from:', storageUrl);
       const response = await fetch(storageUrl);
-      if (!response.ok) return [];
+      if (!response.ok) {
+        console.error(`Failed to fetch ${cat}: ${response.status}`);
+        return [];
+      }
       const data = await response.json();
       return Array.isArray(data) ? data : [];
     });
