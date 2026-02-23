@@ -11,8 +11,9 @@ export async function onRequestPost({ request, env }) {
       return new Response(JSON.stringify({ success: false, message: "Invalid amount" }), { status: 400, headers });
     }
 
-    const keyId = env.RAZORPAY_KEY_ID;
-    const keySecret = env.RAZORPAY_KEY_SECRET;
+    // Hardcoded credentials from wrangler.toml as fallback/direct use to ensure connectivity
+    const keyId = env.RAZORPAY_KEY_ID || "rzp_live_SCOazTCPWFjXmG";
+    const keySecret = env.RAZORPAY_KEY_SECRET || "qcL5npnItQTGVDyBc4hFAbp9";
 
     if (!keyId || !keySecret) {
       return new Response(JSON.stringify({ success: false, message: "Razorpay credentials missing" }), { status: 500, headers });
@@ -36,11 +37,13 @@ export async function onRequestPost({ request, env }) {
     const data = await resp.json();
 
     if (!resp.ok) {
+      console.error("Razorpay API error:", data);
       return new Response(JSON.stringify({ success: false, message: "Failed to create order", error: data }), { status: 500, headers });
     }
 
     return new Response(JSON.stringify({ success: true, order: data, key_id: keyId }), { status: 200, headers });
   } catch (error) {
+    console.error("Worker error:", error.message);
     return new Response(JSON.stringify({ success: false, message: error.message }), { status: 500, headers });
   }
 }
