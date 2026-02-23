@@ -1,0 +1,125 @@
+You are debugging a Cloudflare Pages deployment of a static HTML/JS ecommerce site (Taharah). Old product JSON stored in Firebase Storage still contains Netlify image proxy URLs like:
+
+/.netlify/functions/image-proxy?path=productImages%2FRTW-...jpg
+
+Local dev works because run-server.js and/or Netlify dev can serve /.netlify/functions, but Cloudflare Pages has no Netlify functions, so those URLs break. Current “cleanPath” logic in multiple loaders treats the Netlify URL as a raw filename and re‑encodes it into invalid Firebase paths like:
+
+productImages/.netlify/functions/image-proxy?path=...
+
+Result: only alt text shows in production.
+
+✅ Fix must be runtime (no data migration):
+Normalize any image URL to a clean Firebase storage path (productImages/...) before building /api/image-proxy?url=....
+✅ Root Cause (must mention in your response)
+
+    Firebase product JSON still has Netlify proxy URLs (see screenshot of JSON).
+    Cloudflare Pages has no /.netlify/functions endpoint.
+    Frontend + Cloudflare function don’t strip legacy Netlify URL, so paths are malformed and images 404.
+    Local works because run-server.js special‑cases image-proxy?path= (see /app/run-server.js around lines 22–55).
+
+✅ EXACT FILES / LINES TO FIX
+1) Cloudflare function: /app/functions/api/load-products.js
+
+Lines ~37–51 (transformUrl):
+It only handles Firebase direct URLs or raw paths.
+Must add support for Netlify proxy URLs and /api/image-proxy URLs.
+
+Implement a helper like:
+
+function extractStoragePath(input) {
+  if (!input || typeof input !== 'string') return '';
+  let s = input;
+
+  // If wrapped in proxy (netlify or cloudflare)
+  try {
+    if (s.includes('image-proxy')) {
+      const u = new URL(s, 'https://dummy');
+      const p = u.searchParams.get('path') || u.searchParams.get('url');
+      if (p) s = decodeURIComponent(p);
+    }
+  } catch (e) {}
+
+  // If full Firebase URL
+  if (s.includes('firebasestorage.googleapis.com')) {
+    const m = s.match(/\/o\/([^?]+)/);
+    if (m) s = decodeURIComponent(m[1]);
+  }
+
+  // Decode any leftover %2F
+  try { s = decodeURIComponent(s); } catch (e) {}
+
+  s = s.startsWith('/') ? s.slice(1) : s;
+  if (!s.startsWith('productImages/')) s = `productImages/${s.replace(/^productImages\\//,'')}`;
+  return s;
+}
+
+Then return:
+/api/image-proxy?url=${encodeURIComponent(extractStoragePath(u))}
+
+Apply to image, mainImage, imageUrl, images[].url.
+2) Cloudflare function: /app/functions/api/image-proxy.js
+
+Lines ~10–24:
+Before converting relative path, add legacy URL extraction.
+
+Add support for:
+
+    /.netlify/functions/image-proxy?path=...
+    /api/image-proxy?url=...
+    Full firebase URL
+
+Example fix logic:
+
+if (decodedUrl.includes('image-proxy')) {
+  try {
+    const u = new URL(decodedUrl, 'https://dummy');
+    const p = u.searchParams.get('path') || u.searchParams.get('url');
+    if (p) decodedUrl = decodeURIComponent(p);
+  } catch(e){}
+}
+
+if (decodedUrl.includes('firebasestorage.googleapis.com')) {
+  const m = decodedUrl.match(/\/o\/([^?]+)/);
+  if (m) decodedUrl = decodeURIComponent(m[1]);
+}
+
+Then proceed with your existing “if not http => build firebase URL”.
+3) Frontend image cleanPath functions (MUST update all)
+
+These files currently only handle direct Firebase URLs or raw paths and break on Netlify URLs. Replace the cleanPath logic with the same extractStoragePath behavior:
+
+✅ Files & line ranges:
+
+    /app/js/featured-collection-products-loader.js lines ~139–148
+    /app/js/subcategory-products-loader.js lines ~176–185
+    /app/js/product-detail-loader.js lines ~323–332
+    /app/js/product-gallery.js lines ~244–255
+    /app/js/saree-collection-products-loader.js lines ~398–407
+    /app/js/new-arrivals-page-loader.js lines ~176–193 and 252–262 (best to keep consistent)
+
+Then always do:
+
+const cleanPath = extractStoragePath(product.image);
+const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(cleanPath)}`;
+
+Optional: If product.image already starts with /api/image-proxy?url=, use it directly without re‑wrapping.
+✅ Tests to Run (Cloudflare pages)
+
+    Open /test-images.html
+        Direct Firebase URL loads
+        /api/image-proxy?url=productImages... loads
+    Open ready-to-wear.html + featured-collection sections
+        Old Netlify‑era products now show images
+    Open product-detail.html?id=... for an old product
+        Main image + gallery thumbnails load
+
+✅ Evidence from screenshots
+
+    Screenshot shows product JSON with /.netlify/functions/image-proxy?path=...
+    Firebase Storage bucket contains files under productImages/...
+
+End of prompt.
+
+If you want, I can also generate the exact code patches or a single reusable normalizeImagePath() helper file to reduce duplication.
+Feb 23, 01:55 PM
+Agent went to sleep due to inactivi
