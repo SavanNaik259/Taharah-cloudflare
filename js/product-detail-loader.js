@@ -320,8 +320,7 @@ const ProductDetailLoader = (function() {
         let imageUrl = rawImageUrl;
 
         if (rawImageUrl) {
-            // Use Cloudflare proxy for all images to ensure consistency and bypass potential direct access issues
-            // This matches the "Proxied URL (Testing Cloudflare Function)" approach from test-images.html
+            // Standardize image path for proxy
             const cleanPath = (function(path) {
                 if (path.includes('firebasestorage.googleapis.com')) {
                     // Extract path from Firebase URL
@@ -333,7 +332,7 @@ const ProductDetailLoader = (function() {
             })(rawImageUrl);
 
             imageUrl = `/api/image-proxy?url=${encodeURIComponent(cleanPath)}`;
-            console.log('Using Cloudflare proxy URL:', imageUrl);
+            console.log('Using standardized proxy URL:', imageUrl);
         }
 
         const mainImageElements = document.querySelectorAll('.product-detail-left .product-main-image, .product-detail-left .main-image img, .product-detail-left .gallery-main img');
