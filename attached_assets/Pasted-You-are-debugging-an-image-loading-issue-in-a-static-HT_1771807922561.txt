@@ -1,0 +1,111 @@
+You are debugging an image loading issue in a static HTML/JS ecommerce site deployed on Cloudflare Pages. Locally, images load fine; in production, only alt text shows.
+
+Root Cause (confirmed in code): There is a mismatch between how product image URLs are stored/returned and how the frontend rewrites them.
+Locally, /api/load-products (Netlify function) returns direct Firebase URLs, so the frontend works.
+On Cloudflare, /functions/api/load-products.js wraps URLs with /api/image-proxy?url=..., and the frontend incorrectly rewrites any non‑http URL to a Firebase URL, which breaks the image URL.
+Also, Cloudflare load-products double‑wraps already proxied URLs.
+✅ Exact locations that cause the bug
+1) Cloudflare load-products is wrapping and double‑wrapping image URLs
+
+File: /app/functions/api/load-products.js
+Lines: ~30–67
+
+// transformUrl() wraps any URL containing firebasestorage...
+if (typeof u === 'string' && u.includes('firebasestorage.googleapis.com')) {
+  return `/api/image-proxy?url=${encodeURIComponent(u)}`;
+}
+
+If u already equals /api/image-proxy?url=... (because admin panel stored that), the string still contains firebasestorage.googleapis.com, so it gets encoded again → broken URL.
+2) Frontend forces non-http URLs into Firebase URLs
+
+These loaders convert any non‑http string into https://firebasestorage.googleapis.com/... which destroys /api/image-proxy URLs:
+
+    /app/js/featured-collection-products-loader.js lines 82–89
+    /app/js/subcategory-products-loader.js lines 137–145
+    /app/js/new-arrivals-page-loader.js lines 176–184
+    /app/js/new-arrivals-products-loader.js lines 286–290
+    /app/js/product-gallery.js lines 244–261 (product detail gallery)
+
+Example:
+
+if (!product.image.startsWith('http')) {
+  product.image = `https://firebasestorage.googleapis.com/...`;
+}
+
+If product.image is /api/image-proxy?url=..., this converts it into a garbage Firebase URL → image 404.
+3) Admin panel stores proxy URLs in product data
+
+File: /app/products-admin-panel.html
+Lines: ~2490–2496
+
+const proxyURL = `/api/image-proxy?url=${encodeURIComponent(firebaseUrl)}`;
+resolve(proxyURL);
+
+So all product data gets saved as /api/image-proxy?url=...
+✅ Fix Plan (Choose ONE consistent approach)
+✅ Option A (Recommended): return DIRECT Firebase URLs everywhere
+
+This matches how local works and requires minimal frontend changes.
+✅ Step A1: Fix Cloudflare load-products transformUrl
+
+File: /app/functions/api/load-products.js
+Goal: If URL is already /api/image-proxy?..., decode and return direct Firebase URL, don’t wrap again.
+
+Patch logic example:
+
+if (typeof u === 'string' && u.startsWith('/api/image-proxy')) {
+  const urlObj = new URL(u, 'https://dummy');
+  const directUrl = urlObj.searchParams.get('url');
+  return directUrl || u;
+}
+
+if (typeof u === 'string' && u.includes('firebasestorage.googleapis.com')) {
+  return u; // keep direct
+}
+
+✅ Step A2: (Optional but best) update admin panel to store direct URLs instead of proxy
+
+File: /app/products-admin-panel.html
+Replace:
+
+const proxyURL = `/api/image-proxy?url=${encodeURIComponent(firebaseUrl)}`;
+resolve(proxyURL);
+
+with:
+
+resolve(firebaseUrl);
+
+This makes data portable across Netlify/Cloudflare.
+✅ Option B (if you want to keep image-proxy)
+
+Then you must:
+
+    Fix Cloudflare load-products so it does NOT double-wrap /api/image-proxy?url=...
+    Update frontend loaders to skip rewriting when URL starts with /api/image-proxy
+
+Example frontend fix:
+
+if (product.image.startsWith('/api/image-proxy')) {
+  return product; // leave as is
+}
+
+✅ Why this only fails on Cloudflare (not local)
+
+Local uses /netlify/functions/load-products.js, which converts proxy URLs to direct Firebase URLs before frontend sees them.
+Cloudflare’s /functions/api/load-products.js does the opposite (wraps them) and breaks frontend rewrite.
+✅ Extra sanity checks (secondary, not root cause)
+
+    Firebase Storage Rules already allow public read → not the issue.
+    CORS only matters for fetch/XHR/canvas; <img> tags do NOT need CORS.
+    Ensure /functions/api/image-proxy.js is actually deployed on Cloudflare.
+
+✅ Expected result after fix
+
+    Network tab shows clean image URLs:
+        either direct: https://firebasestorage.googleapis.com/...
+        or stable proxy: /api/image-proxy?url=...
+    No more firebasestorage.../o/%2Fapi%2Fimage-proxy... URLs.
+    Images load normally in production.
+
+Please implement the fix cleanly without changing unrelated logic.
+Feb 23, 06:15 AM
