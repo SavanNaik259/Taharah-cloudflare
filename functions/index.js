@@ -18,7 +18,7 @@ if (!admin.apps.length) {
 }
 
 // Import email service
-const emailService = require('./email/service');
+// const emailService = require('./email/service');
 
 /**
  * Send order confirmation emails
@@ -40,22 +40,13 @@ exports.sendOrderEmail = functions.https.onRequest((req, res) => {
       
       console.log('Received order email request for:', orderData.orderReference);
       
-      // Send emails
-      const result = await emailService.sendOrderEmails(orderData);
-      
-      if (result.success) {
-        return res.status(200).json({
-          success: true,
-          message: 'Order emails sent successfully',
-          result
-        });
-      } else {
-        return res.status(500).json({
-          success: false,
-          message: 'Failed to send order emails',
-          error: result.error
-        });
-      }
+      // Send emails using the Netlify utility (which uses Resend) or similar logic
+      // Note: Since this is Cloudflare/Firebase context, we should use a consistent service.
+      // For now, providing a descriptive error if the service is missing
+      return res.status(501).json({
+        success: false,
+        message: 'Order email service is being migrated to Resend on Cloudflare. Please use the /api/send-order-email endpoint on the new platform.'
+      });
     } catch (error) {
       console.error('Error in sendOrderEmail function:', error);
       return res.status(500).json({
