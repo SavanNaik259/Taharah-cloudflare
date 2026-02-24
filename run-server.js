@@ -77,10 +77,17 @@ app.all('/api/:functionName', async (req, res) => {
     const event = {
       queryStringParameters: req.query,
       headers: req.headers,
-      body: typeof req.body === 'object' ? JSON.stringify(req.body) : req.body,
+      body: JSON.stringify(req.body),
       httpMethod: req.method,
-      path: req.path
+      path: req.path,
+      isBase64Encoded: false
     };
+    
+    // Log function calls and payloads (excluding password)
+    const logBody = { ...req.body };
+    if (logBody.newPassword) logBody.newPassword = '[REDACTED]';
+    if (logBody.password) logBody.password = '[REDACTED]';
+    console.log(`[Function Call] ${functionName} | Method: ${req.method} | Body: ${JSON.stringify(logBody)}`);
     
     const result = await netlifyFunction.handler(event, {});
     if (result.headers) Object.keys(result.headers).forEach(k => res.setHeader(k, result.headers[k]));

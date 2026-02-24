@@ -1065,10 +1065,12 @@ window.FirebaseAuth = (function() {
       console.log('🔐 Attempting to reset password via server function for:', email);
 
       // Call server-side function to handle password reset
+      console.log('🚀 Sending reset request to /api/reset-password');
       const response = await fetch('/api/reset-password', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({
           email: email,
@@ -1077,15 +1079,19 @@ window.FirebaseAuth = (function() {
         })
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Server-side password reset error:', errorText);
-        throw new Error('Failed to reset password');
+      console.log('📥 Response status:', response.status);
+      
+      let result;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        result = await response.json();
+      } else {
+        const text = await response.text();
+        console.error('Non-JSON response:', text);
+        result = { success: false, error: 'Server returned invalid format' };
       }
 
-      const result = await response.json();
-      console.log('🔐 Server-side password reset result:', result);
-
+      console.log('🔐 Password reset result:', result);
       return result;
 
     } catch (error) {
