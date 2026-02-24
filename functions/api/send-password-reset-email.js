@@ -13,8 +13,7 @@ export async function onRequestPost({ request, env }) {
       return new Response(JSON.stringify({ success: false, message: "Resend configuration missing" }), { status: 500, headers });
     }
 
-    const resetUrl = `${new URL(request.url).origin}/reset-password.html?token=${token}&email=${encodeURIComponent(email)}`;
-    const resetUrlFinal = resetUrl.replace('/api/send-password-reset-email', '');
+    const resetUrlFinal = `${new URL(request.url).origin}/reset-password.html?token=${token}&email=${encodeURIComponent(email)}`;
 
     const resendResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',

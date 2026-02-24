@@ -219,17 +219,36 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             
             try {
-                console.log("Sending customer email with:", {serviceId, customerTemplateId, publicKey});
-                // Send email to customer
-                const customerResult = await emailjs.send(serviceId, customerTemplateId, templateParams);
-                console.log("Customer email result:", customerResult);
+                console.log("Sending order email via Cloudflare API:", templateParams.order_reference);
+                const response = await fetch('/api/send-order-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderData: {
+                        customer: {
+                            firstName: document.getElementById('firstName').value,
+                            lastName: document.getElementById('lastName').value,
+                            email: document.getElementById('email').value,
+                            phone: document.getElementById('phone').value,
+                            address: document.getElementById('address').value,
+                            city: '', // Add fields if available in form
+                            state: '',
+                            postalCode: ''
+                        },
+                        products: orderDetails.products,
+                        orderReference: templateParams.order_reference,
+                        orderDate: new Date().toISOString(),
+                        orderTotal: orderDetails.orderTotal,
+                        orderTotalDisplay: orderDetails.orderTotal,
+                        paymentMethod: templateParams.payment_method,
+                        userSelectedCurrency: 'USD' // Default for this form
+                    }})
+                });
+                const apiResult = await response.json();
+                console.log("API result:", apiResult);
                 
-                console.log("Sending owner email with:", {serviceId, ownerTemplateId, publicKey});
-                // Send email to owner
-                const ownerResult = await emailjs.send(serviceId, ownerTemplateId, templateParams);
-                console.log("Owner email result:", ownerResult);
+                if (!apiResult.success) throw new Error(apiResult.message || "Failed to send email");
             } catch (error) {
-                console.error("EmailJS error details:", error);
+                console.error("Order email error:", error);
                 throw error;
             }
             

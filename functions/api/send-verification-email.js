@@ -13,8 +13,7 @@ export async function onRequestPost({ request, env }) {
       return new Response(JSON.stringify({ success: false, message: "Resend configuration missing" }), { status: 500, headers });
     }
 
-    const verificationUrl = `${new URL(request.url).origin}/verify-email.html?token=${token}&email=${encodeURIComponent(email)}`;
-    const verificationUrlFinal = verificationUrl.replace('/api/send-verification-email', '');
+    const verificationUrlFinal = `${new URL(request.url).origin}/verify-email.html?token=${token}&email=${encodeURIComponent(email)}`;
 
     const resendResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',

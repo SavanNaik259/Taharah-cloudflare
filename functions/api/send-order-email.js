@@ -41,7 +41,58 @@ export async function onRequestPost({ request, env }) {
       return `<tr><td style="padding: 10px; border-bottom: 1px solid #e1e1e1;">${product.name || 'Product'}</td><td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: center;">${product.quantity || 1}</td><td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${priceDisplay}</td><td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${totalDisplay}</td></tr>`;
     }).join('');
 
-    const customerHtml = `<html><body style="font-family: Arial, sans-serif; color: #333;"><h2>Order Confirmation - Taharah</h2><p>Dear ${customer.firstName},</p><p>Thank you for your order!</p><div style="background: #f8f9fa; padding: 15px; border-radius: 5px;"><p><strong>Order Ref:</strong> ${orderReference}</p><p><strong>Date:</strong> ${formatToIST(orderDate)}</p></div><table style="width: 100%; border-collapse: collapse; margin-top: 20px;"><thead><tr style="background: #f1f1f1;"><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody>${productsHTML}</tbody></table><p style="text-align: right; font-weight: bold;">Total: ${symbol}${orderData.orderTotalDisplay?.toFixed(2) || orderTotal}</p></body></html>`;
+    const customerHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; }
+          .header { background: #f8f9fa; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; }
+          .order-info { margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 5px; }
+          table { width: 100%; border-collapse: collapse; }
+          th { background: #f1f1f1; padding: 10px; text-align: left; }
+          td { padding: 10px; border-bottom: 1px solid #eee; }
+          .total { text-align: right; font-weight: bold; font-size: 18px; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">Taharah</div>
+          <h2>Order Confirmation</h2>
+          <p>Dear ${customer.firstName},</p>
+          <p>Thank you for your order! We've received it and are processing it now.</p>
+          
+          <div class="order-info">
+            <p><strong>Order Reference:</strong> ${orderReference}</p>
+            <p><strong>Order Date:</strong> ${formatToIST(orderDate)}</p>
+            <p><strong>Payment Method:</strong> ${paymentMethod}</p>
+          </div>
+
+          <h3>Order Items</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${productsHTML}
+            </tbody>
+          </table>
+          
+          <div class="total">
+            Total: ${symbol}${orderData.orderTotalDisplay?.toFixed(2) || orderTotal}
+          </div>
+
+          <p>If you have any questions, please contact us at <a href="mailto:Officialtaharah@gmail.com">Officialtaharah@gmail.com</a></p>
+        </div>
+      </body>
+      </html>
+    `;
 
     const ownerHtml = `<html><body><h2>New Order Received</h2><p>Customer: ${customer.firstName} ${customer.lastName} (${customer.email})</p><p>Order Ref: ${orderReference}</p><p>Total: ₹${orderTotal}</p><table border="1" cellpadding="5" style="border-collapse: collapse;">${productsHTML}</table></body></html>`;
 
