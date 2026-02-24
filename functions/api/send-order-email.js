@@ -97,19 +97,30 @@ export async function onRequestPost({ request, env }) {
     const ownerHtml = `<html><body><h2>New Order Received</h2><p>Customer: ${customer.firstName} ${customer.lastName} (${customer.email})</p><p>Order Ref: ${orderReference}</p><p>Total: ₹${orderTotal}</p><table border="1" cellpadding="5" style="border-collapse: collapse;">${productsHTML}</table></body></html>`;
 
     // Send to Customer
+    console.log(`Attempting to send email to customer: ${customer.email}`);
     const custRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ from: `Taharah <${emailFrom}>`, to: [customer.email], subject: `Order Received - ${orderReference}`, html: customerHtml })
     });
 
+    if (!custRes.ok) {
+      const errorData = await custRes.json();
+      console.error('Resend API Customer Error:', errorData);
+    }
+
     // Send to Owner
     if (ownerEmail) {
-      await fetch('https://api.resend.com/emails', {
+      console.log(`Attempting to send email to owner: ${ownerEmail}`);
+      const ownerRes = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ from: `Taharah Orders <${emailFrom}>`, to: [ownerEmail], subject: `New Order - ${orderReference}`, html: ownerHtml })
       });
+      if (!ownerRes.ok) {
+        const errorData = await ownerRes.json();
+        console.error('Resend API Owner Error:', errorData);
+      }
     }
 
     if (custRes.ok) return new Response(JSON.stringify({ success: true, message: "Order emails sent" }), { status: 200, headers });

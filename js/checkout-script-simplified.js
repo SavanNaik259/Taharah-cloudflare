@@ -1134,37 +1134,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Firebase Orders module not available or saveOrderToFirebase function missing');
             }
 
-            // Send order confirmation email for COD orders
+            // Send order confirmation email
             try {
-                console.log('Sending order confirmation email for COD order...');
+                console.log('Sending order confirmation email via Cloudflare API...');
                 let emailResult = { success: false };
 
-                if (window.netlifyHelpers) {
-                    console.log('Using Netlify Functions for COD order email');
-                    emailResult = await window.netlifyHelpers.callNetlifyFunction('send-order-email', {
-                        method: 'POST',
-                        body: JSON.stringify(orderData)
-                    });
-                } else {
-                    console.log('Using Express server for COD order email');
-                    // Use absolute URL to avoid issues with hosting changes
-                    const baseUrl = window.location.origin;
-                    const emailResponse = await fetch(`${baseUrl}/api/send-order-email`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(orderData)
-                    });
-                    emailResult = await emailResponse.json();
-                }
+                // Always use the Cloudflare /api/send-order-email endpoint
+                const baseUrl = window.location.origin;
+                const emailResponse = await fetch(`${baseUrl}/api/send-order-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderData: orderData })
+                });
+                emailResult = await emailResponse.json();
 
                 if (emailResult.success) {
-                    console.log('✅ COD order confirmation emails sent successfully');
+                    console.log('✅ Order confirmation emails sent successfully');
                 } else {
-                    console.warn('⚠️ Failed to send COD order confirmation emails:', emailResult?.message || 'Email service unavailable');
+                    console.warn('⚠️ Failed to send order confirmation emails:', emailResult?.message || 'Email service unavailable');
                 }
             } catch (emailError) {
-                console.error('❌ Error sending COD order emails:', emailError);
-                // Continue with order processing even if email sending fails
+                console.error('❌ Error sending order emails:', emailError);
             }
 
             // Update button text to show completion for COD orders
