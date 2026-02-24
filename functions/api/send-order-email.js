@@ -27,7 +27,8 @@ export async function onRequestPost({ request, env }) {
 
     const resendApiKey = env.RESEND_API_KEY;
     const emailFrom = env.EMAIL_FROM;
-    const ownerEmail = env.OWNER_EMAIL || env.EMAIL_USER;
+    const ownerEmail = env.OWNER_EMAIL || "Officialtaharah@gmail.com";
+    console.log(`Using owner email: ${ownerEmail}`);
 
     if (!resendApiKey || !emailFrom) return new Response(JSON.stringify({ success: false, message: "Resend configuration missing" }), { status: 500, headers });
 

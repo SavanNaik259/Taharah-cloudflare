@@ -1152,6 +1152,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.log('✅ Order confirmation emails sent successfully');
                 } else {
                     console.warn('⚠️ Failed to send order confirmation emails:', emailResult?.message || 'Email service unavailable');
+                    console.log('Email Result Full:', emailResult);
                 }
             } catch (emailError) {
                 console.error('❌ Error sending order emails:', emailError);
@@ -2628,41 +2629,23 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
 
-            // Send order confirmation email
-            let emailResult = { success: false };
+            // Send order confirmation email for Razorpay
             try {
-                console.log('Attempting to send order confirmation email with Resend...');
-
-                // Ensure we use the latest updated order data with payment info
-                const emailPayload = {
-                    ...updatedOrderData,
-                    resendTrigger: true // Add a flag for debugging
-                };
-
-                if (window.netlifyHelpers) {
-                    console.log('Using Netlify Functions for Resend email');
-                    emailResult = await window.netlifyHelpers.callNetlifyFunction('send-order-email', {
-                        method: 'POST',
-                        body: JSON.stringify(emailPayload)
-                    });
-                } else {
-                    console.log('Using fallback for email');
-                    const baseUrl = window.location.origin;
-                    const emailResponse = await fetch(`${baseUrl}/api/send-order-email`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(emailPayload)
-                    });
-                    emailResult = await emailResponse.json();
-                }
-
+                console.log('Sending order confirmation email for Razorpay order...');
+                const baseUrl = window.location.origin;
+                const emailResponse = await fetch(`${baseUrl}/api/send-order-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderData: updatedOrderData })
+                });
+                const emailResult = await emailResponse.json();
                 if (emailResult.success) {
-                    console.log('Order confirmation emails sent successfully');
+                    console.log('✅ Razorpay order confirmation emails sent successfully');
                 } else {
-                    console.warn('Failed to send order confirmation emails:', emailResult?.message || 'Email service unavailable');
+                    console.warn('⚠️ Failed to send Razorpay order confirmation emails:', emailResult?.message);
                 }
             } catch (emailError) {
-                console.error('Error sending order emails:', emailError);
+                console.error('❌ Error sending Razorpay order emails:', emailError);
             }
 
             // Update button to show completion
