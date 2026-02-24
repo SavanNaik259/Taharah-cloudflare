@@ -116,9 +116,15 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Check if token is expired
     const now = new Date();
-    const expiry = userData.passwordResetTokenExpiry?.toDate();
+    // Support both Date object and timestamp number for compatibility
+    let expiry;
+    if (userData.passwordResetTokenExpiry && typeof userData.passwordResetTokenExpiry.toDate === 'function') {
+      expiry = userData.passwordResetTokenExpiry.toDate();
+    } else if (userData.passwordResetTokenExpiry) {
+      // Handle case where it might be a simple timestamp or number
+      expiry = new Date(userData.passwordResetTokenExpiry);
+    }
     
     if (!expiry || now > expiry) {
       console.log('Reset token has expired for user:', email);

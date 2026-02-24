@@ -1065,7 +1065,7 @@ window.FirebaseAuth = (function() {
       console.log('🔐 Attempting to reset password via server function for:', email);
 
       // Call server-side function to handle password reset
-      const response = await fetch('/.netlify/functions/reset-password', {
+      const response = await fetch('/api/reset-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
