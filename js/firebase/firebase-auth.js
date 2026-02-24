@@ -595,7 +595,7 @@ window.FirebaseAuth = (function() {
       console.log('Token expiry time:', expiryTime.toISOString());
 
       // Update Firestore with reset token
-      const userDoc = await db.collection("users").doc(userData.uid);
+      const userDoc = db.collection("users").doc(userData.uid);
       await userDoc.update({
         passwordResetToken: resetToken,
         passwordResetTokenExpiry: firebase.firestore.Timestamp.fromDate(expiryTime),
@@ -949,25 +949,17 @@ window.FirebaseAuth = (function() {
    */
   async function sendCustomVerificationEmail(email, displayName, token) {
     try {
-      const verificationUrl = `${window.location.origin}/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
-
-      const emailData = {
-        type: 'verification',
-        customer: {
-          email: email,
-          firstName: displayName || 'User'
-        },
-        verificationUrl: verificationUrl,
-        siteName: 'Taharah'
-      };
-
-      // Use your existing email service endpoint
+      console.log('📧 Sending verification email via Cloudflare API...');
       const response = await fetch('/api/send-verification-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(emailData)
+        body: JSON.stringify({
+          email: email,
+          name: displayName,
+          token: token
+        })
       });
 
       if (!response.ok) {
@@ -990,41 +982,23 @@ window.FirebaseAuth = (function() {
    */
   async function sendCustomPasswordResetEmail(email, displayName, token) {
     try {
-      const resetUrl = `${window.location.origin}/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
-
-      const emailData = {
-        type: 'password-reset',
-        customer: {
-          email: email,
-          firstName: displayName || 'User'
-        },
-        resetUrl: resetUrl,
-        siteName: 'Taharah'
-      };
-
-      console.log('📧 Sending custom password reset email via Netlify function');
-
-      // Use custom password reset email service endpoint
+      console.log('🔐 Sending password reset email via Cloudflare API...');
       const response = await fetch('/api/send-password-reset-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(emailData)
+        body: JSON.stringify({
+          email: email,
+          name: displayName,
+          token: token
+        })
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Password reset email service error:', errorText);
-        throw new Error('Failed to send password reset email');
-      }
-
       const result = await response.json();
-      console.log('📧 Password reset email service response:', result);
-
       return result;
     } catch (error) {
-      console.error('Error sending custom password reset email:', error);
+      console.error('❌ Error sending custom password reset email:', error);
       return { success: false, error: error.message };
     }
   }
