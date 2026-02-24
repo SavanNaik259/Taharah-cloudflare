@@ -95,14 +95,20 @@ export async function onRequestPost({ request, env }) {
       </html>
     `; 
 
-    const ownerHtml = `<html><body><h2>New Order Received</h2><p>Customer: ${customer.firstName} ${customer.lastName} (${customer.email})</p><p>Order Ref: ${orderReference}</p><p>Total: ₹${orderTotal}</p><table border="1" cellpadding="5" style="border-collapse: collapse;">${productsHTML}</table></body></html>`;
+    const ownerHtml = `<html><body><h2>${orderData.status && orderData.status.toLowerCase() === 'cancelled' ? 'Order Cancelled' : 'New Order Received'}</h2><p>Customer: ${customer.firstName} ${customer.lastName} (${customer.email})</p><p>Order Ref: ${orderReference}</p><p>Status: ${orderData.status || 'New'}</p><p>Total: ₹${orderTotal}</p><table border="1" cellpadding="5" style="border-collapse: collapse;">${productsHTML}</table></body></html>`;
+
+    // Customize subject based on status
+    let customerSubject = `Order Received - ${orderReference}`;
+    if (orderData.status && orderData.status.toLowerCase() === 'cancelled') {
+      customerSubject = `Order Cancelled - ${orderReference}`;
+    }
 
     // Send to Customer
     console.log(`Attempting to send email to customer: ${customer.email}`);
     const custRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: `Taharah <${emailFrom}>`, to: [customer.email], subject: `Order Received - ${orderReference}`, html: customerHtml })
+      body: JSON.stringify({ from: `Taharah <${emailFrom}>`, to: [customer.email], subject: customerSubject, html: customerHtml })
     });
 
     let custError = null;

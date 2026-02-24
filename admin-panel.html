@@ -4947,32 +4947,32 @@
                 try {
                     // Prepare complete email data structure for cancellation
                     const emailData = {
-                        orderReference: orderData.orderReference || orderData.id,
-                        orderDate: orderData.orderDate || orderData.timestamp?.toDate?.() || new Date(),
-                        orderTotal: orderData.total || orderData.orderTotal || 0,
-                        paymentMethod: orderData.paymentMethod || 'Not specified',
-                        status: 'cancelled', // Important: Include the status for email template selection
-                        cancellationReason: cancellationData.reason, // Use the selected reason
-                        cancellationNote: cancellationData.note, // Additional note if provided
-                        customer: {
-                            firstName: orderData.customer?.firstName || orderData.firstName || '',
-                            lastName: orderData.customer?.lastName || orderData.lastName || '',
-                            email: orderData.customer?.email || orderData.email || '',
-                            phone: orderData.customer?.phone || orderData.phone || '',
-                            address: orderData.customer?.address || orderData.address || '',
-                            city: orderData.customer?.city || orderData.city || '',
-                            state: orderData.customer?.state || orderData.state || '',
-                            postalCode: orderData.customer?.postalCode || orderData.postalCode || ''
-                        },
-                        products: orderData.products || orderData.items || [],
-                        notes: orderData.notes || orderData.specialInstructions || ''
+                        orderData: {
+                            orderReference: orderData.orderReference || orderData.id,
+                            orderDate: orderData.orderDate || orderData.timestamp?.toDate?.() || new Date(),
+                            orderTotal: orderData.total || orderData.orderTotal || 0,
+                            paymentMethod: orderData.paymentMethod || 'Not specified',
+                            status: 'cancelled', // Important: Include the status for email template selection
+                            cancellationReason: cancellationData.reason, // Use the selected reason
+                            cancellationNote: cancellationData.note, // Additional note if provided
+                            customer: {
+                                firstName: orderData.customer?.firstName || orderData.firstName || '',
+                                lastName: orderData.customer?.lastName || orderData.lastName || '',
+                                email: orderData.customer?.email || orderData.email || '',
+                                phone: orderData.customer?.phone || orderData.phone || '',
+                                address: orderData.customer?.address || orderData.address || '',
+                                city: orderData.customer?.city || orderData.city || '',
+                                state: orderData.customer?.state || orderData.state || '',
+                                postalCode: orderData.customer?.postalCode || orderData.postalCode || ''
+                            },
+                            products: orderData.products || orderData.items || [],
+                            notes: orderData.notes || orderData.specialInstructions || ''
+                        }
                     };
 
                     console.log('Sending cancellation email with data:', emailData);
 
-                    // Use absolute URL to avoid issues with hosting changes
-                    const baseUrl = window.location.origin;
-                    const emailResponse = await fetch(`${baseUrl}/api/send-order-email`, {
+                    const emailResponse = await fetch('/api/send-order-email', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -4986,11 +4986,9 @@
                         console.log('✅ Cancellation email sent successfully');
                     } else {
                         console.warn('⚠️ Order cancelled but email failed:', emailResult.error || emailResult.message);
-                        console.error('Email error details:', emailResult);
                     }
                 } catch (emailError) {
                     console.warn('⚠️ Order cancelled but email service unavailable:', emailError);
-                    console.error('Email error details:', emailError);
                 }
 
                 // Show success modal instead of alert
@@ -6988,21 +6986,23 @@
         // Send order cancellation email
         async function sendOrderCancellationEmail(orderData, reason) {
             const emailData = {
-                orderReference: orderData.orderReference || orderData.orderId,
-                orderDate: orderData.date ? orderData.date.toISOString() : new Date().toISOString(),
-                orderTotal: orderData.amount,
-                paymentMethod: orderData.paymentMethod || 'Not specified',
-                customer: {
-                    firstName: orderData.customerName.split(' ')[0] || '',
-                    lastName: orderData.customerName.split(' ').slice(1).join(' ') || '',
-                    email: orderData.customerEmail,
-                    phone: orderData.customerPhone,
-                    address: orderData.customerAddress
-                },
-                products: orderData.products || [],
-                notes: orderData.notes || '',
-                status: 'cancelled',
-                cancellationReason: reason
+                orderData: {
+                    orderReference: orderData.orderReference || orderData.orderId,
+                    orderDate: orderData.date ? orderData.date.toISOString() : new Date().toISOString(),
+                    orderTotal: orderData.amount,
+                    paymentMethod: orderData.paymentMethod || 'Not specified',
+                    customer: {
+                        firstName: orderData.customerName.split(' ')[0] || '',
+                        lastName: orderData.customerName.split(' ').slice(1).join(' ') || '',
+                        email: orderData.customerEmail,
+                        phone: orderData.customerPhone,
+                        address: orderData.customerAddress
+                    },
+                    products: orderData.products || [],
+                    notes: orderData.notes || '',
+                    status: 'cancelled',
+                    cancellationReason: reason
+                }
             };
 
             console.log('Sending cancellation email with data:', emailData);
