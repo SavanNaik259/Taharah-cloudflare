@@ -175,7 +175,7 @@ function customerOrderTemplate(data) {
         <div class="alert-box">
           <h3 style="margin: 0 0 10px 0;">❌ Your order has been cancelled</h3>
           <p style="margin: 0 0 10px 0;"><strong>Reason:</strong> ${data.cancellationReason || 'Order cancelled by store administrator'}</p>
-          ${data.cancellationNote ? `<p style="margin: 0;"><strong>Additional Information:</strong> ${data.cancellationNote}</p>` : ''}
+          ${data.cancellationNote || data.notes ? `<p style="margin: 0;"><strong>Additional Information:</strong> ${data.cancellationNote || data.notes}</p>` : ''}
         </div>
       ` : `
         <h2>Order ${status === 'confirmed' ? 'Confirmed' : 'Confirmation'}</h2>

@@ -495,6 +495,7 @@ function customerCancellationTemplate(data) {
         <p><strong>Payment Method:</strong> ${paymentMethod}</p>
         <p><strong>Total Amount:</strong> ${formatPrice(orderTotal, userSelectedCurrency)}</p>
         ${cancellationReason ? `<p><strong>Cancellation Reason:</strong> ${cancellationReason}</p>` : ''}
+        ${data.cancellationNote ? `<p><strong>Note:</strong> ${data.cancellationNote}</p>` : ''}
       </div>
 
       <h3>Cancelled Items</h3>
@@ -637,7 +638,7 @@ function ownerCancellationTemplate(data) {
         <p><strong>Payment Method:</strong> ${paymentMethod}</p>
         <p><strong>Total Amount (INR):</strong> ${formatPrice(orderTotal, 'INR')}</p>
         ${cancellationReason ? `<p><strong>Cancellation Reason:</strong> ${cancellationReason}</p>` : ''}
-        ${notes ? `<p><strong>Order Notes:</strong> ${notes}</p>` : ''}
+        ${data.cancellationNote ? `<p><strong>Order Notes:</strong> ${data.cancellationNote}</p>` : ''}
       </div>
 
       <h3>Cancelled Items</h3>

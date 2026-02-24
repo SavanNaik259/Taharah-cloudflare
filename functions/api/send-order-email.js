@@ -55,14 +55,24 @@ export async function onRequestPost({ request, env }) {
           th { background: #f1f1f1; padding: 10px; text-align: left; }
           td { padding: 10px; border-bottom: 1px solid #eee; }
           .total { text-align: right; font-weight: bold; font-size: 18px; margin-top: 20px; }
+          .cancellation-box { background-color: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 15px; border-radius: 5px; margin: 20px 0; }
         </style>
       </head>
       <body>
         <div class="container">
           <div class="header">Taharah</div>
-          <h2>Order Confirmation</h2>
+          <h2>${orderData.status && orderData.status.toLowerCase() === 'cancelled' ? 'Order Cancelled' : 'Order Confirmation'}</h2>
+          
+          ${orderData.status && orderData.status.toLowerCase() === 'cancelled' ? `
+            <div class="cancellation-box">
+              <h3 style="margin: 0 0 10px 0;">❌ Your order has been cancelled</h3>
+              <p style="margin: 0 0 10px 0;"><strong>Reason:</strong> ${orderData.cancellationReason || 'Order cancelled by store administrator'}</p>
+              ${orderData.cancellationNote ? `<p style="margin: 0;"><strong>Note:</strong> ${orderData.cancellationNote}</p>` : ''}
+            </div>
+          ` : ''}
+
           <p>Dear ${customer.firstName},</p>
-          <p>Thank you for your order! We've received it and are processing it now.</p>
+          <p>${orderData.status && orderData.status.toLowerCase() === 'cancelled' ? 'We regret to inform you that your order has been cancelled.' : 'Thank you for your order! We\'ve received it and are processing it now.'}</p>
           
           <div class="order-info">
             <p><strong>Order Reference:</strong> ${orderReference}</p>
@@ -89,13 +99,26 @@ export async function onRequestPost({ request, env }) {
             Total: ${symbol}${orderData.orderTotalDisplay?.toFixed(2) || orderTotal}
           </div>
 
+          ${orderData.status && orderData.status.toLowerCase() === 'cancelled' ? `
+            <div style="background-color: #fffbeb; border: 1px solid #fbbf24; padding: 15px; border-radius: 5px; margin: 20px 0;">
+              <p style="margin: 0;">If you have already made the payment, a full refund will be processed within 5-7 business days to your original payment method.</p>
+            </div>
+          ` : ''}
+
           <p>If you have any questions, please contact us at <a href="mailto:Officialtaharah@gmail.com">Officialtaharah@gmail.com</a></p>
         </div>
       </body>
       </html>
     `; 
 
-    const ownerHtml = `<html><body><h2>${orderData.status && orderData.status.toLowerCase() === 'cancelled' ? 'Order Cancelled' : 'New Order Received'}</h2><p>Customer: ${customer.firstName} ${customer.lastName} (${customer.email})</p><p>Order Ref: ${orderReference}</p><p>Status: ${orderData.status || 'New'}</p><p>Total: ₹${orderTotal}</p><table border="1" cellpadding="5" style="border-collapse: collapse;">${productsHTML}</table></body></html>`;
+    const ownerHtml = `<html><body><h2>${orderData.status && orderData.status.toLowerCase() === 'cancelled' ? 'Order Cancelled' : 'New Order Received'}</h2>
+    <p>Customer: ${customer.firstName} ${customer.lastName} (${customer.email})</p>
+    <p>Order Ref: ${orderReference}</p>
+    <p>Status: ${orderData.status || 'New'}</p>
+    ${orderData.cancellationReason ? `<p><strong>Reason:</strong> ${orderData.cancellationReason}</p>` : ''}
+    ${orderData.cancellationNote ? `<p><strong>Note:</strong> ${orderData.cancellationNote}</p>` : ''}
+    <p>Total: ₹${orderTotal}</p>
+    <table border="1" cellpadding="5" style="border-collapse: collapse;">${productsHTML}</table></body></html>`;
 
     // Customize subject based on status
     let customerSubject = `Order Received - ${orderReference}`;

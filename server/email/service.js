@@ -94,7 +94,7 @@ async function sendCustomerOrderCancellation(orderData) {
       to: customer.email,
       subject: `Order Cancelled - ${orderData.orderReference}`,
       html: htmlContent,
-      text: `Order Cancelled - ${orderData.orderReference}\n\nWe regret to inform you that your order has been cancelled.\n\nOrder Reference: ${orderData.orderReference}\nOrder Date: ${new Date(orderData.orderDate).toLocaleString()}\nTotal: ${orderData.userSelectedCurrency || 'INR'} ${orderData.orderTotal.toFixed(2)}\n${orderData.cancellationReason ? `Cancellation Reason: ${orderData.cancellationReason}\n` : ''}\nIf a refund is applicable, it will be processed within 5-7 business days.\n\nIf you have any questions, please contact us at ${emailUser}.`
+      text: `Order Cancelled - ${orderData.orderReference}\n\nWe regret to inform you that your order has been cancelled.\n\nOrder Reference: ${orderData.orderReference}\nOrder Date: ${new Date(orderData.orderDate).toLocaleString()}\nTotal: ${orderData.userSelectedCurrency || 'INR'} ${orderData.orderTotal.toFixed(2)}\n${orderData.cancellationReason ? `Cancellation Reason: ${orderData.cancellationReason}\n` : ''}${orderData.cancellationNote ? `Note: ${orderData.cancellationNote}\n` : ''}\nIf a refund is applicable, it will be processed within 5-7 business days.\n\nIf you have any questions, please contact us at ${emailUser}.`
     };
     
     console.log(`Sending order cancellation email to customer: ${customer.email}`);
@@ -127,7 +127,7 @@ async function sendOwnerOrderCancellation(orderData) {
       to: ownerEmail,
       subject: `Order Cancelled - ${orderData.orderReference}`,
       html: htmlContent,
-      text: `Order Cancelled - ${orderData.orderReference}\n\nAn order has been cancelled in your Taharah store.\n\nOrder Reference: ${orderData.orderReference}\nOrder Date: ${new Date(orderData.orderDate).toLocaleString()}\nCustomer: ${orderData.customer.firstName} ${orderData.customer.lastName}\nEmail: ${orderData.customer.email}\nPhone: ${orderData.customer.phone}\nTotal (INR): ₹${orderData.orderTotal.toFixed(2)}\n${orderData.cancellationReason ? `Cancellation Reason: ${orderData.cancellationReason}\n` : ''}\nYou may need to process a refund for this cancelled order.`
+      text: `Order Cancelled - ${orderData.orderReference}\n\nAn order has been cancelled in your Taharah store.\n\nOrder Reference: ${orderData.orderReference}\nOrder Date: ${new Date(orderData.orderDate).toLocaleString()}\nCustomer: ${orderData.customer.firstName} ${orderData.customer.lastName}\nEmail: ${orderData.customer.email}\nPhone: ${orderData.customer.phone}\nTotal (INR): ₹${orderData.orderTotal.toFixed(2)}\n${orderData.cancellationReason ? `Cancellation Reason: ${orderData.cancellationReason}\n` : ''}${orderData.cancellationNote ? `Cancellation Note: ${orderData.cancellationNote}\n` : ''}\nYou may need to process a refund for this cancelled order.`
     };
     
     console.log(`Sending order cancellation notification to owner: ${ownerEmail}`);

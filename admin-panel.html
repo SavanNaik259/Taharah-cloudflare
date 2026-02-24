@@ -4955,6 +4955,7 @@
                             status: 'cancelled', // Important: Include the status for email template selection
                             cancellationReason: cancellationData.reason, // Use the selected reason
                             cancellationNote: cancellationData.note, // Additional note if provided
+                            userSelectedCurrency: orderData.userSelectedCurrency || 'INR',
                             customer: {
                                 firstName: orderData.customer?.firstName || orderData.firstName || '',
                                 lastName: orderData.customer?.lastName || orderData.lastName || '',

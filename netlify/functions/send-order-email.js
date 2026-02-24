@@ -61,6 +61,10 @@ async function enrichOrderDataWithCurrency(orderData) {
     if (orderData.status && orderData.status.toLowerCase() === 'cancelled' && orderData.orderReference) {
       console.log('\n🔍 CANCELLATION DETECTED - Fetching original order from Firebase');
       
+      // Preserve cancellation reason and note from the request
+      const requestReason = orderData.cancellationReason;
+      const requestNote = orderData.cancellationNote;
+      
       const bucket = admin.storage().bucket();
       const ordersFile = bucket.file('orders/orders.json');
       const [exists] = await ordersFile.exists();
@@ -110,6 +114,10 @@ async function enrichOrderDataWithCurrency(orderData) {
             });
             console.log(`✓ REPLACED products array with ${orderData.products.length} items from original`);
           }
+          
+          // Restore the specific cancellation reason and note from the request
+          if (requestReason) orderData.cancellationReason = requestReason;
+          if (requestNote) orderData.cancellationNote = requestNote;
         } else {
           console.warn('⚠️ Original order NOT found in Firebase with reference:', orderData.orderReference);
         }
