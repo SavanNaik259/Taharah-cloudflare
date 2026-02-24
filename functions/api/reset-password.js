@@ -24,6 +24,7 @@ export async function onRequestPost({ request, env }) {
     const FIREBASE_API_KEY = env.FIREBASE_API_KEY;
     const projectID = env.FIREBASE_PROJECT_ID;
 
+    // Use Firestore REST API to find user and validate token
     const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${projectID}/databases/(default)/documents:runQuery`;
     
     const queryBody = {
@@ -42,8 +43,14 @@ export async function onRequestPost({ request, env }) {
 
     const firestoreRes = await fetch(firestoreUrl, {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(queryBody)
     });
+
+    if (!firestoreRes.ok) {
+      const err = await firestoreRes.text();
+      return new Response(JSON.stringify({ success: false, error: "Firestore query failed", details: err }), { status: 500, headers });
+    }
 
     const firestoreData = await firestoreRes.json();
     if (!firestoreData || !firestoreData[0] || !firestoreData[0].document) {
@@ -57,15 +64,18 @@ export async function onRequestPost({ request, env }) {
     const expiryTimestamp = fields.passwordResetTokenExpiry?.timestampValue;
 
     if (!storedToken || storedToken !== token) {
-      return new Response(JSON.stringify({ success: false, error: "Invalid or expired reset link" }), { status: 400, headers });
+      return new Response(JSON.stringify({ success: false, error: "Invalid reset link" }), { status: 400, headers });
     }
 
-    const now = new Date();
-    const expiry = new Date(expiryTimestamp);
-    if (now > expiry) {
-      return new Response(JSON.stringify({ success: false, error: "Reset link has expired" }), { status: 400, headers });
+    if (expiryTimestamp) {
+      const now = new Date();
+      const expiry = new Date(expiryTimestamp);
+      if (now > expiry) {
+        return new Response(JSON.stringify({ success: false, error: "Reset link has expired" }), { status: 400, headers });
+      }
     }
 
+    // Generate OAuth token using Service Account credentials from env
     const accessToken = await getGoogleAuthToken(
       env.FIREBASE_CLIENT_EMAIL,
       env.FIREBASE_PRIVATE_KEY,
@@ -74,6 +84,7 @@ export async function onRequestPost({ request, env }) {
 
     const uid = userDoc.name.split("/").pop();
 
+    // Update password in Firebase Auth
     const authUpdateUrl = `https://identitytoolkit.googleapis.com/v1/projects/${projectID}/accounts:update`;
     const authUpdateRes = await fetch(authUpdateUrl, {
       method: "POST",
@@ -89,11 +100,12 @@ export async function onRequestPost({ request, env }) {
 
     if (!authUpdateRes.ok) {
       const authError = await authUpdateRes.json();
-      return new Response(JSON.stringify({ success: false, error: authError.error?.message || "Failed to update password" }), { status: 500, headers });
+      return new Response(JSON.stringify({ success: false, error: authError.error?.message || "Auth update failed" }), { status: 500, headers });
     }
 
+    // Clear reset fields in Firestore
     const patchUrl = `https://firestore.googleapis.com/v1/${userDoc.name}?updateMask.fieldPaths=passwordResetToken&updateMask.fieldPaths=passwordResetTokenExpiry&updateMask.fieldPaths=passwordResetCompletedAt`;
-    await fetch(patchUrl, {
+    const patchRes = await fetch(patchUrl, {
       method: "PATCH",
       headers: {
         "Authorization": `Bearer ${accessToken}`,
@@ -105,6 +117,10 @@ export async function onRequestPost({ request, env }) {
         }
       })
     });
+
+    if (!patchRes.ok) {
+      console.error("Firestore patch failed:", await patchRes.text());
+    }
 
     return new Response(JSON.stringify({ success: true, message: "Password reset successfully!" }), { status: 200, headers });
 
@@ -126,12 +142,12 @@ async function getGoogleAuthToken(email, privateKey, scope) {
     iat: now,
   };
 
-  const base64UrlEncode = (str) => {
-    return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const base64UrlEncode = (obj) => {
+    return btoa(JSON.stringify(obj)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   };
 
-  const encodedHeader = base64UrlEncode(JSON.stringify(header));
-  const encodedClaim = base64UrlEncode(JSON.stringify(claim));
+  const encodedHeader = base64UrlEncode(header);
+  const encodedClaim = base64UrlEncode(claim);
   const signatureInput = `${encodedHeader}.${encodedClaim}`;
 
   const keyData = str2ab(atob(pk.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\s/g, "")));
@@ -149,7 +165,11 @@ async function getGoogleAuthToken(email, privateKey, scope) {
     new TextEncoder().encode(signatureInput)
   );
 
-  const encodedSignature = base64UrlEncode(String.fromCharCode(...new Uint8Array(signature)));
+  const encodedSignature = btoa(String.fromCharCode(...new Uint8Array(signature)))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+    
   const jwt = `${signatureInput}.${encodedSignature}`;
 
   const res = await fetch("https://oauth2.googleapis.com/token", {
@@ -159,7 +179,7 @@ async function getGoogleAuthToken(email, privateKey, scope) {
   });
 
   const data = await res.json();
-  if (data.error) throw new Error(`OAuth error: ${data.error_description || data.error}`);
+  if (data.error) throw new Error(`OAuth failed: ${data.error_description || data.error}`);
   return data.access_token;
 }
 

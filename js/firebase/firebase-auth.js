@@ -1078,14 +1078,16 @@ window.FirebaseAuth = (function() {
         })
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Server-side password reset error:', errorText);
-        throw new Error('Failed to reset password');
-      }
-
       const result = await response.json();
       console.log('🔐 Server-side password reset result:', result);
+
+      if (!response.ok) {
+        console.error('Server-side password reset error:', result);
+        return {
+          success: false,
+          error: result.error || 'Failed to reset password. Please try again.'
+        };
+      }
 
       return result;
 
