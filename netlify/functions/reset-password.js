@@ -42,34 +42,12 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    let body;
-    try {
-      body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
-    } catch (e) {
-      console.error('Failed to parse request body:', event.body);
-      return {
-        statusCode: 400,
-        headers: { 
-          'Access-Control-Allow-Origin': '*',
-          'Content-Type': 'application/json' 
-        },
-        body: JSON.stringify({ success: false, error: 'Invalid JSON body' })
-      };
-    }
+    const { email, token, newPassword } = JSON.parse(event.body);
     
-    // Support body properties directly if they are not in a body object
-    const { email, token, newPassword } = body;
-    
-    console.log('--- PASSWORD RESET ATTEMPT ---');
-    console.log('Email:', email);
-    console.log('Token provided (first 10 chars):', token ? token.substring(0, 10) : 'MISSING');
-    console.log('New Password provided:', !!newPassword);
-    console.log('Full Body Keys:', Object.keys(body));
-    console.log('Cloudflare-Ready Mode: ON');
+    console.log('Processing password reset for:', email);
 
     // Validate input
     if (!email || !token || !newPassword) {
-      console.log('ERROR: Missing fields', { email: !!email, token: !!token, password: !!newPassword });
       return {
         statusCode: 400,
         headers: {
@@ -78,7 +56,7 @@ exports.handler = async (event, context) => {
         },
         body: JSON.stringify({
           success: false,
-          error: 'Missing required fields: ' + (!email ? 'email ' : '') + (!token ? 'token ' : '') + (!newPassword ? 'password' : '')
+          error: 'Missing required fields'
         })
       };
     }
@@ -99,14 +77,13 @@ exports.handler = async (event, context) => {
     }
 
     // Find user by email in Firestore
-    console.log('Searching for user in Firestore:', email);
     const usersQuery = await db.collection('users')
       .where('email', '==', email)
       .limit(1)
       .get();
 
     if (usersQuery.empty) {
-      console.log('No user found in Firestore for email:', email);
+      console.log('No user found with email:', email);
       return {
         statusCode: 404,
         headers: {
@@ -115,14 +92,13 @@ exports.handler = async (event, context) => {
         },
         body: JSON.stringify({
           success: false,
-          error: 'Account not found with this email address.'
+          error: 'User not found'
         })
       };
     }
 
     const userDoc = usersQuery.docs[0];
     const userData = userDoc.data();
-    console.log('User data found. Token in DB:', !!userData.passwordResetToken, 'Token matches:', userData.passwordResetToken === token);
 
     // Validate reset token
     if (!userData.passwordResetToken || userData.passwordResetToken !== token) {
@@ -135,7 +111,7 @@ exports.handler = async (event, context) => {
         },
         body: JSON.stringify({
           success: false,
-          error: 'This password reset link is invalid or has already been used. Please request a new one.'
+          error: 'Invalid or expired reset link'
         })
       };
     }
