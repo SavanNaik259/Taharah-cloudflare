@@ -14,6 +14,7 @@ export async function onRequestPost({ request, env }) {
     }
 
     const resetUrl = `${new URL(request.url).origin}/reset-password.html?token=${token}&email=${encodeURIComponent(email)}`;
+    const resetUrlFinal = resetUrl.replace('/api/send-password-reset-email', '');
 
     const resendResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -25,7 +26,7 @@ export async function onRequestPost({ request, env }) {
         from: `Taharah <${emailFrom}>`,
         to: [email],
         subject: "Reset your password - Taharah",
-        html: `<p>Hello ${name || 'User'},</p><p>You requested a password reset. Click the link below to proceed:</p><p><a href="${resetUrl}">${resetUrl}</a></p>`
+        html: `<p>Hello ${name || 'User'},</p><p>You requested a password reset. Click the link below to proceed:</p><p><a href="${resetUrlFinal}">${resetUrlFinal}</a></p>`
       })
     });
 

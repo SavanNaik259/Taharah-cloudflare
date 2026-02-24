@@ -14,6 +14,7 @@ export async function onRequestPost({ request, env }) {
     }
 
     const verificationUrl = `${new URL(request.url).origin}/verify-email.html?token=${token}&email=${encodeURIComponent(email)}`;
+    const verificationUrlFinal = verificationUrl.replace('/api/send-verification-email', '');
 
     const resendResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -25,7 +26,7 @@ export async function onRequestPost({ request, env }) {
         from: `Taharah <${emailFrom}>`,
         to: [email],
         subject: "Verify your email - Taharah",
-        html: `<p>Hello ${name},</p><p>Please verify your email by clicking the link below:</p><p><a href="${verificationUrl}">${verificationUrl}</a></p>`
+        html: `<p>Hello ${name},</p><p>Please verify your email by clicking the link below:</p><p><a href="${verificationUrlFinal}">${verificationUrlFinal}</a></p>`
       })
     });
 
