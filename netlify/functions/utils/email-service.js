@@ -238,18 +238,18 @@ async function sendCustomerOrderConfirmation(orderData) {
 
     if (orderData.status && orderData.status.toLowerCase() === 'cancelled') {
       // Cancellation email - use the same template as confirmation (handles currency properly)
-      subject = `❌ Order Cancelled - ${completeOrderData.orderReference}`;
-      htmlContent = templates.customerOrderTemplate(completeOrderData);
+      subject = `❌ Order Cancelled - ${orderData.orderReference}`;
+      htmlContent = templates.customerOrderTemplate(orderData);
       console.log('Generated cancellation email using customerOrderTemplate');
     } else if (orderData.status && orderData.status.toLowerCase() === 'confirmed') {
       // Confirmation email
-      subject = `✅ Order Confirmed - ${completeOrderData.orderReference}`;
-      htmlContent = templates.customerOrderTemplate(completeOrderData);
+      subject = `✅ Order Confirmed - ${orderData.orderReference}`;
+      htmlContent = templates.customerOrderTemplate(orderData);
       console.log('Generated confirmation email');
     } else {
       // New order email (default)
-      subject = `📋 Order Received - ${completeOrderData.orderReference}`;
-      htmlContent = templates.customerOrderTemplate(completeOrderData);
+      subject = `📋 Order Received - ${orderData.orderReference}`;
+      htmlContent = templates.customerOrderTemplate(orderData);
       console.log('Generated new order email');
     }
 
@@ -257,7 +257,7 @@ async function sendCustomerOrderConfirmation(orderData) {
     // Define email options
     const mailOptions = {
       from: `"Taharah Team" <${process.env.EMAIL_USER}>`,
-      to: customerData.email,
+      to: customer.email,
       subject: subject,
       html: htmlContent,
       headers: {
@@ -272,13 +272,13 @@ async function sendCustomerOrderConfirmation(orderData) {
         'Organization': 'Taharah Fashion'
       },
       // Text version for email clients that don't support HTML
-      text: `Order Confirmation - ${completeOrderData.orderReference}
+      text: `Order Confirmation - ${orderData.orderReference}
 
 Thank you for your order at Taharah!
 
-Order Reference: ${completeOrderData.orderReference}
-Order Date: ${new Date(completeOrderData.orderDate).toLocaleString()}
-Total: ₹${completeOrderData.orderTotal.toFixed(2)}
+Order Reference: ${orderData.orderReference}
+Order Date: ${new Date(orderData.orderDate).toLocaleString()}
+Total: ₹${orderData.orderTotal.toFixed(2)}
 
 Your order has been received and is being processed.
 
@@ -286,11 +286,11 @@ If you have any questions, please contact us at ${process.env.EMAIL_USER}.
       `
     };
 
-    console.log(`Sending order confirmation email to customer: ${customerData.email}`);
+    console.log(`Sending order confirmation email to customer: ${customer.email}`);
     
     const { data, error } = await resend.emails.send({
       from: `Taharah <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
-      to: [customerData.email],
+      to: [customer.email],
       subject: subject,
       html: htmlContent,
       reply_to: 'savannnaik090@gmail.com',

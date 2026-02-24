@@ -105,27 +105,43 @@ export async function onRequestPost({ request, env }) {
       body: JSON.stringify({ from: `Taharah <${emailFrom}>`, to: [customer.email], subject: `Order Received - ${orderReference}`, html: customerHtml })
     });
 
+    let custError = null;
     if (!custRes.ok) {
-      const errorData = await custRes.json();
-      console.error('Resend API Customer Error:', errorData);
+      custError = await custRes.json();
+      console.error('Resend API Customer Error:', custError);
     }
 
     // Send to Owner
+    let ownerRes = { ok: true };
+    let ownerError = null;
     if (ownerEmail) {
       console.log(`Attempting to send email to owner: ${ownerEmail}`);
-      const ownerRes = await fetch('https://api.resend.com/emails', {
+      const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ from: `Taharah Orders <${emailFrom}>`, to: [ownerEmail], subject: `New Order - ${orderReference}`, html: ownerHtml })
       });
+      ownerRes = response;
       if (!ownerRes.ok) {
-        const errorData = await ownerRes.json();
-        console.error('Resend API Owner Error:', errorData);
+        ownerError = await ownerRes.json();
+        console.error('Resend API Owner Error:', ownerError);
       }
     }
 
-    if (custRes.ok) return new Response(JSON.stringify({ success: true, message: "Order emails sent" }), { status: 200, headers });
-    return new Response(JSON.stringify({ success: false, message: "Failed to send customer email" }), { status: 500, headers });
+    if (custRes.ok && ownerRes.ok) return new Response(JSON.stringify({ success: true, message: "Order emails sent" }), { status: 200, headers });
+    
+    const errorMessage = !custRes.ok && !ownerRes.ok 
+      ? "Failed to send both customer and owner emails" 
+      : !custRes.ok ? "Failed to send customer email" : "Failed to send owner email";
+
+    return new Response(JSON.stringify({ 
+      success: false, 
+      message: errorMessage,
+      details: {
+        customer: custError,
+        owner: ownerError
+      }
+    }), { status: 500, headers });
   } catch (error) {
     return new Response(JSON.stringify({ success: false, message: error.message }), { status: 500, headers });
   }

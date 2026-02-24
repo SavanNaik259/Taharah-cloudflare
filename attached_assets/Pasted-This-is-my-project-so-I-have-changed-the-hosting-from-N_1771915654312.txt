@@ -1,0 +1,38 @@
+This is my project so I have changed the hosting from Netlify to Cloudflare because of limited free plan limit in Netlify so I was using the firebase and all with netlify functions to connect with backend so the issue is that the
+
+So I have migrated some part but Nodemailer SMTP will not work on Workers/Pages (no TCP sockets) but also deploying a small SMTP node mailer code on netlify and calling it back and all will be too complicated that's why I change the platform from node mailer to resend but when I place order then it is properly sending the email for customer but in owner email it is not sending any email, research on internet about how to implement all these resend functionality check whether we can send the email to both customer and on owner's email
+
+You are debugging why the owner email is not received in this repo.
+
+IMPORTANT: The active endpoint in production is Cloudflare Pages Functions, not Netlify.
+Checkout calls /api/send-order-email (see js/checkout-script-simplified.js ~1142–1144), which maps to:
+  /functions/api/send-order-email.js
+
+Please open and fix this file:
+
+1) File: /functions/api/send-order-email.js
+   - Around lines 28–33:
+     const ownerEmail = env.OWNER_EMAIL || "githost2007@gmail.com";
+   Use the hardcoded email for fallback 
+
+2) Same file, around lines 113–128:
+   - The code sends customer email, then owner email, but returns success based only on customer email.
+   This hides owner failures completely.
+   Fix: check ownerRes.ok too. If ownerRes fails, return 500 with error details.
+   Example pattern:
+     const custRes = await fetch(...)
+     const ownerRes = await fetch(...)
+     const custErr = custRes.ok ? null : await custRes.json()
+     const ownerErr = ownerRes.ok ? null : await ownerRes.json()
+     if (!custRes.ok || !ownerRes.ok) return 500 with both errors
+
+3) If any part of the frontend still calls Netlify:
+   - File: /netlify/functions/utils/email-service.js
+   - Around lines ~239–299, customer email uses undefined vars:
+       completeOrderData, customerData
+     Replace with orderData and customer.
+   This can break email sending if Netlify functions are still used.
+   If you are fully on Cloudflare, remove those calls instead.
+
+After changes, run a test order and confirm both emails deliver.
+
