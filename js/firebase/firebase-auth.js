@@ -587,44 +587,17 @@ window.FirebaseAuth = (function() {
         emailVerified: userData.emailVerified
       });
 
-      // Generate password reset token and store it
-      const resetToken = generateVerificationToken();
-      const expiryTime = new Date(Date.now() + 60 * 60 * 1000); // 1 hour expiry
+      // Use Firebase SDK to manage the password reset flow
+      // This works on Cloudflare without any custom backend logic for tokens
+      await auth.sendPasswordResetEmail(email);
+      console.log('✅ Firebase password reset email triggered');
 
-      console.log('Generated password reset token:', resetToken.substring(0, 8) + '...');
-      console.log('Token expiry time:', expiryTime.toISOString());
-
-      // Update Firestore with reset token
-      const userDoc = db.collection("users").doc(userData.uid);
-      await userDoc.update({
-        passwordResetToken: resetToken,
-        passwordResetTokenExpiry: firebase.firestore.Timestamp.fromDate(expiryTime),
-        passwordResetRequestedAt: firebase.firestore.Timestamp.now()
-      });
-
-      console.log('✅ Firestore updated with password reset token');
-
-      // Send custom password reset email
-      const result = await sendCustomPasswordResetEmail(email, userData.displayName || userData.firstName || 'User', resetToken);
-
-      if (result.success) {
-        console.log('✅ Custom password reset email sent successfully');
-        return {
-          success: true,
-          message: 'Password reset email sent! Please check your email for instructions to reset your password.'
-        };
-      } else {
-        console.error('❌ Failed to send custom password reset email:', result.error);
-        return { success: false, error: 'Failed to send password reset email. Please try again.' };
-      }
+      return {
+        success: true,
+        message: 'Password reset email sent! Please check your email for instructions to reset your password.'
+      };
     } catch (error) {
-      console.error("❌ Password reset error:", {
-        code: error.code,
-        message: error.message,
-        email: email,
-        fullError: error
-      });
-
+      console.error("❌ Password reset error:", error);
       return { 
         success: false, 
         error: `Failed to send password reset email: ${error.message}`
@@ -1062,40 +1035,30 @@ window.FirebaseAuth = (function() {
     if (!init()) return { success: false, error: 'Firebase not initialized' };
 
     try {
-      console.log('🔐 Attempting to reset password via server function for:', email);
-
-      // Call server-side function to handle password reset
-      // Updated to use the Cloudflare Pages API path
-      const response = await fetch('/api/reset-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          email: email,
-          token: token,
-          newPassword: newPassword
-        })
-      });
-
-      const result = await response.json();
-      console.log('🔐 Server-side password reset result:', result);
-
-      if (!response.ok) {
-        console.error('Server-side password reset error:', result);
-        return {
-          success: false,
-          error: result.error || 'Failed to reset password. Please try again.'
-        };
-      }
-
-      return result;
+      console.log('🔐 Resetting password using Firebase built-in flow for:', email);
+      
+      // Use Firebase Client SDK confirmPasswordReset which works everywhere
+      // The 'token' passed here is the 'oobCode' from the reset link
+      await auth.confirmPasswordReset(token, newPassword);
+      
+      console.log('✅ Password reset successful via Firebase SDK');
+      return { success: true, message: 'Password reset successfully!' };
 
     } catch (error) {
       console.error('❌ Error during password reset:', error);
+      let errorMessage = 'Failed to reset password. Please try again.';
+      
+      if (error.code === 'auth/invalid-action-code') {
+        errorMessage = 'The reset link is invalid or has already been used.';
+      } else if (error.code === 'auth/expired-action-code') {
+        errorMessage = 'The reset link has expired.';
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = 'The new password is too weak.';
+      }
+      
       return { 
         success: false, 
-        error: 'Failed to reset password. Please try again.' 
+        error: errorMessage 
       };
     }
   }
