@@ -12,15 +12,10 @@ export async function onRequestPost(context) {
       });
     }
 
-    // 1. Verify token in Firestore via REST API
-    // We need the Firebase API Key and Project ID
     const API_KEY = env.FIREBASE_API_KEY || "AIzaSyCQ9gafSnJBwuXvIpnOGn4Kwo8YqMkKY0M"; 
     const PROJECT_ID = "studio-7642357109-d9026";
 
-    // Fetch user from Firestore
-    const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/users`;
-    // Note: This is a simplification. In production, you'd query by email.
-    // For now, we'll search for the user document.
+    // 1. Fetch user from Firestore via REST API
     const queryUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents:runQuery`;
     const queryBody = {
       structuredQuery: {
@@ -38,6 +33,7 @@ export async function onRequestPost(context) {
 
     const queryRes = await fetch(queryUrl, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(queryBody)
     });
     const queryData = await queryRes.json();
@@ -52,32 +48,72 @@ export async function onRequestPost(context) {
     const userDoc = queryData[0].document;
     const fields = userDoc.fields;
     const dbToken = fields.passwordResetToken?.stringValue;
+    const dbTokenExpiry = fields.passwordResetTokenExpiry?.timestampValue;
     
+    // Validate token
     if (!dbToken || dbToken !== token) {
-      return new Response(JSON.stringify({ success: false, error: 'Invalid or expired token' }), {
+      return new Response(JSON.stringify({ success: false, error: 'Invalid reset link' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    // 2. Update password via Firebase Auth REST API
-    // We need the user's UID from the doc name (projects/.../databases/.../documents/users/UID)
+    // Validate expiry
+    if (dbTokenExpiry) {
+      const expiryDate = new Date(dbTokenExpiry);
+      if (new Date() > expiryDate) {
+        return new Response(JSON.stringify({ success: false, error: 'Reset link has expired' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
+    // 2. Get user's account info to get their email (verified)
+    // We'll use the "exchange custom token for ID token" or "update profile" flow
+    // In Firebase Auth REST API, you can update password if you have an ID token.
+    // Since we don't have an ID token, we use the 'setAccountInfo' endpoint with the API Key.
+    // IMPORTANT: This requires the user's UID.
     const uid = userDoc.name.split('/').pop();
 
-    // To update password without the old one, we usually need an ID Token.
-    // However, since we don't have firebase-admin here, the best approach is 
-    // to use a Service Account via a specialized Worker library OR 
-    // (Recommended for Cloudflare) Use the Firebase Admin SDK compat layer if possible.
+    // 3. Update Password via Firebase Auth REST API (Identity Toolkit)
+    // The 'setAccountInfo' endpoint allows updating passwords with the API key.
+    const updateAuthUrl = `https://identitytoolkit.googleapis.com/v1/accounts:update?key=${API_KEY}`;
+    const updateAuthRes = await fetch(updateAuthUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        localId: uid,
+        password: newPassword,
+        returnSecureToken: false
+      })
+    });
     
-    // ALTERNATIVE: Since this is a restricted environment, the most robust "Option B" 
-    // is actually to proxy this to a small Node.js service or Firebase Cloud Function 
-    // as suggested in Option A.
-    
+    const authResult = await updateAuthRes.json();
+    if (authResult.error) {
+      return new Response(JSON.stringify({ success: false, error: authResult.error.message }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // 4. Cleanup Firestore (remove token)
+    const patchUrl = `https://firestore.googleapis.com/v1/${userDoc.name}?updateMask.fieldPaths=passwordResetToken&updateMask.fieldPaths=passwordResetTokenExpiry&updateMask.fieldPaths=passwordResetCompletedAt`;
+    await fetch(patchUrl, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          passwordResetCompletedAt: { timestampValue: new Date().toISOString() }
+        }
+      })
+    });
+
     return new Response(JSON.stringify({ 
-      success: false, 
-      error: 'Cloudflare environment requires a Node.js bridge or Firebase Admin SDK migration. Please use Option A: Move this logic to a Node-compatible backend.' 
+      success: true, 
+      message: 'Password reset successfully' 
     }), {
-      status: 501,
+      status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
 
