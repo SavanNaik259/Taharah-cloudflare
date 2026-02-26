@@ -88,6 +88,18 @@ export async function onRequestDelete({ request, env }) {
   }
 }
 
+export async function onRequestOptions() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization, x-goog-resumable, x-upload-content-type, x-upload-content-length",
+      "Access-Control-Max-Age": "86400",
+    },
+  });
+}
+
 export async function onRequestGet({ request, env }) {
   const headers = {
     "Content-Type": "application/json",
@@ -127,9 +139,26 @@ export async function onRequestGet({ request, env }) {
         }
       });
 
-      const location = res.headers.get("Location");
+      if (!res.ok) {
+        const errorText = await res.text();
+        return new Response(JSON.stringify({
+          success: false,
+          error: "Failed to generate upload URL",
+          status: res.status,
+          statusText: res.statusText,
+          details: errorText
+        }), { status: res.status, headers });
+      }
+
+      const location = res.headers.get("Location") || res.headers.get("location");
       if (!location) {
-        throw new Error("Failed to get resumable upload location");
+        const responseText = await res.text();
+        return new Response(JSON.stringify({
+          success: false,
+          error: "Missing Location header in Google Storage response",
+          status: res.status,
+          details: responseText
+        }), { status: 500, headers });
       }
 
       return new Response(JSON.stringify({

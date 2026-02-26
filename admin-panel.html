@@ -5495,6 +5495,7 @@
                         const xhr = new XMLHttpRequest();
                         xhr.open('PUT', uploadUrl);
                         xhr.setRequestHeader('Content-Type', contentType);
+                        xhr.timeout = 120000; // 2 minutes timeout
                         
                         xhr.upload.onprogress = (e) => {
                             if (e.lengthComputable) {
@@ -5508,11 +5509,30 @@
                             if (xhr.status >= 200 && xhr.status < 300) {
                                 resolve();
                             } else {
-                                reject(new Error(`Upload failed with status: ${xhr.status}`));
+                                let errorMsg = `Upload failed with status: ${xhr.status}`;
+                                if (xhr.responseText) {
+                                    try {
+                                        const errorData = JSON.parse(xhr.responseText);
+                                        errorMsg += ` - ${errorData.error || xhr.responseText}`;
+                                    } catch (e) {
+                                        errorMsg += ` - ${xhr.responseText.substring(0, 100)}`;
+                                    }
+                                }
+                                reject(new Error(errorMsg));
                             }
                         };
                         
-                        xhr.onerror = () => reject(new Error('Network error during upload'));
+                        xhr.ontimeout = () => {
+                            reject(new Error('Upload timed out after 2 minutes. Please check your connection.'));
+                        };
+                        
+                        xhr.onerror = () => {
+                            let msg = 'Network error during upload.';
+                            if (xhr.status === 0) {
+                                msg += ' Likely Firebase Storage CORS/preflight block for Cloudflare domain.';
+                            }
+                            reject(new Error(msg));
+                        };
                         xhr.send(file);
                     });
                 } catch (uploadErr) {

@@ -1,8 +1,17 @@
 [
   {
     "origin": ["*"],
-    "method": ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
-    "responseHeader": ["Content-Type", "x-goog-resumable"],
+    "method": ["GET", "HEAD", "PUT", "POST", "DELETE", "OPTIONS"],
+    "responseHeader": [
+      "Content-Type",
+      "Authorization",
+      "x-goog-resumable",
+      "x-upload-content-type",
+      "x-upload-content-length",
+      "Cache-Control",
+      "ETag",
+      "Access-Control-Allow-Origin"
+    ],
     "maxAgeSeconds": 3600
   }
 ]
