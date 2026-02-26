@@ -927,7 +927,23 @@ background-color: #000 !important;
 
                 // Buy Now button click handler
                 if (buyNowBtn) {
+                    // Dedicated Buy Now validator
+                    function validateBuyNowOptions() {
+                        if (typeof CartManager !== 'undefined' && CartManager.validateProductOptionsForDetailPage) {
+                            return CartManager.validateProductOptionsForDetailPage(true);
+                        }
+                        return { 
+                            valid: true, 
+                            selectedSize: window.selectedSize || null, 
+                            selectedColour: window.selectedColour || null, 
+                            selectedDupatta: window.selectedDupatta || window.selectedMaterial || null 
+                        };
+                    }
+
                     buyNowBtn.addEventListener('click', async function() {
+                        const validation = validateBuyNowOptions();
+                        if (!validation.valid) return;
+
                         const quantity = 1;
 
                         // Get current product details from DOM
@@ -937,6 +953,11 @@ background-color: #000 !important;
                             showToast('Please wait for product to load completely', 'error');
                             return;
                         }
+
+                        // Attach selected options to product object
+                        currentProductDetails.size = validation.selectedSize || null;
+                        currentProductDetails.colour = validation.selectedColour || null;
+                        currentProductDetails.dupatta = validation.selectedDupatta || null;
 
                         try {
                             // Check if CartManager is available

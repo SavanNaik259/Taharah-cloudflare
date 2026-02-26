@@ -566,10 +566,108 @@ window.CartManager = (function() {
         */
     }
 
+    // ======================================================
+    // SECTION: HELPERS
+    // ======================================================
+
+    /**
+     * Get currently selected product options from the UI
+     * @returns {Object} Selected options
+     */
+    function getSelectedProductOptions() {
+        const selectedSize =
+            window.selectedSize ||
+            document.querySelector('.size-btn.selected, .size-btn.active')?.dataset.value;
+
+        const selectedColour =
+            window.selectedColour ||
+            document.querySelector('.colour-btn.selected, .colour-btn.active')?.dataset.value;
+
+        const selectedDupatta =
+            window.selectedDupatta ||
+            window.selectedMaterial ||
+            document.querySelector('.dupatta-btn.selected, .dupatta-btn.active')?.dataset.value ||
+            document.querySelector('.material-btn.selected, .material-btn.active')?.dataset.name;
+
+        return { selectedSize, selectedColour, selectedDupatta };
+    }
+
+    /**
+     * Validate product options on the detail page
+     * @param {Boolean} showError - Whether to show an error message
+     * @returns {Object} Validation result and selected options
+     */
+    function validateProductOptionsForDetailPage(showError = true) {
+        const isProductDetailPage = document.querySelector('.product-detail-container') !== null;
+        const { selectedSize, selectedColour, selectedDupatta } = getSelectedProductOptions();
+
+        if (!isProductDetailPage) {
+            return { valid: true, selectedSize, selectedColour, selectedDupatta };
+        }
+
+        const hasSizes =
+            document.getElementById('size-selection')?.style.display !== 'none' &&
+            document.querySelector('.size-btn');
+
+        const hasColours =
+            document.getElementById('colour-selection')?.style.display !== 'none' &&
+            document.querySelector('.colour-btn');
+
+        const hasDupattaOrMaterial =
+            (
+                document.getElementById('dupatta-selection')?.style.display !== 'none' &&
+                document.querySelector('.dupatta-btn')
+            ) ||
+            (
+                document.getElementById('material-selection')?.style.display !== 'none' &&
+                document.querySelector('.material-btn')
+            );
+
+        if ((hasSizes && !selectedSize) || (hasColours && !selectedColour) || (hasDupattaOrMaterial && !selectedDupatta)) {
+            if (showError) {
+                if (window.showToast) {
+                    window.showToast('Please select all required options (Size, Colour, Dupatta)', 'error');
+                } else {
+                    alert('Please select all required options (Size, Colour, Dupatta)');
+                }
+            }
+            return { valid: false, selectedSize, selectedColour, selectedDupatta };
+        }
+
+        return { valid: true, selectedSize, selectedColour, selectedDupatta };
+    }
+
     /**
      * Set up all event listeners for cart functionality
      */
     function setupEventListeners() {
+        // Add to cart button from product detail page
+        const addToCartBtn = document.querySelector('.add-to-cart-btn');
+        if (addToCartBtn) {
+            addToCartBtn.addEventListener('click', async function() {
+                const validation = validateProductOptionsForDetailPage(true);
+                if (!validation.valid) return;
+
+                const { selectedSize, selectedColour, selectedDupatta } = validation;
+
+                // Get product details (this is usually provided globally on product-detail.html)
+                if (window.currentProductDetails || window.productDetails) {
+                    const baseProduct = window.currentProductDetails || window.productDetails;
+                    const productToAdd = {
+                        ...baseProduct,
+                        size: selectedSize || null,
+                        colour: selectedColour || null,
+                        dupatta: selectedDupatta || null
+                    };
+
+                    const quantityInput = document.getElementById('quantity');
+                    const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
+
+                    await addToCart(productToAdd, quantity);
+                }
+            });
+        }
+
         // Delegate events to document to handle dynamically added elements
         document.addEventListener('click', function(e) {
             // Open cart panel when cart icon is clicked (from main nav or mobile nav)
@@ -1053,6 +1151,7 @@ window.CartManager = (function() {
 
     // Public API
     return {
+        validateProductOptionsForDetailPage: validateProductOptionsForDetailPage,
         init: init,
         addToCart: addToCart,
         removeFromCart: removeFromCart,
