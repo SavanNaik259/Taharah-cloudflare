@@ -237,8 +237,8 @@ export async function onRequestPost({ request, env }) {
       return new Response(JSON.stringify({ success: true }), { status: 200, headers });
     }
 
-    const body = await request.json();
-    const { title, productSKU, description, videoUrl, filename, contentType } = body;
+    const { title, productSKU, description, videoUrl, filename, contentType: rawContentType } = body;
+    const contentType = (rawContentType && typeof rawContentType === 'string' && rawContentType.startsWith('video/')) ? rawContentType : 'video/mp4';
     const projectID = env.FIREBASE_PROJECT_ID;
 
     const accessToken = await getGoogleAuthToken(
@@ -256,7 +256,7 @@ export async function onRequestPost({ request, env }) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        contentType: contentType || "video/mp4",
+        contentType: contentType,
         cacheControl: "public, max-age=31536000",
         acl: [{ entity: "allUsers", role: "READER" }]
       })
@@ -277,6 +277,7 @@ export async function onRequestPost({ request, env }) {
           description: { stringValue: description || "" },
           videoUrl: { stringValue: videoUrl },
           storagePath: { stringValue: filename },
+          contentType: { stringValue: contentType },
           uploadedAt: { timestampValue: new Date().toISOString() },
           status: { stringValue: "active" }
         }

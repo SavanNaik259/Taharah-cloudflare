@@ -5428,6 +5428,11 @@
             const fileInput = document.getElementById('videoFile');
             const file = fileInput.files[0];
             
+            const contentType =
+                file && typeof file.type === 'string' && file.type.startsWith('video/')
+                    ? file.type
+                    : 'video/mp4';
+            
             if (!file) {
                 alert('Please select a video file');
                 return;
@@ -5466,7 +5471,7 @@
                 const params = new URLSearchParams({
                     action: 'getUploadUrl',
                     fileName: file.name,
-                    fileType: file.type || 'application/octet-stream'
+                    fileType: contentType
                 });
                 getUrlEndpoint = `/api/videos?${params.toString()}`;
 
