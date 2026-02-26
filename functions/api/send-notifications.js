@@ -132,14 +132,6 @@ export async function onRequestPost({ request, env }) {
 
     const uniqueTokens = [...new Set(tokens)];
     let successCount = 0;
-
-    // Fix image URL to use proxy if it's a Firebase URL or relative path
-    let finalImageUrl = imageUrl || "";
-    if (finalImageUrl) {
-      if (finalImageUrl.includes("firebasestorage.googleapis.com") || !finalImageUrl.startsWith("http")) {
-        finalImageUrl = `https://${new URL(request.url).hostname}/api/image-proxy?url=${encodeURIComponent(finalImageUrl)}`;
-      }
-    }
     
     // Batch sending in parallel to avoid timeouts
     const sendPromises = uniqueTokens.map(async (token) => {
@@ -152,7 +144,7 @@ export async function onRequestPost({ request, env }) {
               title,
               body: msgBody,
               link: link || "",
-              imageUrl: finalImageUrl,
+              imageUrl: imageUrl || "",
               buttonText: buttonText || "View",
               timestamp: Date.now().toString()
             }
