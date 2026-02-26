@@ -1,0 +1,329 @@
+You are working on a Cloudflare Pages website (jewellery brand: Taharah/Auric) that was recently migrated from Netlify to Cloudflare Pages. The project uses Cloudflare Pages Functions (in the `/functions/` directory) to replace the old Netlify Functions (in `/netlify/functions/`). The frontend is plain HTML/CSS/JS.
+
+There are TWO specific bugs to fix, both in the video upload/edit system. I'll explain each bug in detail — where it is, why it happens, and exactly how to fix it.
+
+---
+
+## BUG 1: "Error uploading video: atob() called with invalid base64-encoded data"
+
+### What triggers it:
+When the admin clicks "Upload Video" in the admin panel (`admin-panel.html`) and submits the upload form, this error appears.
+
+### What the flow does:
+1. The form submits via `uploadVideo(event)` (line ~5422 in `admin-panel.html`)
+2. It calls `fetch('/api/videos?action=getUploadUrl&fileName=...&fileType=...')` (line ~5471)
+3. This hits the Cloudflare Pages Function at `functions/api/videos.js`
+4. Inside `onRequestGet()`, it calls `getGoogleAuthToken(env.FIREBASE_CLIENT_EMAIL, env.FIREBASE_PRIVATE_KEY, scope)`
+5. Inside `getGoogleAuthToken()`, at line 253, this line crashes:
+   ```js
+   const binaryKey = atob(cleanKey);
+Why it crashes — Root Cause:
+Look at the getGoogleAuthToken function in functions/api/videos.js (starting at line 226):
+
+async function getGoogleAuthToken(email, privateKey, scope) {
+  const pk = privateKey.replace(/\\n/g, "\n");
+  // ...
+  const cleanKey = pk.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\s/g, "");
+  const binaryKey = atob(cleanKey);   // ← LINE 253: THIS CRASHES
+The problem is at line 252 — the regex used to clean the private key:
+
+const cleanKey = pk.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\s/g, "");
+The \s pattern removes standard whitespace (spaces, tabs, newlines, carriage returns). However, in Cloudflare Pages, when the FIREBASE_PRIVATE_KEY environment variable is read from wrangler.toml (as a multi-line TOML """ string) or set via the Cloudflare dashboard, it can contain:
+
+Windows-style \r\n line endings where \r might not be fully stripped in some edge cases
+Invisible Unicode characters (e.g., \u200b zero-width space, BOM \ufeff) that \s doesn't catch
+Extra characters introduced by copy-paste from terminal/browser into the Cloudflare dashboard
+The Cloudflare Workers/Pages runtime's atob() function is strict: it ONLY accepts A-Z, a-z, 0-9, +, /, and =. If even ONE character outside these survives the cleanup, atob() throws the error you're seeing.
+
+This was NOT a problem on Netlify because the old netlify/functions/videos.js used the firebase-admin Node.js SDK which handles the key parsing internally — it never called atob() manually. The new Cloudflare function (functions/api/videos.js) re-implements the JWT signing from scratch using Web Crypto API, and that's where this bug lives.
+
+The Fix:
+In functions/api/videos.js, inside the getGoogleAuthToken function, replace line 252:
+
+CURRENT CODE (line 252):
+
+const cleanKey = pk.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\s/g, "");
+REPLACE WITH:
+
+const cleanKey = pk
+  .replace(/-----BEGIN PRIVATE KEY-----/g, '')
+  .replace(/-----END PRIVATE KEY-----/g, '')
+  .replace(/[^A-Za-z0-9+/=]/g, '');
+Why this fix works: Instead of trying to remove bad characters (which can miss some), this uses a whitelist approach — it keeps ONLY the characters that are valid base64 (A-Z, a-z, 0-9, +, /, =). Every other character — whether it's a newline, carriage return, space, invisible Unicode, or anything else — gets stripped. This makes the cleanup bulletproof regardless of how the environment variable was stored or what platform injected it.
+
+This single change at line 252 of functions/api/videos.js fixes ALL upload-related operations (upload, register, delete) because all of them call getGoogleAuthToken().
+
+BUG 2: "Error updating video: Unexpected end of JSON input"
+What triggers it:
+When the admin clicks "Edit" on a video card, fills in the form, and submits, this error appears.
+
+What the flow does:
+Edit modal submits via saveVideoEdit(event) (line ~5563 in admin-panel.html)
+It calls fetch('/api/videos/VIDEO_ID_HERE', { method: 'PUT', ... }) (line 5574)
+After the request, it calls response.json() (line 5580)
+response.json() throws: SyntaxError: Unexpected end of JSON input
+Why it crashes — Root Cause:
+This is a Cloudflare Pages Functions routing bug.
+
+In Cloudflare Pages, a function file handles ONLY the exact URL path it's named after:
+
+functions/api/videos.js → handles requests to /api/videos (no path segment after)
+To handle /api/videos/VIDEO_ID (with a dynamic ID), you need a SEPARATE file at functions/api/videos/[id].js
+When the admin panel sends PUT to /api/videos/VIDEO_ID, Cloudflare Pages has NO function registered for that path. It doesn't route the request to functions/api/videos.js. Instead, it either:
+
+Returns a 404 HTML page (Cloudflare's default 404)
+Returns an empty body response
+When response.json() tries to parse HTML or an empty body as JSON, it crashes with SyntaxError: Unexpected end of JSON input.
+
+Note: The functions/api/videos.js file DOES have onRequestPut and onRequestDelete handlers, and they even correctly try to extract the video ID from the URL (url.pathname.split("/").pop()). But they are NEVER CALLED because the routing never reaches them for /api/videos/VIDEOID paths.
+
+The same routing bug affects DELETE as well — deleteVideo() (line 5602 in admin-panel.html) also calls fetch('/api/videos/${videoId}', { method: 'DELETE', ... }) and will fail the same way.
+
+The Fix:
+Create a new file at this exact path: functions/api/videos/[id].js
+
+Cloudflare Pages will automatically route all requests to /api/videos/ANYTHING to this file, and the [id] part becomes the dynamic segment.
+
+Here is the complete content for that new file:
+
+// functions/api/videos/[id].js
+// Handles PUT (edit) and DELETE operations for a specific video by ID
+// This file is required because Cloudflare Pages routing requires
+// dynamic path segments to have their own file: [id].js
+
+const corsHeaders = {
+  "Content-Type": "application/json",
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
+export async function onRequestOptions() {
+  return new Response(null, { status: 204, headers: corsHeaders });
+}
+
+export async function onRequestPut({ request, env, params }) {
+  try {
+    // params.id is automatically populated by Cloudflare Pages from the [id] filename
+    const videoId = params.id;
+    const projectID = env.FIREBASE_PROJECT_ID;
+    const body = await request.json();
+
+    const accessToken = await getGoogleAuthToken(
+      env.FIREBASE_CLIENT_EMAIL,
+      env.FIREBASE_PRIVATE_KEY,
+      "https://www.googleapis.com/auth/datastore"
+    );
+
+    const updateData = { fields: {} };
+    if (body.title !== undefined) updateData.fields.title = { stringValue: body.title };
+    if (body.productSKU !== undefined) updateData.fields.productSKU = { stringValue: body.productSKU };
+    if (body.description !== undefined) updateData.fields.description = { stringValue: body.description };
+    updateData.fields.updatedAt = { timestampValue: new Date().toISOString() };
+
+    const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${projectID}/databases/(default)/documents/watchBuyVideos/${videoId}?updateMask.fieldPaths=title&updateMask.fieldPaths=productSKU&updateMask.fieldPaths=description&updateMask.fieldPaths=updatedAt`;
+
+    const firestoreRes = await fetch(firestoreUrl, {
+      method: "PATCH",
+      headers: {
+        "Authorization": `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updateData),
+    });
+
+    if (!firestoreRes.ok) {
+      const errText = await firestoreRes.text();
+      throw new Error(`Firestore update failed: ${firestoreRes.status} - ${errText}`);
+    }
+
+    return new Response(
+      JSON.stringify({ success: true, message: "Video updated successfully" }),
+      { status: 200, headers: corsHeaders }
+    );
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ success: false, error: error.message }),
+      { status: 500, headers: corsHeaders }
+    );
+  }
+}
+
+export async function onRequestDelete({ request, env, params }) {
+  try {
+    const videoId = params.id;
+    const projectID = env.FIREBASE_PROJECT_ID;
+
+    const accessToken = await getGoogleAuthToken(
+      env.FIREBASE_CLIENT_EMAIL,
+      env.FIREBASE_PRIVATE_KEY,
+      "https://www.googleapis.com/auth/datastore https://www.googleapis.com/auth/devstorage.full_control"
+    );
+
+    // Fetch video document to get storage path for file deletion
+    const getUrl = `https://firestore.googleapis.com/v1/projects/${projectID}/databases/(default)/documents/watchBuyVideos/${videoId}`;
+    const getRes = await fetch(getUrl, {
+      headers: { "Authorization": `Bearer ${accessToken}` },
+    });
+
+    if (getRes.ok) {
+      const videoData = await getRes.json();
+      const storagePath = videoData.fields?.storagePath?.stringValue;
+
+      if (storagePath) {
+        // Delete the actual video file from Firebase Storage
+        const storageUrl = `https://storage.googleapis.com/storage/v1/b/${env.FIREBASE_STORAGE_BUCKET}/o/${encodeURIComponent(storagePath)}`;
+        await fetch(storageUrl, {
+          method: "DELETE",
+          headers: { "Authorization": `Bearer ${accessToken}` },
+        });
+      }
+    }
+
+    // Delete the Firestore document
+    await fetch(getUrl, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${accessToken}` },
+    });
+
+    return new Response(
+      JSON.stringify({ success: true, message: "Video deleted successfully" }),
+      { status: 200, headers: corsHeaders }
+    );
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ success: false, error: error.message }),
+      { status: 500, headers: corsHeaders }
+    );
+  }
+}
+
+// ─── JWT / Google Auth Helper ──────────────────────────────────────────────
+// (Same logic as in functions/api/videos.js but with the FIXED key cleaning)
+
+async function getGoogleAuthToken(email, privateKey, scope) {
+  const pk = privateKey.replace(/\\n/g, "\n");
+  const now = Math.floor(Date.now() / 1000);
+
+  const header = { alg: "RS256", typ: "JWT" };
+  const claim = {
+    iss: email,
+    scope: scope,
+    aud: "https://oauth2.googleapis.com/token",
+    exp: now + 3600,
+    iat: now,
+  };
+
+  const base64UrlEncode = (obj) => {
+    const str = JSON.stringify(obj);
+    const bytes = new TextEncoder().encode(str);
+    let binary = "";
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  };
+
+  const encodedHeader = base64UrlEncode(header);
+  const encodedClaim = base64UrlEncode(claim);
+  const signatureInput = `${encodedHeader}.${encodedClaim}`;
+
+  // FIX: Use whitelist approach instead of \s to clean the private key
+  const cleanKey = pk
+    .replace(/-----BEGIN PRIVATE KEY-----/g, '')
+    .replace(/-----END PRIVATE KEY-----/g, '')
+    .replace(/[^A-Za-z0-9+/=]/g, '');
+
+  const binaryKey = atob(cleanKey);
+  const keyData = new Uint8Array(binaryKey.length);
+  for (let i = 0; i < binaryKey.length; i++) {
+    keyData[i] = binaryKey.charCodeAt(i);
+  }
+
+  const key = await crypto.subtle.importKey(
+    "pkcs8",
+    keyData.buffer,
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+
+  const signature = await crypto.subtle.sign(
+    "RSASSA-PKCS1-v1_5",
+    key,
+    new TextEncoder().encode(signatureInput)
+  );
+
+  const signatureArray = new Uint8Array(signature);
+  let signatureBinary = "";
+  for (let i = 0; i < signatureArray.byteLength; i++) {
+    signatureBinary += String.fromCharCode(signatureArray[i]);
+  }
+  const encodedSignature = btoa(signatureBinary)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+
+  const jwt = `${signatureInput}.${encodedSignature}`;
+
+  const res = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`,
+  });
+
+  const data = await res.json();
+  if (data.error) throw new Error(data.error_description || data.error);
+  return data.access_token;
+}
+ALSO: Apply the same fix to functions/api/videos.js
+Since functions/api/videos.js still handles the GET (getUploadUrl) and POST (register) operations, you must apply the same cleanKey fix there too. Otherwise upload and register will still fail with the atob error.
+
+In functions/api/videos.js, inside the getGoogleAuthToken function at line 252, change:
+
+FROM:
+
+const cleanKey = pk.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\s/g, "");
+TO:
+
+const cleanKey = pk
+  .replace(/-----BEGIN PRIVATE KEY-----/g, '')
+  .replace(/-----END PRIVATE KEY-----/g, '')
+  .replace(/[^A-Za-z0-9+/=]/g, '');
+Summary of all changes needed:
+File	Change
+functions/api/videos.js	Line 252: Fix cleanKey regex from \s to whitelist [^A-Za-z0-9+/=]
+functions/api/videos/[id].js	CREATE THIS NEW FILE with full content provided above
+That's it — just these two changes. No changes needed to admin-panel.html, wrangler.toml, or any other file.
+
+Why these two changes fix everything:
+Upload video → calls getUploadUrl → getGoogleAuthToken → now fixed cleanKey → atob() works → presigned URL generated → video uploads to Firebase Storage → registration POST works → video appears in admin panel ✅
+Edit video → PUT to /api/videos/VIDEO_ID → now routed to functions/api/videos/[id].js → onRequestPut called → getGoogleAuthToken with fixed cleanKey → Firestore updated → success response → admin panel shows "Video Updated!" ✅
+Delete video → DELETE to /api/videos/VIDEO_ID → now routed to functions/api/videos/[id].js → onRequestDelete called → Firebase Storage file + Firestore document deleted ✅
+Important Note on Directory Creation:
+When creating functions/api/videos/[id].js, make sure to create the videos/ subdirectory inside functions/api/. The final directory structure should look like:
+
+functions/
+  api/
+    videos.js          ← existing file (edit line 252 only)
+    videos/
+      [id].js          ← NEW file (create this)
+Cloudflare Pages automatically recognizes [id] as a dynamic route parameter, so /api/videos/abc123 will route to [id].js with params.id = "abc123".
+
+
+---
+
+اس prompt میں میں نے تفصیل سے بتایا ہے:
+
+1. **Bug 1 (atob error)** کی **exact location**: `functions/api/videos.js` کی line 252، `getGoogleAuthToken` function میں
+2. **Bug 2 (JSON error)** کی **exact root cause**: Cloudflare Pages routing issue - `/api/videos/[id]` کے لیے کوئی function file موجود نہیں
+3. **دونوں کا exact fix** code کے ساتھ
+4. نیا file `functions/api/videos/[id].js` کا complete content بھی دیا ہے
+Feb 26, 09:52 AM
+
+Rollback
+
+Scroll to bottom
+0.91 free credit remaining!
+
+Buy

@@ -249,7 +249,12 @@ async function getGoogleAuthToken(email, privateKey, scope) {
   const encodedClaim = base64UrlEncode(claim);
   const signatureInput = `${encodedHeader}.${encodedClaim}`;
 
-  const cleanKey = pk.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\s/g, "");
+  // FIX: Use whitelist approach instead of \s to clean the private key
+  const cleanKey = pk
+    .replace(/-----BEGIN PRIVATE KEY-----/g, '')
+    .replace(/-----END PRIVATE KEY-----/g, '')
+    .replace(/[^A-Za-z0-9+/=]/g, '');
+
   const binaryKey = atob(cleanKey);
   const keyData = new Uint8Array(binaryKey.length);
   for (let i = 0; i < binaryKey.length; i++) {
