@@ -636,9 +636,6 @@ window.CartManager = (function() {
                 const message = `Please select: ${missing.join(', ')}`;
                 if (window.showToast) {
                     window.showToast(message, 'error');
-                } else if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
-                    // Fallback to bootstrap toast if showToast is not globally available
-                    this.internalShowToast(message, 'error');
                 } else {
                     alert(message);
                 }
@@ -1164,48 +1161,8 @@ window.CartManager = (function() {
         }
     }
 
-    /**
-     * Internal helper to show a toast message if window.showToast is not available
-     * @param {String} message - Message to show
-     * @param {String} type - Type of toast (error, success, info)
-     */
-    function internalShowToast(message, type = 'info') {
-        const toastContainer = document.querySelector('.toast-container') || (function() {
-            const container = document.createElement('div');
-            container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-            document.body.appendChild(container);
-            return container;
-        })();
-
-        const toast = document.createElement('div');
-        toast.className = `toast align-items-center text-white bg-${type} border-0 show`;
-        toast.setAttribute('role', 'alert');
-        toast.setAttribute('aria-live', 'assertive');
-        toast.setAttribute('aria-atomic', 'true');
-        
-        toast.innerHTML = `
-            <div class="d-flex">
-                <div class="toast-body">
-                    ${message}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close" onclick="this.parentElement.parentElement.remove()"></button>
-            </div>
-        `;
-        
-        toastContainer.appendChild(toast);
-        
-        // Auto-remove after 3 seconds
-        setTimeout(() => {
-            if (toast && toast.parentElement) {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 500);
-            }
-        }, 3000);
-    }
-
     // Public API
     return {
-        internalShowToast: internalShowToast,
         validateProductOptionsForDetailPage: validateProductOptionsForDetailPage,
         init: init,
         addToCart: addToCart,
