@@ -64,6 +64,37 @@
 /* ========================================
    BASE STYLES & RESET
    ======================================== */
+
+/* Toast Custom Styling */
+.toast-container {
+    z-index: 10001; /* Above modals and other overlays */
+}
+
+.toast.bg-error {
+    background-color: #7B410A !important; /* Using theme brown for a more elegant error look */
+    color: #fff !important;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    font-family: var(--font-heading);
+    letter-spacing: 0.5px;
+}
+
+.toast.bg-error .toast-body {
+    padding: 15px 20px;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.toast.bg-error .btn-close-white {
+    opacity: 0.8;
+    padding: 1rem;
+}
+
+.toast.bg-error .btn-close-white:hover {
+    opacity: 1;
+}
+
 * {
     margin: 0;
     padding: 0;
