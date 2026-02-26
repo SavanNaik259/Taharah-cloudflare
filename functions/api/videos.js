@@ -1,3 +1,5 @@
+import { extractPemKey } from "./_utils/googleAuth.js";
+
 export async function onRequestPut({ request, env }) {
   const headers = {
     "Content-Type": "application/json",
@@ -249,15 +251,7 @@ async function getGoogleAuthToken(email, privateKey, scope) {
   const encodedClaim = base64UrlEncode(claim);
   const signatureInput = `${encodedHeader}.${encodedClaim}`;
 
-  // FIX: Use whitelist approach instead of \s to clean the private key
-  const cleanKey = pk
-    .replace(/-----BEGIN (?:RSA )?PRIVATE KEY-----/g, '')
-    .replace(/-----END (?:RSA )?PRIVATE KEY-----/g, '')
-    .replace(/[^A-Za-z0-9+/=]/g, '');
-
-  // Ensure padding is correct for atob
-  const paddedKey = cleanKey.padEnd(Math.ceil(cleanKey.length / 4) * 4, '=');
-  const binaryKey = atob(paddedKey);
+  const binaryKey = extractPemKey(privateKey);
   const keyData = new Uint8Array(binaryKey.length);
   for (let i = 0; i < binaryKey.length; i++) {
     keyData[i] = binaryKey.charCodeAt(i);
