@@ -5463,25 +5463,14 @@
                 const isLocal = window.location.hostname.includes('localhost');
                 
                 let getUrlEndpoint;
-                if (isLocal) {
-                    getUrlEndpoint = '/api/videos/get-upload-url';
-                } else {
-                    const params = new URLSearchParams({
-                        action: 'getUploadUrl',
-                        fileName: file.name,
-                        fileType: file.type || 'application/octet-stream'
-                    });
-                    getUrlEndpoint = `/api/videos?${params.toString()}`;
-                }
-
-                const urlResponse = await fetch(getUrlEndpoint, {
-                    method: isLocal ? 'POST' : 'GET',
-                    headers: isLocal ? { 'Content-Type': 'application/json' } : {},
-                    body: isLocal ? JSON.stringify({
-                        fileName: file.name,
-                        contentType: file.type || 'application/octet-stream'
-                    }) : null
+                const params = new URLSearchParams({
+                    action: 'getUploadUrl',
+                    fileName: file.name,
+                    fileType: file.type || 'application/octet-stream'
                 });
+                getUrlEndpoint = `/api/videos?${params.toString()}`;
+
+                const urlResponse = await fetch(getUrlEndpoint);
                 
                 const urlData = await urlResponse.json();
                 
