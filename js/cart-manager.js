@@ -644,7 +644,10 @@ window.CartManager = (function() {
         // Add to cart button from product detail page
         const addToCartBtn = document.querySelector('.add-to-cart-btn');
         if (addToCartBtn) {
-            addToCartBtn.addEventListener('click', async function() {
+            addToCartBtn.addEventListener('click', async function(e) {
+                // Prevent duplicate handling if the event bubbles to the document listener
+                e.stopPropagation();
+                
                 const validation = validateProductOptionsForDetailPage(true);
                 if (!validation.valid) return;
 
