@@ -399,6 +399,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Show toast notification
     function showToast(message, type = 'info') {
+        if (window.CartManager && window.CartManager.internalShowToast) {
+            window.CartManager.internalShowToast(message, type);
+            return;
+        }
         // Create toast element
         const toast = document.createElement('div');
         toast.className = `toast align-items-center text-white bg-${type} border-0`;
