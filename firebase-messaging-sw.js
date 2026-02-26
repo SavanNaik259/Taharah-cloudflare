@@ -104,7 +104,7 @@ function displayNotification(payload) {
     
     const title = data.title || 'Taharah';
     const body = data.body || 'New update from Taharah';
-    const image = data.imageUrl || data.image || '';
+    const image = data.imageUrl || data.image || data.fcm_options?.image || '';
     const buttonText = data.buttonText || 'View';
     const icon = data.icon || '/images/logos/taharah.png';
     const link = data.link || '/';
