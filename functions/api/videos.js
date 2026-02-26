@@ -211,13 +211,15 @@ export async function onRequestPost({ request, env }) {
         return new Response(JSON.stringify({ success: false, error: "Missing X-Upload-Url header" }), { status: 400, headers });
       }
 
-      const contentType = request.headers.get("Content-Type");
+      const contentType = request.headers.get("Content-Type") || "video/mp4";
       const body = await request.arrayBuffer();
+
+      console.log(`Proxying upload to ${uploadUrl} with Content-Type: ${contentType}`);
 
       const uploadRes = await fetch(uploadUrl, {
         method: "PUT",
         headers: {
-          "Content-Type": contentType || "application/octet-stream",
+          "Content-Type": contentType,
         },
         body: body
       });

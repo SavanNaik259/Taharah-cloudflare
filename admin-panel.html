@@ -5543,7 +5543,7 @@
                             headers: {
                                 'X-Upload-Action': 'proxyUpload',
                                 'X-Upload-Url': uploadUrl,
-                                'Content-Type': contentType
+                                'Content-Type': contentType || file.type || 'video/mp4'
                             },
                             body: file
                         });
