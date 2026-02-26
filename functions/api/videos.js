@@ -226,7 +226,6 @@ export async function onRequestPost({ request, env }) {
 }
 
 async function getGoogleAuthToken(email, privateKey, scope) {
-  const pk = privateKey.replace(/\\n/g, "\n");
   const now = Math.floor(Date.now() / 1000);
   const header = { alg: "RS256", typ: "JWT" };
   const claim = {

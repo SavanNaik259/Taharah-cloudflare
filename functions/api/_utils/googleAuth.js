@@ -3,25 +3,23 @@ export function extractPemKey(raw) {
 
   let key = raw.trim();
 
+  // If the key is wrapped in quotes (common in some env var setups), strip them
+  if (key.startsWith('"') && key.endsWith('"')) {
+    key = key.slice(1, -1);
+  }
+
   // If full JSON was provided, extract private_key
   if (key.startsWith('{')) {
     try {
       const parsed = JSON.parse(key);
       if (parsed.private_key) key = parsed.private_key;
-    } catch (e) {
-      // Not JSON or parse failed, continue with raw
-    }
+    } catch (e) {}
   }
 
-  // Convert escaped newlines
+  // Convert escaped newlines (\n) to actual newlines
   key = key.replace(/\\n/g, '\n').trim();
 
-  // If no PEM header, wrap it
-  if (!key.includes('BEGIN')) {
-    key = `-----BEGIN PRIVATE KEY-----\n${key}\n-----END PRIVATE KEY-----\n`;
-  }
-
-  // Strip header/footer + whitespace
+  // Strip header/footer + all whitespace (including newlines) to get pure base64
   const clean = key
     .replace(/-----BEGIN (?:RSA )?PRIVATE KEY-----/g, '')
     .replace(/-----END (?:RSA )?PRIVATE KEY-----/g, '')
@@ -33,5 +31,10 @@ export function extractPemKey(raw) {
 
   // Fix padding for base64
   const padded = clean.padEnd(Math.ceil(clean.length / 4) * 4, '=');
-  return atob(padded);
+  
+  try {
+    return atob(padded);
+  } catch (e) {
+    throw new Error('Base64 decode failed for FIREBASE_PRIVATE_KEY. Ensure the key is valid.');
+  }
 }
