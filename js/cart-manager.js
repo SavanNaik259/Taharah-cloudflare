@@ -623,12 +623,18 @@ window.CartManager = (function() {
                 document.querySelector('.material-btn')
             );
 
-        if ((hasSizes && !selectedSize) || (hasColours && !selectedColour) || (hasDupattaOrMaterial && !selectedDupatta)) {
+        const missingOptions = [];
+        if (hasSizes && !selectedSize) missingOptions.push('Size');
+        if (hasColours && !selectedColour) missingOptions.push('Colour');
+        if (hasDupattaOrMaterial && !selectedDupatta) missingOptions.push('Dupatta');
+
+        if (missingOptions.length > 0) {
             if (showError) {
+                const msg = `Please select ${missingOptions.join(', ')}`;
                 if (window.showToast) {
-                    window.showToast('Please select all required options (Size, Colour, Dupatta)', 'error');
+                    window.showToast(msg, 'error');
                 } else {
-                    alert('Please select all required options (Size, Colour, Dupatta)');
+                    alert(msg);
                 }
             }
             return { valid: false, selectedSize, selectedColour, selectedDupatta };
@@ -671,6 +677,35 @@ window.CartManager = (function() {
             });
         }
 
+        // Buy now button from product detail page
+        const buyNowBtn = document.querySelector('.buy-now-btn');
+        if (buyNowBtn) {
+            buyNowBtn.addEventListener('click', async function(e) {
+                e.stopPropagation();
+                
+                const validation = validateProductOptionsForDetailPage(true);
+                if (!validation.valid) return;
+
+                const { selectedSize, selectedColour, selectedDupatta } = validation;
+
+                if (window.currentProductDetails || window.productDetails) {
+                    const baseProduct = window.currentProductDetails || window.productDetails;
+                    const productToAdd = {
+                        ...baseProduct,
+                        size: selectedSize || null,
+                        colour: selectedColour || null,
+                        dupatta: selectedDupatta || null
+                    };
+
+                    const quantityInput = document.getElementById('quantity');
+                    const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
+
+                    await addToCart(productToAdd, quantity);
+                    window.location.href = '/checkout';
+                }
+            });
+        }
+
         // Delegate events to document to handle dynamically added elements
         document.addEventListener('click', function(e) {
             // Open cart panel when cart icon is clicked (from main nav or mobile nav)
@@ -707,12 +742,19 @@ window.CartManager = (function() {
                         const hasSizes = document.getElementById('size-selection')?.style.display !== 'none' && document.querySelector('.size-btn');
                         const hasColours = document.getElementById('colour-selection')?.style.display !== 'none' && document.querySelector('.colour-btn');
                         const hasDupatta = document.getElementById('dupatta-selection')?.style.display !== 'none' && document.querySelector('.dupatta-btn');
+                        const hasMaterial = document.getElementById('material-selection')?.style.display !== 'none' && document.querySelector('.material-btn');
 
-                        if ((hasSizes && !selectedSize) || (hasColours && !selectedColour) || (hasDupatta && !selectedDupatta)) {
+                        const missingOptions = [];
+                        if (hasSizes && !selectedSize) missingOptions.push('Size');
+                        if (hasColours && !selectedColour) missingOptions.push('Colour');
+                        if ((hasDupatta || hasMaterial) && !selectedDupatta) missingOptions.push('Dupatta');
+
+                        if (missingOptions.length > 0) {
+                            const msg = `Please select ${missingOptions.join(', ')}`;
                             if (window.showToast) {
-                                window.showToast('Please select all required options (Size, Colour, Dupatta)', 'error');
+                                window.showToast(msg, 'error');
                             } else {
-                                alert('Please select all required options (Size, Colour, Dupatta)');
+                                alert(msg);
                             }
                             return;
                         }

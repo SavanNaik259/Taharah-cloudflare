@@ -598,8 +598,24 @@
   pointer-events: none;
 }
 
+.toast.error {
+  background: #000000;
+  color: #fff;
+  border-left: 4px solid #c8a97e;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  font-family: 'Futura PT', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 13px;
+}
+
+.toast.info {
+  background: #333;
+}
+
 .toast.show {
   opacity: 1;
+  transform: translateX(-50%) translateY(-10px);
 }
 
 /* Cart closing state */
