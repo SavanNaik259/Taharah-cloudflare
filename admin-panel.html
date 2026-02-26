@@ -5579,13 +5579,6 @@
                 
                 const result = await response.json();
                 
-                if (result.development) {
-                    closeEditVideoModal();
-                    hideGlobalLoader();
-                    alert('Video editing is only available on the production site (Netlify).');
-                    return;
-                }
-                
                 if (result.success) {
                     closeEditVideoModal();
                     hideGlobalLoader();
@@ -5602,7 +5595,7 @@
             } catch (error) {
                 hideGlobalLoader();
                 console.error('Error updating video:', error);
-                alert('Video editing is only available on the production site (Netlify).');
+                alert('Error updating video: ' + error.message);
             }
         }
 

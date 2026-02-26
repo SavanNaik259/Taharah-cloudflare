@@ -236,17 +236,29 @@ async function getGoogleAuthToken(email, privateKey, scope) {
   };
 
   const base64UrlEncode = (obj) => {
-    return btoa(JSON.stringify(obj)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    const str = JSON.stringify(obj);
+    const bytes = new TextEncoder().encode(str);
+    let binary = "";
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   };
 
   const encodedHeader = base64UrlEncode(header);
   const encodedClaim = base64UrlEncode(claim);
   const signatureInput = `${encodedHeader}.${encodedClaim}`;
 
-  const keyData = str2ab(atob(pk.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\s/g, "")));
+  const cleanKey = pk.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\s/g, "");
+  const binaryKey = atob(cleanKey);
+  const keyData = new Uint8Array(binaryKey.length);
+  for (let i = 0; i < binaryKey.length; i++) {
+    keyData[i] = binaryKey.charCodeAt(i);
+  }
+
   const key = await crypto.subtle.importKey(
     "pkcs8",
-    keyData,
+    keyData.buffer,
     { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
     false,
     ["sign"]
@@ -258,7 +270,12 @@ async function getGoogleAuthToken(email, privateKey, scope) {
     new TextEncoder().encode(signatureInput)
   );
 
-  const encodedSignature = btoa(String.fromCharCode(...new Uint8Array(signature)))
+  const signatureArray = new Uint8Array(signature);
+  let signatureBinary = "";
+  for (let i = 0; i < signatureArray.byteLength; i++) {
+    signatureBinary += String.fromCharCode(signatureArray[i]);
+  }
+  const encodedSignature = btoa(signatureBinary)
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
     .replace(/=+$/, "");
@@ -272,6 +289,7 @@ async function getGoogleAuthToken(email, privateKey, scope) {
   });
 
   const data = await res.json();
+  if (data.error) throw new Error(data.error_description || data.error);
   return data.access_token;
 }
 
