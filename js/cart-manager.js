@@ -636,9 +636,11 @@ window.CartManager = (function() {
                 const message = `Please select: ${missing.join(', ')}`;
                 if (window.showToast) {
                     window.showToast(message, 'error');
+                } else if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
+                    // Fallback to bootstrap toast if showToast is not globally available
+                    this.internalShowToast(message, 'error');
                 } else {
-                    // Always use internal fallback for consistent styling
-                    internalShowToast(message, 'error');
+                    alert(message);
                 }
             }
             return { valid: false, selectedSize, selectedColour, selectedDupatta };
@@ -1168,32 +1170,25 @@ window.CartManager = (function() {
      * @param {String} type - Type of toast (error, success, info)
      */
     function internalShowToast(message, type = 'info') {
-        let toastContainer = document.querySelector('.toast-container');
-        if (!toastContainer) {
-            toastContainer = document.createElement('div');
-            toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-            document.body.appendChild(toastContainer);
-        }
+        const toastContainer = document.querySelector('.toast-container') || (function() {
+            const container = document.createElement('div');
+            container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+            document.body.appendChild(container);
+            return container;
+        })();
 
         const toast = document.createElement('div');
-        // Use 'show' class and ensure opacity is set for visibility
         toast.className = `toast align-items-center text-white bg-${type} border-0 show`;
         toast.setAttribute('role', 'alert');
         toast.setAttribute('aria-live', 'assertive');
         toast.setAttribute('aria-atomic', 'true');
-        toast.style.display = 'block'; 
-        // Force a reflow to ensure the transition from opacity 0 to 1 works
-        setTimeout(() => {
-            toast.style.opacity = '1';
-            toast.style.transform = 'translateY(0)';
-        }, 10);
         
         toast.innerHTML = `
             <div class="d-flex">
                 <div class="toast-body">
                     ${message}
                 </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" aria-label="Close" onclick="this.closest('.toast').remove()"></button>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close" onclick="this.parentElement.parentElement.remove()"></button>
             </div>
         `;
         
@@ -1202,9 +1197,7 @@ window.CartManager = (function() {
         // Auto-remove after 3 seconds
         setTimeout(() => {
             if (toast && toast.parentElement) {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(20px)';
-                toast.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                toast.classList.remove('show');
                 setTimeout(() => toast.remove(), 500);
             }
         }, 3000);
