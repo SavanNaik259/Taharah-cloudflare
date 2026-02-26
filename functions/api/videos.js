@@ -94,7 +94,7 @@ export async function onRequestOptions() {
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization, x-goog-resumable, x-upload-content-type, x-upload-content-length",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Upload-Action, X-Upload-Url",
       "Access-Control-Max-Age": "86400",
     },
   });
@@ -198,9 +198,43 @@ export async function onRequestPost({ request, env }) {
   const headers = {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Upload-Action, X-Upload-Url",
   };
 
   try {
+    const action = request.headers.get("X-Upload-Action");
+    
+    if (action === "proxyUpload") {
+      const uploadUrl = request.headers.get("X-Upload-Url");
+      if (!uploadUrl) {
+        return new Response(JSON.stringify({ success: false, error: "Missing X-Upload-Url header" }), { status: 400, headers });
+      }
+
+      const contentType = request.headers.get("Content-Type");
+      const body = await request.arrayBuffer();
+
+      const uploadRes = await fetch(uploadUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": contentType || "application/octet-stream",
+        },
+        body: body
+      });
+
+      if (!uploadRes.ok) {
+        const errorText = await uploadRes.text();
+        return new Response(JSON.stringify({ 
+          success: false, 
+          error: "Storage upload failed", 
+          status: uploadRes.status,
+          details: errorText 
+        }), { status: uploadRes.status, headers });
+      }
+
+      return new Response(JSON.stringify({ success: true }), { status: 200, headers });
+    }
+
     const body = await request.json();
     const { title, productSKU, description, videoUrl, filename, contentType } = body;
     const projectID = env.FIREBASE_PROJECT_ID;

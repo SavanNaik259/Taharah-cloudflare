@@ -5,12 +5,13 @@
     "responseHeader": [
       "Content-Type",
       "Authorization",
+      "Content-Length",
+      "User-Agent",
       "x-goog-resumable",
       "x-upload-content-type",
       "x-upload-content-length",
-      "Cache-Control",
-      "ETag",
-      "Access-Control-Allow-Origin"
+      "X-Upload-Action",
+      "X-Upload-Url"
     ],
     "maxAgeSeconds": 3600
   }

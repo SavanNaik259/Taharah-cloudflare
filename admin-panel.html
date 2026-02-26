@@ -5482,12 +5482,8 @@
                 const finalFilename = filename || storagePath;
                 
                 // Step 2: Upload directly to Firebase Storage using the Presigned URL
-                progressText.textContent = 'Uploading video (direct channel)...';
-                
-                const contentType = file.type || 'video/mp4';
-                
                 try {
-                    // Step 2: Upload directly to Firebase Storage using the Presigned URL
+                    // Step 2: Upload through Cloudflare Worker proxy to avoid CORS issues
                     progressText.textContent = 'Uploading video data...';
                     
                     // Use XMLHttpRequest to track progress since fetch doesn't support upload progress natively
@@ -5536,8 +5532,33 @@
                         xhr.send(file);
                     });
                 } catch (uploadErr) {
-                    console.error('Upload error:', uploadErr);
-                    throw uploadErr;
+                    // Fallback to proxy upload if direct upload fails (likely due to CORS)
+                    console.warn('Direct upload failed, attempting via proxy...', uploadErr);
+                    
+                    try {
+                        progressText.textContent = 'Uploading video data via proxy...';
+                        
+                        const uploadResponse = await fetch('/api/videos', {
+                            method: 'POST',
+                            headers: {
+                                'X-Upload-Action': 'proxyUpload',
+                                'X-Upload-Url': uploadUrl,
+                                'Content-Type': contentType
+                            },
+                            body: file
+                        });
+
+                        if (!uploadResponse.ok) {
+                            const errorData = await uploadResponse.json();
+                            throw new Error(errorData.error || `Upload failed with status: ${uploadResponse.status}`);
+                        }
+                        
+                        progressBar.style.width = '100%';
+                        progressText.textContent = 'Upload complete!';
+                    } catch (proxyErr) {
+                        console.error('Proxy upload error:', proxyErr);
+                        throw proxyErr;
+                    }
                 }
                 
                 // Step 3: Register metadata
