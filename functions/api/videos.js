@@ -237,6 +237,7 @@ export async function onRequestPost({ request, env }) {
       return new Response(JSON.stringify({ success: true }), { status: 200, headers });
     }
 
+    const body = await request.json();
     const { title, productSKU, description, videoUrl, filename, contentType: rawContentType } = body;
     const contentType = (rawContentType && typeof rawContentType === 'string' && rawContentType.startsWith('video/')) ? rawContentType : 'video/mp4';
     const projectID = env.FIREBASE_PROJECT_ID;
