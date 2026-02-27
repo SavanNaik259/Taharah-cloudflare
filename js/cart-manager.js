@@ -1047,6 +1047,16 @@ window.CartManager = (function() {
                 <button class="remove-item-btn">&times;</button>
             `;
 
+            // Add click listener to the entire item to redirect to product detail
+            cartItemDiv.style.cursor = 'pointer';
+            cartItemDiv.addEventListener('click', (e) => {
+                // Don't redirect if clicking on quantity buttons or remove button
+                if (e.target.closest('.quantity-btn') || e.target.closest('.remove-item-btn') || e.target.closest('.quantity-input')) {
+                    return;
+                }
+                window.location.href = `/product-detail?id=${item.id}`;
+            });
+
             fragment.appendChild(cartItemDiv);
         });
 

@@ -128,10 +128,19 @@ const WishlistManager = (function() {
                     <div class="wishlist-item-price" data-translate-dynamic>${currencySymbol}${displayPrice.toFixed(2)}</div>
                     <div class="wishlist-item-actions">
                         <button class="remove-from-wishlist" data-translate-dynamic>Remove</button>
-                        <button class="move-to-cart" data-translate-dynamic>Move to Cart</button>
                     </div>
                 </div>
             `;
+
+            // Add click listener to the entire item to redirect to product detail
+            wishlistItemDiv.style.cursor = 'pointer';
+            wishlistItemDiv.addEventListener('click', (e) => {
+                // Don't redirect if clicking on the remove button
+                if (e.target.closest('.remove-from-wishlist')) {
+                    return;
+                }
+                window.location.href = `/product-detail?id=${item.id}`;
+            });
 
             fragment.appendChild(wishlistItemDiv);
         });
