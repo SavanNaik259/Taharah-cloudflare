@@ -36,7 +36,8 @@ exports.handler = async (event, context) => {
       headers: {
         'Content-Type': contentType || 'image/jpeg',
         'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'public, max-age=31536000'
+        'Cache-Control': 'public, max-age=31536000, immutable',
+        'Netlify-CDN-Cache-Control': 'public, max-age=31536000, durable'
       },
       body: buffer.toString('base64'),
       isBase64Encoded: true

@@ -281,12 +281,11 @@ exports.handler = async (event, context) => {
       responseHeaders['Pragma'] = 'no-cache';
       responseHeaders['Expires'] = '0';
     } else {
-      // For normal requests, disable caching to ensure users always see the latest products
-      // This fixes the issue where new or edited products don't show up until redeploy
-      responseHeaders['Cache-Control'] = 'no-cache, no-store, must-revalidate';
-      responseHeaders['Pragma'] = 'no-cache';
-      responseHeaders['Expires'] = '0';
-      responseHeaders['Netlify-CDN-Cache-Control'] = 'no-store, must-revalidate, max-age=0'; // Netlify CDN specific - disable caching
+      // For normal requests, enable long-term CDN caching
+      // This allows Cloudflare/Netlify to serve the product list from the edge
+      // cache-control: public, max-age=86400 (1 day) is a good balance
+      responseHeaders['Cache-Control'] = 'public, max-age=86400, stale-while-revalidate=31536000';
+      responseHeaders['Netlify-CDN-Cache-Control'] = 'public, max-age=31536000, durable, stale-while-revalidate=31536000';
       
       // Generate consistent ETag based on product data to ensure proper cache validation
       if (etag) {
