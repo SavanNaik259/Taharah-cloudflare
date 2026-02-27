@@ -12,8 +12,8 @@ export async function onRequestPost({ request, env }) {
     }
 
     // Use environment variables for Razorpay credentials
-    const keyId = env.RAZORPAY_KEY_ID || "rzp_test_qZWULE2MoPHZJv";
-    const keySecret = env.RAZORPAY_KEY_SECRET || "dwhI00HuTIRk5T61AyUq1Bhh";
+    const keyId = env.RAZORPAY_KEY_ID || "rzp_live_SG2nO8SrQyBF6r";
+    const keySecret = env.RAZORPAY_KEY_SECRET;
 
     const auth = btoa(`${keyId}:${keySecret}`);
     const resp = await fetch("https://api.razorpay.com/v1/orders", {

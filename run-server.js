@@ -16,8 +16,8 @@ app.all('/api/:functionName', async (req, res) => {
   const functionName = req.params.functionName;
   
   // Hardcoded Razorpay Keys for Cloudflare/Local consistency
-  const RAZORPAY_KEY_ID = "rzp_live_SCOazTCPWFjXmG";
-  const RAZORPAY_KEY_SECRET = "qcL5npnItQTGVDyBc4hFAbp9";
+  const RAZORPAY_KEY_ID = "rzp_live_SG2nO8SrQyBF6r";
+  const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || "";
   
   if (functionName === 'image-proxy') {
       let imageUrl = req.query.url;
@@ -77,8 +77,8 @@ app.all('/api/:functionName', async (req, res) => {
     const netlifyFunction = require(functionPath);
     
     // Inject hardcoded keys into process.env for the function execution
-    process.env.RAZORPAY_KEY_ID = "rzp_live_SCOazTCPWFjXmG";
-    process.env.RAZORPAY_KEY_SECRET = "qcL5npnItQTGVDyBc4hFAbp9";
+    process.env.RAZORPAY_KEY_ID = "rzp_live_SG2nO8SrQyBF6r";
+    // RAZORPAY_KEY_SECRET is already in process.env from the environment or should be left to be picked up from there
 
     const event = {
       queryStringParameters: req.query,
