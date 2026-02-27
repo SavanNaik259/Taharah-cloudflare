@@ -732,32 +732,23 @@ window.CartManager = (function() {
                         const hasColours = document.getElementById('colour-selection')?.style.display !== 'none' && document.querySelector('.colour-btn');
                         const hasDupatta = document.getElementById('dupatta-selection')?.style.display !== 'none' && document.querySelector('.dupatta-btn');
 
-                        const missingOptions = [];
-                        if (hasSizes && !selectedSize) missingOptions.push('Size');
-                        if (hasColours && !selectedColour) missingOptions.push('Colour');
-                        if (hasDupatta && !selectedDupatta) missingOptions.push('Dupatta');
-
-                        if (missingOptions.length > 0) {
-                            // Highlight missing options
-                            if (hasSizes && !selectedSize) {
-                                document.getElementById('size-selection').classList.add('error-shaking');
-                                setTimeout(() => document.getElementById('size-selection').classList.remove('error-shaking'), 500);
-                            }
-                            if (hasColours && !selectedColour) {
-                                document.getElementById('colour-selection').classList.add('error-shaking');
-                                setTimeout(() => document.getElementById('colour-selection').classList.remove('error-shaking'), 500);
-                            }
-                            if (hasDupatta && !selectedDupatta) {
-                                document.getElementById('dupatta-selection').classList.add('error-shaking');
-                                setTimeout(() => document.getElementById('dupatta-selection').classList.remove('error-shaking'), 500);
-                            }
+                        if ((hasSizes && !selectedSize) || (hasColours && !selectedColour) || (hasDupatta && !selectedDupatta)) {
+                            // Add error classes for CSS styling
+                            if (hasSizes && !selectedSize) document.getElementById('size-selection')?.classList.add('error');
+                            if (hasColours && !selectedColour) document.getElementById('colour-selection')?.classList.add('error');
+                            if (hasDupatta && !selectedDupatta) document.getElementById('dupatta-selection')?.classList.add('error');
 
                             if (window.showToast) {
-                                window.showToast(`Please select required options: ${missingOptions.join(', ')}`, 'error');
+                                window.showToast('Please select all required options (Size, Colour, Dupatta)', 'error');
                             } else {
-                                alert(`Please select required options: ${missingOptions.join(', ')}`);
+                                alert('Please select all required options (Size, Colour, Dupatta)');
                             }
                             return;
+                        } else {
+                            // Remove error classes if valid
+                            document.getElementById('size-selection')?.classList.remove('error');
+                            document.getElementById('colour-selection')?.classList.remove('error');
+                            document.getElementById('dupatta-selection')?.classList.remove('error');
                         }
                     }
 
