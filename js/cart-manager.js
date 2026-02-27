@@ -655,44 +655,32 @@ window.CartManager = (function() {
     function setupEventListeners() {
         // Add to cart button from product detail page
         const addToCartBtn = document.querySelector('.add-to-cart-btn');
-        const buyNowBtn = document.querySelector('.buy-now-btn');
-
-        const handleButtonClick = async function(e, isBuyNow = false) {
-            // Prevent duplicate handling if the event bubbles to the document listener
-            e.stopPropagation();
-            
-            const validation = validateProductOptionsForDetailPage(true);
-            if (!validation.valid) return;
-
-            const { selectedSize, selectedColour, selectedDupatta } = validation;
-
-            // Get product details (this is usually provided globally on product-detail.html)
-            if (window.currentProductDetails || window.productDetails) {
-                const baseProduct = window.currentProductDetails || window.productDetails;
-                const productToAdd = {
-                    ...baseProduct,
-                    size: selectedSize || null,
-                    colour: selectedColour || null,
-                    dupatta: selectedDupatta || null
-                };
-
-                const quantityInput = document.getElementById('quantity');
-                const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
-
-                await addToCart(productToAdd, quantity);
-                
-                if (isBuyNow) {
-                    window.location.href = '/checkout';
-                }
-            }
-        };
-
         if (addToCartBtn) {
-            addToCartBtn.addEventListener('click', (e) => handleButtonClick(e, false));
-        }
-        
-        if (buyNowBtn) {
-            buyNowBtn.addEventListener('click', (e) => handleButtonClick(e, true));
+            addToCartBtn.addEventListener('click', async function(e) {
+                // Prevent duplicate handling if the event bubbles to the document listener
+                e.stopPropagation();
+                
+                const validation = validateProductOptionsForDetailPage(true);
+                if (!validation.valid) return;
+
+                const { selectedSize, selectedColour, selectedDupatta } = validation;
+
+                // Get product details (this is usually provided globally on product-detail.html)
+                if (window.currentProductDetails || window.productDetails) {
+                    const baseProduct = window.currentProductDetails || window.productDetails;
+                    const productToAdd = {
+                        ...baseProduct,
+                        size: selectedSize || null,
+                        colour: selectedColour || null,
+                        dupatta: selectedDupatta || null
+                    };
+
+                    const quantityInput = document.getElementById('quantity');
+                    const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
+
+                    await addToCart(productToAdd, quantity);
+                }
+            });
         }
 
         // Delegate events to document to handle dynamically added elements
@@ -732,30 +720,11 @@ window.CartManager = (function() {
                         const hasColours = document.getElementById('colour-selection')?.style.display !== 'none' && document.querySelector('.colour-btn');
                         const hasDupatta = document.getElementById('dupatta-selection')?.style.display !== 'none' && document.querySelector('.dupatta-btn');
 
-                        const missingOptions = [];
-                        if (hasSizes && !selectedSize) missingOptions.push('Size');
-                        if (hasColours && !selectedColour) missingOptions.push('Colour');
-                        if (hasDupatta && !selectedDupatta) missingOptions.push('Dupatta');
-
-                        if (missingOptions.length > 0) {
-                            // Highlight missing options
-                            if (hasSizes && !selectedSize) {
-                                document.getElementById('size-selection').classList.add('error-shaking');
-                                setTimeout(() => document.getElementById('size-selection').classList.remove('error-shaking'), 500);
-                            }
-                            if (hasColours && !selectedColour) {
-                                document.getElementById('colour-selection').classList.add('error-shaking');
-                                setTimeout(() => document.getElementById('colour-selection').classList.remove('error-shaking'), 500);
-                            }
-                            if (hasDupatta && !selectedDupatta) {
-                                document.getElementById('dupatta-selection').classList.add('error-shaking');
-                                setTimeout(() => document.getElementById('dupatta-selection').classList.remove('error-shaking'), 500);
-                            }
-
+                        if ((hasSizes && !selectedSize) || (hasColours && !selectedColour) || (hasDupatta && !selectedDupatta)) {
                             if (window.showToast) {
-                                window.showToast(`Please select required options: ${missingOptions.join(', ')}`, 'error');
+                                window.showToast('Please select all required options (Size, Colour, Dupatta)', 'error');
                             } else {
-                                alert(`Please select required options: ${missingOptions.join(', ')}`);
+                                alert('Please select all required options (Size, Colour, Dupatta)');
                             }
                             return;
                         }
