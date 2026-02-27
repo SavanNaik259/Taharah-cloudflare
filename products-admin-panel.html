@@ -2484,28 +2484,22 @@
                             async () => {
                                 try {
                                     console.log('Upload completed, generating image proxy URL...');
+                            async () => {
+                                try {
+                                    console.log("Upload completed, generating image proxy URL...");
                                     const imagePath = `productImages/${fileName}`;
-                                    const bucket = window.firebaseConfig?.storageBucket || 'studio-7642357109-d9026.firebasestorage.app';
+                                    const bucket = window.firebaseConfig?.storageBucket || "studio-7642357109-d9026.firebasestorage.app";
                                     const firebaseUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(imagePath)}?alt=media`;
 
-                                    console.log('Image uploaded successfully to Firebase Storage:', firebaseUrl);
-                                    console.log('Storing direct Firebase URL:', firebaseUrl);
+                                    console.log("Image uploaded successfully to Firebase Storage:", firebaseUrl);
+                                    console.log("Storing direct Firebase URL:", firebaseUrl);
 
                                     resolve(firebaseUrl);
                                 } catch (error) {
-                                    console.error('Error getting download URL:', error);
+                                    console.error("Error getting download URL:", error);
                                     reject(error);
                                 }
                             },
-                            console.log('Storing direct Firebase URL:', firebaseUrl);
-
-                            resolve(firebaseUrl);
-                        } catch (error) {
-                            console.error('Error getting download URL:', error);
-                            reject(error);
-                        }
-                    }
-                );
             });
         }
 
