@@ -1,7 +1,7 @@
 export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
-  const imageUrl = url.searchParams.get('url') || url.searchParams.get('path');
+  const imageUrl = url.searchParams.get('url');
 
   if (!imageUrl) {
     return new Response('Missing URL parameter', { status: 400 });
@@ -63,8 +63,7 @@ export async function onRequest(context) {
 
     const newHeaders = new Headers();
     newHeaders.set('Content-Type', contentType || 'image/jpeg');
-    newHeaders.set('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, stale-while-revalidate=31536000, immutable');
-    newHeaders.set('CDN-Cache-Control', 'public, max-age=31536000');
+    newHeaders.set('Cache-Control', 'public, max-age=31536000');
     newHeaders.set('Access-Control-Allow-Origin', '*');
     newHeaders.set('Vary', 'Accept');
 

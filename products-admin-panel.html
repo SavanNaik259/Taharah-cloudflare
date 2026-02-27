@@ -2481,22 +2481,16 @@
                         console.error(`Upload error for image ${index + 1}:`, error);
                         reject(error);
                     },
-                            async () => {
-                                try {
-                                    console.log('Upload completed, generating image proxy URL...');
-                                    const imagePath = `productImages/${fileName}`;
-                                    const bucket = window.firebaseConfig?.storageBucket || 'studio-7642357109-d9026.firebasestorage.app';
-                                    const firebaseUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(imagePath)}?alt=media`;
-
-                                    console.log('Image uploaded successfully to Firebase Storage:', firebaseUrl);
-                                    console.log('Storing direct Firebase URL:', firebaseUrl);
-
-                                    resolve(firebaseUrl);
-                                } catch (error) {
-                                    console.error('Error getting download URL:', error);
-                                    reject(error);
-                                }
-                            },
+                    async () => {
+                        try {
+                            console.log('Upload completed, generating image proxy URL...');
+                            // Generate DIRECT Firebase URL instead of proxy
+                            // This ensures portability across different platforms (Netlify/Cloudflare)
+                            const imagePath = `productImages/${fileName}`;
+                            const bucket = window.firebaseConfig?.storageBucket || 'studio-7642357109-d9026.firebasestorage.app';
+                            const firebaseUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(imagePath)}?alt=media`;
+                            
+                            console.log('Image uploaded successfully to Firebase Storage:', downloadURL);
                             console.log('Storing direct Firebase URL:', firebaseUrl);
 
                             resolve(firebaseUrl);
@@ -2570,7 +2564,7 @@
 
                 await storageRef.put(blob, {
                     contentType: 'application/json',
-                    cacheControl: 'public, max-age=300, s-maxage=300, stale-while-revalidate=86400'
+                    cacheControl: 'public, max-age=0, no-cache'
                 });
 
                 console.log(`Product saved successfully to ${newCategory}`);
@@ -2607,7 +2601,7 @@
                 const blob = new Blob([jsonData], { type: 'application/json' });
                 await storage.ref(`productData/${category}-products.json`).put(blob, {
                     contentType: 'application/json',
-                    cacheControl: 'public, max-age=300, s-maxage=300, stale-while-revalidate=86400'
+                    cacheControl: 'public, max-age=0, no-cache'
                 });
                 console.log(`Removed product ${productId} from ${category}`);
             } catch (e) {
@@ -2964,7 +2958,7 @@
                       // Back-in-stock: ONLY if stock field was edited and stock went from 0 to available
                       if (fieldsChanged.stock && originalProductData.stock === 0 && updatedProductData.stock > 0) {
                         console.log('📦 Triggering back-in-stock notification (stock field was edited)...');
-                        await fetch('/api/auto-back-in-stock-alerts', {
+                        await fetch('https://taharah.netlify.app/api/auto-back-in-stock-alerts', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({
@@ -2979,7 +2973,7 @@
                       // Low-stock: ONLY if stock field was edited and stock changed to 3 or below
                       if (fieldsChanged.stock && updatedProductData.stock <= 3 && updatedProductData.stock > 0) {
                         console.log('⚡ Triggering low-stock notification (stock field was edited)...');
-                        await fetch('/api/auto-low-stock-alerts', {
+                        await fetch('https://taharah.netlify.app/api/auto-low-stock-alerts', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({
@@ -2996,7 +2990,7 @@
                       // Price-drop: ONLY if price field was edited and price decreased
                       if (fieldsChanged.price && originalProductData.price > updatedProductData.price) {
                         console.log('📉 Triggering price-drop notification (price field was edited)...');
-                        await fetch('/api/auto-price-drop-alerts', {
+                        await fetch('https://taharah.netlify.app/api/auto-price-drop-alerts', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({
@@ -3040,7 +3034,7 @@
                       console.log('⭐ Triggering new-product notification...');
                       const isProduction = !window.location.hostname.includes('localhost');
                       const notificationUrl = isProduction 
-                        ? '/api/auto-new-product-alerts'
+                        ? 'https://taharah.netlify.app/api/auto-new-product-alerts'
                         : '/api/new-product-notification';
                       
                       const response = await fetch(notificationUrl, {

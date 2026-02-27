@@ -2,8 +2,6 @@ export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
   const categories = url.searchParams.get('categories') || url.searchParams.get('category');
-  const cacheBust = url.searchParams.get('cacheBust');
-  const ifNoneMatch = request.headers.get('If-None-Match');
   
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -17,11 +15,17 @@ export async function onRequest(context) {
 
     const categoryList = categories.split(',').map(c => c.trim()).filter(c => c);
     const storageBucket = env.FIREBASE_STORAGE_BUCKET || 'studio-7642357109-d9026.firebasestorage.app';
+    console.log('Using storage bucket:', storageBucket);
     
     const productPromises = categoryList.map(async (cat) => {
+      // Use direct Firebase Storage JSON URL
       const storageUrl = `https://firebasestorage.googleapis.com/v0/b/${storageBucket}/o/productData%2F${cat}-products.json?alt=media`;
+      console.log('Fetching category from:', storageUrl);
       const response = await fetch(storageUrl);
-      if (!response.ok) return [];
+      if (!response.ok) {
+        console.error(`Failed to fetch ${cat}: ${response.status}`);
+        return [];
+      }
       const data = await response.json();
       return Array.isArray(data) ? data : [];
     });
@@ -32,9 +36,13 @@ export async function onRequest(context) {
     const transformedProducts = allProducts.map(p => {
       const transformUrl = (u) => {
         if (!u || typeof u !== 'string') return u;
+        
+        // Normalize any image URL to a clean Firebase storage path
         const extractStoragePath = (input) => {
           if (!input || typeof input !== 'string') return '';
           let s = input;
+
+          // If wrapped in proxy (netlify or cloudflare)
           try {
             if (s.includes('image-proxy')) {
               const u = new URL(s, 'https://dummy');
@@ -42,25 +50,33 @@ export async function onRequest(context) {
               if (p) s = decodeURIComponent(p);
             }
           } catch (e) {}
+
+          // If full Firebase URL
           if (s.includes('firebasestorage.googleapis.com')) {
             const m = s.match(/\/o\/([^?]+)/);
             if (m) s = decodeURIComponent(m[1]);
           }
+
+          // Decode any leftover %2F
           try { s = decodeURIComponent(s); } catch (e) {}
+
           s = s.startsWith('/') ? s.slice(1) : s;
           if (!s.startsWith('productImages/')) {
             s = `productImages/${s.replace(/^productImages\//, '')}`;
           }
           return s;
         };
+
         const cleanPath = extractStoragePath(u);
         return `/api/image-proxy?url=${encodeURIComponent(cleanPath)}`;
       };
 
+      // Deep copy to avoid mutation issues if needed, but here we just map
       const newP = { ...p };
       if (newP.image) newP.image = transformUrl(newP.image);
       if (newP.mainImage) newP.mainImage = transformUrl(newP.mainImage);
       if (newP.imageUrl) newP.imageUrl = transformUrl(newP.imageUrl);
+      
       if (newP.images && Array.isArray(newP.images)) {
         newP.images = newP.images.map(img => {
           if (typeof img === 'string') return transformUrl(img);
@@ -73,29 +89,11 @@ export async function onRequest(context) {
       return newP;
     });
 
-    const body = JSON.stringify({
+    return new Response(JSON.stringify({
       success: true,
       products: transformedProducts,
       count: transformedProducts.length
-    });
-
-    // Simple hash for ETag
-    const etag = `"${btoa(body).substring(0, 20)}"`;
-
-    if (!cacheBust && ifNoneMatch === etag) {
-      return new Response(null, { status: 304, headers: { ...headers, 'ETag': etag } });
-    }
-
-    const responseHeaders = { ...headers, 'ETag': etag };
-    if (cacheBust) {
-      responseHeaders['Cache-Control'] = 'no-cache, no-store, must-revalidate';
-      responseHeaders['Pragma'] = 'no-cache';
-      responseHeaders['Expires'] = '0';
-    } else {
-      responseHeaders['Cache-Control'] = 'public, max-age=60, s-maxage=300, stale-while-revalidate=86400';
-    }
-
-    return new Response(body, { status: 200, headers: responseHeaders });
+    }), { status: 200, headers });
 
   } catch (error) {
     return new Response(JSON.stringify({ success: false, error: error.message }), { status: 500, headers });

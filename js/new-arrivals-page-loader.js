@@ -103,25 +103,22 @@ function sortProducts(products, sortBy) {
 /**
  * Load new arrivals products directly from Firebase (without external dependencies)
  */
-async function loadNewArrivalsProductsDirect(forceRefresh = false) {
+async function loadNewArrivalsProductsDirect() {
     try {
         console.log('Loading products directly from API function...');
 
-        let endpoint = '/api/load-products?category=new-arrivals';
-        if (forceRefresh) endpoint += `&cacheBust=${Date.now()}`;
+        const cacheBust = Date.now();
+        const endpoint = `/api/load-products?category=new-arrivals&cacheBust=${cacheBust}`;
 
         console.log('Making request to:', endpoint);
 
         const response = await fetch(endpoint, {
             method: 'GET',
-            cache: forceRefresh ? 'no-store' : 'default',
             headers: {
                 'Content-Type': 'application/json',
-                ...(forceRefresh ? {
-                    'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache',
-                    'Expires': '0'
-                } : {})
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
             }
         });
 
