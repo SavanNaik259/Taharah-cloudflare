@@ -337,7 +337,6 @@ const SearchUI = (function() {
             <div class="search-product-details">
                 <div class="search-product-name">${product.name}</div>
                 <div class="search-product-price">₹${parseFloat(product.price).toLocaleString('en-IN')}</div>
-                <div class="search-product-category">${formatCategoryName(product.searchCategory)}</div>
             </div>
         `;
         
