@@ -38,36 +38,36 @@ const BridalProductsLoader = (function() {
     /**
      * Load bridal products EXCLUSIVELY from Firebase Cloud Storage
      */
-    async function loadBridalProducts(forceRefresh = true) {
+    async function loadBridalProducts(forceRefresh = false) {
         if (!isInitialized) {
             console.error('Bridal Products Loader not initialized');
             return [];
         }
 
-        // Always force refresh to clear any potential local cache
-        localStorage.removeItem('featuredCollectionProducts');
-        localStorage.removeItem('featuredCollectionProductsTime');
-        localStorage.removeItem('lastProductUpdate');
-        
-        // Clear ALL possible collection caches
-        const collections = ['new-arrivals', 'ready-to-wear', 'party-wear', 'modest-wear', 'featured-collection'];
-        collections.forEach(c => {
-            localStorage.removeItem(`${c}Products`);
-            localStorage.removeItem(`${c}ProductsTime`);
-        });
-
         const now = Date.now();
         
         try {
-            let netlifyEndpoint = `/api/load-products?category=featured-collection&cacheBust=${now}`;
+            let endpoint = '/api/load-products?category=featured-collection';
+            if (forceRefresh) {
+                endpoint += `&cacheBust=${now}`;
+                // Clear localStorage caches on force refresh
+                localStorage.removeItem('featuredCollectionProducts');
+                localStorage.removeItem('featuredCollectionProductsTime');
+                localStorage.removeItem('lastProductUpdate');
+                const collections = ['new-arrivals', 'ready-to-wear', 'party-wear', 'modest-wear', 'featured-collection'];
+                collections.forEach(c => {
+                    localStorage.removeItem(`${c}Products`);
+                    localStorage.removeItem(`${c}ProductsTime`);
+                });
+            }
             
-            const response = await fetch(netlifyEndpoint, {
-                cache: 'no-store',
-                headers: {
+            const response = await fetch(endpoint, {
+                cache: forceRefresh ? 'no-store' : 'default',
+                headers: forceRefresh ? {
                     'Cache-Control': 'no-cache, no-store, must-revalidate',
                     'Pragma': 'no-cache',
                     'Expires': '0'
-                }
+                } : {}
             });
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             
