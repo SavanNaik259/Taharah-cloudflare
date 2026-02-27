@@ -43,7 +43,20 @@ const SearchManager = (function() {
                 'pakistani-pret-wear',
                 'ready-to-wear',
                 'modest-wear',
-                'party-wear'
+                'party-wear',
+                'saree-collection',
+                'gold-necklace',
+                'silver-necklace',
+                'meenakari-necklace',
+                'gold-earrings',
+                'silver-earrings',
+                'meenakari-earrings',
+                'gold-bangles',
+                'silver-bangles',
+                'meenakari-bangles',
+                'gold-rings',
+                'silver-rings',
+                'meenakari-rings'
             ];
             const productPromises = collections.map(category => loadProductsFromCategory(category));
             
