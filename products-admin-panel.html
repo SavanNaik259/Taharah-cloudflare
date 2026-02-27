@@ -2483,16 +2483,19 @@
                     },
                     async () => {
                         try {
-                            console.log('Upload completed, generating image proxy URL...');
-                            // Generate DIRECT Firebase URL instead of proxy
-                            // This ensures portability across different platforms (Netlify/Cloudflare)
+                            console.log('Upload completed, getting download URL...');
+                            const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                            
+                            // Generate DIRECT Firebase URL as a backup/standardized format
                             const imagePath = `productImages/${fileName}`;
                             const bucket = window.firebaseConfig?.storageBucket || 'studio-7642357109-d9026.firebasestorage.app';
                             const firebaseUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(imagePath)}?alt=media`;
                             
                             console.log('Image uploaded successfully to Firebase Storage:', downloadURL);
-                            console.log('Storing direct Firebase URL:', firebaseUrl);
+                            console.log('Direct Firebase URL:', firebaseUrl);
 
+                            // Prefer the authenticated downloadURL for the admin session, 
+                            // but the system is designed to use the ?alt=media version for public CDN
                             resolve(firebaseUrl);
                         } catch (error) {
                             console.error('Error getting download URL:', error);
