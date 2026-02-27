@@ -44,11 +44,17 @@ app.all('/api/:functionName', async (req, res) => {
         const encodedPath = finalPath.split('/').map(part => encodeURIComponent(part)).join('%2F');
         decodedUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodedPath}?alt=media`;
         console.log(`[Proxy Construct] Path: ${finalPath} | URL: ${decodedUrl}`);
+      } else if (decodedUrl.includes('firebasestorage.googleapis.com') && !decodedUrl.includes('alt=media')) {
+          decodedUrl += (decodedUrl.includes('?') ? '&' : '?') + 'alt=media';
       }
 
-      // Ensure it's a firebase URL we are fetching
-      if (decodedUrl.includes('firebasestorage.googleapis.com') && !decodedUrl.includes('alt=media')) {
-        decodedUrl += (decodedUrl.includes('?') ? '&' : '?') + 'alt=media';
+      // Handle old Netlify URLs by extracting the filename and routing through proxy
+      if (decodedUrl.includes('netlify.app/productImages/')) {
+          const parts = decodedUrl.split('/productImages/');
+          const filename = parts[parts.length - 1].split('?')[0];
+          const bucket = process.env.FIREBASE_STORAGE_BUCKET || 'studio-7642357109-d9026.firebasestorage.app';
+          decodedUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/productImages%2F${encodeURIComponent(filename)}?alt=media`;
+          console.log(`[Proxy Netlify Fallback] Filename: ${filename} | URL: ${decodedUrl}`);
       }
 
       return res.redirect(decodedUrl);
