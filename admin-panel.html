@@ -3680,6 +3680,15 @@
         }
 
         // Load orders from Firebase - Now includes both user and guest orders
+        function normalizeProduct(item) {
+            return {
+                ...item,
+                size: item.size || item.selectedSize || item.variantSize || '',
+                color: item.color || item.colour || item.selectedColor || item.selectedColour || '',
+                dupatta: item.dupatta || item.duppata || item.selectedDupatta || item.selectedMaterial || item.material || item.materialName || item.dupattaOption || ''
+            };
+        }
+
         async function loadOrders() {
             try {
                 console.log('Loading orders from Firestore...');
@@ -3717,26 +3726,28 @@
                 const fetchedOrders = allOrdersResult.orders || [];
                 console.log(`📦 Fetched ${fetchedOrders.length} total orders (including guest orders)`);
 
-                fetchedOrders.forEach(orderData => {
-                    // Process order data with comprehensive fallbacks
-                    const processedOrder = {
-                        orderId: orderData.id,
-                        userId: orderData.userId,
-                        isGuestOrder: orderData.isGuestOrder || false,
-                        orderReference: orderData.orderReference || orderData.id || orderData.id,
-                        date: orderData.timestamp?.toDate?.() ||
-                              (orderData.orderDate ? new Date(orderData.orderDate) : new Date()),
-                        amount: calculateOrderAmount(orderData),
-                        customerName: extractCustomerName(orderData),
-                        customerEmail: extractCustomerEmail(orderData),
-                        customerPhone: extractCustomerPhone(orderData),
-                        customerAddress: extractCustomerAddress(orderData),
-                        paymentMethod: orderData.paymentMethod || 'Not specified',
-                        products: orderData.products || orderData.items || [],
-                        notes: orderData.notes || orderData.specialInstructions || '',
-                        status: orderData.status || 'pending',
-                        deliveryStatus: orderData.deliveryStatus || 'pending'
-                    };
+                    fetchedOrders.forEach(orderData => {
+                        // Process order data with comprehensive fallbacks
+                        const products = (orderData.products || orderData.items || []).map(normalizeProduct);
+                        
+                        const processedOrder = {
+                            orderId: orderData.id,
+                            userId: orderData.userId,
+                            isGuestOrder: orderData.isGuestOrder || false,
+                            orderReference: orderData.orderReference || orderData.id || orderData.id,
+                            date: orderData.timestamp?.toDate?.() ||
+                                  (orderData.orderDate ? new Date(orderData.orderDate) : new Date()),
+                            amount: calculateOrderAmount(orderData),
+                            customerName: extractCustomerName(orderData),
+                            customerEmail: extractCustomerEmail(orderData),
+                            customerPhone: extractCustomerPhone(orderData),
+                            customerAddress: extractCustomerAddress(orderData),
+                            paymentMethod: orderData.paymentMethod || 'Not specified',
+                            products: products,
+                            notes: orderData.notes || orderData.specialInstructions || '',
+                            status: orderData.status || 'pending',
+                            deliveryStatus: orderData.deliveryStatus || 'pending'
+                        };
 
                     allOrders.push(processedOrder);
 
@@ -7878,15 +7889,9 @@
             if ((notification.type === 'auto-new-order' || notification.type.startsWith('auto-order-') || notification.type.startsWith('admin-order-') || notification.type === 'pending-order-notification') && notification.relatedData) {
                 console.log('Opening order details for:', notification.relatedData);
 
-                // If we have complete order data in the notification, show it directly
-                if (notification.relatedData.customerAddress && notification.relatedData.products) {
-                    console.log('Using complete order data from notification');
-                    showOrderDetailsFromNotification(notification.relatedData);
-                } else {
-                    // Fallback to loading from Firebase
-                    console.log('Loading order details from Firebase');
-                    viewOrderDetails(notification.relatedData.orderId, notification.relatedData.userId);
-                }
+                // Fetch latest order from Firestore to ensure complete variants instead of trusting old relatedData
+                console.log('Fetching latest order details from Firestore to ensure data integrity');
+                viewOrderDetails(notification.relatedData.orderId, notification.relatedData.userId);
             } else {
                 console.log('No related data or wrong type for notification:', notification.type);
                 // Show notification details in a simple modal for non-order notifications
@@ -7896,19 +7901,20 @@
 
         // Show order details directly from notification data
         function showOrderDetailsFromNotification(orderData) {
+            const products = (orderData.products || orderData.items || []).map(normalizeProduct);
             const order = {
                 orderId: orderData.orderId,
                 orderReference: orderData.orderReference,
-                date: new Date(orderData.orderDate),
-                amount: orderData.amount,
-                customerName: orderData.customerName,
-                customerEmail: orderData.customerEmail,
-                customerPhone: orderData.customerPhone,
-                customerAddress: orderData.customerAddress,
-                paymentMethod: orderData.paymentMethod,
-                products: orderData.products || [],
-                notes: orderData.notes || '',
-                status: orderData.status
+                date: new Date(orderData.orderDate || orderData.date),
+                amount: orderData.amount || orderData.total || orderData.orderTotal,
+                customerName: orderData.customerName || extractCustomerName(orderData),
+                customerEmail: orderData.customerEmail || extractCustomerEmail(orderData),
+                customerPhone: orderData.customerPhone || extractCustomerPhone(orderData),
+                customerAddress: orderData.customerAddress || extractCustomerAddress(orderData),
+                paymentMethod: orderData.paymentMethod || 'Not specified',
+                products: products,
+                notes: orderData.notes || orderData.specialInstructions || '',
+                status: orderData.status || 'pending'
             };
 
             console.log('Showing order details from notification with complete address:', order.customerAddress);
@@ -7969,7 +7975,7 @@
                                                             <h5 style="margin: 0 0 4px 0; color: #1e293b;">${item.name || item.productName || `Product #${item.id || index + 1}`}</h5>
                                                             <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px;">
                                                                 ${item.size ? `<span style="font-size: 13px; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 4px;"><strong>Size:</strong> ${item.size}</span>` : ''}
-                                                                ${item.colour ? `<span style="font-size: 13px; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 4px;"><strong>Color:</strong> ${item.colour}</span>` : ''}
+                                                                ${item.color ? `<span style="font-size: 13px; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 4px;"><strong>Color:</strong> ${item.color}</span>` : ''}
                                                                 ${item.dupatta ? `<span style="font-size: 13px; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 4px;"><strong>Dupatta:</strong> ${item.dupatta}</span>` : ''}
                                                                 ${item.category ? `<span style="font-size: 13px; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 4px;"><strong>Category:</strong> ${item.category}</span>` : ''}
                                                             </div>
@@ -8067,14 +8073,12 @@
                 // Show loading state
                 showGlobalLoader('Loading order details...');
 
-                // Find order in our cached data first
-                let order = allOrders.find(o => o.orderId === orderId && o.userId === userId);
+                // Always fetch from Firestore to ensure we have normalized data and latest variants
+                console.log('Fetching latest order details from Firestore...');
 
-                if (!order) {
-                    // If not found in cache, try to load from Firebase
-                    console.log('Order not found in cache, loading from Firebase...');
-
-                    if (typeof firebase !== 'undefined' && firebase.firestore) {
+                let order = null;
+                if (typeof firebase !== 'undefined' && firebase.firestore) {
+                    try {
                         const orderDoc = await firebase.firestore()
                             .collection('users')
                             .doc(userId)
@@ -8084,24 +8088,33 @@
 
                         if (orderDoc.exists) {
                             const orderData = orderDoc.data();
+                            const products = (orderData.products || orderData.items || []).map(normalizeProduct);
                             order = {
                                 orderId: orderId,
                                 userId: userId,
                                 orderReference: orderData.orderReference || orderId,
-                                date: orderData.timestamp?.toDate() || new Date(orderData.orderDate) || new Date(),
-                                amount: orderData.total || orderData.orderTotal || 0,
+                                date: orderData.timestamp?.toDate() || (orderData.orderDate ? new Date(orderData.orderDate) : new Date()),
+                                amount: calculateOrderAmount(orderData),
                                 customerName: extractCustomerName(orderData),
                                 customerEmail: extractCustomerEmail(orderData),
                                 customerPhone: extractCustomerPhone(orderData),
                                 customerAddress: extractCustomerAddress(orderData),
                                 paymentMethod: orderData.paymentMethod || 'Not specified',
-                                products: orderData.products || orderData.items || [],
+                                products: products,
                                 notes: orderData.notes || orderData.specialInstructions || '',
-                                status: orderData.status || 'pending', // Default status
-                                deliveryStatus: orderData.deliveryStatus || 'pending' // Ensure delivery status is included
+                                status: orderData.status || 'pending',
+                                deliveryStatus: orderData.deliveryStatus || 'pending'
                             };
                         }
+                    } catch (dbError) {
+                        console.error('Error fetching order from Firestore:', dbError);
                     }
+                }
+
+                // Fallback to cached data if Firestore fetch fails or is unavailable
+                if (!order) {
+                    console.log('Falling back to cached order data');
+                    order = allOrders.find(o => o.orderId === orderId && o.userId === userId);
                 }
 
                 hideGlobalLoader();
@@ -8202,8 +8215,7 @@
                                                     <h5 style="margin: 0 0 4px 0; color: #1e293b; font-size: 16px;">${item.name || item.productName || 'Product'}</h5>
                                                     <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
                                                         ${item.size ? `<span style="background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">Size: ${item.size}</span>` : ''}
-                                                        ${item.color || item.colour || item.selectedColor ? `<span style="background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">Color: ${item.color || item.colour || item.selectedColor}</span>` : ''}
-                                                        ${item.duppata ? `<span style="background: #eff6ff; color: #2563eb; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">Dupatta: ${item.duppata}</span>` : ''}
+                                                        ${item.color ? `<span style="background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">Color: ${item.color}</span>` : ''}
                                                         ${item.dupatta ? `<span style="background: #eff6ff; color: #2563eb; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">Dupatta: ${item.dupatta}</span>` : ''}
                                                     </div>
                                                     <p style="margin: 0; color: #64748b; font-size: 14px;">Quantity: ${itemQuantity} × ₹${itemPrice.toLocaleString('en-IN')}</p>

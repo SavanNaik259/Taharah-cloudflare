@@ -1,0 +1,113 @@
+Perfect — here is a copy-paste ready Replit prompt you can give directly:
+
+You are working on an existing e-commerce codebase. Fix 2 production issues without breaking anything else.
+
+========================================
+ISSUES TO FIX
+========================================
+1) In Admin Panel “View Details” modals, size and color show correctly, but customer-selected dupatta option is missing.
+   This happens from:
+   - Dashboard pending/recent orders
+   - Orders management section
+   - Notifications section
+
+2) After migration from Netlify/Nodemailer to Cloudflare Pages + Resend, order placed/cancelled emails are sent with incomplete order info (for both customer and owner). Need full order details in both emails.
+
+========================================
+EXACT FILES + LOCATIONS
+========================================
+A) Admin order details display
+File: /app/admin-panel.html
+
+- Around line ~7898 function: showOrderDetailsFromNotification(orderData)
+  Current issue: dupatta rendering only checks item.dupatta, no robust fallback keys.
+
+- Around line ~8147 function: showOrderDetailsModal(order)
+  Current issue: dupatta rendering has limited key handling (item.duppata / item.dupatta only), missing other possible keys (material, selectedDupatta, etc).
+
+- Around line ~3720 in loadOrders() order processing
+  Current issue: products array is passed raw (orderData.products || orderData.items) without normalization.
+
+- Around line ~7882 in handleNotificationClick(notification)
+  Current behavior may use stale/incomplete notification.relatedData.products instead of reloading full order from Firestore.
+
+B) Order email endpoint (Cloudflare Pages Function)
+File: /app/functions/api/send-order-email.js
+
+- Around line ~25 request parsing
+  Current code expects only { orderData } shape; not resilient.
+
+- Around line ~39 productsHTML generation
+  Current code renders only product name, qty, price, total (no size/color/dupatta/options).
+
+- Around line ~114 ownerHtml
+  Current owner email content is too minimal (missing full customer/order detail and product options).
+
+- Around line ~151 owner subject
+  Current subject is always “New Order - ...” even for cancelled orders.
+
+========================================
+IMPLEMENTATION REQUIREMENTS
+========================================
+1) Add product normalization helper and use it everywhere before rendering:
+   - Normalize keys:
+     size: item.size || item.selectedSize || item.variantSize || ''
+     color: item.color || item.colour || item.selectedColor || item.selectedColour || ''
+     dupatta: item.dupatta || item.duppata || item.selectedDupatta || item.selectedMaterial || item.material || item.materialName || item.dupattaOption || ''
+   - Keep existing fields too.
+
+2) Apply normalization in:
+   - loadOrders() when constructing processedOrder.products
+   - showOrderDetailsFromNotification()
+   - showOrderDetailsModal()
+
+3) In modal HTML, render dupatta from normalized key (single consistent field), not fragmented checks.
+
+4) Notification detail source logic:
+   - If notification data lacks complete variants, fetch latest order from Firestore using viewOrderDetails(orderId, userId) instead of trusting old relatedData.
+   - Keep existing behavior for non-order notifications.
+
+5) In /functions/api/send-order-email.js:
+   - Parse payload safely:
+     const payload = await request.json();
+     const orderData = payload?.orderData ?? payload;
+   - Validate required fields after normalization.
+   - Build normalizedProducts and include options in email rows:
+     “Size: X | Color: Y | Dupatta: Z” when available.
+   - Include complete order/customer details in BOTH customer and owner emails:
+     order ref, order date, payment method, status, customer name/email/phone, full address (address/city/state/postal), cancellation reason/note when cancelled.
+   - Set owner subject dynamically:
+     cancelled => “Order Cancelled - <ref>”
+     otherwise => “New Order - <ref>” (or confirmation status subject)
+
+6) Do not refactor unrelated modules. Minimal targeted patch only.
+
+========================================
+IMPORTANT EDGE CASES
+========================================
+- orders may have products in orderData.items instead of orderData.products
+- product variant keys may be spellings: color/colour, dupatta/duppata/material
+- cancellation payload can include cancellationReason and cancellationNote
+- products array may be empty (don’t crash)
+
+========================================
+VERIFICATION CHECKLIST (MUST RUN)
+========================================
+1) Place a test order containing size + color + dupatta/material option.
+2) Open View Details from:
+   - pending/recent dashboard
+   - orders management
+   - notification click
+   Confirm dupatta is visible in all.
+3) Verify “order placed” email (customer + owner) contains:
+   - full customer details
+   - full address
+   - line items with size/color/dupatta
+4) Cancel order from admin and verify cancellation email (customer + owner) also includes full info + reason.
+5) Confirm no runtime JS errors in console and no API 500 from /api/send-order-email.
+
+Return only:
+- changed files list
+- concise diff summary
+- test proof/results
+If you want, I can also give you a second version of this prompt in shorter format (for faster Replit runs).

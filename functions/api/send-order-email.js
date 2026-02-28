@@ -22,7 +22,8 @@ const currencySymbols = {
 export async function onRequestPost({ request, env }) {
   const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
   try {
-    const { orderData } = await request.json();
+    const payload = await request.json();
+    const orderData = payload?.orderData ?? payload;
     if (!orderData) return new Response(JSON.stringify({ success: false, message: "Missing order data" }), { status: 400, headers });
 
     const resendApiKey = env.RESEND_API_KEY;
@@ -32,15 +33,69 @@ export async function onRequestPost({ request, env }) {
 
     if (!resendApiKey || !emailFrom) return new Response(JSON.stringify({ success: false, message: "Resend configuration missing" }), { status: 500, headers });
 
-    const { customer, products, orderReference, orderDate, orderTotal, paymentMethod, userSelectedCurrency = 'INR' } = orderData;
+    const { 
+      customer, 
+      products: rawProducts, 
+      items: rawItems,
+      orderReference, 
+      orderDate, 
+      orderTotal, 
+      paymentMethod, 
+      userSelectedCurrency = 'INR',
+      status,
+      cancellationReason,
+      cancellationNote
+    } = orderData;
+
+    const products = (rawProducts || rawItems || []).map(item => ({
+      ...item,
+      size: item.size || item.selectedSize || item.variantSize || '',
+      color: item.color || item.colour || item.selectedColor || item.selectedColour || '',
+      dupatta: item.dupatta || item.duppata || item.selectedDupatta || item.selectedMaterial || item.material || item.materialName || item.dupattaOption || ''
+    }));
+
     const currencyInfo = currencySymbols[userSelectedCurrency] || currencySymbols['INR'];
     const { symbol } = currencyInfo;
 
     const productsHTML = products.map(product => {
       const priceDisplay = product.priceDisplay !== undefined ? `${symbol}${product.priceDisplay.toFixed(2)}` : `${symbol}${product.price}`;
       const totalDisplay = product.totalDisplay !== undefined ? `${symbol}${product.totalDisplay.toFixed(2)}` : `${symbol}${(product.price * product.quantity).toFixed(2)}`;
-      return `<tr><td style="padding: 10px; border-bottom: 1px solid #e1e1e1;">${product.name || 'Product'}</td><td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: center;">${product.quantity || 1}</td><td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${priceDisplay}</td><td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${totalDisplay}</td></tr>`;
+      
+      let options = [];
+      if (product.size) options.push(`Size: ${product.size}`);
+      if (product.color) options.push(`Color: ${product.color}`);
+      if (product.dupatta) options.push(`Dupatta: ${product.dupatta}`);
+      const optionsText = options.length > 0 ? `<br><small style="color: #666;">${options.join(' | ')}</small>` : '';
+
+      return `<tr><td style="padding: 10px; border-bottom: 1px solid #e1e1e1;">${product.name || 'Product'}${optionsText}</td><td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: center;">${product.quantity || 1}</td><td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${priceDisplay}</td><td style="padding: 10px; border-bottom: 1px solid #e1e1e1; text-align: right;">${totalDisplay}</td></tr>`;
     }).join('');
+
+    const isCancelled = status?.toLowerCase() === 'cancelled';
+    const addressInfo = customer ? `
+      <p><strong>Address:</strong> ${customer.address || ''}</p>
+      <p><strong>City:</strong> ${customer.city || ''}</p>
+      <p><strong>State:</strong> ${customer.state || ''}</p>
+      <p><strong>Postal Code:</strong> ${customer.postalCode || ''}</p>
+    ` : '';
+
+    const commonOrderInfo = `
+      <div class="order-info">
+        <p><strong>Order Reference:</strong> ${orderReference}</p>
+        <p><strong>Order Date:</strong> ${formatToIST(orderDate)}</p>
+        <p><strong>Payment Method:</strong> ${paymentMethod}</p>
+        <p><strong>Status:</strong> ${status || 'New'}</p>
+      </div>
+    `;
+
+    const commonCustomerInfo = `
+      <div class="order-info">
+        <h3>Customer Details</h3>
+        <p><strong>Name:</strong> ${customer?.firstName} ${customer?.lastName || ''}</p>
+        <p><strong>Email:</strong> ${customer?.email}</p>
+        <p><strong>Phone:</strong> ${customer?.phone}</p>
+        ${addressInfo}
+      </div>
+    `;
 
     const customerHtml = `
       <!DOCTYPE html>
@@ -61,24 +116,21 @@ export async function onRequestPost({ request, env }) {
       <body>
         <div class="container">
           <div class="header">Taharah</div>
-          <h2>${orderData.status && orderData.status.toLowerCase() === 'cancelled' ? 'Order Cancelled' : 'Order Confirmation'}</h2>
+          <h2>${isCancelled ? 'Order Cancelled' : 'Order Confirmation'}</h2>
           
-          ${orderData.status && orderData.status.toLowerCase() === 'cancelled' ? `
+          ${isCancelled ? `
             <div class="cancellation-box">
               <h3 style="margin: 0 0 10px 0;">❌ Your order has been cancelled</h3>
-              <p style="margin: 0 0 10px 0;"><strong>Reason:</strong> ${orderData.cancellationReason || 'Order cancelled by store administrator'}</p>
-              ${orderData.cancellationNote ? `<p style="margin: 0;"><strong>Note:</strong> ${orderData.cancellationNote}</p>` : ''}
+              <p style="margin: 0 0 10px 0;"><strong>Reason:</strong> ${cancellationReason || 'Order cancelled by store administrator'}</p>
+              ${cancellationNote ? `<p style="margin: 0;"><strong>Note:</strong> ${cancellationNote}</p>` : ''}
             </div>
           ` : ''}
 
-          <p>Dear ${customer.firstName},</p>
-          <p>${orderData.status && orderData.status.toLowerCase() === 'cancelled' ? 'We regret to inform you that your order has been cancelled.' : 'Thank you for your order! We\'ve received it and are processing it now.'}</p>
+          <p>Dear ${customer?.firstName},</p>
+          <p>${isCancelled ? 'We regret to inform you that your order has been cancelled.' : 'Thank you for your order! We\'ve received it and are processing it now.'}</p>
           
-          <div class="order-info">
-            <p><strong>Order Reference:</strong> ${orderReference}</p>
-            <p><strong>Order Date:</strong> ${formatToIST(orderDate)}</p>
-            <p><strong>Payment Method:</strong> ${paymentMethod}</p>
-          </div>
+          ${commonOrderInfo}
+          ${commonCustomerInfo}
 
           <h3>Order Items</h3>
           <table>
@@ -99,7 +151,7 @@ export async function onRequestPost({ request, env }) {
             Total: ${symbol}${orderData.orderTotalDisplay?.toFixed(2) || orderTotal}
           </div>
 
-          ${orderData.status && orderData.status.toLowerCase() === 'cancelled' ? `
+          ${isCancelled ? `
             <div style="background-color: #fffbeb; border: 1px solid #fbbf24; padding: 15px; border-radius: 5px; margin: 20px 0;">
               <p style="margin: 0;">If you have already made the payment, a full refund will be processed within 5-7 business days to your original payment method.</p>
             </div>
@@ -111,27 +163,69 @@ export async function onRequestPost({ request, env }) {
       </html>
     `; 
 
-    const ownerHtml = `<html><body><h2>${orderData.status && orderData.status.toLowerCase() === 'cancelled' ? 'Order Cancelled' : 'New Order Received'}</h2>
-    <p>Customer: ${customer.firstName} ${customer.lastName} (${customer.email})</p>
-    <p>Order Ref: ${orderReference}</p>
-    <p>Status: ${orderData.status || 'New'}</p>
-    ${orderData.cancellationReason ? `<p><strong>Reason:</strong> ${orderData.cancellationReason}</p>` : ''}
-    ${orderData.cancellationNote ? `<p><strong>Note:</strong> ${orderData.cancellationNote}</p>` : ''}
-    <p>Total: ₹${orderTotal}</p>
-    <table border="1" cellpadding="5" style="border-collapse: collapse;">${productsHTML}</table></body></html>`;
+    const ownerHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; }
+          .header { background: #333; color: #fff; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; }
+          .order-info { margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 5px; }
+          table { width: 100%; border-collapse: collapse; }
+          th { background: #f1f1f1; padding: 10px; text-align: left; }
+          td { padding: 10px; border-bottom: 1px solid #eee; }
+          .total { text-align: right; font-weight: bold; font-size: 18px; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">Taharah - Admin Notification</div>
+          <h2>${isCancelled ? 'Order Cancelled' : 'New Order Received'}</h2>
+          
+          ${isCancelled ? `
+            <div style="background-color: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 15px; border-radius: 5px; margin: 20px 0;">
+              <p><strong>Cancellation Reason:</strong> ${cancellationReason || 'N/A'}</p>
+              ${cancellationNote ? `<p><strong>Note:</strong> ${cancellationNote}</p>` : ''}
+            </div>
+          ` : ''}
 
-    // Customize subject based on status
-    let customerSubject = `Order Received - ${orderReference}`;
-    if (orderData.status && orderData.status.toLowerCase() === 'cancelled') {
-      customerSubject = `Order Cancelled - ${orderReference}`;
-    }
+          ${commonOrderInfo}
+          ${commonCustomerInfo}
+
+          <h3>Order Items</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${productsHTML}
+            </tbody>
+          </table>
+          
+          <div class="total">
+            Total: ${symbol}${orderData.orderTotalDisplay?.toFixed(2) || orderTotal}
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    // Customize subjects
+    let customerSubject = isCancelled ? `Order Cancelled - ${orderReference}` : `Order Confirmation - ${orderReference}`;
+    let ownerSubject = isCancelled ? `Order Cancelled - ${orderReference}` : `New Order - ${orderReference}`;
 
     // Send to Customer
-    console.log(`Attempting to send email to customer: ${customer.email}`);
+    console.log(`Attempting to send email to customer: ${customer?.email}`);
     const custRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: `Taharah <${emailFrom}>`, to: [customer.email], subject: customerSubject, html: customerHtml })
+      body: JSON.stringify({ from: `Taharah <${emailFrom}>`, to: [customer?.email], subject: customerSubject, html: customerHtml })
     });
 
     let custError = null;
@@ -148,7 +242,7 @@ export async function onRequestPost({ request, env }) {
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: `Taharah Orders <${emailFrom}>`, to: [ownerEmail], subject: `New Order - ${orderReference}`, html: ownerHtml })
+        body: JSON.stringify({ from: `Taharah Orders <${emailFrom}>`, to: [ownerEmail], subject: ownerSubject, html: ownerHtml })
       });
       ownerRes = response;
       if (!ownerRes.ok) {
