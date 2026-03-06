@@ -142,6 +142,13 @@ const NewArrivalsProductsLoader = (function() {
                     'Content-Type': 'application/json'
                 };
 
+                // Add cache control headers for force refresh
+                if (forceRefresh || cacheInvalidated) {
+                    netlifyHeaders['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+                    netlifyHeaders['Pragma'] = 'no-cache';
+                    netlifyHeaders['Expires'] = '0';
+                }
+
                 // Add ETag for cache validation (only if not forcing refresh and cache not invalidated)
                 const storedETag = localStorage.getItem('newArrivalsProductsETag');
                 if (!forceRefresh && !cacheInvalidated && storedETag) {
@@ -154,7 +161,8 @@ const NewArrivalsProductsLoader = (function() {
 
                 response = await fetch(netlifyEndpoint, {
                     method: 'GET',
-                    headers: netlifyHeaders
+                    headers: netlifyHeaders,
+                    cache: (forceRefresh || cacheInvalidated) ? 'no-store' : 'default'
                 });
 
                 // Handle 304 Not Modified (only if we weren't forcing refresh)

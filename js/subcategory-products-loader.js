@@ -90,11 +90,6 @@ const SubcategoryProductsLoader = (function() {
 
             // Only add cache busting when force refresh or cache invalidated (not always)
             let netlifyEndpoint = `/api/load-products?category=${category}`;
-            
-            // Handle special cases for categories that might be named differently in the JSON files
-            if (category === 'gold-bangles' && window.location.pathname.includes('pakistani-pret-wear')) {
-                // Keep as gold-bangles or adjust if needed
-            }
 
             if (forceRefresh || cacheInvalidated) {
                 const cacheBustTimestamp = Date.now();
@@ -106,9 +101,16 @@ const SubcategoryProductsLoader = (function() {
                 'Content-Type': 'application/json'
             };
 
+            if (forceRefresh || cacheInvalidated) {
+                netlifyHeaders['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+                netlifyHeaders['Pragma'] = 'no-cache';
+                netlifyHeaders['Expires'] = '0';
+            }
+
             const response = await fetch(netlifyEndpoint, {
                 method: 'GET',
-                headers: netlifyHeaders
+                headers: netlifyHeaders,
+                cache: (forceRefresh || cacheInvalidated) ? 'no-store' : 'default'
             });
 
             if (!response.ok) {
