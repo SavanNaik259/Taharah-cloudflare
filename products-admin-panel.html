@@ -1339,12 +1339,12 @@
                 if (!category) return;
 
                 console.log(`Fetching subcategories for ${category}...`);
-                const response = await fetch(`/api/load-subcategories?category=${category}&cacheBust=${Date.now()}`);
+                const response = await fetch('/api/sync-subcategories');
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.success && Array.isArray(data.subcategories)) {
-                        globalSubcategories[category] = data.subcategories;
-                        console.log('Subcategories loaded:', data.subcategories);
+                        if (data.success && data.subcategories) {
+                        globalSubcategories = data.subcategories;
+                        console.log('Subcategories loaded:', globalSubcategories[category]);
                     }
                 }
             } catch (error) {
@@ -1363,7 +1363,10 @@
                         subcategory: subcategory
                     })
                 });
-                
+                if (response.status === 204) {
+                    console.log("Subcategory synced successfully (No Content)");
+                    return true;
+        }
                 const result = await response.json();
                 if (result.success) {
                     console.log("Subcategory synced successfully");
@@ -2961,7 +2964,7 @@
                       // Back-in-stock: ONLY if stock field was edited and stock went from 0 to available
                       if (fieldsChanged.stock && originalProductData.stock === 0 && updatedProductData.stock > 0) {
                         console.log('📦 Triggering back-in-stock notification (stock field was edited)...');
-                        await fetch('https://taharah.netlify.app/api/auto-back-in-stock-alerts', {
+                            await fetch('/api/auto-back-in-stock-alerts', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({
@@ -2976,7 +2979,7 @@
                       // Low-stock: ONLY if stock field was edited and stock changed to 3 or below
                       if (fieldsChanged.stock && updatedProductData.stock <= 3 && updatedProductData.stock > 0) {
                         console.log('⚡ Triggering low-stock notification (stock field was edited)...');
-                        await fetch('https://taharah.netlify.app/api/auto-low-stock-alerts', {
+                            await fetch('/api/auto-low-stock-alerts', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({
@@ -2993,7 +2996,7 @@
                       // Price-drop: ONLY if price field was edited and price decreased
                       if (fieldsChanged.price && originalProductData.price > updatedProductData.price) {
                         console.log('📉 Triggering price-drop notification (price field was edited)...');
-                        await fetch('https://taharah.netlify.app/api/auto-price-drop-alerts', {
+                            await fetch('/api/auto-price-drop-alerts', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({
@@ -3035,10 +3038,8 @@
                     // 🔔 TRIGGER NEW PRODUCT NOTIFICATION
                     try {
                       console.log('⭐ Triggering new-product notification...');
-                      const isProduction = !window.location.hostname.includes('localhost');
-                      const notificationUrl = isProduction 
-                        ? 'https://taharah.netlify.app/api/auto-new-product-alerts'
-                        : '/api/new-product-notification';
+
+                          const notificationUrl = '/api/auto-new-product-alerts';
                       
                       const response = await fetch(notificationUrl, {
                         method: 'POST',

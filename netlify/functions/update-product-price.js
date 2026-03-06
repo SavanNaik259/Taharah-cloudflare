@@ -106,7 +106,11 @@ exports.handler = async (event, context) => {
           console.log(`   Product name: ${updatedProduct.name || updatedProduct.productName}`);
           console.log(`   Discount: ${Math.round(((oldPrice - newPrice) / oldPrice) * 100)}%`);
           
-          const priceDropResponse = await fetch('https://taharah.netlify.app/api/auto-price-drop-alerts', {
+            const forwardedProto = event.headers?.['x-forwarded-proto'] || 'https';
+            const forwardedHost = event.headers?.['x-forwarded-host'] || event.headers?.host;
+            const origin = event.headers?.origin || `${forwardedProto}://${forwardedHost}`;
+
+            const priceDropResponse = await fetch(`${origin}/api/auto-price-drop-alerts`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

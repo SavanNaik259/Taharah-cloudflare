@@ -125,7 +125,11 @@ exports.handler = async (event, context) => {
         if (previousStock === 0 && newStock > 0) {
           console.log(`\n📦 BACK-IN-STOCK CONDITION MET - Calling automation function...`);
           try {
-            const backInStockResponse = await fetch('https://taharah.netlify.app/api/auto-back-in-stock-alerts', {
+              const forwardedProto = event.headers?.['x-forwarded-proto'] || 'https';
+              const forwardedHost = event.headers?.['x-forwarded-host'] || event.headers?.host;
+              const origin = event.headers?.origin || `${forwardedProto}://${forwardedHost}`;
+
+              const backInStockResponse = await fetch(`${origin}/api/auto-back-in-stock-alerts`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -147,7 +151,11 @@ exports.handler = async (event, context) => {
         if (previousStock > 3 && newStock <= 3 && newStock > 0) {
           console.log(`\n⚡ LOW-STOCK CONDITION MET - Calling automation function...`);
           try {
-            const lowStockResponse = await fetch('https://taharah.netlify.app/api/auto-low-stock-alerts', {
+              const forwardedProto = event.headers?.['x-forwarded-proto'] || 'https';
+              const forwardedHost = event.headers?.['x-forwarded-host'] || event.headers?.host;
+              const origin = event.headers?.origin || `${forwardedProto}://${forwardedHost}`;
+
+              const lowStockResponse = await fetch(`${origin}/api/auto-low-stock-alerts`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({

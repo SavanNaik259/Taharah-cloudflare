@@ -267,11 +267,19 @@ const FilterSortHandler = (function() {
         let categorySubs = [];
         try {
             // Fetch from Storage via API Function for shared persistence
-            const response = await fetch(`/api/load-subcategories?category=${category}&cacheBust=${Date.now()}`);
+            const response = await fetch(`/api/sync-subcategories?cacheBust=${Date.now()}`);
             if (response.ok) {
                 const data = await response.json();
-                if (data.success && Array.isArray(data.subcategories)) {
-                    categorySubs = data.subcategories;
+                    console.log('Fetched subcategories data:', data);
+                    if (data.success && data.subcategories) {
+                        // Check if it's the new format (object with categories as keys)
+                        if (data.subcategories[category]) {
+                            categorySubs = data.subcategories[category];
+                        } 
+                        // Or if it's the old format (direct array for a specific category)
+                        else if (Array.isArray(data.subcategories)) {
+                            categorySubs = data.subcategories;
+                        }
                 }
             }
         } catch (error) {
@@ -287,10 +295,12 @@ const FilterSortHandler = (function() {
                     products = await NewArrivalsProductsLoader.loadNewArrivalsProducts();
                 } else if (typeof SubcategoryProductsLoader !== 'undefined') {
                     products = await SubcategoryProductsLoader.loadSubcategoryProducts(category);
+                }else if (typeof FeaturedCollectionLoader !== 'undefined' && pageName === 'featured-collection') {
+                    products = await FeaturedCollectionLoader.loadFeaturedProducts();
                 }
 
                 if (products && products.length > 0) {
-                    const uniqueSubs = [...new Set(products.map(p => p.subcategory).filter(s => s && s.trim() !== ""))];
+                    const uniqueSubs = [...new Set(products.map(p => p.subcategory || p.subCategory).filter(s => s && s.trim() !== ""))];
                     categorySubs = uniqueSubs;
                 }
             } catch (pError) {
