@@ -115,10 +115,7 @@ async function loadNewArrivalsProductsDirect() {
         const response = await fetch(endpoint, {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
-                'Expires': '0'
+                'Content-Type': 'application/json'
             }
         });
 

@@ -44,24 +44,11 @@ const BridalProductsLoader = (function() {
             return [];
         }
 
-        // Always force refresh to clear any potential local cache
-        localStorage.removeItem('featuredCollectionProducts');
-        localStorage.removeItem('featuredCollectionProductsTime');
-        localStorage.removeItem('lastProductUpdate');
-        
-        // Clear ALL possible collection caches
-        const collections = ['new-arrivals', 'ready-to-wear', 'party-wear', 'modest-wear', 'featured-collection'];
-        collections.forEach(c => {
-            localStorage.removeItem(`${c}Products`);
-            localStorage.removeItem(`${c}ProductsTime`);
-        });
-
         const now = Date.now();
         
         try {
             let netlifyEndpoint = `/api/load-products?category=featured-collection`;
 
-            // Only add ETag if available
             const fetchHeaders = {
                 'Accept': 'application/json'
             };

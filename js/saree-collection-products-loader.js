@@ -154,12 +154,6 @@ const JewelrySubcategoriesLoader = (function() {
                 const categoriesParam = JEWELRY_SUBCATEGORIES.join(',');
                 let netlifyEndpoint = `/api/load-products?categories=${encodeURIComponent(categoriesParam)}`;
 
-                if (forceRefresh || cacheInvalidated) {
-                    const timestamp = Date.now();
-                    netlifyEndpoint += `&cacheBust=${timestamp}`;
-                    console.log('Added cache busting parameter:', timestamp);
-                }
-
                 const netlifyHeaders = {
                     'Content-Type': 'application/json'
                 };
@@ -181,8 +175,7 @@ const JewelrySubcategoriesLoader = (function() {
 
                 response = await fetch(netlifyEndpoint, {
                     method: 'GET',
-                    headers: netlifyHeaders,
-                    cache: (forceRefresh || cacheInvalidated) ? 'no-store' : 'default'
+                    headers: netlifyHeaders
                 });
 
                 if (response.status === 304 && !forceRefresh && !cacheInvalidated) {
