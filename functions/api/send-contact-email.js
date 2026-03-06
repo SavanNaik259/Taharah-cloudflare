@@ -36,7 +36,7 @@ export async function onRequestPost({ request, env }) {
               <p style="white-space: pre-wrap;">${contactData.message}</p>
             </div>
             <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-            <p style="font-size: 12px; color: #888; text-align: center;">Taharah Admin Notification</p>
+            <p style="font-size: 12px; color: #888; text-align: center;">&copy; ${new Date().getFullYear()} Taharah Admin Notification</p>
           </div>
         `
       })
@@ -63,7 +63,7 @@ export async function onRequestPost({ request, env }) {
             </div>
             <p>Best regards,<br>Taharah Team</p>
             <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-            <p style="font-size: 12px; color: #888; text-align: center;">Taharah - Pakistani Fashion</p>
+            <p style="font-size: 12px; color: #888; text-align: center;">&copy; ${new Date().getFullYear()} Taharah - Pakistani Fashion | Instagram: <a href="https://www.instagram.com/officialtaharah_/" style="color: #888;">officialtaharah_</a></p>
           </div>
         `
       })

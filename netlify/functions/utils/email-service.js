@@ -133,8 +133,8 @@ function generateCancellationEmailContent(orderData) {
 
             <div class="footer">
                 <p>Thank you for choosing Taharah</p>
-                <p>Email: ${process.env.EMAIL_USER} | Phone: +91 8589920686</p>
-                <p style="font-size: 12px; color: #999;">This is an automated email. Please do not reply to this email.</p>
+                <p>Email: ${process.env.EMAIL_USER} | Instagram: <a href="https://www.instagram.com/officialtaharah_/">officialtaharah_</a></p>
+                <p style="font-size: 12px; color: #999;">&copy; ${new Date().getFullYear()} Taharah. This is an automated email. Please do not reply to this email.</p>
             </div>
         </div>
     </body>
@@ -185,7 +185,7 @@ function generateOwnerCancellationContent(orderData) {
                 <p><strong>Order Reference:</strong> ${orderData.orderReference}</p>
                 <p><strong>Customer:</strong> ${orderData.customer.firstName} ${orderData.customer.lastName}</p>
                 <p><strong>Email:</strong> ${orderData.customer.email}</p>
-                <p><strong>Phone:</strong> ${orderData.customer.phone}</p>
+                <p><strong>Instagram ID:</strong> officialtaharah_</p>
                 <p><strong>Order Date:</strong> ${new Date(orderData.orderDate).toLocaleDateString('en-IN')}</p>
                 <p><strong>Total Amount:</strong> ${formatOwnerPrice(orderData.orderTotal)}</p>
 
