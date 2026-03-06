@@ -188,11 +188,16 @@ export async function onRequestGet({ request, env }) {
       };
     });
 
-    return new Response(JSON.stringify({ success: true, videos }), { status: 200, headers });
-  } catch (error) {
-    return new Response(JSON.stringify({ success: false, error: error.message }), { status: 500, headers });
-  }
-}
+    const responseHeaders = {
+      ...headers,
+      "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=600"
+    };
+
+    return new Response(JSON.stringify({ success: true, videos }), { status: 200, headers: responseHeaders });
+      } catch (error) {
+        return new Response(JSON.stringify({ success: false, error: error.message }), { status: 500, headers });
+      }
+    }
 
 export async function onRequestPost({ request, env }) {
   const headers = {

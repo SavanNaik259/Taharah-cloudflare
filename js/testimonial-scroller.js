@@ -19,12 +19,12 @@ async function loadWatchBuyVideos() {
     try {
         // First try the collection used by admin panel
         let snapshot = await db.collection('watch_buy_videos').orderBy('createdAt', 'desc').get();
-        
+
         // If empty, try the other possible collection name
         if (snapshot.empty) {
             snapshot = await db.collection('watchBuyVideos').orderBy('uploadedAt', 'desc').get();
         }
-        
+
         const loadingSpinner = document.getElementById('watch-buy-loading-spinner');
         if (loadingSpinner) loadingSpinner.remove();
 
@@ -42,6 +42,9 @@ async function loadWatchBuyVideos() {
             const sku = videoData.productSKU || videoData.sku || '';
             const videoItem = document.createElement('div');
             videoItem.className = 'testimonial-item';
+            // Use Cloudflare proxy for video to enable CDN caching and reduce bandwidth
+            const proxiedVideoUrl = `/api/proxy-video?url=${encodeURIComponent(videoData.videoUrl)}`;
+
             videoItem.innerHTML = `
                 <div class="video-container">
                     <div class="play-button-overlay">
@@ -52,7 +55,7 @@ async function loadWatchBuyVideos() {
                         </div>
                     </div>
                     <video class="testimonial-video" loop playsinline>
-                        <source src="${videoData.videoUrl}" type="video/mp4">
+                        <source src="${proxiedVideoUrl}" type="video/mp4">
                     </video>
                     <div class="video-product-link-placeholder" style="position: absolute; bottom: 20px; left: 20px; background: rgba(255, 255, 255, 0.95); padding: 12px 16px; border-radius: 8px; min-width: 250px; z-index: 5;">
                         <span style="font-size: 12px; color: #666;">⏳ Loading product link...</span>
@@ -60,7 +63,7 @@ async function loadWatchBuyVideos() {
                 </div>
             `;
             videoContainer.appendChild(videoItem);
-            
+
             // Link product after adding to DOM
             if (sku) {
                 updateDynamicVideoProductLink(videoItem, sku);
@@ -77,33 +80,27 @@ async function loadWatchBuyVideos() {
 
 async function updateDynamicVideoProductLink(container, sku) {
     try {
-        const categories = [
-            'featured-collection', 'new-arrivals', 'saree-collection',
-            'gold-necklace', 'silver-necklace', 'meenakari-necklace',
-            'gold-earrings', 'silver-earrings', 'meenakari-earrings',
-            'gold-bangles', 'silver-bangles', 'meenakari-bangles',
-            'gold-rings', 'silver-rings', 'meenakari-rings'
-        ];
-        
-        let productDetails = null;
-
-        // Use the categories parameter to fetch all at once for better performance and reliability
-        const categoriesQuery = categories.join(',');
-        const response = await fetch(`/api/load-products?categories=${categoriesQuery}&cacheBust=${Date.now()}`, {
-            cache: 'no-store',
-            headers: {
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
-                'Expires': '0'
-            }
-        });
-        if (response.ok) {
-            const data = await response.json();
-            if (data.success && data.products) {
-                // Find by id (SKU)
-                productDetails = data.products.find(p => p.id === sku);
+        // Fetch product list once if not already cached
+        if (!window.ALL_PRODUCTS_CACHE) {
+            const categories = [
+                'featured-collection', 'new-arrivals', 'saree-collection',
+                'gold-necklace', 'silver-necklace', 'meenakari-necklace',
+                'gold-earrings', 'silver-earrings', 'meenakari-earrings',
+                'gold-bangles', 'silver-bangles', 'meenakari-bangles',
+                'gold-rings', 'silver-rings', 'meenakari-rings'
+            ];
+            const categoriesQuery = categories.join(',');
+            // Removed cacheBust to allow CDN/Browser caching and optimized to a single global request
+            const response = await fetch(`/api/load-products?categories=${categoriesQuery}`);
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    window.ALL_PRODUCTS_CACHE = data.products;
+                }
             }
         }
+
+        const productDetails = window.ALL_PRODUCTS_CACHE ? window.ALL_PRODUCTS_CACHE.find(p => p.id === sku) : null;
 
         const placeholder = container.querySelector('.video-product-link-placeholder');
         if (!placeholder) return;
@@ -122,7 +119,7 @@ async function updateDynamicVideoProductLink(container, sku) {
         if (productDetails) {
             const productImage = productDetails.image || productDetails.mainImage || (productDetails.images && productDetails.images[0]?.url) || 'images/logos/royalmeenakari.png';
             const productPrice = productDetails.price ? `₹${productDetails.price.toLocaleString()}` : 'Price on request';
-            
+
             productLinkAnchor.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <img src="${productImage}" 
@@ -146,12 +143,12 @@ async function updateDynamicVideoProductLink(container, sku) {
                 </div>
             `;
         }
-        
+
         // Add click handler to ensure link works even if nested
         productLinkAnchor.addEventListener('click', (e) => {
             window.location.href = productLinkAnchor.href;
         });
-        
+
         placeholder.replaceWith(productLinkAnchor);
 
     } catch (error) {
@@ -162,7 +159,7 @@ async function updateDynamicVideoProductLink(container, sku) {
 document.addEventListener('DOMContentLoaded', function() {
     initBuyAndWatchVideos();
     initCustomerTestimonialVideos();
-    
+
     let firebaseCheckAttempts = 0;
     function waitForFirebaseAndLoad() {
         if (typeof firebase !== 'undefined' && typeof db !== 'undefined') {
@@ -191,60 +188,27 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
 
     // Fetch product details to get image and price
     try {
-        // Search in all possible categories
-        const categories = [
-            'featured-collection', 
-            'new-arrivals', 
-            'saree-collection',
-            'gold-necklace',
-            'silver-necklace',
-            'meenakari-necklace',
-            'gold-earrings',
-            'silver-earrings',
-            'meenakari-earrings',
-            'gold-bangles',
-            'silver-bangles',
-            'meenakari-bangles',
-            'gold-rings',
-            'silver-rings',
-            'meenakari-rings'
-        ];
-        let productDetails = null;
-
-        for (const category of categories) {
-            try {
-                const response = await fetch(`/api/load-products?category=${category}&cacheBust=${Date.now()}`, {
-                    cache: 'no-store',
-                    headers: {
-                        'Cache-Control': 'no-cache, no-store, must-revalidate',
-                        'Pragma': 'no-cache',
-                        'Expires': '0'
-                    }
-                });
-                if (response.ok) {
-                    const data = await response.json();
-
-                    if (data.success && data.products && data.products.length > 0) {
-                        // Find the product with matching SKU
-                        productDetails = data.products.find(p => p.id === sku);
-
-                        if (productDetails) {
-                            console.log(`Found product ${sku} in category ${category}:`, productDetails);
-                            // Ensure the product has all necessary fields
-                            if (!productDetails.image && productDetails.mainImage) {
-                                productDetails.image = productDetails.mainImage;
-                            } else if (!productDetails.image && productDetails.images && productDetails.images.length > 0) {
-                                productDetails.image = productDetails.images[0].url;
-                            }
-                            break;
-                        }
-                    }
+        // Fetch product list once if not already cached
+        if (!window.ALL_PRODUCTS_CACHE) {
+            const categories = [
+                'featured-collection', 'new-arrivals', 'saree-collection',
+                'gold-necklace', 'silver-necklace', 'meenakari-necklace',
+                'gold-earrings', 'silver-earrings', 'meenakari-earrings',
+                'gold-bangles', 'silver-bangles', 'meenakari-bangles',
+                'gold-rings', 'silver-rings', 'meenakari-rings'
+            ];
+            const categoriesQuery = categories.join(',');
+            // Removed cacheBust to allow CDN/Browser caching and optimized to a single global request
+            const response = await fetch(`/api/load-products?categories=${categoriesQuery}`);
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    window.ALL_PRODUCTS_CACHE = data.products;
                 }
-            } catch (error) {
-                console.error(`Error loading from category ${category}:`, error);
-                continue;
             }
         }
+
+        const productDetails = window.ALL_PRODUCTS_CACHE ? window.ALL_PRODUCTS_CACHE.find(p => p.id === sku) : null;
 
         // Remove any existing product link first
         const existingProductLink = videoContainer.querySelector('.video-product-link');
@@ -315,16 +279,16 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
         productLinkAnchor.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            
+
             const targetUrl = `product-detail?id=${encodeURIComponent(sku)}`;
-            
+
             console.log('🔗 VIDEO PRODUCT LINK CLICKED');
             console.log('📹 Video Number:', videoNumber);
             console.log('📦 Product SKU:', sku);
             console.log('📝 Product Name:', productName || 'Not found');
             console.log('🎯 Target URL:', targetUrl);
             console.log('🌐 Current Page:', window.location.href);
-            
+
             // Try immediate navigation first
             try {
                 // Method 1: Direct assignment (most reliable)
@@ -350,11 +314,11 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
         const videoWrapper = videoContainer.querySelector('.video-container');
         if (videoWrapper) {
             console.log(`📍 Found video wrapper for video ${videoNumber}`);
-            
+
             // First append the new link
             videoWrapper.appendChild(productLinkAnchor);
             console.log(`➕ New product link appended for video ${videoNumber}`);
-            
+
             // Then remove any old links (but not the one we just added)
             const existingLinks = videoWrapper.querySelectorAll('.video-product-link');
             let removedCount = 0;
@@ -367,14 +331,14 @@ async function updateVideoProductLink(videoNumber, sku, productName) {
             if (removedCount > 0) {
                 console.log(`🗑️ Removed ${removedCount} old product link(s)`);
             }
-            
+
             // Remove placeholder after new link is added
             const placeholder = videoWrapper.querySelector('.video-product-link-placeholder');
             if (placeholder) {
                 placeholder.remove();
                 console.log(`🗑️ Placeholder removed for video ${videoNumber}`);
             }
-            
+
             console.log(`✅ Product link added for video ${videoNumber}, SKU: ${sku}`);
             console.log(`🔗 Link href:`, productLinkAnchor.href);
             console.log(`🎨 Link styles:`, productLinkAnchor.style.cssText);

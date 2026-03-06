@@ -285,21 +285,57 @@ background-color: #000 !important;
     </style>
   <body style="margin: 0;">
     <!-- Page Loader -->
-    <div id="page-loader" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; display: flex; justify-content: center; align-items: center; z-index: 99999;">
+        <style>
+            #page-loader {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: #fff;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 99999;
+            }
+            body.loader-active {
+                overflow: hidden;
+            }
+        </style>
+        <div id="page-loader">
         <div class="loader-spinner" style="width: 50px; height: 50px; border: 3px solid #f3f3f3; border-top: 3px solid #333; border-radius: 50%; animation: spin 1s linear infinite;"></div>
     </div>
     <style>
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
     <script>
-        window.addEventListener('load', function() {
+            function hideLoader() {
             const loader = document.getElementById('page-loader');
-            if (loader) {
+                if (loader && loader.style.display !== 'none') {
                 loader.style.opacity = '0';
                 loader.style.transition = 'opacity 0.5s ease';
-                setTimeout(() => loader.style.display = 'none', 500);
+        setTimeout(() => {
+                    loader.style.display = 'none';
+                    document.body.style.overflow = '';
+                }, 500);
             }
-        });
+        }
+
+        // Fast hide: Hide as soon as the main structure is ready
+        // This prevents waiting for heavy videos and 100+ product images
+        if (document.readyState === 'interactive' || document.readyState === 'complete') {
+            hideLoader();
+        } else {
+            document.addEventListener('DOMContentLoaded', hideLoader);
+        }
+
+        // Safety timeout: Never show loader for more than 1.5 seconds
+        // Most users won't wait longer than this anyway
+        setTimeout(hideLoader, 1500);
+
+        // Window load is the "slow" way (waits for everything), 
+        // we keep it as a final fallback
+        window.addEventListener('load', hideLoader);
     </script>
 
     <!-- Push Notification Permission Banner -->

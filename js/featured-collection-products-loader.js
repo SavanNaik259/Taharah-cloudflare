@@ -59,16 +59,29 @@ const BridalProductsLoader = (function() {
         const now = Date.now();
         
         try {
-            let netlifyEndpoint = `/api/load-products?category=featured-collection&cacheBust=${now}`;
-            
+            let netlifyEndpoint = `/api/load-products?category=featured-collection`;
+
+            // Only add ETag if available
+            const fetchHeaders = {
+                'Accept': 'application/json'
+            };
+
+            const cachedETag = localStorage.getItem('featuredCollectionProductsETag');
+            if (cachedETag) {
+                fetchHeaders['If-None-Match'] = cachedETag;
+            }
+
             const response = await fetch(netlifyEndpoint, {
-                cache: 'no-store',
-                headers: {
-                    'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache',
-                    'Expires': '0'
-                }
+                headers: fetchHeaders
             });
+
+            if (response.status === 304) {
+                console.log('Using local cache (304 Not Modified)');
+                const cachedData = localStorage.getItem('featuredCollectionProducts');
+                if (cachedData) {
+                    return JSON.parse(cachedData);
+                }
+            }
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             
             const data = await response.json();

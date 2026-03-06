@@ -5199,7 +5199,11 @@
                 console.warn('Failed to load fresh video data:', err);
             }
         }
-
+// Clear the global cache to ensure fresh data on next visit
+                if (window.opener && window.opener.ALL_PRODUCTS_CACHE) {
+                    try { window.opener.ALL_PRODUCTS_CACHE = null; } catch(e) {}
+                }
+                window.ALL_PRODUCTS_CACHE = null;
         // Watch & Buy Video Management Functions
         async function loadWatchBuyVideos() {
             console.log('Loading Watch & Buy video configurations...');
