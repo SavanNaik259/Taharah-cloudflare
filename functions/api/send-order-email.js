@@ -92,7 +92,7 @@ export async function onRequestPost({ request, env }) {
         <h3>Customer Details</h3>
         <p><strong>Name:</strong> ${customer?.firstName} ${customer?.lastName || ''}</p>
         <p><strong>Email:</strong> ${customer?.email}</p>
-        <p><strong>Instagram:</strong> <a href="https://www.instagram.com/officialtaharah_/">officialtaharah_</a></p>
+        <p><strong>Phone:</strong> ${customer?.phone}</p>
         ${addressInfo}
       </div>
     `;
@@ -158,7 +158,6 @@ export async function onRequestPost({ request, env }) {
           ` : ''}
 
           <p>If you have any questions, please contact us at <a href="mailto:Officialtaharah@gmail.com">Officialtaharah@gmail.com</a></p>
-          <p style="font-size: 12px; color: #888; text-align: center;">&copy; ${new Date().getFullYear()} Taharah. All Rights Reserved.</p>
         </div>
       </body>
       </html>
@@ -182,12 +181,7 @@ export async function onRequestPost({ request, env }) {
       <body>
         <div class="container">
           <div class="header">Taharah - Admin Notification</div>
-          <p style="font-size: 12px; color: #888; text-align: center;">&copy; ${new Date().getFullYear()} Taharah Admin Notification</p>
           <h2>${isCancelled ? 'Order Cancelled' : 'New Order Received'}</h2>
-          
-          <div class="order-info">
-            <p><strong>Instagram:</strong> <a href="https://www.instagram.com/officialtaharah_/" style="color: #fff;">officialtaharah_</a></p>
-          </div>
           
           ${isCancelled ? `
             <div style="background-color: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 15px; border-radius: 5px; margin: 20px 0;">

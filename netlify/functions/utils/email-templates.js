@@ -230,14 +230,14 @@ function customerOrderTemplate(data) {
         </div>
       `}
 
-      <p>If you have any questions${status === 'cancelled' ? ' or would like to place a new order' : ' about your order'}, please contact our customer service team at <a href="mailto:${process.env.EMAIL_USER}">${process.env.EMAIL_USER}</a> or visit our Instagram at <a href="https://www.instagram.com/officialtaharah_/">officialtaharah_</a>.</p>
+      <p>If you have any questions${status === 'cancelled' ? ' or would like to place a new order' : ' about your order'}, please contact our customer service team at <a href="mailto:${process.env.EMAIL_USER}">${process.env.EMAIL_USER}</a> or call us at +91 8589920686.</p>
 
       <p>Thank you for ${status === 'cancelled' ? 'your understanding' : 'shopping with Taharah'}!</p>
 
       <div class="footer">
-        <p>&copy; ${new Date().getFullYear()} Taharah. All Rights Reserved.</p>
+        <p>&copy; 2025 Taharah. All Rights Reserved.</p>
         <p>This email was sent to ${customer.email || 'customer'}</p>
-        <p>Contact us: ${process.env.EMAIL_USER} | Instagram: <a href="https://www.instagram.com/officialtaharah_/" style="color: #999;">officialtaharah_</a></p>
+        <p>Contact us: ${process.env.EMAIL_USER} | +91 8589920686</p>
       </div>
     </div>
   </body>
@@ -412,7 +412,7 @@ function ownerOrderTemplate(data) {
       <p>Please process this order as soon as possible.</p>
 
       <div class="footer">
-        <p>&copy; ${new Date().getFullYear()} Taharah. All Rights Reserved.</p>
+        <p>&copy; 2025 Taharah. All Rights Reserved.</p>
         <p>This is an automated email from your Taharah website.</p>
       </div>
     </div>
@@ -466,14 +466,14 @@ function customerDeliveryTemplate(data) {
         ${trackingNumber ? `<p><strong>Tracking Number:</strong> ${trackingNumber}</p>` : ''}
       </div>
 
-      <p>If you have any questions about your order or need any assistance, please don't hesitate to contact us at <a href="mailto:${process.env.EMAIL_USER}">${process.env.EMAIL_USER}</a> or visit our Instagram: <a href="https://www.instagram.com/officialtaharah_/">officialtaharah_</a>.</p>
+      <p>If you have any questions about your order or need any assistance, please don't hesitate to contact us at <a href="mailto:${process.env.EMAIL_USER}">${process.env.EMAIL_USER}</a> or call us at +91 8589920686.</p>
 
       <p>We'd love to hear from you! Please share your feedback and help us improve your shopping experience.</p>
 
       <div class="footer">
-        <p>&copy; ${new Date().getFullYear()} Taharah. All Rights Reserved.</p>
+        <p>&copy; 2025 Taharah. All Rights Reserved.</p>
         <p>Thank you for shopping with us!</p>
-        <p>Contact us: ${process.env.EMAIL_USER} | Instagram: <a href="https://www.instagram.com/officialtaharah_/" style="color: #999;">officialtaharah_</a></p>
+        <p>Contact us: ${process.env.EMAIL_USER} | +91 8589920686</p>
       </div>
     </div>
   </body>
@@ -528,7 +528,7 @@ function ownerDeliveryTemplate(data) {
       <p>The customer has been notified of the successful delivery.</p>
 
       <div class="footer">
-        <p>&copy; ${new Date().getFullYear()} Taharah. All Rights Reserved.</p>
+        <p>&copy; 2025 Taharah. All Rights Reserved.</p>
         <p>This is an automated email from your Taharah website.</p>
       </div>
     </div>
