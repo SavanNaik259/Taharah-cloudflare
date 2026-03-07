@@ -1147,7 +1147,7 @@ async function sendContactEmail(contactData) {
 
               <div class="footer">
                   <p>Thank you for choosing Taharah - Where elegance meets tradition</p>
-                  <p>Email: Officialtaharah@gmail.com | Phone: +91 8589920686</p>
+                  <p>Email: officialtaharah@gmail.com | Phone: +91 8589920686</p>
                   <p style="font-size: 12px; color: #999;">This is an automated confirmation email. Please do not reply to this email.</p>
               </div>
           </div>

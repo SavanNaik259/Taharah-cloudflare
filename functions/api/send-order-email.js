@@ -28,7 +28,7 @@ export async function onRequestPost({ request, env }) {
 
     const resendApiKey = env.RESEND_API_KEY;
     const emailFrom = env.EMAIL_FROM;
-    const ownerEmail = env.OWNER_EMAIL || "githost2007@gmail.com";
+    const ownerEmail = env.OWNER_EMAIL || "officialtaharah@gmail.com";
     console.log(`Using owner email: ${ownerEmail}`);
 
     if (!resendApiKey || !emailFrom) return new Response(JSON.stringify({ success: false, message: "Resend configuration missing" }), { status: 500, headers });
@@ -157,7 +157,7 @@ export async function onRequestPost({ request, env }) {
             </div>
           ` : ''}
 
-          <p>If you have any questions, please contact us at <a href="mailto:Officialtaharah@gmail.com">Officialtaharah@gmail.com</a></p>
+          <p>If you have any questions, please contact us at <a href="mailto:officialtaharah@gmail.com">officialtaharah@gmail.com</a></p>
         </div>
       </body>
       </html>

@@ -78,6 +78,7 @@ app.all('/api/:functionName', async (req, res) => {
     
     // Inject hardcoded keys into process.env for the function execution
     process.env.RAZORPAY_KEY_ID = "rzp_live_SG2nO8SrQyBF6r";
+    process.env.OWNER_EMAIL = "officialtaharah@gmail.com";
     // RAZORPAY_KEY_SECRET is already in process.env from the environment or should be left to be picked up from there
 
     const event = {

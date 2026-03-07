@@ -64,7 +64,7 @@ export async function onRequestPost({ request, env }) {
               <p><strong>Time:</strong> ${appointmentData.time || 'Not specified'}</p>
               <p><strong>Service:</strong> ${appointmentData.service || 'Not specified'}</p>
             </div>
-            <p>If you need to reschedule, please contact us at <a href="mailto:Officialtaharah@gmail.com">Officialtaharah@gmail.com</a></p>
+            <p>If you need to reschedule, please contact us at <a href="mailto:officialtaharah@gmail.com">officialtaharah@gmail.com</a></p>
             <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
             <p style="font-size: 12px; color: #888; text-align: center;">Taharah - Pakistani Fashion</p>
           </div>

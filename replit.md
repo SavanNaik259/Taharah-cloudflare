@@ -13,7 +13,7 @@ Taharah is a premium Pakistani fashion e-commerce platform.
 
 ## Key Configurations
 - **Instagram:** [@officialtaharah_](https://www.instagram.com/officialtaharah_/)
-- **Contact Email:** Officialtaharah@gmail.com
+- **Contact Email:** officialtaharah@gmail.com
 - **Brand Colors:** 
   - Plum: `#a46d77` (Buttons)
   - Greyish Beige: `#d8d2c2` (Borders/Accents)
