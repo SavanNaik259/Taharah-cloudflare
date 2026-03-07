@@ -65,13 +65,27 @@
 }
 
 .buy-now-btn {
-    background-color: #d8d2c2 !important; /* Greyish Beige Color */
-    color: #4a4a4a !important; /* Dark grey for readability on beige */
+    background-color: #a46d77 !important; /* Match Add to Cart background */
+    color: #fff !important;
     border: none !important;
 }
 
+.add-to-wishlist-btn {
+    background-color: transparent !important;
+    color: #333 !important;
+    border: 1px solid #d8d2c2 !important; /* Greyish Beige Color for border */
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.add-to-wishlist-btn:hover {
+    background-color: #f8f8f5 !important;
+    border-color: #c5c0b0 !important;
+}
+
 .add-to-cart-btn:hover, .buy-now-btn:hover {
-    filter: brightness(0.95) !important;
+    filter: brightness(0.9) !important;
 }
 
 /* Emergency fallback - if nothing else works */
