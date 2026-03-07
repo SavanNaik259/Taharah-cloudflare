@@ -44,6 +44,8 @@ async function loadWatchBuyVideos() {
             videoItem.className = 'testimonial-item';
             // Use Cloudflare proxy for video to enable CDN caching and reduce bandwidth
             const proxiedVideoUrl = `/api/proxy-video?url=${encodeURIComponent(videoData.videoUrl)}`;
+            
+            console.log('📹 Loading video:', proxiedVideoUrl);
 
             videoItem.innerHTML = `
                 <div class="video-container">
