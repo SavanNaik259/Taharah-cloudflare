@@ -3506,6 +3506,9 @@
     <script src="js/stock-manager.js"></script>
     <script src="js/out-of-stock-handler.js"></script>
     
+    <!-- Cache Manager - CRITICAL: Must load BEFORE firebase-orders.js -->
+    <script src="js/firebase/cache-manager.js"></script>
+    
     <!-- Firebase Orders Module - CRITICAL: Must load BEFORE loadOrders() is called -->
     <script src="js/firebase/firebase-orders.js"></script>
 

@@ -200,59 +200,48 @@ async function getUserOrders() {
 /**
  * Get ALL orders from Firebase (both user and guest orders)
  * For admin panel to display all orders
+ * This version includes intelligent caching to reduce Firebase reads
  * @returns {Promise<Object>} Success status and all orders
  */
 async function getAllOrders() {
     try {
-        const allOrders = [];
+        const cacheKey = 'admin_all_orders';
+        const cacheTTL = 5 * 60 * 1000; // 5 minutes cache validity
         
-        // Get all user orders
-        console.log('Fetching all user orders for admin...');
-        const usersSnapshot = await firebase.firestore().collection('users').get();
-        
-        for (const userDoc of usersSnapshot.docs) {
-            const userId = userDoc.id;
-            const userOrdersSnapshot = await userDoc.ref.collection('orders').get();
-            
-            userOrdersSnapshot.forEach(orderDoc => {
-                const data = orderDoc.data();
-                allOrders.push({
-                    id: orderDoc.id,
-                    userId: userId,
-                    isGuestOrder: false,
-                    ...data,
-                    orderDate: data.timestamp ? data.timestamp.toDate().toISOString() : new Date().toISOString()
-                });
-            });
+        // Try to get cached data first
+        if (typeof window.CacheManager !== 'undefined') {
+            const cachedOrders = window.CacheManager.get(cacheKey);
+            if (cachedOrders) {
+                console.log('✅ Using cached orders (from CacheManager):', cachedOrders.length, 'orders');
+                // Fetch fresh data in background without blocking
+                fetchAllOrdersFresh().then(orders => {
+                    if (orders.length !== cachedOrders.length) {
+                        console.log('🔄 Fresh orders data updated - new count:', orders.length);
+                        window.CacheManager.set(cacheKey, orders, cacheTTL);
+                    }
+                }).catch(err => console.warn('Background orders refresh failed:', err));
+                
+                return {
+                    success: true,
+                    orders: cachedOrders,
+                    fromCache: true
+                };
+            }
         }
         
-        // Get all guest orders
-        console.log('Fetching all guest orders for admin...');
-        const guestOrdersSnapshot = await firebase.firestore().collection('guest-orders').get();
+        // No valid cache, fetch fresh data
+        console.log('📡 Cache miss - fetching fresh orders from Firebase...');
+        const orders = await fetchAllOrdersFresh();
         
-        guestOrdersSnapshot.forEach(orderDoc => {
-            const data = orderDoc.data();
-            allOrders.push({
-                id: orderDoc.id,
-                userId: 'guest',
-                isGuestOrder: true,
-                ...data,
-                orderDate: data.timestamp ? data.timestamp.toDate().toISOString() : new Date().toISOString()
-            });
-        });
-        
-        // Sort by timestamp descending
-        allOrders.sort((a, b) => {
-            const aTime = new Date(a.orderDate).getTime();
-            const bTime = new Date(b.orderDate).getTime();
-            return bTime - aTime;
-        });
-        
-        console.log('Successfully fetched all orders:', allOrders.length, '(User orders:', usersSnapshot.size, ', Guest orders:', guestOrdersSnapshot.size, ')');
+        // Cache the result
+        if (typeof window.CacheManager !== 'undefined') {
+            window.CacheManager.set(cacheKey, orders, cacheTTL);
+        }
         
         return {
             success: true,
-            orders: allOrders
+            orders: orders,
+            fromCache: false
         };
     } catch (error) {
         console.error('Error getting all orders:', error);
@@ -261,6 +250,61 @@ async function getAllOrders() {
             error: error.message
         };
     }
+}
+
+/**
+ * Fetch fresh orders directly from Firebase
+ * @private
+ * @returns {Promise<Array>} Array of all orders
+ */
+async function fetchAllOrdersFresh() {
+    const allOrders = [];
+    
+    // Get all user orders
+    console.log('📡 Fetching all user orders from Firebase...');
+    const usersSnapshot = await firebase.firestore().collection('users').get();
+    
+    for (const userDoc of usersSnapshot.docs) {
+        const userId = userDoc.id;
+        const userOrdersSnapshot = await userDoc.ref.collection('orders').get();
+        
+        userOrdersSnapshot.forEach(orderDoc => {
+            const data = orderDoc.data();
+            allOrders.push({
+                id: orderDoc.id,
+                userId: userId,
+                isGuestOrder: false,
+                ...data,
+                orderDate: data.timestamp ? data.timestamp.toDate().toISOString() : new Date().toISOString()
+            });
+        });
+    }
+    
+    // Get all guest orders
+    console.log('📡 Fetching all guest orders from Firebase...');
+    const guestOrdersSnapshot = await firebase.firestore().collection('guest-orders').get();
+    
+    guestOrdersSnapshot.forEach(orderDoc => {
+        const data = orderDoc.data();
+        allOrders.push({
+            id: orderDoc.id,
+            userId: 'guest',
+            isGuestOrder: true,
+            ...data,
+            orderDate: data.timestamp ? data.timestamp.toDate().toISOString() : new Date().toISOString()
+        });
+    });
+    
+    // Sort by timestamp descending
+    allOrders.sort((a, b) => {
+        const aTime = new Date(a.orderDate).getTime();
+        const bTime = new Date(b.orderDate).getTime();
+        return bTime - aTime;
+    });
+    
+    console.log('✅ Fetched fresh orders:', allOrders.length, '(User orders:', usersSnapshot.size, ', Guest orders:', guestOrdersSnapshot.size, ')');
+    
+    return allOrders;
 }
 
 // Create global object to expose functions
