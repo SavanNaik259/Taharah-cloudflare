@@ -9,7 +9,7 @@ const CacheManager = {
     // Configuration
     config: {
         enableLogging: true,
-        defaultTTL: 5 * 60 * 1000, // 5 minutes default
+        defaultTTL: 365 * 24 * 60 * 60 * 1000, // 1 year default
     },
 
     /**

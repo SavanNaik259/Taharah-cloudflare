@@ -206,7 +206,7 @@ async function getUserOrders() {
 async function getAllOrders() {
     try {
         const cacheKey = 'admin_all_orders';
-        const cacheTTL = 5 * 60 * 1000; // 5 minutes cache validity
+        const cacheTTL = 365 * 24 * 60 * 60 * 1000; // 1 year cache validity
         
         // Try to get cached data first
         if (typeof window.CacheManager !== 'undefined') {
