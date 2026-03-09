@@ -8,19 +8,19 @@
   Content-Type: application/javascript
   Cache-Control: no-cache, must-revalidate
 
-# Standard cache headers for static assets
+# Static assets - no caching to ensure instant updates on Cloudflare Pages
 /*.js
   Content-Type: application/javascript
-  Cache-Control: public, max-age=31536000
+  Cache-Control: no-cache, no-store, must-revalidate
 
 /*.css
   Content-Type: text/css
-  Cache-Control: public, max-age=31536000
+  Cache-Control: no-cache, no-store, must-revalidate
 
 /*.woff
   Content-Type: font/woff
-  Cache-Control: public, max-age=31536000
+  Cache-Control: no-cache, no-store, must-revalidate
 
 /*.woff2
   Content-Type: font/woff2
-  Cache-Control: public, max-age=31536000
+  Cache-Control: no-cache, no-store, must-revalidate
