@@ -63,7 +63,7 @@ export async function onRequest(context) {
 
     const newHeaders = new Headers();
     newHeaders.set('Content-Type', contentType || 'image/jpeg');
-    newHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    newHeaders.set('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, stale-while-revalidate=604800');
     newHeaders.set('Access-Control-Allow-Origin', '*');
     newHeaders.set('Vary', 'Accept');
 

@@ -190,7 +190,7 @@ export async function onRequestGet({ request, env }) {
 
     const responseHeaders = {
       ...headers,
-      "Cache-Control": "no-cache, no-store, must-revalidate"
+      "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=600"
     };
 
     return new Response(JSON.stringify({ success: true, videos }), { status: 200, headers: responseHeaders });
