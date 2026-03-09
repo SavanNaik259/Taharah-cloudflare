@@ -23,9 +23,9 @@ export async function onRequestGet({ request, env }) {
       return new Response(`Failed to fetch video: ${response.statusText}`, { status: response.status });
     }
 
-    // Set aggressive caching headers for Cloudflare
+    // Disable caching for development on Cloudflare Pages
     const newHeaders = new Headers(response.headers);
-    newHeaders.set("Cache-Control", "public, max-age=31536000, immutable");
+    newHeaders.set("Cache-Control", "no-cache, no-store, must-revalidate");
     newHeaders.set("Access-Control-Allow-Origin", "*");
 
     return new Response(response.body, {

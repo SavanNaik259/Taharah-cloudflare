@@ -6,7 +6,7 @@ export async function onRequest(context) {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Content-Type': 'application/json',
-    'Cache-Control': 'public, max-age=31536000, s-maxage=31536000, stale-while-revalidate=604800'
+    'Cache-Control': 'no-cache, no-store, must-revalidate'
   };
 
   try {
