@@ -8582,9 +8582,9 @@
                 
                 // Load cached orders (displays Total Orders, Revenue stat cards instantly)
                 try {
-                    const cachedOrders = localStorage.getItem('admin_dashboard_orders');
+                    const cachedOrders = window.CacheManager && window.CacheManager.get ? window.CacheManager.get('admin_dashboard_orders') : localStorage.getItem('admin_dashboard_orders');
                     if (cachedOrders) {
-                        const { data } = JSON.parse(cachedOrders);
+                        const data = cachedOrders.allOrders ? cachedOrders : JSON.parse(cachedOrders).data;
                         console.log(`✅ Using cached orders (instant display)`);
                         allOrders = data.allOrders || [];
                         newOrders = data.newOrders || [];
@@ -8600,9 +8600,9 @@
                 
                 // Load cached customers (displays Total Customers stat card instantly)
                 try {
-                    const cachedCustomers = localStorage.getItem('admin_dashboard_customers');
+                    const cachedCustomers = window.CacheManager && window.CacheManager.get ? window.CacheManager.get('admin_dashboard_customers') : localStorage.getItem('admin_dashboard_customers');
                     if (cachedCustomers) {
-                        const { data } = JSON.parse(cachedCustomers);
+                        const data = Array.isArray(cachedCustomers) ? cachedCustomers : JSON.parse(cachedCustomers).data;
                         console.log(`✅ Using cached customers (instant display)`);
                         allCustomers = data || [];
                         updateCustomersDisplay();
@@ -8650,16 +8650,18 @@
                 // Load orders
                 try {
                     await loadOrders();
-                    // Save to cache
-                    localStorage.setItem('admin_dashboard_orders', JSON.stringify({
-                        timestamp: Date.now(),
-                        data: {
-                            allOrders,
-                            newOrders,
-                            confirmedOrders,
-                            cancelledOrders
-                        }
-                    }));
+                    // Save to cache using CacheManager
+                    const cacheData = {
+                        allOrders,
+                        newOrders,
+                        confirmedOrders,
+                        cancelledOrders
+                    };
+                    if (window.CacheManager && window.CacheManager.set) {
+                        window.CacheManager.set('admin_dashboard_orders', cacheData);
+                    } else {
+                        localStorage.setItem('admin_dashboard_orders', JSON.stringify({ timestamp: Date.now(), data: cacheData }));
+                    }
                     console.log('💾 Cached fresh orders data');
                 } catch (err) {
                     console.warn('Failed to load fresh orders:', err);
@@ -8668,11 +8670,12 @@
                 // Load customers
                 try {
                     await loadCustomers();
-                    // Save to cache
-                    localStorage.setItem('admin_dashboard_customers', JSON.stringify({
-                        timestamp: Date.now(),
-                        data: allCustomers
-                    }));
+                    // Save to cache using CacheManager
+                    if (window.CacheManager && window.CacheManager.set) {
+                        window.CacheManager.set('admin_dashboard_customers', allCustomers);
+                    } else {
+                        localStorage.setItem('admin_dashboard_customers', JSON.stringify({ timestamp: Date.now(), data: allCustomers }));
+                    }
                     console.log('💾 Cached fresh customers data');
                 } catch (err) {
                     console.warn('Failed to load fresh customers:', err);

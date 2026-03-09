@@ -200,7 +200,7 @@ async function getUserOrders() {
 /**
  * Get ALL orders from Firebase (both user and guest orders)
  * For admin panel to display all orders
- * This version includes intelligent caching with IndexedDB support
+ * This version includes intelligent caching with localStorage
  * @returns {Promise<Object>} Success status and all orders
  */
 async function getAllOrders() {
@@ -208,20 +208,18 @@ async function getAllOrders() {
         const cacheKey = 'admin_all_orders';
         const cacheTTL = 365 * 24 * 60 * 60 * 1000; // 1 year cache validity
         
-        // Try to get cached data first
+        // Try to get cached data first (SYNCHRONOUS - instant!)
         if (typeof window.CacheManager !== 'undefined') {
-            const cachedOrders = await window.CacheManager.get(cacheKey);
+            const cachedOrders = window.CacheManager.get(cacheKey);
             if (cachedOrders) {
-                console.log('✅ Using cached orders (from CacheManager):', cachedOrders.length, 'orders');
+                console.log('✅ Using cached orders:', cachedOrders.length, 'orders');
                 // Fetch fresh data in background without blocking UI
                 fetchAllOrdersFresh().then(orders => {
                     if (orders.length !== cachedOrders.length) {
-                        console.log('🔄 Fresh orders data updated - new count:', orders.length);
-                        window.CacheManager.set(cacheKey, orders, cacheTTL).catch(err => {
-                            console.warn('Failed to update cache:', err);
-                        });
+                        console.log('🔄 Fresh orders updated - new count:', orders.length);
+                        window.CacheManager.set(cacheKey, orders, cacheTTL);
                     }
-                }).catch(err => console.warn('Background orders refresh failed:', err));
+                }).catch(err => console.warn('Background refresh failed:', err));
                 
                 return {
                     success: true,
@@ -232,14 +230,12 @@ async function getAllOrders() {
         }
         
         // No valid cache, fetch fresh data
-        console.log('📡 Cache miss - fetching fresh orders from Firebase...');
+        console.log('📡 Fetching fresh orders from Firebase...');
         const orders = await fetchAllOrdersFresh();
         
         // Cache the result
         if (typeof window.CacheManager !== 'undefined') {
-            await window.CacheManager.set(cacheKey, orders, cacheTTL).catch(err => {
-                console.warn('Failed to cache orders:', err);
-            });
+            window.CacheManager.set(cacheKey, orders, cacheTTL);
         }
         
         return {
