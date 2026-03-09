@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Banner content array
     const bannerContents = [
+        '•Eid orders are closed!!•',
         '•Free shipping for all your orders•',
         '•New arrivals for the festive season• - <a href="new-arrivals">View Collection</a>'
     ];
