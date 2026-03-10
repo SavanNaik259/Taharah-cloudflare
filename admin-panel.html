@@ -8729,19 +8729,43 @@
                 console.log('💾 Loading cached video data for instant display...');
                 loadWatchBuyVideosCachedData();
 
-                // Load fresh dashboard data in parallel (updates will happen automatically)
-                console.log('📋 Loading fresh dashboard data in parallel...');
-                loadDashboardFreshData();
-                
-                // Load fresh products data in parallel (updates will happen automatically)
-                console.log('📡 Loading fresh products data in parallel...');
-                loadProductsFreshData();
-                
-                // Load fresh videos data in parallel (updates will happen automatically)
-                console.log('📡 Loading fresh video data in parallel...');
-                loadWatchBuyVideosFreshData();
+                // Check if we have valid cache and if it's fresh (less than 1 hour old)
+                const cachedOrders = localStorage.getItem('admin_dashboard_orders');
+                let needsFreshLoad = true;
+                if (cachedOrders) {
+                    try {
+                        const { timestamp } = JSON.parse(cachedOrders);
+                        const age = Date.now() - timestamp;
+                        if (age < 60 * 60 * 1000) { // 1 hour
+                            needsFreshLoad = false;
+                            console.log('✨ Cache is fresh (age: ' + Math.round(age/60000) + 'm). Skipping background Firebase fetch.');
+                            
+                            // Set up a background refresh after 5 seconds just in case, but don't block
+                            setTimeout(() => {
+                                console.log('🔄 Background refresh starting...');
+                                loadDashboardFreshData();
+                                loadProductsFreshData();
+                                loadWatchBuyVideosFreshData();
+                            }, 5000);
+                        }
+                    } catch(e) {}
+                }
 
-                console.log('✅ Dashboard initialization complete (using cached data, fresh data loading in background)');
+                if (needsFreshLoad) {
+                    // Load fresh dashboard data in parallel (updates will happen automatically)
+                    console.log('📋 Loading fresh dashboard data in parallel...');
+                    loadDashboardFreshData();
+                    
+                    // Load fresh products data in parallel (updates will happen automatically)
+                    console.log('📡 Loading fresh products data in parallel...');
+                    loadProductsFreshData();
+                    
+                    // Load fresh videos data in parallel (updates will happen automatically)
+                    console.log('📡 Loading fresh video data in parallel...');
+                    loadWatchBuyVideosFreshData();
+                }
+
+                console.log('✅ Dashboard initialization complete (using cached data, fresh data loading if needed)');
 
                 // Lazy load full inventory data in the background (non-blocking)
                 setTimeout(() => {
