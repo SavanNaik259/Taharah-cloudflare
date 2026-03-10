@@ -1,3 +1,7 @@
+# Catch-all rule for HTML and other files to ensure no caching
+/*
+  Cache-Control: no-cache, no-store, must-revalidate
+
 # Service Worker - must have correct MIME type
 /service-worker.js
   Content-Type: application/javascript
