@@ -7498,7 +7498,6 @@
 
         // Enhanced delete product function with custom modal
         async function deleteProduct(productId, category) {
-            // Find product details for the modal
             const product = productsCache?.products?.find(p => p.id === productId);
 
             const confirmed = await showDeleteProductModal({
@@ -7513,72 +7512,62 @@
                 return;
             }
 
-            // Show loading state immediately
             showGlobalLoader('Deleting product...');
 
             try {
                 console.log(`Deleting product ${productId} from ${category}...`);
 
-                const response = await fetch('/api/delete-product', {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        productId: productId,
-                        category: category
-                    })
+                const storageBucket = 'studio-7642357109-d9026.firebasestorage.app';
+                const storageUrl = `https://firebasestorage.googleapis.com/v0/b/${storageBucket}/o/productData%2F${category}-products.json?alt=media`;
+
+                console.log('📥 Loading current products from Firebase Storage...');
+                const loadResponse = await fetch(storageUrl);
+                if (!loadResponse.ok) {
+                    throw new Error(`Failed to load products file: ${loadResponse.status}`);
+                }
+                let existingProducts = await loadResponse.json();
+                console.log(`📦 Loaded ${existingProducts.length} products from ${category}`);
+
+                const productIndex = existingProducts.findIndex(p => p.id === productId);
+                if (productIndex === -1) {
+                    throw new Error('Product not found in category file');
+                }
+
+                const productToDelete = existingProducts[productIndex];
+                console.log(`🗑️ Removing product: ${productToDelete.name}`);
+
+                existingProducts.splice(productIndex, 1);
+
+                const updatedJSON = JSON.stringify(existingProducts, null, 2);
+                const blob = new Blob([updatedJSON], { type: 'application/json' });
+
+                console.log('📤 Uploading updated products list via Firebase Storage SDK...');
+                const storageRef = firebase.storage().ref(`productData/${category}-products.json`);
+                await storageRef.put(blob, { contentType: 'application/json' });
+
+                console.log(`✅ Product ${productId} deleted successfully. Remaining: ${existingProducts.length}`);
+
+                showSuccessModal({
+                    title: 'Product Deleted!',
+                    message: `"${productToDelete.name}" has been successfully removed from your inventory.`,
+                    icon: '🗑️'
                 });
 
-                console.log(`Delete response status: ${response.status}`);
-                console.log(`Delete response headers:`, response.headers);
-
-                // Check if response is JSON
-                const contentType = response.headers.get('content-type');
-                let result;
-
-                if (contentType && contentType.includes('application/json')) {
-                    result = await response.json();
-                } else {
-                    // Handle non-JSON response (likely HTML error page)
-                    const textResponse = await response.text();
-                    console.error('Non-JSON response:', textResponse);
-                    throw new Error('Server returned HTML instead of JSON. Status: ' + response.status);
-                }
-
-                if (result.success) {
-                    // Show success modal
-                    showSuccessModal({
-                        title: 'Product Deleted!',
-                        message: 'The product has been successfully removed from your inventory.',
-                        icon: '🗑️'
-                    });
-
-                    // Clear cache to force refresh
-                    productsCache = null;
-
-                    // Reload products with fresh data
-                    await loadProducts();
-
-                    // Reload inventory stats
-                    await loadInventoryData();
-                } else {
-                    throw new Error(result.error || 'Failed to delete product');
-                }
+                productsCache = null;
+                await loadProducts();
+                await loadInventoryData();
 
             } catch (error) {
                 console.error('❌ Error deleting product:', error);
-                hideGlobalLoader(); // Hide loader on error
+                hideGlobalLoader();
 
-                // Provide more helpful error messages
                 let errorMsg = error.message;
                 if (error.message.includes('Failed to fetch')) {
                     errorMsg = 'Network error: Could not connect to server. Please check your internet connection.';
-                } else if (error.message.includes('HTML instead of JSON')) {
-                    errorMsg = 'Server error: The delete function is not responding properly. This might be a deployment issue.';
+                } else if (error.message.includes('storage/unauthorized')) {
+                    errorMsg = 'Permission denied: Firebase Storage rules may need to allow writes. Please check your Firebase console.';
                 }
 
-                // Show error in styled modal instead of alert
                 showErrorModal('Delete Failed', `Error deleting product: ${errorMsg}`);
             }
         }
