@@ -2,6 +2,14 @@ if (typeof firebase === 'undefined') {
     console.error('Firebase is not initialized. Make sure to include Firebase SDK and initialize it first.');
 }
 
+var _userOrdersUnsubscribe = null;
+var _guestOrdersUnsubscribe = null;
+var _userOrdersData = [];
+var _guestOrdersData = [];
+var _ordersListenerCallback = null;
+var _listenersReady = { users: false, guests: false };
+var _initialLoadDone = false;
+
 function checkOrderAuthRequirement() {
     const result = {
         requiresAuth: false,
@@ -59,9 +67,6 @@ async function saveOrderToFirebase(orderData) {
         }
         
         console.log('Successfully saved order to Firebase with ID:', orderRef.id, 'isGuest:', !user);
-        
-        localStorage.removeItem('admin_all_orders_cache');
-        localStorage.removeItem('admin_dashboard_orders');
         
         return {
             success: true,
@@ -158,22 +163,217 @@ async function getUserOrders() {
     }
 }
 
+function _mergeAndNotify() {
+    const allOrders = [..._userOrdersData, ..._guestOrdersData];
+    
+    allOrders.sort((a, b) => {
+        const aTime = new Date(a.orderDate).getTime();
+        const bTime = new Date(b.orderDate).getTime();
+        return bTime - aTime;
+    });
+    
+    try {
+        localStorage.setItem('admin_all_orders_cache', JSON.stringify({
+            timestamp: Date.now(),
+            data: allOrders
+        }));
+    } catch (e) {
+        console.warn('Failed to cache orders to localStorage:', e);
+    }
+    
+    if (_ordersListenerCallback) {
+        _ordersListenerCallback(allOrders);
+    }
+}
+
+function setupOrdersListener(onOrdersChanged) {
+    stopOrdersListener();
+    
+    _ordersListenerCallback = onOrdersChanged;
+    _listenersReady = { users: false, guests: false };
+    _initialLoadDone = false;
+    
+    console.log('🔴 Setting up real-time order listeners...');
+    
+    var userOrdersByUser = {};
+    
+    firebase.firestore().collection('users').get().then(function(usersSnapshot) {
+        var userCount = usersSnapshot.size;
+        var listenersSetup = 0;
+        
+        if (userCount === 0) {
+            _userOrdersData = [];
+            _listenersReady.users = true;
+            if (_listenersReady.guests) _mergeAndNotify();
+            return;
+        }
+        
+        usersSnapshot.forEach(function(userDoc) {
+            var userId = userDoc.id;
+            userOrdersByUser[userId] = [];
+            
+            var unsubUser = userDoc.ref.collection('orders').onSnapshot(function(snapshot) {
+                var userOrders = [];
+                snapshot.forEach(function(orderDoc) {
+                    var data = orderDoc.data();
+                    userOrders.push({
+                        id: orderDoc.id,
+                        userId: userId,
+                        isGuestOrder: false,
+                        ...data,
+                        orderDate: data.timestamp ? data.timestamp.toDate().toISOString() : new Date().toISOString()
+                    });
+                });
+                
+                userOrdersByUser[userId] = userOrders;
+                
+                var allUserOrders = [];
+                Object.keys(userOrdersByUser).forEach(function(uid) {
+                    allUserOrders = allUserOrders.concat(userOrdersByUser[uid]);
+                });
+                _userOrdersData = allUserOrders;
+                
+                if (!_listenersReady.users) {
+                    listenersSetup++;
+                    if (listenersSetup >= userCount) {
+                        _listenersReady.users = true;
+                        console.log('✅ Real-time listener active for', userCount, 'user order collections');
+                        if (_listenersReady.guests) {
+                            if (!_initialLoadDone) {
+                                _initialLoadDone = true;
+                                console.log('🔴 Initial real-time load complete:', _userOrdersData.length + _guestOrdersData.length, 'total orders');
+                            }
+                            _mergeAndNotify();
+                        }
+                    }
+                } else {
+                    var changes = snapshot.docChanges();
+                    if (changes.length > 0) {
+                        var added = changes.filter(function(c) { return c.type === 'added'; }).length;
+                        var modified = changes.filter(function(c) { return c.type === 'modified'; }).length;
+                        var removed = changes.filter(function(c) { return c.type === 'removed'; }).length;
+                        console.log('🔴 User orders changed - added:', added, 'modified:', modified, 'removed:', removed);
+                    }
+                    _mergeAndNotify();
+                }
+            }, function(error) {
+                console.error('Error in user orders listener for', userId, ':', error);
+            });
+            
+            if (!_userOrdersUnsubscribe) {
+                _userOrdersUnsubscribe = [];
+            }
+            if (!Array.isArray(_userOrdersUnsubscribe)) {
+                _userOrdersUnsubscribe = [];
+            }
+            _userOrdersUnsubscribe.push(unsubUser);
+        });
+    }).catch(function(error) {
+        console.error('Error setting up user order listeners:', error);
+        _listenersReady.users = true;
+        _userOrdersData = [];
+        if (_listenersReady.guests) _mergeAndNotify();
+    });
+    
+    _guestOrdersUnsubscribe = firebase.firestore().collection('guest-orders')
+        .onSnapshot(function(snapshot) {
+            var guestOrders = [];
+            snapshot.forEach(function(orderDoc) {
+                var data = orderDoc.data();
+                guestOrders.push({
+                    id: orderDoc.id,
+                    userId: 'guest',
+                    isGuestOrder: true,
+                    ...data,
+                    orderDate: data.timestamp ? data.timestamp.toDate().toISOString() : new Date().toISOString()
+                });
+            });
+            
+            _guestOrdersData = guestOrders;
+            
+            if (!_listenersReady.guests) {
+                _listenersReady.guests = true;
+                console.log('✅ Real-time listener active for guest orders (' + guestOrders.length + ' orders)');
+                if (_listenersReady.users) {
+                    if (!_initialLoadDone) {
+                        _initialLoadDone = true;
+                        console.log('🔴 Initial real-time load complete:', _userOrdersData.length + _guestOrdersData.length, 'total orders');
+                    }
+                    _mergeAndNotify();
+                }
+            } else {
+                var changes = snapshot.docChanges();
+                if (changes.length > 0) {
+                    var added = changes.filter(function(c) { return c.type === 'added'; }).length;
+                    var modified = changes.filter(function(c) { return c.type === 'modified'; }).length;
+                    var removed = changes.filter(function(c) { return c.type === 'removed'; }).length;
+                    console.log('🔴 Guest orders changed - added:', added, 'modified:', modified, 'removed:', removed);
+                }
+                _mergeAndNotify();
+            }
+        }, function(error) {
+            console.error('Error in guest orders listener:', error);
+            _listenersReady.guests = true;
+            _guestOrdersData = [];
+            if (_listenersReady.users) _mergeAndNotify();
+        });
+    
+    console.log('🔴 Real-time listeners setup initiated');
+}
+
+function stopOrdersListener() {
+    if (_userOrdersUnsubscribe) {
+        if (Array.isArray(_userOrdersUnsubscribe)) {
+            _userOrdersUnsubscribe.forEach(function(unsub) {
+                if (typeof unsub === 'function') unsub();
+            });
+        } else if (typeof _userOrdersUnsubscribe === 'function') {
+            _userOrdersUnsubscribe();
+        }
+        _userOrdersUnsubscribe = null;
+    }
+    if (_guestOrdersUnsubscribe) {
+        _guestOrdersUnsubscribe();
+        _guestOrdersUnsubscribe = null;
+    }
+    _ordersListenerCallback = null;
+    _listenersReady = { users: false, guests: false };
+    _initialLoadDone = false;
+    console.log('🔴 Real-time order listeners stopped');
+}
+
+function getAllOrdersFromCache() {
+    try {
+        var cached = localStorage.getItem('admin_all_orders_cache');
+        if (cached) {
+            var parsed = JSON.parse(cached);
+            if (Array.isArray(parsed.data)) {
+                console.log('✅ Loaded', parsed.data.length, 'orders from localStorage cache');
+                return { success: true, orders: parsed.data, fromCache: true };
+            }
+        }
+    } catch (e) {
+        console.warn('Cache read error:', e);
+    }
+    return { success: true, orders: [], fromCache: false };
+}
+
 async function getAllOrders(forceFresh) {
     try {
-        const cacheKey = 'admin_all_orders_cache';
-        const cacheTTL = 60 * 60 * 1000;
+        var cacheKey = 'admin_all_orders_cache';
+        var cacheTTL = 24 * 60 * 60 * 1000;
         
         if (!forceFresh) {
             try {
-                const cached = localStorage.getItem(cacheKey);
+                var cached = localStorage.getItem(cacheKey);
                 if (cached) {
-                    const { timestamp, data } = JSON.parse(cached);
-                    const age = Date.now() - timestamp;
-                    if (age < cacheTTL && Array.isArray(data)) {
-                        console.log('✅ Using cached orders from localStorage:', data.length, 'orders (age: ' + Math.round(age/60000) + 'm)');
+                    var parsed = JSON.parse(cached);
+                    var age = Date.now() - parsed.timestamp;
+                    if (age < cacheTTL && Array.isArray(parsed.data)) {
+                        console.log('✅ Using cached orders from localStorage:', parsed.data.length, 'orders (age: ' + Math.round(age/60000) + 'm)');
                         return {
                             success: true,
-                            orders: data,
+                            orders: parsed.data,
                             fromCache: true
                         };
                     }
@@ -181,12 +381,10 @@ async function getAllOrders(forceFresh) {
             } catch (e) {
                 console.warn('Cache read error, fetching fresh:', e);
             }
-        } else {
-            console.log('🔄 Force fresh requested - skipping cache');
         }
         
         console.log('📡 Cache miss - fetching fresh orders from Firebase...');
-        const orders = await fetchAllOrdersFresh();
+        var orders = await fetchAllOrdersFresh();
         
         try {
             localStorage.setItem(cacheKey, JSON.stringify({
@@ -213,20 +411,20 @@ async function getAllOrders(forceFresh) {
 }
 
 async function fetchAllOrdersFresh() {
-    const allOrders = [];
-    const startTime = Date.now();
+    var allOrders = [];
+    var startTime = Date.now();
     
     console.log('📡 Fetching all orders from Firebase (parallel mode)...');
     
-    const usersSnapshot = await firebase.firestore().collection('users').get();
+    var usersSnapshot = await firebase.firestore().collection('users').get();
     
-    const orderPromises = usersSnapshot.docs.map(async (userDoc) => {
-        const userId = userDoc.id;
-        const userOrdersSnapshot = await userDoc.ref.collection('orders').get();
-        const userOrders = [];
+    var orderPromises = usersSnapshot.docs.map(async function(userDoc) {
+        var userId = userDoc.id;
+        var userOrdersSnapshot = await userDoc.ref.collection('orders').get();
+        var userOrders = [];
         
-        userOrdersSnapshot.forEach(orderDoc => {
-            const data = orderDoc.data();
+        userOrdersSnapshot.forEach(function(orderDoc) {
+            var data = orderDoc.data();
             userOrders.push({
                 id: orderDoc.id,
                 userId: userId,
@@ -239,10 +437,10 @@ async function fetchAllOrdersFresh() {
         return userOrders;
     });
     
-    const guestPromise = firebase.firestore().collection('guest-orders').get().then(snapshot => {
-        const guestOrders = [];
-        snapshot.forEach(orderDoc => {
-            const data = orderDoc.data();
+    var guestPromise = firebase.firestore().collection('guest-orders').get().then(function(snapshot) {
+        var guestOrders = [];
+        snapshot.forEach(function(orderDoc) {
+            var data = orderDoc.data();
             guestOrders.push({
                 id: orderDoc.id,
                 userId: 'guest',
@@ -254,21 +452,22 @@ async function fetchAllOrdersFresh() {
         return guestOrders;
     });
     
-    const [userOrderArrays, guestOrders] = await Promise.all([
+    var results = await Promise.all([
         Promise.all(orderPromises),
         guestPromise
     ]);
     
-    userOrderArrays.forEach(orders => allOrders.push(...orders));
-    allOrders.push(...guestOrders);
+    var userOrderArrays = results[0];
+    var guestOrders = results[1];
     
-    allOrders.sort((a, b) => {
-        const aTime = new Date(a.orderDate).getTime();
-        const bTime = new Date(b.orderDate).getTime();
-        return bTime - aTime;
+    userOrderArrays.forEach(function(orders) { allOrders = allOrders.concat(orders); });
+    allOrders = allOrders.concat(guestOrders);
+    
+    allOrders.sort(function(a, b) {
+        return new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime();
     });
     
-    const elapsed = Date.now() - startTime;
+    var elapsed = Date.now() - startTime;
     console.log('✅ Fetched', allOrders.length, 'orders in', elapsed + 'ms (Users:', usersSnapshot.size, ', Guest orders:', guestOrders.length, ')');
     
     return allOrders;
@@ -286,7 +485,10 @@ window.firebaseOrdersModule = {
     updateOrderPaymentStatus,
     getUserOrders,
     getAllOrders,
-    invalidateOrdersCache
+    getAllOrdersFromCache,
+    invalidateOrdersCache,
+    setupOrdersListener,
+    stopOrdersListener
 };
 
 console.log('Firebase Orders module loaded');

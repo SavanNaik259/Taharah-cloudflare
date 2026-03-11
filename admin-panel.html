@@ -2876,7 +2876,7 @@
                     <div class="card-header">
                         <h2 class="card-title">Order Management</h2>
                         <div style="display: flex; gap: 8px;">
-                            <button class="btn btn-secondary" onclick="window.firebaseOrdersModule.invalidateOrdersCache(); loadOrders();">
+                            <button class="btn btn-secondary" onclick="window.firebaseOrdersModule.invalidateOrdersCache(); loadOrders();" title="Force refresh orders from Firebase">
                                 <i class="fas fa-refresh"></i>
                                 Refresh Orders
                             </button>
@@ -3689,65 +3689,34 @@
             };
         }
 
-        async function loadOrders() {
+        function processAndDisplayOrders(fetchedOrders) {
             try {
-                console.log('Loading orders from Firestore...');
-
-                const hasCachedData = allOrders.length > 0;
-
-                if (!hasCachedData) {
-                    const ordersLoading = document.getElementById('orders-loading');
-                    const ordersTable = document.getElementById('orders-table');
-                    if (ordersLoading) ordersLoading.style.display = 'flex';
-                    if (ordersTable) ordersTable.style.display = 'none';
-
-                    const newOrdersLoading = document.getElementById('new-orders-loading');
-                    if (newOrdersLoading) newOrdersLoading.style.display = 'flex';
-
-                    if (document.getElementById('orders-section-loading')) {
-                        document.getElementById('orders-section-loading').style.display = 'flex';
-                    }
-                    if (document.getElementById('orders-section-table')) {
-                        document.getElementById('orders-section-table').style.display = 'none';
-                    }
-                }
-
                 const freshAllOrders = [];
                 const freshNewOrders = [];
                 const freshConfirmedOrders = [];
                 const freshCancelledOrders = [];
 
-                // Fetch ALL orders (both user and guest) using the new function
-                const allOrdersResult = await window.firebaseOrdersModule.getAllOrders();
-                
-                if (!allOrdersResult.success) {
-                    throw new Error(allOrdersResult.error || 'Failed to fetch orders');
-                }
-
-                const fetchedOrders = allOrdersResult.orders || [];
-                console.log(`📦 Fetched ${fetchedOrders.length} total orders (including guest orders)`);
-
-                    fetchedOrders.forEach(orderData => {
-                        const products = (orderData.products || orderData.items || []).map(normalizeProduct);
-                        
-                        const processedOrder = {
-                            orderId: orderData.id,
-                            userId: orderData.userId,
-                            isGuestOrder: orderData.isGuestOrder || false,
-                            orderReference: orderData.orderReference || orderData.id || orderData.id,
-                            date: orderData.timestamp?.toDate?.() ||
-                                  (orderData.orderDate ? new Date(orderData.orderDate) : new Date()),
-                            amount: calculateOrderAmount(orderData),
-                            customerName: extractCustomerName(orderData),
-                            customerEmail: extractCustomerEmail(orderData),
-                            customerPhone: extractCustomerPhone(orderData),
-                            customerAddress: extractCustomerAddress(orderData),
-                            paymentMethod: orderData.paymentMethod || 'Not specified',
-                            products: products,
-                            notes: orderData.notes || orderData.specialInstructions || '',
-                            status: orderData.status || 'pending',
-                            deliveryStatus: orderData.deliveryStatus || 'pending'
-                        };
+                fetchedOrders.forEach(orderData => {
+                    const products = (orderData.products || orderData.items || []).map(normalizeProduct);
+                    
+                    const processedOrder = {
+                        orderId: orderData.id,
+                        userId: orderData.userId,
+                        isGuestOrder: orderData.isGuestOrder || false,
+                        orderReference: orderData.orderReference || orderData.id || orderData.id,
+                        date: orderData.timestamp?.toDate?.() ||
+                              (orderData.orderDate ? new Date(orderData.orderDate) : new Date()),
+                        amount: calculateOrderAmount(orderData),
+                        customerName: extractCustomerName(orderData),
+                        customerEmail: extractCustomerEmail(orderData),
+                        customerPhone: extractCustomerPhone(orderData),
+                        customerAddress: extractCustomerAddress(orderData),
+                        paymentMethod: orderData.paymentMethod || 'Not specified',
+                        products: products,
+                        notes: orderData.notes || orderData.specialInstructions || '',
+                        status: orderData.status || 'pending',
+                        deliveryStatus: orderData.deliveryStatus || 'pending'
+                    };
 
                     freshAllOrders.push(processedOrder);
 
@@ -3774,13 +3743,55 @@
                 confirmedOrders = freshConfirmedOrders;
                 cancelledOrders = freshCancelledOrders;
 
-                console.log(`✅ Loaded ${allOrders.length} total orders from Firebase`);
-                console.log(`✅ New orders: ${newOrders.length}, Confirmed orders: ${confirmedOrders.length}, Cancelled orders: ${cancelledOrders.length}`);
+                console.log(`✅ Orders updated: ${allOrders.length} total (New: ${newOrders.length}, Confirmed: ${confirmedOrders.length}, Cancelled: ${cancelledOrders.length})`);
 
                 updateOrdersDisplay();
                 updateOrdersStats();
                 updateNewOrdersDisplay();
                 updateRecentOrdersDisplay();
+
+                localStorage.setItem('admin_dashboard_orders', JSON.stringify({
+                    timestamp: Date.now(),
+                    data: { allOrders, newOrders, confirmedOrders, cancelledOrders }
+                }));
+            } catch (error) {
+                console.error('❌ Error processing orders:', error);
+            }
+        }
+
+        async function loadOrders() {
+            try {
+                console.log('Loading orders from Firestore...');
+
+                const hasCachedData = allOrders.length > 0;
+
+                if (!hasCachedData) {
+                    const ordersLoading = document.getElementById('orders-loading');
+                    const ordersTable = document.getElementById('orders-table');
+                    if (ordersLoading) ordersLoading.style.display = 'flex';
+                    if (ordersTable) ordersTable.style.display = 'none';
+
+                    const newOrdersLoading = document.getElementById('new-orders-loading');
+                    if (newOrdersLoading) newOrdersLoading.style.display = 'flex';
+
+                    if (document.getElementById('orders-section-loading')) {
+                        document.getElementById('orders-section-loading').style.display = 'flex';
+                    }
+                    if (document.getElementById('orders-section-table')) {
+                        document.getElementById('orders-section-table').style.display = 'none';
+                    }
+                }
+
+                const allOrdersResult = await window.firebaseOrdersModule.getAllOrders(true);
+                
+                if (!allOrdersResult.success) {
+                    throw new Error(allOrdersResult.error || 'Failed to fetch orders');
+                }
+
+                const fetchedOrders = allOrdersResult.orders || [];
+                console.log(`📦 Fetched ${fetchedOrders.length} total orders (including guest orders)`);
+
+                processAndDisplayOrders(fetchedOrders);
 
                 await loadNotifications();
                 updateNotificationBadges();
@@ -4894,8 +4905,8 @@
                 };
                 await addOrderStatusNotification(orderId, 'confirmed', orderDetailsForNotification);
 
-                window.firebaseOrdersModule.invalidateOrdersCache();
-                await loadOrders();
+                await loadNotifications();
+                updateNotificationBadges();
 
             } catch (error) {
                 console.error('❌ Error confirming order:', error);
@@ -5026,8 +5037,8 @@
                 };
                 await addOrderStatusNotification(orderId, 'cancelled', orderDetailsForNotification);
 
-                window.firebaseOrdersModule.invalidateOrdersCache();
-                await loadOrders();
+                await loadNotifications();
+                updateNotificationBadges();
 
             } catch (error) {
                 console.error('❌ Error cancelling order:', error);
@@ -5126,8 +5137,8 @@
                 });
 
                 setTimeout(() => {
-                    window.firebaseOrdersModule.invalidateOrdersCache();
-                    loadOrders();
+                    loadNotifications();
+                    updateNotificationBadges();
                 }, 2000);
 
             } catch (error) {
@@ -8628,33 +8639,10 @@
             }
         }
         
-        // Load fresh dashboard data from Firebase and update displays
-        async function loadDashboardFreshData() {
+        async function loadDashboardNonOrderData() {
             try {
-                console.log('📡 Loading fresh dashboard data from Firebase...');
-                
-                // Load orders
-                try {
-                    await loadOrders();
-                    // Save to cache
-                    localStorage.setItem('admin_dashboard_orders', JSON.stringify({
-                        timestamp: Date.now(),
-                        data: {
-                            allOrders,
-                            newOrders,
-                            confirmedOrders,
-                            cancelledOrders
-                        }
-                    }));
-                    console.log('💾 Cached fresh orders data');
-                } catch (err) {
-                    console.warn('Failed to load fresh orders:', err);
-                }
-                
-                // Load customers
                 try {
                     await loadCustomers();
-                    // Save to cache
                     localStorage.setItem('admin_dashboard_customers', JSON.stringify({
                         timestamp: Date.now(),
                         data: allCustomers
@@ -8664,10 +8652,8 @@
                     console.warn('Failed to load fresh customers:', err);
                 }
                 
-                // Load notifications
                 try {
                     await loadNotifications();
-                    // Save to cache
                     localStorage.setItem('admin_dashboard_notifications', JSON.stringify({
                         timestamp: Date.now(),
                         data: notifications
@@ -8676,10 +8662,8 @@
                 } catch (err) {
                     console.warn('Failed to load fresh notifications:', err);
                 }
-                
-                console.log('✅ Dashboard data refresh complete');
             } catch (error) {
-                console.error('Error loading fresh dashboard data:', error);
+                console.error('Error loading dashboard non-order data:', error);
             }
         }
 
@@ -8703,53 +8687,28 @@
                     console.warn('⚠️ Inventory summary load failed:', err);
                 });
 
-                // Load cached dashboard data for instant display
                 console.log('💾 Loading cached dashboard data for instant display...');
                 loadDashboardCachedData();
                 
-                // Load cached products for instant display
                 console.log('💾 Loading cached products data for instant display...');
                 loadProductsCachedData();
                 
-                // Load cached videos for instant display
                 console.log('💾 Loading cached video data for instant display...');
                 loadWatchBuyVideosCachedData();
 
-                // Check if we have valid cache and if it's fresh (less than 1 hour old)
-                const cachedOrders = localStorage.getItem('admin_dashboard_orders');
-                let needsFreshLoad = true;
-                if (cachedOrders) {
-                    try {
-                        const { timestamp } = JSON.parse(cachedOrders);
-                        const age = Date.now() - timestamp;
-                        if (age < 60 * 60 * 1000) { // 1 hour
-                            needsFreshLoad = false;
-                            console.log('✨ Cache is fresh (age: ' + Math.round(age/60000) + 'm). Skipping background Firebase fetch.');
-                            
-                            // Set up a background refresh after 5 seconds just in case, but don't block
-                            setTimeout(() => {
-                                console.log('🔄 Background refresh starting...');
-                                loadDashboardFreshData();
-                                loadProductsFreshData();
-                                loadWatchBuyVideosFreshData();
-                            }, 5000);
-                        }
-                    } catch(e) {}
-                }
+                console.log('🔴 Setting up real-time order listeners...');
+                window.firebaseOrdersModule.setupOrdersListener(function(rawOrders) {
+                    console.log('🔴 Real-time update received:', rawOrders.length, 'orders');
+                    processAndDisplayOrders(rawOrders);
+                });
 
-                if (needsFreshLoad) {
-                    // Load fresh dashboard data in parallel (updates will happen automatically)
-                    console.log('📋 Loading fresh dashboard data in parallel...');
-                    loadDashboardFreshData();
-                    
-                    // Load fresh products data in parallel (updates will happen automatically)
-                    console.log('📡 Loading fresh products data in parallel...');
-                    loadProductsFreshData();
-                    
-                    // Load fresh videos data in parallel (updates will happen automatically)
-                    console.log('📡 Loading fresh video data in parallel...');
-                    loadWatchBuyVideosFreshData();
-                }
+                console.log('📡 Loading fresh products data...');
+                loadProductsFreshData();
+                
+                console.log('📡 Loading fresh video data...');
+                loadWatchBuyVideosFreshData();
+
+                loadDashboardNonOrderData();
 
                 console.log('✅ Dashboard initialization complete (using cached data, fresh data loading if needed)');
 

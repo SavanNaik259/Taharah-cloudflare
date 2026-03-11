@@ -20,7 +20,8 @@ Taharah is a premium Pakistani fashion e-commerce platform.
 - **Product Data:** Fetched from Firebase Storage via `/api/load-products`
 - **Product Deletion:** Uses client-side Firebase Storage SDK directly (not server function) to avoid Cloudflare Pages auth issues
 - **Video Proxy:** `/api/proxy-video` for CDN caching of Firebase Storage videos.
-- **Dashboard Caching:** Two-layer localStorage caching: `admin_all_orders_cache` (raw Firestore data in firebase-orders.js) + `admin_dashboard_orders` (processed data in admin-panel.html); 1-hour TTL; shows cached data instantly, background refresh after 5s
-- **Order Mutations:** confirmOrder/cancelOrder/markAsDelivered invalidate both cache layers before reloading
-- **Order Fetching:** Parallel Promise.all for per-user order subcollections + guest orders (not sequential)
+- **Order Real-Time Listeners:** Firestore `onSnapshot` listeners on all user order subcollections + guest-orders collection; auto-updates UI when orders are added/modified/deleted anywhere
+- **Dashboard Caching:** localStorage cache (`admin_all_orders_cache` + `admin_dashboard_orders`) for instant display on page load; real-time listeners take over after initial load
+- **Order Mutations:** confirmOrder/cancelOrder/markAsDelivered update Firestore directly; real-time listeners auto-detect changes and refresh UI
+- **Refresh Button:** Manual force-refresh available on Order Management section; invalidates cache and fetches fresh from Firebase
 - **Static File Caching:** `_headers` file with `no-cache, no-store` for all assets to ensure instant updates on Cloudflare Pages
