@@ -2876,7 +2876,7 @@
                     <div class="card-header">
                         <h2 class="card-title">Order Management</h2>
                         <div style="display: flex; gap: 8px;">
-                            <button class="btn btn-secondary" onclick="loadOrders()">
+                            <button class="btn btn-secondary" onclick="window.firebaseOrdersModule.invalidateOrdersCache(); loadOrders();">
                                 <i class="fas fa-refresh"></i>
                                 Refresh Orders
                             </button>
@@ -3506,9 +3506,6 @@
     <script src="js/stock-manager.js"></script>
     <script src="js/out-of-stock-handler.js"></script>
     
-    <!-- Cache Manager - CRITICAL: Must load BEFORE firebase-orders.js -->
-    <script src="js/firebase/cache-manager.js"></script>
-    
     <!-- Firebase Orders Module - CRITICAL: Must load BEFORE loadOrders() is called -->
     <script src="js/firebase/firebase-orders.js"></script>
 
@@ -3696,28 +3693,29 @@
             try {
                 console.log('Loading orders from Firestore...');
 
-                // Show loading for dashboard orders
-                const ordersLoading = document.getElementById('orders-loading');
-                const ordersTable = document.getElementById('orders-table');
-                if (ordersLoading) ordersLoading.style.display = 'flex';
-                if (ordersTable) ordersTable.style.display = 'none';
+                const hasCachedData = allOrders.length > 0;
 
-                // Show loading for new orders section
-                const newOrdersLoading = document.getElementById('new-orders-loading');
-                if (newOrdersLoading) newOrdersLoading.style.display = 'flex';
+                if (!hasCachedData) {
+                    const ordersLoading = document.getElementById('orders-loading');
+                    const ordersTable = document.getElementById('orders-table');
+                    if (ordersLoading) ordersLoading.style.display = 'flex';
+                    if (ordersTable) ordersTable.style.display = 'none';
 
-                // Show loading for orders section page
-                if (document.getElementById('orders-section-loading')) {
-                    document.getElementById('orders-section-loading').style.display = 'flex';
+                    const newOrdersLoading = document.getElementById('new-orders-loading');
+                    if (newOrdersLoading) newOrdersLoading.style.display = 'flex';
+
+                    if (document.getElementById('orders-section-loading')) {
+                        document.getElementById('orders-section-loading').style.display = 'flex';
+                    }
+                    if (document.getElementById('orders-section-table')) {
+                        document.getElementById('orders-section-table').style.display = 'none';
+                    }
                 }
-                if (document.getElementById('orders-section-table')) {
-                    document.getElementById('orders-section-table').style.display = 'none';
-                }
 
-                allOrders = [];
-                newOrders = [];
-                confirmedOrders = [];
-                cancelledOrders = [];
+                const freshAllOrders = [];
+                const freshNewOrders = [];
+                const freshConfirmedOrders = [];
+                const freshCancelledOrders = [];
 
                 // Fetch ALL orders (both user and guest) using the new function
                 const allOrdersResult = await window.firebaseOrdersModule.getAllOrders();
@@ -3730,7 +3728,6 @@
                 console.log(`📦 Fetched ${fetchedOrders.length} total orders (including guest orders)`);
 
                     fetchedOrders.forEach(orderData => {
-                        // Process order data with comprehensive fallbacks
                         const products = (orderData.products || orderData.items || []).map(normalizeProduct);
                         
                         const processedOrder = {
@@ -3752,26 +3749,30 @@
                             deliveryStatus: orderData.deliveryStatus || 'pending'
                         };
 
-                    allOrders.push(processedOrder);
+                    freshAllOrders.push(processedOrder);
 
-                    // Categorize orders by status
                     try {
                         if (orderData.status === 'confirmed' || processedOrder.adminConfirmed) {
                             processedOrder.status = 'confirmed';
-                            confirmedOrders.push(processedOrder);
+                            freshConfirmedOrders.push(processedOrder);
                         } else if (orderData.status === 'cancelled') {
                             processedOrder.status = 'cancelled';
-                            cancelledOrders.push(processedOrder);
+                            freshCancelledOrders.push(processedOrder);
                         } else {
                             processedOrder.status = 'pending';
-                            newOrders.push(processedOrder);
+                            freshNewOrders.push(processedOrder);
                         }
                     } catch (statusError) {
                         console.warn('Error categorizing order:', statusError);
                         processedOrder.status = 'pending';
-                        newOrders.push(processedOrder);
+                        freshNewOrders.push(processedOrder);
                     }
                 });
+
+                allOrders = freshAllOrders;
+                newOrders = freshNewOrders;
+                confirmedOrders = freshConfirmedOrders;
+                cancelledOrders = freshCancelledOrders;
 
                 console.log(`✅ Loaded ${allOrders.length} total orders from Firebase`);
                 console.log(`✅ New orders: ${newOrders.length}, Confirmed orders: ${confirmedOrders.length}, Cancelled orders: ${cancelledOrders.length}`);
@@ -3781,28 +3782,24 @@
                 updateNewOrdersDisplay();
                 updateRecentOrdersDisplay();
 
-                // Update notifications when orders change
                 await loadNotifications();
-
-                // Ensure notification badge is updated
                 updateNotificationBadges();
 
             } catch (error) {
                 console.error('❌ Error loading orders:', error.message, error);
 
-                // Initialize empty arrays to prevent undefined errors
-                allOrders = [];
-                newOrders = [];
-                confirmedOrders = [];
-                cancelledOrders = [];
+                if (allOrders.length === 0) {
+                    allOrders = [];
+                    newOrders = [];
+                    confirmedOrders = [];
+                    cancelledOrders = [];
 
-                // Update displays with empty state
-                updateOrdersDisplay();
-                updateOrdersStats();
-                updateNewOrdersDisplay();
-                updateRecentOrdersDisplay();
+                    updateOrdersDisplay();
+                    updateOrdersStats();
+                    updateNewOrdersDisplay();
+                    updateRecentOrdersDisplay();
+                }
 
-                // Show error in console but don't break the UI
                 if (typeof showError === 'function') {
                     showError(`Error loading orders: ${error.message}`);
                 }
@@ -4897,7 +4894,7 @@
                 };
                 await addOrderStatusNotification(orderId, 'confirmed', orderDetailsForNotification);
 
-                // Refresh orders
+                window.firebaseOrdersModule.invalidateOrdersCache();
                 await loadOrders();
 
             } catch (error) {
@@ -5029,7 +5026,7 @@
                 };
                 await addOrderStatusNotification(orderId, 'cancelled', orderDetailsForNotification);
 
-                // Refresh orders
+                window.firebaseOrdersModule.invalidateOrdersCache();
                 await loadOrders();
 
             } catch (error) {
@@ -5128,8 +5125,8 @@
                     message: 'The order has been successfully marked as delivered. Delivery confirmation email sent to customer.'
                 });
 
-                // Reload orders to reflect changes
                 setTimeout(() => {
+                    window.firebaseOrdersModule.invalidateOrdersCache();
                     loadOrders();
                 }, 2000);
 

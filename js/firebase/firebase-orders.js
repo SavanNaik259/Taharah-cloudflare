@@ -1,27 +1,13 @@
-/**
- * Firebase Orders Module
- * 
- * This module handles order creation, storage and retrieval from Firebase.
- * Order data is stored at: users/{userId}/orders/{orderId}
- */
-
-// Check if Firebase is initialized
 if (typeof firebase === 'undefined') {
     console.error('Firebase is not initialized. Make sure to include Firebase SDK and initialize it first.');
 }
 
-/**
- * Check if authentication is required for placing orders
- * @returns {Object} Auth requirement status
- */
 function checkOrderAuthRequirement() {
-    // GUEST CHECKOUT ENABLED - Authentication is NOT required
     const result = {
-        requiresAuth: false, // Authentication is optional
+        requiresAuth: false,
         isAuthenticated: false
     };
     
-    // Check if user is authenticated
     if (firebase.auth && firebase.auth().currentUser) {
         result.isAuthenticated = true;
     }
@@ -31,14 +17,8 @@ function checkOrderAuthRequirement() {
     return result;
 }
 
-/**
- * Save order to Firebase
- * @param {Object} orderData - Order data to save
- * @returns {Promise<Object>} Success status and order ID
- */
 async function saveOrderToFirebase(orderData) {
     try {
-        // Validate orderData
         if (!orderData || !orderData.customer || !orderData.products) {
             console.error('Invalid order data structure');
             return {
@@ -47,10 +27,8 @@ async function saveOrderToFirebase(orderData) {
             };
         }
         
-        // Check if user is authenticated
         const user = firebase.auth().currentUser;
         
-        // Create a clean copy of order data for Firebase
         const firebaseOrderData = {
             ...orderData,
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
@@ -71,18 +49,19 @@ async function saveOrderToFirebase(orderData) {
         let orderRef;
         
         if (user) {
-            // Authenticated user - save to user's orders collection
             console.log('User authenticated, saving to user orders collection:', user.uid);
             const userOrdersRef = firebase.firestore().collection('users').doc(user.uid).collection('orders');
             orderRef = await userOrdersRef.add(firebaseOrderData);
         } else {
-            // Guest order - save to root guest-orders collection
             console.log('Guest order detected, saving to root guest-orders collection');
             const guestOrdersRef = firebase.firestore().collection('guest-orders');
             orderRef = await guestOrdersRef.add(firebaseOrderData);
         }
         
         console.log('Successfully saved order to Firebase with ID:', orderRef.id, 'isGuest:', !user);
+        
+        localStorage.removeItem('admin_all_orders_cache');
+        localStorage.removeItem('admin_dashboard_orders');
         
         return {
             success: true,
@@ -103,15 +82,8 @@ async function saveOrderToFirebase(orderData) {
     }
 }
 
-/**
- * Update order payment status in Firebase
- * @param {String} orderId - ID of the order to update
- * @param {Object} paymentData - Payment data to update
- * @returns {Promise<Object>} Success status
- */
 async function updateOrderPaymentStatus(orderId, paymentData) {
     try {
-        // Check if user is authenticated
         const user = firebase.auth().currentUser;
         if (!user) {
             return {
@@ -120,14 +92,12 @@ async function updateOrderPaymentStatus(orderId, paymentData) {
             };
         }
         
-        // Get reference to the order document
         const orderRef = firebase.firestore()
             .collection('users')
             .doc(user.uid)
             .collection('orders')
             .doc(orderId);
         
-        // Update the order with payment information
         await orderRef.update({
             paymentStatus: paymentData.paymentStatus,
             paymentId: paymentData.paymentId,
@@ -147,13 +117,8 @@ async function updateOrderPaymentStatus(orderId, paymentData) {
     }
 }
 
-/**
- * Get user's orders from Firebase
- * @returns {Promise<Object>} Success status and orders
- */
 async function getUserOrders() {
     try {
-        // Check if user is authenticated
         const user = firebase.auth().currentUser;
         if (!user) {
             return {
@@ -162,24 +127,20 @@ async function getUserOrders() {
             };
         }
         
-        // Get user's orders collection
         const userOrdersRef = firebase.firestore()
             .collection('users')
             .doc(user.uid)
             .collection('orders');
         
-        // Query orders, sorted by timestamp in descending order
         const orderSnapshot = await userOrdersRef
             .orderBy('timestamp', 'desc')
             .get();
         
-        // Map snapshot to array of order objects
         const orders = orderSnapshot.docs.map(doc => {
             const data = doc.data();
             return {
                 id: doc.id,
                 ...data,
-                // Convert timestamps to date strings for easier display
                 orderDate: data.timestamp ? data.timestamp.toDate().toISOString() : new Date().toISOString()
             };
         });
@@ -197,45 +158,44 @@ async function getUserOrders() {
     }
 }
 
-/**
- * Get ALL orders from Firebase (both user and guest orders)
- * For admin panel to display all orders
- * This version includes intelligent caching to reduce Firebase reads
- * @returns {Promise<Object>} Success status and all orders
- */
-async function getAllOrders() {
+async function getAllOrders(forceFresh) {
     try {
-        const cacheKey = 'admin_all_orders';
-        const cacheTTL = 365 * 24 * 60 * 60 * 1000; // 1 year cache validity
+        const cacheKey = 'admin_all_orders_cache';
+        const cacheTTL = 60 * 60 * 1000;
         
-        // Try to get cached data first
-        if (typeof window.CacheManager !== 'undefined') {
-            const cachedOrders = window.CacheManager.get(cacheKey);
-            if (cachedOrders) {
-                console.log('✅ Using cached orders (from CacheManager):', cachedOrders.length, 'orders');
-                // Fetch fresh data in background without blocking
-                fetchAllOrdersFresh().then(orders => {
-                    if (orders.length !== cachedOrders.length) {
-                        console.log('🔄 Fresh orders data updated - new count:', orders.length);
-                        window.CacheManager.set(cacheKey, orders, cacheTTL);
+        if (!forceFresh) {
+            try {
+                const cached = localStorage.getItem(cacheKey);
+                if (cached) {
+                    const { timestamp, data } = JSON.parse(cached);
+                    const age = Date.now() - timestamp;
+                    if (age < cacheTTL && Array.isArray(data)) {
+                        console.log('✅ Using cached orders from localStorage:', data.length, 'orders (age: ' + Math.round(age/60000) + 'm)');
+                        return {
+                            success: true,
+                            orders: data,
+                            fromCache: true
+                        };
                     }
-                }).catch(err => console.warn('Background orders refresh failed:', err));
-                
-                return {
-                    success: true,
-                    orders: cachedOrders,
-                    fromCache: true
-                };
+                }
+            } catch (e) {
+                console.warn('Cache read error, fetching fresh:', e);
             }
+        } else {
+            console.log('🔄 Force fresh requested - skipping cache');
         }
         
-        // No valid cache, fetch fresh data
         console.log('📡 Cache miss - fetching fresh orders from Firebase...');
         const orders = await fetchAllOrdersFresh();
         
-        // Cache the result
-        if (typeof window.CacheManager !== 'undefined') {
-            window.CacheManager.set(cacheKey, orders, cacheTTL);
+        try {
+            localStorage.setItem(cacheKey, JSON.stringify({
+                timestamp: Date.now(),
+                data: orders
+            }));
+            console.log('💾 Cached', orders.length, 'orders to localStorage');
+        } catch (e) {
+            console.warn('Failed to cache orders (storage full?):', e);
         }
         
         return {
@@ -252,25 +212,22 @@ async function getAllOrders() {
     }
 }
 
-/**
- * Fetch fresh orders directly from Firebase
- * @private
- * @returns {Promise<Array>} Array of all orders
- */
 async function fetchAllOrdersFresh() {
     const allOrders = [];
+    const startTime = Date.now();
     
-    // Get all user orders
-    console.log('📡 Fetching all user orders from Firebase...');
+    console.log('📡 Fetching all orders from Firebase (parallel mode)...');
+    
     const usersSnapshot = await firebase.firestore().collection('users').get();
     
-    for (const userDoc of usersSnapshot.docs) {
+    const orderPromises = usersSnapshot.docs.map(async (userDoc) => {
         const userId = userDoc.id;
         const userOrdersSnapshot = await userDoc.ref.collection('orders').get();
+        const userOrders = [];
         
         userOrdersSnapshot.forEach(orderDoc => {
             const data = orderDoc.data();
-            allOrders.push({
+            userOrders.push({
                 id: orderDoc.id,
                 userId: userId,
                 isGuestOrder: false,
@@ -278,43 +235,58 @@ async function fetchAllOrdersFresh() {
                 orderDate: data.timestamp ? data.timestamp.toDate().toISOString() : new Date().toISOString()
             });
         });
-    }
-    
-    // Get all guest orders
-    console.log('📡 Fetching all guest orders from Firebase...');
-    const guestOrdersSnapshot = await firebase.firestore().collection('guest-orders').get();
-    
-    guestOrdersSnapshot.forEach(orderDoc => {
-        const data = orderDoc.data();
-        allOrders.push({
-            id: orderDoc.id,
-            userId: 'guest',
-            isGuestOrder: true,
-            ...data,
-            orderDate: data.timestamp ? data.timestamp.toDate().toISOString() : new Date().toISOString()
-        });
+        
+        return userOrders;
     });
     
-    // Sort by timestamp descending
+    const guestPromise = firebase.firestore().collection('guest-orders').get().then(snapshot => {
+        const guestOrders = [];
+        snapshot.forEach(orderDoc => {
+            const data = orderDoc.data();
+            guestOrders.push({
+                id: orderDoc.id,
+                userId: 'guest',
+                isGuestOrder: true,
+                ...data,
+                orderDate: data.timestamp ? data.timestamp.toDate().toISOString() : new Date().toISOString()
+            });
+        });
+        return guestOrders;
+    });
+    
+    const [userOrderArrays, guestOrders] = await Promise.all([
+        Promise.all(orderPromises),
+        guestPromise
+    ]);
+    
+    userOrderArrays.forEach(orders => allOrders.push(...orders));
+    allOrders.push(...guestOrders);
+    
     allOrders.sort((a, b) => {
         const aTime = new Date(a.orderDate).getTime();
         const bTime = new Date(b.orderDate).getTime();
         return bTime - aTime;
     });
     
-    console.log('✅ Fetched fresh orders:', allOrders.length, '(User orders:', usersSnapshot.size, ', Guest orders:', guestOrdersSnapshot.size, ')');
+    const elapsed = Date.now() - startTime;
+    console.log('✅ Fetched', allOrders.length, 'orders in', elapsed + 'ms (Users:', usersSnapshot.size, ', Guest orders:', guestOrders.length, ')');
     
     return allOrders;
 }
 
-// Create global object to expose functions
+function invalidateOrdersCache() {
+    localStorage.removeItem('admin_all_orders_cache');
+    localStorage.removeItem('admin_dashboard_orders');
+    console.log('🗑️ Orders cache invalidated');
+}
+
 window.firebaseOrdersModule = {
     checkOrderAuthRequirement,
     saveOrderToFirebase,
     updateOrderPaymentStatus,
     getUserOrders,
-    getAllOrders
+    getAllOrders,
+    invalidateOrdersCache
 };
 
-// Log that the module is loaded
 console.log('Firebase Orders module loaded');
