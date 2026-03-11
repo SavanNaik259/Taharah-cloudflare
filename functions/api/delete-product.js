@@ -2,7 +2,7 @@
  * Cloudflare Pages Function: Delete Product
  * 
  * Handles deleting products from Firebase Storage product JSON files
- * Supports DELETE requests to /api/delete-product
+ * Uses Firebase REST API with proper authentication
  */
 
 export async function onRequest(context) {
@@ -51,6 +51,8 @@ export async function onRequest(context) {
 
     // Get Firebase configuration from environment
     const storageBucket = env.FIREBASE_STORAGE_BUCKET || 'studio-7642357109-d9026.firebasestorage.app';
+    const firebaseProjectId = env.FIREBASE_PROJECT_ID || 'studio-7642357109-d9026';
+    const firebaseApiKey = env.FIREBASE_API_KEY || 'AIzaSyDyZ5IjG2_E4VJNkLNQEiJAHkzz0C9PzXk';
 
     // Load existing products from Firebase Storage
     const storageUrl = `https://firebasestorage.googleapis.com/v0/b/${storageBucket}/o/productData%2F${category}-products.json?alt=media`;
@@ -101,14 +103,16 @@ export async function onRequest(context) {
     // Remove the product from the array
     existingProducts.splice(productIndex, 1);
 
-    // Save updated product list back to Firebase Storage
+    // Save updated product list back to Firebase Storage using authenticated request
     const updatedData = JSON.stringify(existingProducts, null, 2);
     
-    // Use Firebase Storage REST API to upload
-    const uploadUrl = `https://firebasestorage.googleapis.com/v0/b/${storageBucket}/o/productData%2F${category}-products.json?uploadType=media`;
+    // Use Cloud Storage JSON API with authentication
+    const uploadUrl = `https://www.googleapis.com/upload/storage/v1/b/${storageBucket}/o?uploadType=media&name=productData%2F${category}-products.json&key=${firebaseApiKey}`;
     
+    console.log(`[DELETE-PRODUCT] Uploading updated products to: ${uploadUrl}`);
+
     const uploadResponse = await fetch(uploadUrl, {
-      method: 'PUT',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
@@ -116,8 +120,9 @@ export async function onRequest(context) {
     });
 
     if (!uploadResponse.ok) {
-      console.error('[DELETE-PRODUCT] Failed to save products:', uploadResponse.status, await uploadResponse.text());
-      throw new Error(`Failed to save updated products: ${uploadResponse.status}`);
+      const errorText = await uploadResponse.text();
+      console.error('[DELETE-PRODUCT] Failed to save products:', uploadResponse.status, errorText);
+      throw new Error(`Failed to save updated products: ${uploadResponse.status} - ${errorText}`);
     }
 
     console.log(`[DELETE-PRODUCT] Product ${productId} deleted successfully. Remaining: ${existingProducts.length}`);
