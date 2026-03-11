@@ -4090,8 +4090,11 @@
                     // Get user's confirmed orders only
                     const userOrders = confirmedOrders.filter(order => order.userId === userId);
                     const totalSpent = userOrders.reduce((sum, order) => sum + order.amount, 0);
-                    const lastOrder = userOrders.length > 0 ?
-                        Math.max(...userOrders.map(order => order.date.getTime())) : null; // Use getTime() for comparison
+                    const orderTimestamps = userOrders.map(order => {
+                            const d = order.date instanceof Date ? order.date : new Date(order.date);
+                            return Number.isFinite(d.getTime()) ? d.getTime() : 0;
+                        }).filter(t => t > 0);
+                    const lastOrder = orderTimestamps.length > 0 ? Math.max(...orderTimestamps) : null;
 
                     allCustomers.push({
                         uid: userId, // Add UID to customer data
@@ -4110,7 +4113,7 @@
 
             } catch (error) {
                 console.error('❌ Error loading customers:', error);
-                showError('customers-error', `Error loading customers: ${error.message}`);
+                showError(`Error loading customers: ${error.message}`);
             }
         }
 
@@ -8583,10 +8586,14 @@
                     if (cachedOrders) {
                         const { data } = JSON.parse(cachedOrders);
                         console.log(`✅ Using cached orders (instant display)`);
-                        allOrders = data.allOrders || [];
-                        newOrders = data.newOrders || [];
-                        confirmedOrders = data.confirmedOrders || [];
-                        cancelledOrders = data.cancelledOrders || [];
+                        const fixDates = (orders) => (orders || []).map(o => {
+                            const d = o.date instanceof Date ? o.date : new Date(o.date);
+                            return { ...o, date: (d && Number.isFinite(d.getTime())) ? d : new Date() };
+                        });
+                        allOrders = fixDates(data.allOrders);
+                        newOrders = fixDates(data.newOrders);
+                        confirmedOrders = fixDates(data.confirmedOrders);
+                        cancelledOrders = fixDates(data.cancelledOrders);
                         updateOrdersDisplay();
                         updateNewOrdersDisplay();
                         updateOrdersStats();  // Updates "Total Orders", "₹ Revenue" stat cards
