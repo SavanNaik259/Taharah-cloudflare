@@ -1828,159 +1828,119 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Step 2 to Step 3
         if (continueToPaymentBtn) {
+            let isValidating = false;
             continueToPaymentBtn.addEventListener('click', async function() {
-                // Show loading state on button
+                if (isValidating) return;
+                isValidating = true;
+
                 const originalText = this.innerHTML;
                 this.disabled = true;
                 this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Validating...';
 
                 try {
-                    // Validate all form fields before proceeding
                     const isValid = await validateAllCheckoutFields();
                     if (!isValid) {
                         console.log('Form validation failed');
                         return;
                     }
+
+                    if (window.FirebaseAddressManager && window.FirebaseAddressManager.validateAddressData) {
+                        const addressData = {
+                            firstName: document.getElementById('firstName').value,
+                            lastName: document.getElementById('lastName').value,
+                            email: document.getElementById('email').value,
+                            phone: document.getElementById('phone').value,
+                            pinCode: document.getElementById('pinCode').value,
+                            state: document.getElementById('state').value,
+                            city: document.getElementById('city').value,
+                            houseNumber: document.getElementById('houseNumber').value,
+                            roadName: document.getElementById('roadName').value
+                        };
+
+                        const validation = window.FirebaseAddressManager.validateAddressData(addressData);
+                        if (!validation.isValid) {
+                            showErrorModal('Please fix the following issues: ' + validation.errors.join('. '));
+                            return;
+                        }
+                    } else {
+                        const firstName = document.getElementById('firstName').value;
+                        const lastName = document.getElementById('lastName').value;
+                        const email = document.getElementById('email').value;
+                        const phone = document.getElementById('phone').value;
+                        const pinCode = document.getElementById('pinCode').value;
+                        const state = document.getElementById('state').value;
+                        const city = document.getElementById('city').value;
+                        const houseNumber = document.getElementById('houseNumber').value;
+                        const roadName = document.getElementById('roadName').value;
+
+                        if (!firstName || !lastName || !email || !phone || !pinCode || !state || !city || !houseNumber || !roadName) {
+                            showErrorModal('Please fill in all required address fields.');
+                            return;
+                        }
+
+                        const strictEmailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                        if (!strictEmailRegex.test(email)) {
+                            showErrorModal('Please enter a valid email address with proper domain extension.');
+                            return;
+                        }
+
+                        const domain = email.toLowerCase().split('@')[1];
+                        if (domain && (domain.includes('.co') && !domain.includes('.com') && !domain.includes('.co.in') && !domain.includes('.co.uk'))) {
+                            if (domain.endsWith('.co')) {
+                                showErrorModal('Email domain appears incomplete. Did you mean .com or .co.in?');
+                                return;
+                            }
+                        }
+
+                        if (domain && (domain.includes('gmail.co') && !domain.includes('gmail.com'))) {
+                            showErrorModal('Invalid Gmail domain. Did you mean @gmail.com?');
+                            return;
+                        }
+
+                        const phoneRegex = /^\d{10}$/;
+                        if (!phoneRegex.test(phone.replace(/\D/g, ''))) {
+                            showErrorModal('Please enter a valid 10-digit phone number.');
+                            return;
+                        }
+
+                        const pinCodeRegex = /^\d{6}$/;
+                        if (!pinCodeRegex.test(pinCode)) {
+                            showErrorModal('Please enter a valid 6-digit PIN code.');
+                            return;
+                        }
+
+                        if (firstName.trim().length < 2) {
+                            showErrorModal('First name must be at least 2 characters long.');
+                            return;
+                        }
+
+                        if (lastName.trim().length < 2) {
+                            showErrorModal('Last name must be at least 2 characters long.');
+                            return;
+                        }
+
+                        if (city.trim().length < 2) {
+                            showErrorModal('City name must be at least 2 characters long.');
+                            return;
+                        }
+
+                        if (state.trim().length < 2) {
+                            showErrorModal('State name must be at least 2 characters long.');
+                            return;
+                        }
+
+                        if (roadName.trim().length < 5) {
+                            showErrorModal('Road name/Area must be at least 5 characters long.');
+                            return;
+                        }
+                    }
+
+                    goToStep(3);
                 } finally {
-                    // Reset button state
                     this.disabled = false;
                     this.innerHTML = originalText;
+                    isValidating = false;
                 }
-
-                // Validate PIN code using direct API call
-                const pinCode = document.getElementById('pinCode').value;
-                if (pinCode && /^\d{6}$/.test(pinCode)) {
-                    try {
-                        console.log(`Final validation: Checking PIN code ${pinCode}...`);
-                        const response = await fetch(`https://api.postalpincode.in/pincode/${pinCode}`);
-                        const data = await response.json();
-
-                        if (data && data[0] && data[0].Status === 'Success') {
-                            const postOffice = data[0].PostOffice[0];
-                            const state = document.getElementById('state').value;
-
-                            if (state) {
-                                const normalizeState = (s) => s.toLowerCase().replace(/\s+/g, ' ').trim();
-                                const apiState = normalizeState(postOffice.State);
-                                const userState = normalizeState(state);
-
-                                if (apiState !== userState) {
-                                    showErrorModal(`PIN code ${pinCode} belongs to ${postOffice.State}, but you selected ${state}. Please verify your PIN code and state.`);
-                                    return;
-                                }
-                            }
-                            console.log(`✅ Final validation passed: PIN code ${pinCode} belongs to ${postOffice.District}, ${postOffice.State}`);
-                        } else {
-                            showErrorModal(`PIN code ${pinCode} is not valid. Please check and enter a correct PIN code.`);
-                            return;
-                        }
-                    } catch (error) {
-                        console.warn('PIN code validation failed during final check:', error);
-                        // Continue - don't block if API is down
-                    }
-                }
-
-                // Use FirebaseAddressManager validation if available for other fields
-                if (window.FirebaseAddressManager && window.FirebaseAddressManager.validateAddressData) {
-                    const addressData = {
-                        firstName: document.getElementById('firstName').value,
-                        lastName: document.getElementById('lastName').value,
-                        email: document.getElementById('email').value,
-                        phone: document.getElementById('phone').value,
-                        pinCode: document.getElementById('pinCode').value,
-                        state: document.getElementById('state').value,
-                        city: document.getElementById('city').value,
-                        houseNumber: document.getElementById('houseNumber').value,
-                        roadName: document.getElementById('roadName').value
-                    };
-
-                    const validation = window.FirebaseAddressManager.validateAddressData(addressData);
-                    if (!validation.isValid) {
-                        showErrorModal('Please fix the following issues: ' + validation.errors.join('. '));
-                        return;
-                    }
-                } else {
-                    // Fallback validation
-                    const firstName = document.getElementById('firstName').value;
-                    const lastName = document.getElementById('lastName').value;
-                    const email = document.getElementById('email').value;
-                    const phone = document.getElementById('phone').value;
-                    const pinCode = document.getElementById('pinCode').value;
-                    const state = document.getElementById('state').value;
-                    const city = document.getElementById('city').value;
-                    const houseNumber = document.getElementById('houseNumber').value;
-                    const roadName = document.getElementById('roadName').value;
-
-                    if (!firstName || !lastName || !email || !phone || !pinCode || !state || !city || !houseNumber || !roadName) {
-                        showErrorModal('Please fill in all required address fields.');
-                        return;
-                    }
-
-                    // Enhanced email validation
-                    const strictEmailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-                    if (!strictEmailRegex.test(email)) {
-                        showErrorModal('Please enter a valid email address with proper domain extension.');
-                        return;
-                    }
-
-                    // Check if incomplete domains
-                    const domain = email.toLowerCase().split('@')[1];
-                    if (domain && (domain.includes('.co') && !domain.includes('.com') && !domain.includes('.co.in') && !domain.includes('.co.uk'))) {
-                        if (domain.endsWith('.co')) {
-                            showErrorModal('Email domain appears incomplete. Did you mean .com or .co.in?');
-                            return;
-                        }
-                    }
-
-                    // Check for common Gmail typos
-                    if (domain && (domain.includes('gmail.co') && !domain.includes('gmail.com'))) {
-                        showErrorModal('Invalid Gmail domain. Did you mean @gmail.com?');
-                        return;
-                    }
-
-                    // Phone validation
-                    const phoneRegex = /^\d{10}$/;
-                    if (!phoneRegex.test(phone.replace(/\D/g, ''))) {
-                        showErrorModal('Please enter a valid 10-digit phone number.');
-                        return;
-                    }
-
-                    // PIN code validation
-                    const pinCodeRegex = /^\d{6}$/;
-                    if (!pinCodeRegex.test(pinCode)) {
-                        showErrorModal('Please enter a valid 6-digit PIN code.');
-                        return;
-                    }
-
-                    // Basic length validations
-                    if (firstName.trim().length < 2) {
-                        showErrorModal('First name must be at least 2 characters long.');
-                        return;
-                    }
-
-                    if (lastName.trim().length < 2) {
-                        showErrorModal('Last name must be at least 2 characters long.');
-                        return;
-                    }
-
-                    if (city.trim().length < 2) {
-                        showErrorModal('City name must be at least 2 characters long.');
-                        return;
-                    }
-
-                    if (state.trim().length < 2) {
-                        showErrorModal('State name must be at least 2 characters long.');
-                        return;
-                    }
-
-                    if (roadName.trim().length < 5) {
-                        showErrorModal('Road name/Area must be at least 5 characters long.');
-                        return;
-                    }
-                }
-
-                // If all validations pass, proceed to step 3
-                goToStep(3);
             });
         }
 

@@ -25,3 +25,5 @@ Taharah is a premium Pakistani fashion e-commerce platform.
 - **Order Mutations:** confirmOrder/cancelOrder/markAsDelivered update Firestore directly; real-time listeners auto-detect changes and refresh UI
 - **Refresh Button:** Manual force-refresh available on Order Management section; invalidates cache and fetches fresh from Firebase
 - **Static File Caching:** `_headers` file with `no-cache, no-store` for all assets to ensure instant updates on Cloudflare Pages
+- **Checkout PIN Validation:** Single PIN code API call with 8-second timeout (via `fetchWithTimeout`); no duplicate validation; `isValidating` guard prevents double-click on "Continue to Place Order" button
+- **State Dropdown:** All state values trimmed (no leading spaces); `normalizeState()` used for API comparison
