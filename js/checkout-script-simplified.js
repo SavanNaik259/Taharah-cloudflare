@@ -2515,6 +2515,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                     console.error('Error updating stock for Razorpay payment:', stockError);
                                 }
                             }
+
+                            try {
+                                await createNewOrderNotification(updatedOrderData, orderData.orderId);
+                            } catch (notificationError) {
+                                console.warn('Failed to create admin notification for Razorpay order:', notificationError);
+                            }
                         } else {
                             console.warn('Failed to update order in Firebase:', updateResult.error);
                         }
@@ -2540,6 +2546,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                 } catch (stockError) {
                                     console.error('Error updating stock for Razorpay payment:', stockError);
                                 }
+                            }
+
+                            try {
+                                await createNewOrderNotification(updatedOrderData, firebaseSaveResult.orderId);
+                            } catch (notificationError) {
+                                console.warn('Failed to create admin notification for new Razorpay order:', notificationError);
                             }
 
                             // Create shipment automatically after Razorpay payment
@@ -2576,6 +2588,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             } catch (stockError) {
                                 console.error('Error updating stock for Razorpay guest payment:', stockError);
                             }
+                        }
+
+                        try {
+                            await createNewOrderNotification(updatedOrderData, firebaseSaveResult.orderId);
+                        } catch (notificationError) {
+                            console.warn('Failed to create admin notification for guest Razorpay order:', notificationError);
                         }
 
                         // Create shipment automatically for guest orders
