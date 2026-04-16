@@ -92,6 +92,152 @@ document.addEventListener('DOMContentLoaded', function() {
     const continueToPaymentBtn = document.getElementById('continue-to-payment');
     const backToAddressBtn = document.getElementById('back-to-address');
 
+    const PENDING_ORDER_KEY = 'taharah_pending_razorpay_order';
+
+    async function checkAndRecoverPendingOrder() {
+        try {
+            const pendingData = localStorage.getItem(PENDING_ORDER_KEY);
+            if (!pendingData) return;
+
+            const pending = JSON.parse(pendingData);
+            if (!pending.razorpayOrderId || !pending.orderData) {
+                localStorage.removeItem(PENDING_ORDER_KEY);
+                return;
+            }
+
+            const savedAt = pending.savedAt || 0;
+            const hoursSince = (Date.now() - savedAt) / (1000 * 60 * 60);
+            if (hoursSince > 48) {
+                console.log('Pending order is older than 48 hours, removing');
+                localStorage.removeItem(PENDING_ORDER_KEY);
+                return;
+            }
+
+            console.log('Found pending Razorpay order, checking payment status:', pending.razorpayOrderId);
+
+            const baseUrl = window.location.origin;
+            const checkResponse = await fetch(`${baseUrl}/api/check-razorpay-payment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ razorpay_order_id: pending.razorpayOrderId })
+            });
+            const checkResult = await checkResponse.json();
+
+            if (!checkResult.success || !checkResult.paid) {
+                console.log('Pending order payment not captured, keeping for later check');
+                return;
+            }
+
+            console.log('Payment was captured! Recovering order:', checkResult.payment_id);
+
+            const orderData = pending.orderData;
+            const updatedOrderData = {
+                ...orderData,
+                paymentMethod: 'razorpay',
+                paymentStatus: 'paid',
+                paymentId: checkResult.payment_id,
+                razorpayOrderId: pending.razorpayOrderId,
+                paymentCompletedAt: new Date().toISOString(),
+                recoveredFromPending: true
+            };
+
+            if (window.firebaseOrdersModule) {
+                let firebaseSaveResult = { success: false };
+
+                if (orderData.orderId) {
+                    try {
+                        const updateResult = await window.firebaseOrdersModule.updateOrderPaymentStatus(orderData.orderId, {
+                            paymentStatus: 'paid',
+                            paymentId: checkResult.payment_id,
+                            razorpayOrderId: pending.razorpayOrderId,
+                            paymentCompletedAt: updatedOrderData.paymentCompletedAt,
+                            deliveryStatus: 'pending',
+                            recoveredFromPending: true
+                        });
+                        firebaseSaveResult = updateResult;
+                        if (updateResult.success) {
+                            console.log('Recovered order: payment status updated in Firebase');
+                            try {
+                                await createNewOrderNotification(updatedOrderData, orderData.orderId);
+                            } catch (notifErr) {
+                                console.warn('Failed to create notification for recovered order:', notifErr);
+                            }
+                        }
+                    } catch (updateErr) {
+                        console.error('Error updating recovered order:', updateErr);
+                    }
+                } else {
+                    try {
+                        updatedOrderData.deliveryStatus = 'pending';
+                        firebaseSaveResult = await window.firebaseOrdersModule.saveOrderToFirebase(updatedOrderData);
+                        if (firebaseSaveResult.success) {
+                            console.log('Recovered order saved to Firebase:', firebaseSaveResult.orderId);
+                            updatedOrderData.firebaseOrderId = firebaseSaveResult.orderId;
+                            try {
+                                await createNewOrderNotification(updatedOrderData, firebaseSaveResult.orderId);
+                            } catch (notifErr) {
+                                console.warn('Failed to create notification for recovered order:', notifErr);
+                            }
+                        }
+                    } catch (saveErr) {
+                        console.error('Error saving recovered order:', saveErr);
+                    }
+                }
+            }
+
+            try {
+                console.log('Sending email for recovered order...');
+                const baseUrl = window.location.origin;
+                const emailResponse = await fetch(`${baseUrl}/api/send-order-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderData: updatedOrderData })
+                });
+                const emailResult = await emailResponse.json();
+                if (emailResult.success) {
+                    console.log('Recovered order email sent successfully');
+                } else {
+                    console.warn('Failed to send recovered order email:', emailResult.message);
+                }
+            } catch (emailErr) {
+                console.error('Error sending recovered order email:', emailErr);
+            }
+
+            clearPendingOrder();
+            console.log('Order recovery complete for payment:', checkResult.payment_id);
+
+        } catch (error) {
+            console.error('Error during pending order recovery check:', error);
+        }
+    }
+
+    function savePendingOrderToLocalStorage(orderData, razorpayOrderId) {
+        try {
+            const pendingData = {
+                razorpayOrderId: razorpayOrderId,
+                orderData: orderData,
+                savedAt: Date.now()
+            };
+            localStorage.setItem(PENDING_ORDER_KEY, JSON.stringify(pendingData));
+            console.log('Pending order saved to localStorage for recovery');
+        } catch (err) {
+            console.warn('Failed to save pending order to localStorage:', err);
+        }
+    }
+
+    function clearPendingOrder() {
+        try {
+            localStorage.removeItem(PENDING_ORDER_KEY);
+            console.log('Pending order cleared from localStorage');
+        } catch (err) {
+            console.warn('Failed to clear pending order:', err);
+        }
+    }
+
+    setTimeout(() => {
+        checkAndRecoverPendingOrder();
+    }, 3000);
+
     // A simplified Firebase integration function that focuses on reliability
     function initializeFirebaseIntegration() {
         console.log('Initializing Firebase integration (simplified version)');
@@ -2302,6 +2448,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             console.log('Opening Razorpay payment gateway...');
 
+            savePendingOrderToLocalStorage(orderData, result.order.id);
+
             try {
                 // Create Razorpay instance and open payment modal
                 const rzp = new Razorpay(options);
@@ -2445,12 +2593,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     verificationResult = await verifyResponse.json();
                 }
             } catch (verifyError) {
-                // Continue with order processing even if verification fails
-                // This is safer than leaving the user hanging, as Razorpay has confirmed payment
-                console.warn('Proceeding with order despite verification error:', verifyError);
+                console.error('Payment verification failed due to error:', verifyError);
                 verificationResult = {
-                    success: true, // Assume success if payment was confirmed by Razorpay
-                    message: 'Payment accepted, but verification unsuccessful. Order will be processed.'
+                    success: false,
+                    message: 'Payment verification could not be completed. Your payment is safe — please contact support if your order does not appear shortly.'
                 };
             }
 
@@ -2625,6 +2771,8 @@ document.addEventListener('DOMContentLoaded', function() {
             } catch (emailError) {
                 console.error('❌ Error sending Razorpay order emails:', emailError);
             }
+
+            clearPendingOrder();
 
             // Update button to show completion
             if (submitButton) {

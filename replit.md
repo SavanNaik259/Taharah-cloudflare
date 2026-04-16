@@ -23,6 +23,8 @@ Taharah is a premium Pakistani fashion e-commerce platform.
 - **Order Real-Time Listeners:** Firestore `onSnapshot` listeners on all user order subcollections + guest-orders collection; auto-updates UI when orders are added/modified/deleted anywhere
 - **Dashboard Caching:** localStorage cache (`admin_all_orders_cache` + `admin_dashboard_orders`) for instant display on page load; real-time listeners take over after initial load
 - **Order Mutations:** confirmOrder/cancelOrder/markAsDelivered update Firestore directly; real-time listeners auto-detect changes and refresh UI
+- **Razorpay Order Recovery:** Client-side recovery mechanism saves pending order data to localStorage before opening Razorpay. On checkout page load, checks for incomplete orders via `/api/check-razorpay-payment`, and if payment was captured but order wasn't processed (e.g., browser closed), it auto-recovers: updates Firebase, creates admin notification, and sends emails. Pending orders expire after 48 hours.
+- **Razorpay Admin Notifications:** `createNewOrderNotification()` is called in all Razorpay success paths (logged-in update, logged-in new save, guest save) to ensure admin panel receives alerts for every Razorpay order.
 - **Refresh Button:** Manual force-refresh available on Order Management section; invalidates cache and fetches fresh from Firebase
 - **Static File Caching:** `_headers` file with `no-cache, no-store` for all assets to ensure instant updates on Cloudflare Pages
 - **Checkout PIN Validation:** Single PIN code API call with 8-second timeout (via `fetchWithTimeout`); no duplicate validation; `isValidating` guard prevents double-click on "Continue to Place Order" button
