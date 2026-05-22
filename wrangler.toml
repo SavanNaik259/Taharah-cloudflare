@@ -4,9 +4,9 @@ pages_build_output_dir = "."
 
 [vars]
 RESEND_API_KEY = "re_TEeXueCx_LkVvYLKY8S9nsQ32regcjzvD"
-EMAIL_FROM = "noreply@fluxe.in"
+EMAIL_FROM = "noreply@flomerce.com"
 OWNER_EMAIL = "officialtaharah@gmail.com"
-EMAIL_USER = "noreply@fluxe.in"
+EMAIL_USER = "noreply@flomerce.com"
 # Keep existing vars but update if they overlap
 FIREBASE_PROJECT_ID = "studio-7642357109-d9026"
 FIREBASE_STORAGE_BUCKET = "studio-7642357109-d9026.firebasestorage.app"

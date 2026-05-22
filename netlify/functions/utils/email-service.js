@@ -289,7 +289,7 @@ If you have any questions, please contact us at ${process.env.EMAIL_USER}.
     console.log(`Sending order confirmation email to customer: ${customer.email}`);
     
     const { data, error } = await resend.emails.send({
-      from: `Taharah <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+      from: `Taharah <${process.env.EMAIL_FROM || 'noreply@flomerce.com'}>`,
       to: [customer.email],
       subject: subject,
       html: htmlContent,
@@ -389,7 +389,7 @@ Please log in to your dashboard to view the complete order details.
     console.log(`Sending order notification email to owner: ${ownerEmail}`);
     
     const { data, error } = await resend.emails.send({
-      from: `Taharah Orders <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+      from: `Taharah Orders <${process.env.EMAIL_FROM || 'noreply@flomerce.com'}>`,
       to: [ownerEmail],
       subject: subject,
       html: ownerContent,
@@ -440,7 +440,7 @@ async function sendCustomerDeliveryConfirmation(orderData) {
     console.log(`Sending delivery confirmation email to customer: ${customer.email}`);
     
     const { data, error } = await resend.emails.send({
-      from: `Taharah <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+      from: `Taharah <${process.env.EMAIL_FROM || 'noreply@flomerce.com'}>`,
       to: [customer.email],
       subject: `✅ Delivery Confirmed - ${orderData.orderReference}`,
       html: htmlContent,
@@ -485,7 +485,7 @@ async function sendOwnerDeliveryConfirmation(orderData) {
     console.log(`Sending delivery confirmation email to owner: ${ownerEmail}`);
     
     const { data, error } = await resend.emails.send({
-      from: `Taharah Orders <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+      from: `Taharah Orders <${process.env.EMAIL_FROM || 'noreply@flomerce.com'}>`,
       to: [ownerEmail],
       subject: `✅ Order Delivered - ${orderData.orderReference}`,
       html: htmlContent,
@@ -660,7 +660,7 @@ async function sendVerificationEmail(emailData) {
     console.log(`📤 Sending verification email to: ${customer.email}`);
     
     const { data, error } = await resend.emails.send({
-      from: `Taharah <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+      from: `Taharah <${process.env.EMAIL_FROM || 'noreply@flomerce.com'}>`,
       to: [customer.email],
       subject: '✅ Verify Your Email Address - Taharah',
       html: htmlContent,
@@ -779,7 +779,7 @@ async function sendPasswordResetEmail(emailData) {
     console.log(`Sending password reset email to: ${customer.email}`);
     
     const { data, error } = await resend.emails.send({
-      from: `Taharah Security <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+      from: `Taharah Security <${process.env.EMAIL_FROM || 'noreply@flomerce.com'}>`,
       to: [customer.email],
       subject: '🔐 Reset Your Password - Taharah',
       html: htmlContent,
@@ -999,14 +999,14 @@ async function sendAppointmentEmail(appointmentData) {
     
     const [adminResult, customerResult] = await Promise.all([
       resend.emails.send({
-        from: `Taharah Appointments <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+        from: `Taharah Appointments <${process.env.EMAIL_FROM || 'noreply@flomerce.com'}>`,
         to: [ownerEmail],
         subject: `🗓️ New Appointment: ${fullName} - ${formattedDate} at ${selectedTime}`,
         html: adminEmailContent,
         reply_to: email
       }),
       resend.emails.send({
-        from: `Taharah <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+        from: `Taharah <${process.env.EMAIL_FROM || 'noreply@flomerce.com'}>`,
         to: [email],
         subject: '✅ Appointment Confirmation - Taharah',
         html: customerEmailContent,
@@ -1195,7 +1195,7 @@ async function sendContactEmail(contactData) {
     
     const [adminResult, customerResult] = await Promise.all([
       resend.emails.send({
-        from: `Taharah Contact <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+        from: `Taharah Contact <${process.env.EMAIL_FROM || 'noreply@flomerce.com'}>`,
         to: [ownerEmail],
         subject: `New Contact Form: ${subject} - ${firstName} ${lastName}`,
         html: adminEmailContent,
@@ -1205,7 +1205,7 @@ async function sendContactEmail(contactData) {
         }
       }),
       resend.emails.send({
-        from: `Taharah Team <${process.env.EMAIL_FROM || 'noreply@fluxe.in'}>`,
+        from: `Taharah Team <${process.env.EMAIL_FROM || 'noreply@flomerce.com'}>`,
         to: [email],
         subject: '✅ Thank you for contacting Taharah - We\'ll be in touch soon!',
         html: customerEmailContent,
